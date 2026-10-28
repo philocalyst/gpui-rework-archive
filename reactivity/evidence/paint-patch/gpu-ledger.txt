@@ -1,0 +1,19 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_gpu v0.1.0 (/root/gpui-paint-patch/reactivity/crates/gpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.89s
+     Running unittests src/lib.rs (/tmp/gpui-paint-patch-target/debug/deps/gpui_gpu-12baec636b0b3f1a)
+
+running 1 test
+paint_gpu_storage,Renderer=872,PaintRenderer=896,MapHeader=24,Site=12,Binding=4,Edit=24,Guard=40
+test renderer::paint::tests::optional_map_and_guards_have_explicit_storage ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+

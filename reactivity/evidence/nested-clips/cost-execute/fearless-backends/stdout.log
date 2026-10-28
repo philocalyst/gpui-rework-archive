@@ -1,0 +1,6 @@
+
+running 1 test
+test canvas::mask_kernel::tests::every_supported_backend_matches_mapping_bits_and_all_primitive_sites ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 93 filtered out; finished in 3.29s
+

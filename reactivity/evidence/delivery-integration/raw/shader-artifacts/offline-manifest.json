@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-3-vertex.spv",
+    "bytes": 880,
+    "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-2-vertex.spv",
+    "bytes": 880,
+    "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-0-vertex.spv",
+    "bytes": 880,
+    "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-1-vertex.spv",
+    "bytes": 880,
+    "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-artifacts.json",
+    "bytes": 2720,
+    "sha256": "fc067d31a4056e4218c34982d311d1501bb78c7dda65e5893735d95eb7035c11"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-artifacts.rs",
+    "bytes": 388211,
+    "sha256": "f794dbf435f5be905f94d34f1e883e5661c3da6762e59ff78cd1b3228debe2bf"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-0-fragment.spv",
+    "bytes": 33240,
+    "sha256": "340705fc6b102097e399cc8d94ef534ad7a36226a3fb39a4605810c3e206e4a7"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-1-fragment.spv",
+    "bytes": 33400,
+    "sha256": "0ac744db2f1dbfa895dc18c03a5a4ae981dacb7c5abf02b66019633c806a8e29"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui.wgsl",
+    "bytes": 15139,
+    "sha256": "ab3accf5a441b5eb03a9c7a690fdd40c13471ba6475b406183a7e86369b9605b"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-2-fragment.spv",
+    "bytes": 35620,
+    "sha256": "1cb0cfc89a311181363dcd8336ba79c0c5a6684ab952d8c1a6066913561f9d73"
+  },
+  {
+    "path": "/tmp/gpui-source-value-nightly-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out/ui-3-fragment.spv",
+    "bytes": 35780,
+    "sha256": "811d6e0c734abd6b2a3c818bebac48352b0d54f1a41a28ca88663797eaa8c84c"
+  }
+]

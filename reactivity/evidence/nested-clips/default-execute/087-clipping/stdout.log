@@ -1,0 +1,10 @@
+
+running 5 tests
+test declarative_clip_preserves_builder_order_paint_and_acknowledged_hit_geometry ... ok
+test mapped_flag_coalesces_without_describing_and_p_changes_only_on_ack ... ok
+test nested_clip_depth_failure_keeps_prior_acknowledged_and_eligible_scenes ... ok
+test scrolling_beneath_rounded_clip_admits_new_glyphs_and_updates_hits_on_ack ... ok
+test typed_clipping_overrides_observe_p_and_eligible_c_after_new_logical_failure ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+

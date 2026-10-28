@@ -1,0 +1,39 @@
+{
+  "variants": {
+    "baseline": {
+      "worktree": "/root/gpui-identity-order-baseline",
+      "source": "b15133e90de3925fcb4aeaa4ffb18d413a3bf0f7",
+      "fixture": {
+        "path": "/tmp/gpui-identity-order-baseline-fixture-ec311471540a0ce6707b480e19a2ba6be9f10343f95d301e8d337f84aeec3521",
+        "build_output_path": "/tmp/gpui-identity-order-baseline-target/release/examples/identity_index",
+        "sha256": "ec311471540a0ce6707b480e19a2ba6be9f10343f95d301e8d337f84aeec3521"
+      },
+      "apps": {
+        "path": "/tmp/gpui-identity-order-baseline-apps-46b57e849d6d560a98daa49d9d627c9c28ada87c9347dd726ac6c6f38fa271d4",
+        "build_output_path": "/tmp/gpui-identity-order-baseline-target/release/deps/gpui-9bd20898650b3580",
+        "sha256": "46b57e849d6d560a98daa49d9d627c9c28ada87c9347dd726ac6c6f38fa271d4"
+      },
+      "fixture_sha256": "b820be22ac0ac97d6efb7fe2895bec3f22950932bc838897c2f59fff47f136a8"
+    },
+    "candidate": {
+      "worktree": "/root/gpui-validated-lookup",
+      "source": "b25b45f2c11db024083749d0dcdd8080333a7b10",
+      "fixture": {
+        "path": "/tmp/gpui-validated-lookup-fixture-c3efc492061db3873f7eeb9b46e616c49d2158184564f5cee1101cbe8be1dc0b",
+        "build_output_path": "/tmp/gpui-validated-lookup-target/release/examples/identity_index",
+        "sha256": "c3efc492061db3873f7eeb9b46e616c49d2158184564f5cee1101cbe8be1dc0b"
+      },
+      "apps": {
+        "path": "/tmp/gpui-validated-lookup-apps-47b10baaa49b35f2e0adf9713c95b13d4bbe776de05550eb007192163d59af6f",
+        "build_output_path": "/tmp/gpui-validated-lookup-target/release/deps/gpui-9bd20898650b3580",
+        "sha256": "47b10baaa49b35f2e0adf9713c95b13d4bbe776de05550eb007192163d59af6f"
+      },
+      "fixture_sha256": "b820be22ac0ac97d6efb7fe2895bec3f22950932bc838897c2f59fff47f136a8"
+    }
+  },
+  "fixture": "reactivity/crates/gpui/examples/identity_index.rs",
+  "fixture_sha256": "b820be22ac0ac97d6efb7fe2895bec3f22950932bc838897c2f59fff47f136a8",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "lock_sha256": "d4835c0d54448d6c5560b9fde1a3a43a9b5497e0d707140ce7c58f13b81ce99f",
+  "host": "Linux ilo-prod 6.18.54 #1-NixOS SMP PREEMPT_DYNAMIC Fri Sep 25 14:35:54 UTC 2026 x86_64 GNU/Linux"
+}

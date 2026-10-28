@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running unittests src/lib.rs (/tmp/gpui-canonical-text-target/debug/deps/gpui-8d0da3ef1bff4f51)
+
+running 9 tests
+test native::accessibility::selection_tests::cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair ... ok
+test native::accessibility::selection_tests::empty_static_text_does_not_qualify_another_owner ... ok
+test native::accessibility::selection_tests::equal_text_field_rebind_survives_failed_prepare_and_older_ack ... ok
+test native::accessibility::selection_tests::failed_newer_edit_and_cold_provider_keep_older_candidate_selection ... ok
+test native::accessibility::selection_tests::independent_inputs_list_rebind_and_provider_restart_do_not_reuse_authority ... ok
+test native::accessibility::selection_tests::input_root_survives_wrap_and_font_changes_but_old_run_positions_retire ... ok
+test native::accessibility::selection_tests::long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip ... ok
+test native::accessibility::selection_tests::native_selection_and_atomic_replacement_use_acknowledged_grapheme_source ... ok
+test native::accessibility::selection_tests::native_text_transport_memory_budget ... NATIVE_TEXT_MEMORY shared=72 command=32 queued=48 ingress=8 replacement=48
+NATIVE_TEXT_INGRESS allocations=3 retained=4312 peak=4312
+ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 228 filtered out; finished in 0.07s
+

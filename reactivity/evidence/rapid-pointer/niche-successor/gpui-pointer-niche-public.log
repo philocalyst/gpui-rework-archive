@@ -1,0 +1,32 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.19s
+     Running tests/pointer.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer-484e6e4a991dfb2a)
+
+running 9 tests
+test wheel_uses_the_ordinary_two_axis_scroll_router ... ok
+test semantic_only_publication_keeps_the_current_gesture_usable ... ok
+test session_cannot_transfer_a_press_between_window_namespaces ... ok
+test a_fresh_hit_on_a_new_acknowledged_sheet_can_activate_the_surviving_target ... ok
+test pending_geometry_rejects_and_consumes_release_before_later_acknowledgement ... ok
+test press_focuses_and_release_rechecks_the_same_live_hit_once ... ok
+test failed_prepare_or_removed_target_never_replays_a_press ... ok
+test leave_nonfinite_cancel_and_wheel_consume_a_gesture_without_blurring ... ok
+test repeated_input_clicks_allocate_nothing_after_selection_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/pointer_focus.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer_focus-b3a630a8b74cb497)
+
+running 9 tests
+test ack_before_release_uses_the_ordinary_current_sheet ... ok
+test own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state ... ok
+test equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture ... ok
+test focus_proof_never_crosses_window_namespaces ... ok
+test viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate ... ok
+test cancellation_and_failed_new_press_consume_the_own_focus_proof ... ok
+test intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof ... ok
+test built_in_inspector_requires_ack_because_epoch_captions_can_change_layout ... ok
+test absent_point_encoding_preserves_finite_bits_and_public_debug_shape ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

@@ -1,0 +1,126 @@
+{
+  "artifacts": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-delivery-isolation-target/release/build/gpui/fdeee9d45ba8e179/out/libgpui-fdeee9d45ba8e179.rlib",
+        "/tmp/gpui-delivery-isolation-target/release/build/gpui/fdeee9d45ba8e179/out/libgpui-fdeee9d45ba8e179.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ordinary_control",
+        "src_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/examples/ordinary_control.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-delivery-isolation-target/release/examples/ordinary_control"
+      ],
+      "executable": "/tmp/gpui-delivery-isolation-target/release/examples/ordinary_control",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "field_control",
+        "src_path": "/tmp/gpui-delivery-isolation-cost-sol/reactivity/crates/gpui/examples/field_control.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/tmp/gpui-delivery-isolation-target/release/examples/field_control"
+      ],
+      "executable": "/tmp/gpui-delivery-isolation-target/release/examples/field_control",
+      "fresh": false
+    }
+  ],
+  "binaries": [
+    {
+      "name": "ordinary_control",
+      "source": "/tmp/gpui-delivery-isolation-target/release/examples/ordinary_control",
+      "frozen": "/tmp/gpui-delivery-isolation-captures/cost-a2-ordinary_control.elf",
+      "sha256": "78b96b76330a5298c21733c7a34f31d2f21a9d2fe3518573525a09383faa3d3a",
+      "size": 12167184
+    },
+    {
+      "name": "field_control",
+      "source": "/tmp/gpui-delivery-isolation-target/release/examples/field_control",
+      "frozen": "/tmp/gpui-delivery-isolation-captures/cost-a2-field_control.elf",
+      "sha256": "87a7eef28dcb14eacf48acef9a092b05e488e6c99e15b8ffebf8bdc126e910ab",
+      "size": 12213896
+    }
+  ]
+}

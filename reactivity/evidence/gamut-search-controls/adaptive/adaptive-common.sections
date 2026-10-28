@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-adaptive-adaptive-common-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16680     4296
+.rela.plt               48    20976
+.rodata              25960    21024
+.gcc_except_table    45112    46984
+.eh_frame_hdr         4580    92096
+.eh_frame            22976    96680
+.text               277685   123760
+.init                   27   401448
+.fini                   13   401476
+.plt                    48   401504
+.tdata                  32   405648
+.tbss                 3168   405680
+.fini_array              8   405680
+.init_array             16   405688
+.data.rel.ro          8080   405704
+.dynamic               480   413784
+.got                  2432   414264
+.got.plt                40   416696
+.relro_padding        1056   416736
+.tm_clone_table          0   420832
+.data                 2504   420832
+.bss                   208   423336
+.comment               157        0
+Total               414858
+
+

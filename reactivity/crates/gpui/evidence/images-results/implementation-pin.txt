@@ -1,0 +1,3 @@
+implementation_commit=b0ef87f8bfb7f51a35451cb8fa363981cc9a0ac0
+capture_base=5b0a38b222
+source_checksum_scope=All Rust files and manifests in canvas,gpu,gpui at capture time.

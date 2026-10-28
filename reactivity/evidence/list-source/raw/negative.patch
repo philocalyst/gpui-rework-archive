@@ -1,0 +1,12 @@
+diff --git a/reactivity/crates/gpui/src/runtime/turn.rs b/reactivity/crates/gpui/src/runtime/turn.rs
+index 5be1ad6bbd..7c9fb125c1 100644
+--- a/reactivity/crates/gpui/src/runtime/turn.rs
++++ b/reactivity/crates/gpui/src/runtime/turn.rs
+@@ -327,7 +327,6 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+             Some(field)
+                 if self.runtime.logical_valid
+                     && !questions_changed
+-                    && !matches!(self.runtime.fanout.get(&field), Some(Fanout::Owner))
+                     && !self.runtime.sources.invalidates_owner(field)? =>
+             {
+                 Some(field)

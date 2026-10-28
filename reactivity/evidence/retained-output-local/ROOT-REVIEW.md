@@ -1,0 +1,13 @@
+# Integration review of retained output
+
+**Do not adopt this candidate as a universal default yet.** It removes expensive repeated compositing on sparse scenes, but measured flat and full-damage regressions remain. The tests justify keeping a composed local experiment, not merging it into the archive's integrated baseline or claiming superiority to ZGX.
+
+The reviewed diff keeps the ordinary full `Renderer` path and introduces an additive wrapper. Both paths share packet encoding and the existing compositor; the wrapper supplies preserved storage and a copy pass. Native application APIs, exclusive owner borrows, source publication, input and accessibility authority are unchanged. No dependency, vendor or unsafe change is present.
+
+The damage certificate is qualified by window namespace as well as epoch. An equal numeric epoch from another window is insufficient. The backing has independent pixel validity and the packet retains its existing invalidation rules. New scene attempts revoke backing validity before admission; failed upload/preparation cannot restore old image authority. Slot edits validate before writes and revoke packet eligibility before queue mutation. Queue ordering preserves already-submitted frames. Diagnostic mode changes invalidate packet reuse; resize recreates backing. The target is fully overwritten without assuming swapchain preservation.
+
+The copy pass retains the target's format. Exact tests cover both sRGB channel orders and RGBA16F, including all channel codes, but this does not prove precision behavior on untested drivers. The retained resource adds a full-size texture and a copy pass; this explains a plausible tradeoff but is not a measured decomposition of all host/driver costs.
+
+The refreshed source guard checks 1,544 inputs. A clean release GPU rebuild reproduces the measured executable hash exactly; the executable contains both the expected generated compositor shader and literal copy shader. The pixel mutant fails as intended. Native X11 and public GPU checks pass under explicitly identified software Vulkan. No test result is labeled hardware evidence.
+
+The experiment did not start with a frozen performance protocol and does not meet the complete `EXPERIMENTS.md`/`TESTING.md` adoption matrix. Its measured data are retained as exploratory. The next experiment should preregister cost-aware direct/retained selection and cold/sparse/dense regimes; choosing a threshold now from the observed winners would not qualify it. The broader architecture investigation prioritizes stable text/scene segments and composition updates after this renderer seam.

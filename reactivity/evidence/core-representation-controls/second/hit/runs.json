@@ -1,0 +1,128 @@
+[
+  {
+    "repeat": 1,
+    "label": "parent",
+    "log": "1-parent.log",
+    "sha256": "7eddd4d3e03eb10370657b0f5af3dc0c992869cf71ca126619922e7f946593e5",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-parent-ce9b21c14b0bbc766c9d988abfe6d9d8a7be85715d27c9a90c3c5d1183790180",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 1,
+    "label": "runs",
+    "log": "1-runs.log",
+    "sha256": "9c7a470efdd02c22f1f110a4a424d7fa4f979bee6ae652aaa7c511c09c712013",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-runs-449a529c40cb99ec07a18896755207752898bdf6a7315ca8c2174b0942e6809f",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 1,
+    "label": "links",
+    "log": "1-links.log",
+    "sha256": "ccfd93bec6205fc16f88b1bf9c0c7ba9cb4d2861a1553495ed2661a261bab27b",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-links-7768406cd14b0a536f3ac2d658e7be6914eb7c9dd6695353cb689182ce3e2738",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 2,
+    "label": "links",
+    "log": "2-links.log",
+    "sha256": "a8aa27d67fbef1101ceeb004e5d782b0abcef11cfbab7ba827da8bd3a30205c9",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-links-7768406cd14b0a536f3ac2d658e7be6914eb7c9dd6695353cb689182ce3e2738",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 2,
+    "label": "runs",
+    "log": "2-runs.log",
+    "sha256": "7ab287927deb337671d22bc86b6f8e24362aa4d40263aa68883f73e33dbec32e",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-runs-449a529c40cb99ec07a18896755207752898bdf6a7315ca8c2174b0942e6809f",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 2,
+    "label": "parent",
+    "log": "2-parent.log",
+    "sha256": "76576c7c1ad436b746265f22d795f5586f6598de5a5845ff411bdb08efa1935f",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-parent-ce9b21c14b0bbc766c9d988abfe6d9d8a7be85715d27c9a90c3c5d1183790180",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 3,
+    "label": "parent",
+    "log": "3-parent.log",
+    "sha256": "68d86eed742be068f0a788b7a4b923fc2295e5b59bac398f4ceb0fcedf24fc51",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-parent-ce9b21c14b0bbc766c9d988abfe6d9d8a7be85715d27c9a90c3c5d1183790180",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 3,
+    "label": "runs",
+    "log": "3-runs.log",
+    "sha256": "7b243bc8fec5162377799db0b254174d44c2a5779275dfe79e412ed07000b862",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-runs-449a529c40cb99ec07a18896755207752898bdf6a7315ca8c2174b0942e6809f",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "repeat": 3,
+    "label": "links",
+    "log": "3-links.log",
+    "sha256": "0f88e3d7428ec61e495e8c2c9eff88f4f0720272a397df5cb0cd3fe89d490587",
+    "command": [
+      "/tmp/gpui-core-controls-artifacts/hit_cost-links-7768406cd14b0a536f3ac2d658e7be6914eb7c9dd6695353cb689182ce3e2738",
+      "--ignored",
+      "--exact",
+      "public_hit_probe",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  }
+]

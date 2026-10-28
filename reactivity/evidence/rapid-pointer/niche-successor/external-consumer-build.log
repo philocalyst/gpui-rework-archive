@@ -1,0 +1,18 @@
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-hal)
+   Compiling parley_engine v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley_engine)
+   Compiling winit v0.30.13 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/winit)
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpu)
+   Compiling accesskit_atspi_common v0.21.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling parley v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/canvas)
+   Compiling wgpu v30.0.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/wgpu)
+   Compiling accesskit_unix v0.24.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_unix)
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+   Compiling hummingbird-gpui-port v0.1.0 (/tmp/gpui-rapid-pointer-consumer/reactivity/ports/hummingbird)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 37.91s

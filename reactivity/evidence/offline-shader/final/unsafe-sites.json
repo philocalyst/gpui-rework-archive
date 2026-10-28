@@ -1,0 +1,21 @@
+{
+  "authored_sites": [
+    {
+      "path": "reactivity/crates/gpu/src/renderer/artifact.rs",
+      "line": 47,
+      "text": "entries: &'static [wgpu::PassthroughShaderEntryPoint<'static>]| unsafe {"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/shader_artifact.rs",
+      "line": 29,
+      "text": "if unsafe { self.as_hal::<hal::api::Vulkan>() }.is_some() {"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/shader_artifact.rs",
+      "line": 44,
+      "text": "let device = unsafe { self.as_hal::<hal::api::Vulkan>() }?;"
+    }
+  ],
+  "callsite_qualification": "One private GPU callsite invoked twice, plus two vendor-local immutable borrowed HAL guards; existing dependency unsafe code is not counted as authored delta. Default GPU crate remains forbid unsafe.",
+  "host_generator_unsafe_sites": 0
+}

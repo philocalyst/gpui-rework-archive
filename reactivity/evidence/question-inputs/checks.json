@@ -1,0 +1,37 @@
+[
+  {
+    "check": "owner",
+    "passed": 281,
+    "failed": 0,
+    "ignored": 7,
+    "log": "owner.txt"
+  },
+  {
+    "check": "clippy",
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "log": "clippy.txt"
+  },
+  {
+    "check": "native-question",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "log": "native-question.txt"
+  },
+  {
+    "check": "native-library",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "log": "native-library.txt"
+  },
+  {
+    "check": "loom",
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "log": "loom.txt"
+  }
+]

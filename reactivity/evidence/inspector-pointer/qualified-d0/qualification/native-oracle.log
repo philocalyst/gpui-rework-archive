@@ -1,0 +1,16 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-e5c9359d761e98c0)
+
+running 4 tests
+test runtime::inspector::tests::every_typed_caption_matches_its_constructed_panel_slot ... ok
+inspector_blank_headless_retained,plain_bytes=5572,plain_allocs=21,tool_bytes=76086,tool_allocs=355,delta_bytes=70514 (includes font/text/layout/paint resources)
+inspector_bytes,Node=40,Runtime=1840,Metadata=264,Inspector=24,Handler=16,WindowAction=4,tool_nodes=28,texts_capacity=26
+catalog_headers,El=176,Style=88,Presented=64,Admission=16,InspectorAction=4
+catalog_warm_inspector_idle,allocations=0,total_bytes=0,retained=0
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... ok
+OUTWARD_PICK x_bits=1036831948 width_bits=1144256922 endpoint64=720.000024408102 point_x=720
+test runtime::inspector::tests::picking_skip_matches_old_loop_for_compacted_p_and_c_with_outside_points ... ok
+test runtime::inspector::tests::outward_bounds_preserve_strict_picking_but_do_not_admit_pending_focus_outside_window ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 229 filtered out; finished in 0.05s
+

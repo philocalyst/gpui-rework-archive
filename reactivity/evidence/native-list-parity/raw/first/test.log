@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-native-list-parity-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 4.87s
+     Running unittests examples/zgx_native_lab.rs (/home/user/gpui-native-list-parity-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6)

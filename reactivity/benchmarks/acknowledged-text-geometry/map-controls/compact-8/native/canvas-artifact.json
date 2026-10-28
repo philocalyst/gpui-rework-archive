@@ -1,0 +1,14 @@
+{
+  "source": "d77d3b92822797857059ff6073e6c4e3ef2f7909",
+  "features": "Canvas default simd,parallel; explicit empty rustflags",
+  "binary": "/tmp/gpui-text-map-8-fused-native/gpui_canvas",
+  "sha256": "53cc636ad8279c062f42ec2cbac0423dcf7a78b8dac4e75d53d4ae16e81a5e6f",
+  "command": [
+    "/tmp/gpui-text-map-8-fused-native/gpui_canvas",
+    "--exact",
+    "text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "log_sha256": "2b33c57e33ed79a1ce8f18c5ae0f4b84c560f450c0409fea2da003d0353a1def"
+}

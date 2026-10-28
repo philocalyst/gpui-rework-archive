@@ -1,0 +1,229 @@
+{
+  "source_commit": "1183954cdab2a15060bc8a1046cb9c5fb815e495",
+  "integration_base": "6e9839856d93ad7b1359245289b4496727554582",
+  "upstream": {
+    "repository": "https://github.com/hummingbird-player/hummingbird",
+    "commit": "e15e8ba0ef6ff5445294030d373e3c8ccc7d780c",
+    "license": "Apache-2.0"
+  },
+  "working_tree_at_capture": "Tracked files clean at source commit; only evidence/ was untracked.",
+  "scope": "Linux x86_64 debug builds; ordinary public Win and native Window/shared View; native reference CPU renderer. No timing/performance or full player/audio claim.",
+  "cwd": "/tmp/gpui-hummingbird-port-sol/reactivity/ports/hummingbird",
+  "commands": [
+    "source /tmp/gpui-native-env.sh",
+    "export CARGO_TARGET_DIR=/tmp/gpui-hummingbird-port-sol-target CARGO_BUILD_JOBS=2",
+    "cargo test --offline --locked --all-targets --features native",
+    "cargo clippy --offline --locked --all-targets --features native -- -D warnings",
+    "cargo run --offline --locked -- --headless",
+    "cargo build --offline --locked --features native",
+    "cargo metadata --offline --locked --all-features --filter-platform x86_64-unknown-linux-gnu --format-version 1",
+    "dbus-run-session -- /nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3 native-transcript.py /tmp/gpui-hummingbird-binaries/1183954cda/native --xvfb /nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb --xdotool /nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool --atspi-launcher /nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher --output evidence/native-1183954cda.json"
+  ],
+  "native_environment_script": {
+    "path": "/tmp/gpui-native-env.sh",
+    "sha256": "abd136aac384458c19e7c3db828a52f5c760bce1fdf28bef2e8877892eaea134",
+    "note": "Native driver overrides inherited DISPLAY with its explicitly owned :127."
+  },
+  "selected_build_environment": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_TARGET_DIR": "/tmp/gpui-hummingbird-port-sol-target",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null
+  },
+  "binary_sha256": {
+    "headless": "ced03b27cf4fd74f8708ecf1e9fe3e98d7a314adfe9b2fc14cdc32ba640f169f",
+    "native": "a18afd0669f0704561bac2e46b1525f88d00649dbeddec40a40ce56d8171282c"
+  },
+  "app_source_file_sha256": {
+    "Cargo.lock": "26dd118ff4af64a7c3d2453dca02964fc9feabfc96b2b6a269a3efb3fcc8d0b3",
+    "Cargo.toml": "1116899835e02f7ff3577a92dfb6ffef13fb523eefa52087e2c6385c72451d6c",
+    "LICENSE.upstream": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "README.md": "bef85f43d4b61247b9bd523edc820c46ae15bb0ddb847c4b855252b018b39c36",
+    "UPSTREAM.json": "8f81e38510c61fb0b65d84b3c93b1d39fafe6d7759d739385afc036901d52a48",
+    "dependency-latest-2026-10-22.json": "b2f78624c0f499eee3c24b903756af81e908e1baa27a1300a1eba51b5e069075",
+    "migrations/20240730163128_create_artist_table.sql": "cdcb441f9344dd17d39ece0433210998aa6b75641b80f2367305394abfb2e000",
+    "migrations/20240730163151_create_album_table.sql": "2baed726e828bd1480c38a08eaab26cd469f9b23101bcc70303308e648028e40",
+    "migrations/20240730163200_create_track_table.sql": "94ad83a178548a2377a04a1472d856234cba012d96ad577e71562b2354ad5fa2",
+    "migrations/20240817201809_create_delete_album_trigger.sql": "ebed109fcaca683fbdf322db0b881d98597321c6427fe8b58a0dfaa95ab31b2c",
+    "migrations/20240817201912_create_delete_artist_trigger.sql": "af5d18a5b5c4fbe29c8dbbbef11d476dda032bc2b9267e9f0cb315449bf659a0",
+    "migrations/20240917084650_add_release_information.sql": "5ef59a498dc52f6b51bbbff11e110ad48e153acabeb42d8a0373a92910981924",
+    "migrations/20250424090924_add_track_artist.sql": "7cc88902ad166189853df4b5f21ad3fc40783303106d9c5b506515573a974c8d",
+    "migrations/20250512214434_add_album_location_data.sql": "169bd3db47257e81f08d79bc9fe0fa2aa6cb4fe6a974870493d1c862f6d0fd53",
+    "migrations/20250512231103_add_album_path_track_info.sql": "2c20673b26ae9c396c3fd119b67c2378e29839ba48792d9f4c2ad49479cd8cd0",
+    "migrations/20250825224757_create_playlist_table.sql": "7571ea4a7be4f7a8ecb8efcec8c7324fabccdac4b6ff6b550410052975bc1390",
+    "migrations/20250825225240_create_playlist_item.sql": "ee4a593171c9ed70a5eea9f311f4aabd65cb25775ef782d6d6a0359554425d0d",
+    "migrations/20250825234341_insert_liked_songs.sql": "d0bc9664774c61da51a5241e152f2a725e6b3e8d80b205439db78ad778d61530",
+    "migrations/20251022214837_add_album_year_field.sql": "f256f583ea2744c5d03196598196398e647488e2c72497d724dbbba124ca244f",
+    "migrations/20260111094612_add_vinyl_numbering.sql": "4a193295e28b3b0ff908eced955cb5bac6a8e1c9b616dc22526f564fa8c01f17",
+    "migrations/20260215002300_add_track_update_cleanup_trigger.sql": "197322ecbadfdd207cd00d06a6bf29dd0f7a8ed14bf1cd4922dc97e396b27c08",
+    "migrations/20260226124733_add_sort_date_vcolumn.sql": "fd609a1b2adad88cffcee8985a5d667e89a98af2a908e6a2b8ee71f8441de6db",
+    "migrations/20260226220000_unify_release_date.sql": "2d9362e51d6fc34c2c52941985d6263a34caf3e6a9c0802f3db4168b27dd9d53",
+    "migrations/20260226223000_drop_old_date_columns.sql": "c03bae6174396df835c3cd9adef29ab79afef3985f5e24db8b20c9c62eb9c5b5",
+    "migrations/20260227091607_artist_count_indicies.sql": "d2cabc7d441d2943ed657c58e03babb862f0bc1b5feeb0c6fb71cadbbf8d070a",
+    "migrations/20260316000000_add_replaygain_columns.sql": "2930bfb9f63ff563fb4e3438778cf2961d69744029a15c467e826f934b21b270",
+    "migrations/20260317000000_add_lyrics_table.sql": "a9de23b20717d04460bfdf824203a00fee2e62f0d54d9c5297c189561df6d1eb",
+    "migrations/20260321000000_add_disc_subtitle.sql": "9ff30d85414fa78eff389a77f552ea7c1eea21db41a3322014f4aa4ac039951a",
+    "migrations/20260419000000_add_playlist_position.sql": "ccf447f6747cff46dbeffc5d7ae9aa3dbc8de4bcac398ef54e98b7256a92f3cd",
+    "migrations/20260712000000_fix_album_path_trigger.sql": "40040427b489dacbd3abda731462c64b8b5b8cd7108153637febc277fab9daf2",
+    "migrations/20260712120000_cascade_delete_track_children.sql": "5cc5cb1ee90944c74a0ec21ea6b2ed9c6e04b028bac027a0117280d1e727d177",
+    "migrations/20260805085130_multi_artist_albums.sql": "41ee3462cf9ac892cdd0540659d15cb0ff67f1a0f5f94a1781a0d4a203ef4307",
+    "migrations/20260805131050_album_artist_sort.sql": "23cd8fe455334aa1ea77c2d9874907e0fcfc1a29eaf237bbd95fce56321172cd",
+    "migrations/20260806120000_album_artist_keys.sql": "5b0feb9e1f8f468681788190c3f4cd13c323fe9b2774fa54d8d64eef4f889a3f",
+    "migrations/20260807000000_heal_leaked_artist_sorts.sql": "439213545a7addc7d729456e4295e71fca86b4b64613a358dfe8e9cd92798b0c",
+    "migrations/20260808120000_create_artwork_table.sql": "247534f88f575f5546b25b5d6d6b6bf3df699b3963de60f2a7451278ea3530d7",
+    "migrations/20260813000000_create_track_artist.sql": "b6dceab6aa28da98ef9d63a741e60e0174056f731ffb04c78661ac735b892e55",
+    "migrations/20260813100000_add_track_release_date.sql": "bc2f34fbbcf8bbce61ffeba182df2668a9c3d36c9c4b8b4fcc4fa5ed0d940bb3",
+    "migrations/20260814000000_store_artist_lists_as_json.sql": "d5b3cb82ca7cbaaeadf4e6b4f47be3cca95240ce9e298eae757b4917661afe6e",
+    "migrations/20260815000000_drop_scan_art.sql": "8f1f6635fa7c4734a293c338aeb8843e821d2476db7b91db2153ae6be84b0390",
+    "migrations/20260816000000_normalize_genres.sql": "5ad45270ad53845606559c2b29473595d22e5e21148ffe0ef4f0a86f09acb2f0",
+    "migrations/20260817000000_add_track_section_and_display_mode.sql": "6c3da8f4f9e3acc9adbafaf96fa661381438b7375e5ba717742b73f6932dcce7",
+    "migrations/20260818000000_keep_album_track_artists.sql": "be78f19c3e5885394de580e9c6b4eee362a9903b517c6012110d5c8bf7742c09",
+    "migrations/20260819000000_add_artist_sort_index.sql": "2de980e0f10599ed9b10f7b6014329efb059e582e7d8a7356d46cd25fd613faf",
+    "migrations/20260820000000_drop_dead_persisted_columns.sql": "85ebd6d964c5e59d81619349538d9e5b5d6ff91968060a1d9c883bc9fed04ff4",
+    "native-transcript.py": "cc8318ad87caedc9dd6f85758163003fbd79ba4cfced614b6c44e5042afcfa8d",
+    "src/app.rs": "c8ce715b76305315e16fd181c5cf5f8d08cd2f3bc7657aeab2a6fbc131e10087",
+    "src/database.rs": "906e9a199b8305081908dc415ce5be3d2855a3522875348ae43d797a20e40af7",
+    "src/lib.rs": "5a08cbc89d8d2ea81f21189463b90a76494579858c6effb32455c2c506689d47",
+    "src/main.rs": "4d8a6e82deccdd19f6df1ab54e891b829f2f8a6bea8aedd50705999f89225680",
+    "src/migrations.rs": "6cba44fd2743d420b87cef51f591fbfd3706a517629fc45393f5b5657f981a2a",
+    "src/query.rs": "8b91e5022ad973f2962eb782bc185b5c96b1e1cc35cd1f45f7ba3e36ffc0942f",
+    "src/query_helpers.rs": "4fed0b718a998b2c066079d4a423950c9ac6f7151d1f521b3f0d56ae96ea8b48",
+    "src/search.rs": "109daa6ed94a03fcded165798ed8c3839f9c3baa8099cc352ce924742abe0f2c",
+    "src/transcript.rs": "41d224cd935e2a40abca4cf5d8a358b05da37d2820740281ccf5285333c621ad",
+    "src/worker.rs": "92075ac958a2a70d5a6fc1c25c61f8cc69ffbe6a8d5476bff965e33033c35014",
+    "tests/query.rs": "f23d966c0e9deb16c147133984e2bc35bd8703407954839e43483f87d626fa6e",
+    "tests/search.rs": "771762c2da60aa03a722208a59b2db754f26788527b683a8b11f4a9101532f4e",
+    "tests/transcript.rs": "81f16b1002092d7c4e74066182e0b2a66ca03652d8e8ba53a91b65e24e941366",
+    "upstream/track_query.rs": "38c6e33409f700c1fb26b475f8812868af9eba99b87444041b003b0c5c80f8d6"
+  },
+  "inherited_root_lock_sha256": "b6e543ab796fadcde93676fd4fabbe3dded770a0333cb772a65006fe13bc6258",
+  "new_registry_families": [
+    {
+      "name": "fallible-iterator",
+      "version": "0.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649",
+      "latest_stable": "0.3.0",
+      "primary_metadata": "https://crates.io/api/v1/crates/fallible-iterator"
+    },
+    {
+      "name": "fallible-streaming-iterator",
+      "version": "0.1.9",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a",
+      "latest_stable": "0.1.9",
+      "primary_metadata": "https://crates.io/api/v1/crates/fallible-streaming-iterator"
+    },
+    {
+      "name": "libsqlite3-sys",
+      "version": "0.38.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "f1d20bef17f513b9b3004532233187769cd072d790971f4e4da0e346eb6401e8",
+      "dependencies": [
+        "cc",
+        "pkg-config",
+        "vcpkg"
+      ],
+      "latest_stable": "0.38.2",
+      "primary_metadata": "https://crates.io/api/v1/crates/libsqlite3-sys"
+    },
+    {
+      "name": "nucleo-matcher",
+      "version": "0.3.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "bf33f538733d1a5a3494b836ba913207f14d9d4a1d3cd67030c5061bdd2cac85",
+      "dependencies": [
+        "memchr",
+        "unicode-segmentation"
+      ],
+      "latest_stable": "0.3.1",
+      "primary_metadata": "https://crates.io/api/v1/crates/nucleo-matcher"
+    },
+    {
+      "name": "rusqlite",
+      "version": "0.40.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "23f2a97da3e3873c73cb2a2e71b35c40ff95e0b1eefa8d72d8499a6928c3b5b3",
+      "dependencies": [
+        "bitflags 2.13.2",
+        "fallible-iterator",
+        "fallible-streaming-iterator",
+        "libsqlite3-sys",
+        "smallvec"
+      ],
+      "latest_stable": "0.40.2",
+      "primary_metadata": "https://crates.io/api/v1/crates/rusqlite"
+    },
+    {
+      "name": "vcpkg",
+      "version": "0.2.15",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426",
+      "latest_stable": "0.2.15",
+      "primary_metadata": "https://crates.io/api/v1/crates/vcpkg"
+    }
+  ],
+  "linux_metadata_new_packages": [
+    {
+      "name": "fallible-iterator",
+      "version": "0.3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MIT/Apache-2.0",
+      "rust_version": null
+    },
+    {
+      "name": "fallible-streaming-iterator",
+      "version": "0.1.9",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MIT/Apache-2.0",
+      "rust_version": null
+    },
+    {
+      "name": "libsqlite3-sys",
+      "version": "0.38.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MIT",
+      "rust_version": null
+    },
+    {
+      "name": "nucleo-matcher",
+      "version": "0.3.1",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MPL-2.0",
+      "rust_version": null
+    },
+    {
+      "name": "rusqlite",
+      "version": "0.40.2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MIT",
+      "rust_version": null
+    },
+    {
+      "name": "vcpkg",
+      "version": "0.2.15",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "license": "MIT/Apache-2.0",
+      "rust_version": null
+    }
+  ],
+  "metadata_sha256": "0563a6ed77c09e3e249cff9dcba50c8e44bae48986e991f34920e7d80bf9ed96",
+  "metadata_scope": "Linux-filtered all-features dependency graph; unfiltered offline lookup failure preserved separately.",
+  "gates": {
+    "tests": 8,
+    "strict_native_all_targets_clippy": "pass",
+    "headless_public_owner_transcript": "pass",
+    "native_external_transcript": "pass",
+    "native_acknowledged_frames": 8,
+    "all_native_source_epochs_equal_presented_epochs": true,
+    "upstream_sha256_checks": "All recorded source objects match pin; 39 migration files + original track query and Apache license retain exact bytes."
+  },
+  "controls": {
+    "preliminary_base": "d05b826b62",
+    "preliminary_working_source": "Uncommitted app before source freeze; not byte-exact to any final app commit. Binary digest only exists in preliminary success JSON.",
+    "preliminary_native_success_warning": "The matched_ids field was expected from the separate headless SQL fixture, not individually read from native accessibility. Final capture reports only acknowledged visible_result_count.",
+    "preliminary_offscreen_failure": "Driver looked for ID13 CAFE Étude after longest-first ordering moved it outside the anchored viewport. Final control follows still-visible ID1 across resort.",
+    "preliminary_scalar_failure": "External busctl driver incorrectly treated a scalar get-property JSON value as a tuple.",
+    "preliminary_prefix_failure": "Initial test expectation contradicted actual Nucleo0.3.1 case-sensitive ASCII prefix behavior; final test preserves upstream behavior."
+  }
+}

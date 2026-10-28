@@ -1,0 +1,307 @@
+{
+  "base": "f102ef111c7214c7ace900f76a74c9d3e7ca14e2",
+  "application": "197fb3917df221e84f4d2247a91f1c19aabb9bc8",
+  "categories": {
+    "licenses_provenance_and_current_docs": [
+      "reactivity/ports/hummingbird/AUDIO-BUDGET.md",
+      "reactivity/ports/hummingbird/AUDIO-FFT-UPSTREAM.json",
+      "reactivity/ports/hummingbird/AUDIO.md",
+      "reactivity/ports/hummingbird/LIBRARY-INTENT.md",
+      "reactivity/ports/hummingbird/LIBRARY-PLAY-UPSTREAM.json",
+      "reactivity/ports/hummingbird/LIBRARY-PLAY.md",
+      "reactivity/ports/hummingbird/README.md",
+      "reactivity/ports/hummingbird/UPSTREAM.json",
+      "reactivity/ports/hummingbird/licenses/rubato-MIT.txt"
+    ],
+    "runtime_and_manifests": [
+      "reactivity/ports/hummingbird/Cargo.lock",
+      "reactivity/ports/hummingbird/Cargo.toml",
+      "reactivity/ports/hummingbird/src/app.rs",
+      "reactivity/ports/hummingbird/src/audio/block.rs",
+      "reactivity/ports/hummingbird/src/audio/cpal.rs",
+      "reactivity/ports/hummingbird/src/audio/decoder.rs",
+      "reactivity/ports/hummingbird/src/audio/fft.rs",
+      "reactivity/ports/hummingbird/src/audio/media.rs",
+      "reactivity/ports/hummingbird/src/audio/mod.rs",
+      "reactivity/ports/hummingbird/src/audio/output.rs",
+      "reactivity/ports/hummingbird/src/audio/pipeline.rs",
+      "reactivity/ports/hummingbird/src/audio/service.rs",
+      "reactivity/ports/hummingbird/src/audio/timing.rs",
+      "reactivity/ports/hummingbird/src/lib.rs",
+      "reactivity/ports/hummingbird/src/main.rs",
+      "reactivity/ports/hummingbird/src/queue_audio.rs",
+      "reactivity/ports/hummingbird/src/queue_playback.rs",
+      "reactivity/ports/hummingbird/src/queue_view.rs",
+      "reactivity/ports/hummingbird/src/search.rs",
+      "reactivity/ports/hummingbird/src/transcript.rs",
+      "reactivity/ports/hummingbird/src/worker.rs"
+    ],
+    "public_tests_and_fixture_support": [
+      "reactivity/ports/hummingbird/assets/audio/fixture.flac",
+      "reactivity/ports/hummingbird/assets/audio/fixture.mp3",
+      "reactivity/ports/hummingbird/assets/audio/fixture.wav",
+      "reactivity/ports/hummingbird/assets/audio/stereo.flac",
+      "reactivity/ports/hummingbird/assets/audio/stereo.mp3",
+      "reactivity/ports/hummingbird/assets/audio/stereo.wav",
+      "reactivity/ports/hummingbird/tests/audio.rs",
+      "reactivity/ports/hummingbird/tests/library_audio.rs",
+      "reactivity/ports/hummingbird/tests/preparation.rs",
+      "reactivity/ports/hummingbird/tests/preparation_authority.rs",
+      "reactivity/ports/hummingbird/tests/queue_consumer.rs",
+      "reactivity/ports/hummingbird/tests/support/audio_clock.rs",
+      "reactivity/ports/hummingbird/tests/transcript.rs"
+    ],
+    "optional_example_and_fixture_tool": [
+      "reactivity/ports/hummingbird/examples/audio_output.rs",
+      "reactivity/ports/hummingbird/tools/audio-fixtures.py"
+    ],
+    "historical_qualification_excluded_from_minimal": [
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v1/FINGERPRINTS.txt",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v1/PREREG.md",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v1/REPORT.md",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v1/samples.csv",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v2/FINGERPRINTS.txt",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v2/PREREG.md",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v2/REPORT.md",
+      "reactivity/ports/hummingbird/qualification/audio-exact-unit-v2/ordinary-geometry-matrix.csv",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/.gitattributes",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/PREREG.md",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/REPORT.md",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/baseline.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/baseline.sha256",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/candidate.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/candidate.sha256",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/capture.sh",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/final-source-check.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/gpui-audio-sol-300-75-core-oracle.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/gpui-audio-sol-300-75-pipeline-oracle.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/untimed-gates.log",
+      "reactivity/ports/hummingbird/qualification/audio-progress-clock/wrapper-exit.txt",
+      "reactivity/ports/hummingbird/qualification/library-play-prepared/.gitattributes",
+      "reactivity/ports/hummingbird/qualification/library-play-prepared/all-audio.log",
+      "reactivity/ports/hummingbird/qualification/library-play-prepared/clippy.log",
+      "reactivity/ports/hummingbird/qualification/library-play-prepared/default.log",
+      "reactivity/ports/hummingbird/qualification/library-play-prepared/source.sha256"
+    ]
+  },
+  "category_counts": {
+    "licenses_provenance_and_current_docs": 9,
+    "runtime_and_manifests": 21,
+    "public_tests_and_fixture_support": 13,
+    "optional_example_and_fixture_tool": 2,
+    "historical_qualification_excluded_from_minimal": 26
+  },
+  "historical_prerequisite_chain": [
+    "ae015dd273a073b3cabe54c238aaf822c01fb599 Port real decoder pipeline and CPAL output through queue Inbox",
+    "6c4ebeee647da373e26fe1ba7106c3806efb4e79 Preserve valid audio tails on source failure and close failed output",
+    "61f9292bc8af279327b0e3ade561797865bf5f7a Keep audio output provider and stream concrete on control owner",
+    "ecfaddd3cffa07d09510faa7b194c1bea1c123cf Park quiescent audio control and verify affine output ownership",
+    "5cebe303087ae503b0b93a45ad7298088350afb7 Simplify Hummingbird audio ownership with borrowed FFT units",
+    "a913a41f3b2072d4beb85ce70b9bfc8eb4fdefd2 Bound exact audio FFT geometry with the nearest smooth multiplier",
+    "a91ab055730a0ca0c20e59026abf933d02a4751e Run audio work to its credit boundary before parking",
+    "0fc824ba782f1794f9511c9b32aed8c869fe6b21 Check the changed 300 by 75 audio unit against independent Rubato",
+    "3efa2c4fb0bac0e54496425305171fe38e63a9be Keep pinned audio coefficients explicit under strict lint checks",
+    "e8ad0dab98e4a4aff1a5b4ec135fc29d78bdb1b4 Connect explicit prepared Library playback to the real audio service",
+    "a357cc3c2d10813dfa56d71925bb5c06610ac9ea Make Library Play now an owned one-click preparation intent",
+    "197fb3917df221e84f4d2247a91f1c19aabb9bc8 Validate complete preparation identity across public worker commands"
+  ],
+  "lock_added": [
+    [
+      "alsa",
+      "0.11.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "alsa-sys",
+      "0.4.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audio-codec-algorithms",
+      "0.8.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter",
+      "5.0.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter-buffers",
+      "5.2.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter-sample",
+      "5.2.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "coreaudio-rs",
+      "0.14.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "cpal",
+      "0.18.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "dasp_sample",
+      "0.11.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "extended",
+      "0.1.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "lazy_static",
+      "1.5.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "mach2",
+      "0.6.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-complex",
+      "0.4.6",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-derive",
+      "0.4.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-integer",
+      "0.1.47",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-audio-toolbox",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-avf-audio",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-core-audio",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-core-audio-types",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "primal-check",
+      "0.3.4",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "realfft",
+      "3.5.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "regex-lite",
+      "0.1.9",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rtrb",
+      "0.4.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rubato",
+      "5.0.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rustfft",
+      "6.4.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "strength_reduce",
+      "0.2.4",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-bundle-flac",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-bundle-mp3",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-codec-pcm",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-common",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-core",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-format-riff",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-metadata",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "transpose",
+      "0.2.3",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "visibility",
+      "0.1.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "windowfunctions",
+      "0.1.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ]
+  ],
+  "lock_removed": [],
+  "review_patch_sha256": "eebf64a9133a74a27825cc3148c6d307533b1163088d944852f6ebd1140fb355",
+  "review_patch_files": 45,
+  "required_manifest_example": "reactivity/ports/hummingbird/examples/audio_output.rs",
+  "important_limits": [
+    "Inventory only: no application delta applied to this rehearsal.",
+    "Use final port-path patch, not whole commits: original ancestry contains frozen/rejected experiments and unrelated core.",
+    "Shipping native feature includes CPAL; device negotiation is lazy and hardware execution remains unavailable.",
+    "Final197fb uses full Selection echo; a357 request-only echo is rejected, not a standalone prerequisite to adopt.",
+    "Keep historical allocation/performance failures and limits linked to frozen evidence, not promoted to passing gates.",
+    "Adapted FFT core requires complete licenses/rubato-MIT.txt and precise AUDIO-FFT-UPSTREAM.json attribution."
+  ]
+}

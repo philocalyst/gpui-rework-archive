@@ -1,0 +1,58 @@
+{
+  "source": "6b730a0edfa335aed7685b2df877224d5ed2c207",
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-lowered-solid-fault/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "manifest_path": "/root/gpui-lowered-solid-fault/reactivity/crates/gpu/Cargo.toml",
+    "target": {
+      "kind": [
+        "test"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "render",
+      "src_path": "/root/gpui-lowered-solid-fault/reactivity/crates/gpu/tests/render.rs",
+      "edition": "2024",
+      "required-features": [
+        "vulkan-tests"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [
+      "default",
+      "simd",
+      "vulkan-tests"
+    ],
+    "filenames": [
+      "/tmp/gpui-lowered-solid-fault-target/debug/build/gpui_gpu/afe157e2369925c6/out/render-afe157e2369925c6"
+    ],
+    "executable": "/tmp/gpui-lowered-solid-fault-target/debug/build/gpui_gpu/afe157e2369925c6/out/render-afe157e2369925c6",
+    "fresh": false
+  },
+  "build_script": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///root/gpui-lowered-solid-fault/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/tmp/gpui-lowered-solid-fault-target/debug/build/gpui_gpu/d4b259f172523aaa/out"
+  },
+  "original": "/tmp/gpui-lowered-solid-fault-target/debug/build/gpui_gpu/afe157e2369925c6/out/render-afe157e2369925c6",
+  "copy": "/tmp/gpui-lowered-solid-evidence/fault-qualified-execution/render-unconditional",
+  "bytes": 227609984,
+  "sha256": "47a119edf9d388da78472535b9c49be7c5a4e3a8002bd733d98d2778523fa1a6",
+  "generated_wgsl": "/tmp/gpui-lowered-solid-fault-target/debug/build/gpui_gpu/d4b259f172523aaa/out/ui.wgsl",
+  "generated_wgsl_sha256": "edf2251a46d9726b4d42a51f213651b119e8980933343991e0ba7bf2b1805abf",
+  "unconditional_branch_asserted_before_execution": true
+}

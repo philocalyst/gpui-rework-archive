@@ -1,0 +1,23 @@
+{
+  "base": "91d2aac60ded476aa3f3bbfc00ae4a6cc0cc8787",
+  "source_patch_sha256": "e32e0ea85a109e4b43ec79ac79d2326e168f5b011ae952143b15050543b81e69",
+  "core_source": "unchanged from8c17a763ee",
+  "core_non_test_code_lines": 30599,
+  "app_code_baseline": 2905,
+  "app_code_candidate": 2910,
+  "default_tests": 35,
+  "native_feature_tests": 35,
+  "strict_both": true,
+  "ordinary_headless_command": true,
+  "format": true,
+  "historical_control": {
+    "exit": 101,
+    "desired_failures": 2,
+    "other_passes": 7,
+    "restored_guard_count": 1125
+  },
+  "artifact_members": 40,
+  "archive_sha256": "dfb5e1171769585bf687978d6c49b09d35232c051d2b50ecda6894323d171522",
+  "limitations": "No decoder/audio output, device drain, native input, timing/RSS or foreign execution evidence added.",
+  "final_guard_count": 1126
+}

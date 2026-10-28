@@ -1,0 +1,453 @@
+[
+  {
+    "name": "<<gpui::native::DeviceErrors>::install::{closure#0} as core::ops::function::FnOnce<(wgpu_types::DeviceLostReason, alloc::string::String)>>::call_once::{shim:vtable#0}",
+    "baseline": {
+      "code": 180,
+      "frame": 56
+    },
+    "candidate": {
+      "code": 140,
+      "frame": 56
+    }
+  },
+  {
+    "name": "<<std::sync::once::Once>::call_once_force<<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::initialize<<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::get_or_init<<gpui::native::accessibility::Ingress>::prepare_publication::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0} as core::ops::function::FnOnce<(&std::sync::once::OnceState,)>>::call_once::{shim:vtable#0}",
+    "baseline": null,
+    "candidate": {
+      "code": 170,
+      "frame": 88
+    }
+  },
+  {
+    "name": "<accesskit_unix::adapter::Adapter>::update_if_active::<<gpui::native::accessibility::Bridge>::sync<empty::Empty, ()>::{closure#3}>",
+    "baseline": {
+      "code": 2001,
+      "frame": 1688
+    },
+    "candidate": {
+      "code": 1493,
+      "frame": 1688
+    }
+  },
+  {
+    "name": "<alloc::boxed::Box<[std::sync::mpmc::array::Slot<gpui::native::accessibility::Queued>]> as core::iter::traits::collect::FromIterator<std::sync::mpmc::array::Slot<gpui::native::accessibility::Queued>>>::from_iter::<core::iter::adapters::map::Map<core::ops::range::Range<usize>, <std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>::with_capacity::{closure#0}>>",
+    "baseline": {
+      "code": 388,
+      "frame": 56
+    },
+    "candidate": {
+      "code": 395,
+      "frame": 56
+    }
+  },
+  {
+    "name": "<gpui::native::DeviceErrors>::record",
+    "baseline": {
+      "code": 402,
+      "frame": 56
+    },
+    "candidate": {
+      "code": 396,
+      "frame": 56
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty> as gpui_reactivity_host::native::Host>::dispatch",
+    "baseline": {
+      "code": 7524,
+      "frame": 3000
+    },
+    "candidate": {
+      "code": 7500,
+      "frame": 3000
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty>>::create_surface",
+    "baseline": {
+      "code": 2548,
+      "frame": 2680
+    },
+    "candidate": {
+      "code": 2542,
+      "frame": 2680
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty>>::redraw",
+    "baseline": {
+      "code": 2871,
+      "frame": 440
+    },
+    "candidate": {
+      "code": 2856,
+      "frame": 440
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty>>::retire_window",
+    "baseline": {
+      "code": 386,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 380,
+      "frame": 24
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty>>::start_upgrade",
+    "baseline": {
+      "code": 434,
+      "frame": 88
+    },
+    "candidate": {
+      "code": 419,
+      "frame": 88
+    }
+  },
+  {
+    "name": "<gpui::native::NativeHost<empty::Empty>>::try_upgrade",
+    "baseline": {
+      "code": 2308,
+      "frame": 632
+    },
+    "candidate": {
+      "code": 2284,
+      "frame": 632
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Bridge>::drain::<empty::Empty, ()>",
+    "baseline": {
+      "code": 3112,
+      "frame": 1416
+    },
+    "candidate": {
+      "code": 3088,
+      "frame": 1432
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Bridge>::new",
+    "baseline": {
+      "code": 619,
+      "frame": 200
+    },
+    "candidate": {
+      "code": 467,
+      "frame": 136
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Bridge>::sync::<empty::Empty, ()>",
+    "baseline": {
+      "code": 5550,
+      "frame": 744
+    },
+    "candidate": {
+      "code": 5547,
+      "frame": 744
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Bridge>::sync::<empty::Empty, ()>::{closure#3}",
+    "baseline": null,
+    "candidate": {
+      "code": 312,
+      "frame": 184
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Ingress as accesskit::ActionHandler>::do_action",
+    "baseline": {
+      "code": 1002,
+      "frame": 168
+    },
+    "candidate": {
+      "code": 951,
+      "frame": 152
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Ingress as accesskit::DeactivationHandler>::deactivate_accessibility",
+    "baseline": {
+      "code": 82,
+      "frame": 8
+    },
+    "candidate": {
+      "code": 83,
+      "frame": 8
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Ingress>::prepare_publication",
+    "baseline": null,
+    "candidate": {
+      "code": 20,
+      "frame": 0
+    }
+  },
+  {
+    "name": "<gpui::native::accessibility::Shared>::overload",
+    "baseline": {
+      "code": 21,
+      "frame": 0
+    },
+    "candidate": null
+  },
+  {
+    "name": "<gpui::native::accessibility::Shared>::signal",
+    "baseline": {
+      "code": 17,
+      "frame": 0
+    },
+    "candidate": {
+      "code": 12,
+      "frame": 0
+    }
+  },
+  {
+    "name": "<gpui::native::upgrade::Upgrade>::start",
+    "baseline": {
+      "code": 1782,
+      "frame": 1016
+    },
+    "candidate": {
+      "code": 1739,
+      "frame": 1016
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::Receiver<gpui::native::accessibility::Queued> as core::ops::drop::Drop>::drop",
+    "baseline": {
+      "code": 455,
+      "frame": 56
+    },
+    "candidate": {
+      "code": 457,
+      "frame": 56
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::Sender<gpui::native::accessibility::Queued> as core::ops::drop::Drop>::drop",
+    "baseline": {
+      "code": 584,
+      "frame": 56
+    },
+    "candidate": {
+      "code": 586,
+      "frame": 56
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::Sender<gpui::native::accessibility::Queued>>::try_send",
+    "baseline": {
+      "code": 1020,
+      "frame": 152
+    },
+    "candidate": {
+      "code": 1018,
+      "frame": 152
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>::try_send",
+    "baseline": {
+      "code": 751,
+      "frame": 40
+    },
+    "candidate": {
+      "code": 749,
+      "frame": 40
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::list::Channel<gpui::native::accessibility::Queued>>::disconnect_receivers",
+    "baseline": {
+      "code": 808,
+      "frame": 72
+    },
+    "candidate": {
+      "code": 840,
+      "frame": 72
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::list::Channel<gpui::native::accessibility::Queued>>::try_recv",
+    "baseline": {
+      "code": 1080,
+      "frame": 120
+    },
+    "candidate": {
+      "code": 1112,
+      "frame": 104
+    }
+  },
+  {
+    "name": "<std::sync::mpmc::list::Channel<gpui::native::accessibility::Queued>>::try_send",
+    "baseline": {
+      "code": 971,
+      "frame": 168
+    },
+    "candidate": {
+      "code": 981,
+      "frame": 152
+    }
+  },
+  {
+    "name": "<std::sync::once::Once>::call_once_force::<<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::initialize<<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::get_or_init<<gpui::native::accessibility::Ingress>::prepare_publication::{closure#0}>::{closure#0}, !>::{closure#0}>::{closure#0}",
+    "baseline": null,
+    "candidate": {
+      "code": 170,
+      "frame": 88
+    }
+  },
+  {
+    "name": "<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::mpsc::SyncSender<gpui::native::accessibility::Queued>>>::get_or_init<<gpui::native::accessibility::Ingress>::prepare_publication::{closure#0}>::{closure#0}, !>",
+    "baseline": null,
+    "candidate": {
+      "code": 73,
+      "frame": 40
+    }
+  },
+  {
+    "name": "<std::thread::builder::Builder>::spawn_unchecked::<<gpui::native::upgrade::Upgrade>::start::{closure#1}, ()>",
+    "baseline": null,
+    "candidate": {
+      "code": 1410,
+      "frame": 408
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<<gpui::native::DeviceErrors>::install::{closure#0}>",
+    "baseline": {
+      "code": 67,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 138,
+      "frame": 24
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<<gpui::native::DeviceErrors>::install::{closure#1}>",
+    "baseline": {
+      "code": 138,
+      "frame": 24
+    },
+    "candidate": null
+  },
+  {
+    "name": "core::ptr::drop_glue::<alloc::boxed::Box<std::sync::mpmc::counter::Counter<std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>>>",
+    "baseline": {
+      "code": 144,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 148,
+      "frame": 24
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<core::option::Option<gpui::native::Graphics>>",
+    "baseline": {
+      "code": 33,
+      "frame": 0
+    },
+    "candidate": {
+      "code": 607,
+      "frame": 40
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<core::option::Option<gpui::native::accessibility::Bridge>>",
+    "baseline": {
+      "code": 291,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 305,
+      "frame": 24
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<core::result::Result<(), std::sync::mpsc::TrySendError<gpui::native::accessibility::Queued>>>",
+    "baseline": null,
+    "candidate": {
+      "code": 129,
+      "frame": 8
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<gpui::native::NativeHost<empty::Empty>>",
+    "baseline": {
+      "code": 785,
+      "frame": 40
+    },
+    "candidate": {
+      "code": 770,
+      "frame": 40
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<gpui::native::accessibility::Command>",
+    "baseline": {
+      "code": 123,
+      "frame": 8
+    },
+    "candidate": null
+  },
+  {
+    "name": "core::ptr::drop_glue::<gpui::native::accessibility::Shared>",
+    "baseline": {
+      "code": 151,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 188,
+      "frame": 24
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<gpui::native::upgrade::Message>",
+    "baseline": {
+      "code": 247,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 231,
+      "frame": 24
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<gpui_reactivity_host::native::Driver<gpui::native::NativeHost<empty::Empty>>>",
+    "baseline": {
+      "code": 887,
+      "frame": 40
+    },
+    "candidate": {
+      "code": 872,
+      "frame": 40
+    }
+  },
+  {
+    "name": "core::ptr::drop_glue::<std::sync::mpmc::counter::Counter<std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>>",
+    "baseline": {
+      "code": 107,
+      "frame": 24
+    },
+    "candidate": {
+      "code": 111,
+      "frame": 24
+    }
+  },
+  {
+    "name": "std::thread::lifecycle::spawn_unchecked::<<gpui::native::upgrade::Upgrade>::start::{closure#1}, ()>",
+    "baseline": {
+      "code": 1403,
+      "frame": 392
+    },
+    "candidate": null
+  }
+]

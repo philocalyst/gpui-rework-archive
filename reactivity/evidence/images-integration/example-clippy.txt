@@ -1,0 +1,54 @@
+   Compiling syn v3.0.9
+    Checking gpui_reactivity_core v0.1.0 (/root/gpui-ce3/reactivity/crates/core)
+   Compiling synstructure v0.14.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+   Compiling thiserror-impl v2.0.21
+    Checking bytemuck v1.25.2
+    Checking yoke v0.8.3
+    Checking font-types v0.12.7
+    Checking rustybuzz v0.20.1
+    Checking zerovec v0.11.8
+    Checking zerotrie v0.2.5
+    Checking read-fonts v0.41.0
+    Checking thiserror v2.0.21
+    Checking naga v29.0.4
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking icu_provider v2.3.1
+    Checking icu_collections v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking wgpu-types v29.0.4
+    Checking icu_properties v2.3.0
+    Checking parley_data v0.11.1
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking gpu-allocator v0.28.0
+    Checking skrifa v0.44.0
+    Checking harfrust v0.12.0
+    Checking fontique v0.11.1
+    Checking swash v0.2.10
+    Checking parley v0.11.1 (/root/gpui-ce3/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking wgpu-naga-bridge v29.0.4
+    Checking wgsl-rs v0.1.0-beta.1
+    Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking wgpu-core v29.0.4
+    Checking wgpu v29.0.4
+    Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 16.53s

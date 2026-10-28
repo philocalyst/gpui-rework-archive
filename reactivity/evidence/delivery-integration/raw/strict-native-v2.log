@@ -1,0 +1,24 @@
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpu)
+    Checking parley v0.12.0 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/parley)
+    Checking snafu v0.8.9
+   Compiling fearless_simd_macros v0.1.0
+    Checking ctor v0.10.1
+    Checking glam v0.30.10
+    Checking wgsl-rs-ir v0.1.0-beta.6
+    Checking wgsl-rs v0.1.0-beta.6
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/canvas)
+    Checking tiny-xlib v0.2.5
+    Checking accesskit_unix v0.24.0 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/accesskit_unix)
+    Checking wgpu v30.0.1 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/wgpu)
+   Compiling zbus_utils v6.0.0
+    Checking zruntime v0.2.0
+   Compiling zbus_macros v6.0.0
+    Checking accesskit_winit v0.34.1
+    Checking softbuffer v0.4.8 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/host)
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/state)
+    Checking pollster v1.0.1
+    Checking x11rb v0.14.0
+    Checking zbus v6.0.0
+    Checking gpui v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpui)
+error: could not compile `gpui` (lib) due to 2 previous errors

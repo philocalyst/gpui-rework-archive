@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/root/gpui-hummingbird-main-port-sol/reactivity/ports/hummingbird/native-service.py", line 218, in <module>
+    main()
+    ~~~~^^
+  File "/root/gpui-hummingbird-main-port-sol/reactivity/ports/hummingbird/native-service.py", line 166, in main
+    find("9 recordings for ‘’ — Title")
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/gpui-hummingbird-main-port-sol/reactivity/ports/hummingbird/native-service.py", line 150, in find
+    node = wait(lambda: named(name), name)
+  File "/root/gpui-hummingbird-main-port-sol/reactivity/ports/hummingbird/native-service.py", line 74, in wait
+    raise TimeoutError(description)
+TimeoutError: 9 recordings for ‘’ — Title

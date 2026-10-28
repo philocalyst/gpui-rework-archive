@@ -1,0 +1,10 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-source-authority-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.27s
+     Running tests/library_audio.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/library_audio-bf3fe0e19751049e)
+
+running 2 tests
+test published_source_replace_rejects_buffered_named_play_before_owner_notification ... ok
+test published_source_replace_rejects_visible_prepared_enqueue_before_owner_notification ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.95s
+

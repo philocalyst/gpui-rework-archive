@@ -1,0 +1,32 @@
+    Checking concurrent-queue v2.5.0
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+    Checking wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+warning: `parley` (lib) generated 1 warning
+    Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking rustybuzz v0.20.1
+    Checking async-channel v2.5.0
+    Checking async-io v2.6.0
+    Checking async-executor v1.14.0
+    Checking blocking v1.7.0
+    Checking async-signal v0.2.14
+    Checking async-process v2.5.0
+    Checking zbus v5.19.0
+    Checking wgpu-core-deps-windows-linux-android v29.0.4
+    Checking wgpu-core v29.0.4
+    Checking atspi-common v0.13.0
+    Checking wgpu v29.0.4
+    Checking atspi-proxies v0.13.0
+    Checking accesskit_atspi_common v0.21.0
+    Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Checking atspi v0.29.0
+    Checking accesskit_unix v0.24.0
+    Checking accesskit_winit v0.34.1
+    Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 15.95s

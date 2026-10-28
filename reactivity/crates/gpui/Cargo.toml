@@ -1,0 +1,119 @@
+[package]
+name = "gpui"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Clean-room GPUI implementation: typed views and coherent retained presentation"
+publish = false
+
+[dependencies]
+gpui_inline_call = { path = "../inline-call" }
+triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
+arcstr = { version = "=1.2.0", default-features = false, features = ["std"] }
+gpui_reactivity_core = { path = "../core", features = ["layout"] }
+gpui_reactivity_state = { path = "../state", features = ["serde"] }
+gpui_canvas = { path = "../canvas", default-features = false }
+icu_segmenter = { version = "=2.3.0", default-features = false, features = ["compiled_data"] }
+cephal = { path = "../../vendor/cephal", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+pin-project-lite = "=0.2.17"
+parking_lot = { version = "=0.12.5", default-features = false }
+gpui_gpu = { path = "../gpu", default-features = false, optional = true }
+gpui_reactivity_host = { path = "../host", optional = true }
+pollster = { version = "=1.0.1", optional = true }
+softbuffer = { version = "=0.4.8", default-features = false, optional = true }
+accesskit = { version = "=0.25.1", optional = true }
+accesskit_winit = { version = "=0.34.1", default-features = false, features = ["accesskit_unix", "async-io", "rwh_06"], optional = true }
+
+[features]
+default = ["simd"]
+simd = ["gpui_canvas/simd", "gpui_gpu?/simd"]
+accessibility = ["native-core", "dep:accesskit", "dep:accesskit_winit"]
+native = ["native-core", "accessibility"]
+# Implementation transport; prefer native or explicit *-minimal diagnostics.
+native-core = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
+desktop = ["native"]
+x11 = ["x11-minimal", "native"]
+wayland = ["wayland-minimal", "native"]
+# Explicit AT-disabled transport diagnostics; ordinary shipped Linux profiles
+# above include the real AT-SPI adapter, not AccessKit's null Unix backend.
+x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-dlopen"]
+wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+
+[dev-dependencies]
+allocation-counter = "=0.8.1"
+accesskit_consumer = "=0.39.1"
+
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+zbus = { version = "=6.0.0", default-features = false, features = ["default-rt", "proxy", "service"] }
+zruntime = { version = "=0.2.0", default-features = false, features = ["runtime", "mpmc"] }
+x11rb = { version = "=0.14.0", features = ["record", "shm", "request-parsing"] }
+
+[[example]]
+name = "workbench"
+required-features = ["native-core"]
+
+[[example]]
+name = "empty"
+required-features = ["native-core"]
+
+[[example]]
+name = "graphics"
+required-features = ["native-core"]
+
+[[example]]
+name = "workspace"
+required-features = ["native-core"]
+
+[[example]]
+name = "library"
+required-features = ["native-core"]
+
+[[example]]
+name = "unicode"
+required-features = ["native-core"]
+
+[[example]]
+name = "luna_bench"
+required-features = ["native-core"]
+
+[[example]]
+name = "covers"
+required-features = ["native-core"]
+
+[[example]]
+name = "panes"
+required-features = ["native-core"]
+
+[[example]]
+name = "inspector"
+required-features = ["native-core"]
+
+[[example]]
+name = "property_editor"
+required-features = ["native-core"]
+
+[[example]]
+name = "todo_comparison"
+required-features = ["native-core"]
+
+[[example]]
+name = "component_sources"
+required-features = ["native-core"]
+
+[[example]]
+name = "todo_comparison_five"
+required-features = ["native-core"]
+
+[[example]]
+name = "mapped_properties"
+required-features = ["native-core"]
+
+[[example]]
+name = "todo_comparison_mapped"
+required-features = ["native-core"]
+
+[[example]]
+name = "zgx_native_lab"
+required-features = ["native-core"]

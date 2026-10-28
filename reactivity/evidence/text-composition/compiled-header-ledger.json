@@ -1,0 +1,15 @@
+{
+  "source": "4aba1b86be9adb6b22e16485caeb90c96f93acc1",
+  "lines": [
+    "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1008,NativeHost=752,Canvas=464,PreparedScene=56",
+    "gradient_gpui_headers,Color=16,Style=88,Node=40,Destination=4,PropertyValue=28,PropInputColor=48,ElementExtra=56,SceneResources=32,Backgrounds=72,Runtime=1816,Metadata=264",
+    "test runtime::geometry::clip_layout_tests::clipping_headers_and_cold_builder_costs_are_explicit ... CLIP_LAYOUT geometry_style=8 decorations=48 extra=56 parts=216 image_spec=16 image_draft=24 el=176 node=40 presented=64 style=88 record=16",
+    "CLIP_BUILDER clipped=false count=0 bytes=0",
+    "CLIP_BUILDER clipped=true count=1 bytes=56",
+    "TextLayout=56 Shaped=64 OptionShaped=64 RuntimeHeader=1816 TextSite=80 OptionTextSite=80",
+    "test retained_text_metadata_preserves_complex_clip_gradient_order_and_lifetime ... COMPOSE_HEADERS canvas=464 layout=56 scene=264",
+    "COMPOSE_HEADERS canvas=464 layout=56 scene=264"
+  ],
+  "explicit_TextSite_regression_bytes": 8,
+  "explicit_OptionTextSite_regression_bytes": 8
+}

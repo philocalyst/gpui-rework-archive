@@ -1,0 +1,4977 @@
+{
+  "schema": 1,
+  "original_primary_rows": 75,
+  "files": [
+    {
+      "path": "adapter-patch-reconstruction.json",
+      "bytes": 900,
+      "sha256": "91708fb140bb965270a8e068673df7a188f6dab8020e4323c7de1d25b673727e"
+    },
+    {
+      "path": "build-inputs/all-rust-registry-lock.json",
+      "bytes": 158111,
+      "sha256": "e20ae02e76ebd59be3c4b5b161f9611052fe85cffe4197641727d5ce72cba9aa"
+    },
+    {
+      "path": "build-inputs/peer-exports/mygo-full-source-manifest.json",
+      "bytes": 609749,
+      "sha256": "e0186236d97f19e92c1fa1e44a71a9f8181bad216cb43a05306c3922adab1f88"
+    },
+    {
+      "path": "build-inputs/peer-exports/nanoui-full-source-manifest.json",
+      "bytes": 85170,
+      "sha256": "279c81eaa4d8ba6395a7d96bea0023b5da1909f8a4dd168083244decd60573e7"
+    },
+    {
+      "path": "build-inputs/peer-exports/zeronsh-zgui-full-source-manifest.json",
+      "bytes": 3428093,
+      "sha256": "6ac70597335b006b5483dfa97f57165a2707d8ccc285cc86deaeee29496754d9"
+    },
+    {
+      "path": "build-inputs/peer-exports/zortax-zgui-full-source-manifest.json",
+      "bytes": 1214898,
+      "sha256": "a4b774bff0c21492621e7bd1d224c6d681f866ce7f8c3259ce020f86248d1866"
+    },
+    {
+      "path": "build-inputs/peer-exports-initial-audit/mygo-full-source-manifest.json",
+      "bytes": 609749,
+      "sha256": "42e9f71cc7a2b56d7d4dad98ef0d4bd5ed9613ced2741bd2e1b718a6d0e09f95"
+    },
+    {
+      "path": "build-inputs/peer-exports-initial-audit/nanoui-full-source-manifest.json",
+      "bytes": 85170,
+      "sha256": "d6aa05f0731331eda2c7190d65db623658b7843bb50f2131d56863c76c4fbd73"
+    },
+    {
+      "path": "build-inputs/peer-exports-initial-audit/zeronsh-zgui-full-source-manifest.json",
+      "bytes": 3428093,
+      "sha256": "52edd01d7514a53d1fa166bd7f0fbb00b8032f7de13dbf49a04d78106568ff2b"
+    },
+    {
+      "path": "build-inputs/peer-exports-initial-audit/zortax-zgui-full-source-manifest.json",
+      "bytes": 1214898,
+      "sha256": "f3b2a9d0a1d6b2898dc29de6536b2572d5ef88e557e14a8bd7644e94bdab21c1"
+    },
+    {
+      "path": "build-inputs/peer-exports-zortax-prestyle/zortax-zgui-full-source-manifest.json",
+      "bytes": 1214898,
+      "sha256": "93928b4b2252fdcb4cdb7a5c03b98256a40e06250d6a825b3a6783a62c7825ef"
+    },
+    {
+      "path": "build-inputs/pkg-config/dbus-1.pc",
+      "bytes": 302,
+      "sha256": "cc24775091aace1ecdf3c8732bc9a2d467bfd1b28d09bb829a326bc202f05732"
+    },
+    {
+      "path": "build-inputs/pkg-config/fontconfig.pc",
+      "bytes": 239,
+      "sha256": "35bbdcf03607aa37ad5646c315e3ac5e371b6d2a6cd42030f40af93eb5063999"
+    },
+    {
+      "path": "build-inputs/pkg-config/xkbcommon.pc",
+      "bytes": 675,
+      "sha256": "055fd018fc1dcae7251b9f1c403acd9009dcf072ef3d530283cf67fab97e0c6a"
+    },
+    {
+      "path": "build-native-present-control-v1.sh",
+      "bytes": 1245,
+      "sha256": "294e3f7574a1edc2734f51e454f33feeb6901aab1ebe459fe65b9ab719a194e7"
+    },
+    {
+      "path": "builds/driver-status.json",
+      "bytes": 75,
+      "sha256": "e3eb1b9642d0de99e58e66772b245fd9cad55a1e792ee6f440cb93ae6df8a5f8"
+    },
+    {
+      "path": "builds/driver.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/driver.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/driver.py",
+      "bytes": 1377,
+      "sha256": "722d48bd591897e04d450a817d53e5e8623da5ab1ea9ff3433beca717d5ea75d"
+    },
+    {
+      "path": "builds/gpui-build.log",
+      "bytes": 9078,
+      "sha256": "a9b7d691f35d6b29895d5bf2ee5cbb3c95be57cc08308b8e8319b3b57fcbfb63"
+    },
+    {
+      "path": "builds/gpui-build.sh",
+      "bytes": 717,
+      "sha256": "591271a71a7e7f76a72fb138e7f0de7713f561d0460717be51f5297487e36a30"
+    },
+    {
+      "path": "builds/gpui-command.json",
+      "bytes": 116,
+      "sha256": "89c49fcb3f55dbc15eb521a3b5b2db318b56d41ea78209ba3f8c258997da3d9b"
+    },
+    {
+      "path": "builds/gpui-receipt.json",
+      "bytes": 2622,
+      "sha256": "b75bedcf7f12f1aba6485d78032e3aa48aa1531941805f63cb054f61b6fddac4"
+    },
+    {
+      "path": "builds/gpui-supervisor.json",
+      "bytes": 380,
+      "sha256": "872c247dcd3523589aad57c789b5d78d8c40049a93c42594349f415be8e5b814"
+    },
+    {
+      "path": "builds/gpui-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/mygo-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/mygo-build.sh",
+      "bytes": 716,
+      "sha256": "76fb0e5da65e6a5b06a280e5a35ffaeba304ee121613dd66b00b13cecf6ea5f0"
+    },
+    {
+      "path": "builds/mygo-command.json",
+      "bytes": 116,
+      "sha256": "51e379704972b894bb61b992e584a9674cb66ef9f149bbf23a6de2f4bea100da"
+    },
+    {
+      "path": "builds/mygo-fault-controls-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/mygo-fault-controls-receipt.json",
+      "bytes": 2053,
+      "sha256": "d45414f5ce68abea67f211ffb80c0231489b4225e3740b93669c75fd8cdd6230"
+    },
+    {
+      "path": "builds/mygo-fault-controls-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/mygo-final-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/mygo-final-receipt.json",
+      "bytes": 2054,
+      "sha256": "e67dc03a027e7b1d2808e6aa62ba39d72f7d6c6f5ca3f67bd0bf6523f1ea341c"
+    },
+    {
+      "path": "builds/mygo-receipt.json",
+      "bytes": 2137,
+      "sha256": "e96dd13a962b0560978b2fea909038fea6ea7d835ba9123b13e1ef7df707428a"
+    },
+    {
+      "path": "builds/nanoui-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/nanoui-build.sh",
+      "bytes": 688,
+      "sha256": "db9ce5235d01530c7457e056ea50eaa796d425bb8e24eddda1d4deabbb7970c8"
+    },
+    {
+      "path": "builds/nanoui-command.json",
+      "bytes": 118,
+      "sha256": "4b0cefa260d78ecc61b26301b678c5f97f1cfbeac2cbb8e1c405575104d92a5f"
+    },
+    {
+      "path": "builds/nanoui-receipt.json",
+      "bytes": 2790,
+      "sha256": "761936544499bac2f24ba05105a7acc6077c60ad009292a61121c4a281315f90"
+    },
+    {
+      "path": "builds/native-present-control-v1-build.log",
+      "bytes": 332,
+      "sha256": "b26ebdfbfc92c35080ec6dea4017ad843110de31e47d8cf2fe7d066c68ab92ce"
+    },
+    {
+      "path": "builds/native-present-control-v1-build.sh",
+      "bytes": 967,
+      "sha256": "b5a20858e0dea5fe84e574762c818589e2321437742c8cc9ad33db3db68577c2"
+    },
+    {
+      "path": "builds/native-present-control-v1-command.json",
+      "bytes": 109,
+      "sha256": "9c8a235f508e8439d3bcb4db10b724f2eb03655e8514ed1c43025f4eec93ef7f"
+    },
+    {
+      "path": "builds/native-present-control-v1-receipt.json",
+      "bytes": 2377,
+      "sha256": "7e5363018ea2952167c6c9ae5c1c4fdf002ae9228009444ccfcc7e61c542301f"
+    },
+    {
+      "path": "builds/rust-peers-driver.py",
+      "bytes": 845,
+      "sha256": "743551a33b6671af6badb7cc739dcc3b7f7c57ba51ca29d7f90c92417657ac71"
+    },
+    {
+      "path": "builds/rust-peers-retry2-driver.py",
+      "bytes": 866,
+      "sha256": "4000e9ac173439f147bd161984ff64f791e7e46bf224ba124feab919725ab7b1"
+    },
+    {
+      "path": "builds/rust-peers-retry2-supervisor.json",
+      "bytes": 192,
+      "sha256": "492d1cf541d230a22bf2ef81796482d733a17fc87c37a2e67037fc8fee9d393c"
+    },
+    {
+      "path": "builds/rust-peers-retry2-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/rust-peers-retry4-driver.py",
+      "bytes": 866,
+      "sha256": "06e19f9a3373c695154f063958074a7bb5e99c449022b225d293c69f7945ae00"
+    },
+    {
+      "path": "builds/rust-peers-retry4-supervisor.json",
+      "bytes": 192,
+      "sha256": "66ee1f40c8d33ccfc055d38ffa5ee5ee0e0fbcf45d6d8f2d89959c0e37d9358f"
+    },
+    {
+      "path": "builds/rust-peers-retry4-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/rust-peers-supervisor.json",
+      "bytes": 192,
+      "sha256": "eb1d7b5f2a106b699c3d57ca194c1546780159f1763147074136a85453678b2f"
+    },
+    {
+      "path": "builds/rust-peers-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/supervisor.json",
+      "bytes": 320,
+      "sha256": "754a84267bd1fa3661c065ddb5df7e84e5b1aab64598ecb4cfe0172bc9b5f957"
+    },
+    {
+      "path": "builds/zeronsh-zgui-build.log",
+      "bytes": 11676,
+      "sha256": "724b0edb15ece2defbf03a6a5af69612707a6a9f4de91cab0c93207a0e5299c5"
+    },
+    {
+      "path": "builds/zeronsh-zgui-build.sh",
+      "bytes": 922,
+      "sha256": "67f73bfa6990f8f88cabff0a81455301966090708cc06af362d0a899e16efea7"
+    },
+    {
+      "path": "builds/zeronsh-zgui-command.json",
+      "bytes": 123,
+      "sha256": "4c18071f1e77bb3ca0ea9ddf8d5d86934fa6fdee48089b4d2f5a917e803db192"
+    },
+    {
+      "path": "builds/zeronsh-zgui-receipt.json",
+      "bytes": 2019,
+      "sha256": "6c0927d3ee5fd5d5dcd68bbbebeea430bcf024176c093147e814b75e31684465"
+    },
+    {
+      "path": "builds/zeronsh-zgui-retry2-build.log",
+      "bytes": 290,
+      "sha256": "7f8e32477f24a3be681b73c2e015be2a2cb7cf0459f5e09ca28298c9e3126aaa"
+    },
+    {
+      "path": "builds/zeronsh-zgui-retry2-receipt.json",
+      "bytes": 2108,
+      "sha256": "a6037285b3f7871c0d989e6a21bfc3ba6348aa7bd16095c06ac3cad244466b5b"
+    },
+    {
+      "path": "builds/zeronsh-zgui-retry4-build.log",
+      "bytes": 290,
+      "sha256": "77076541358d78367dbe7c7660f0cb3a1e688ec543e8eb00a04719fe9099bb1c"
+    },
+    {
+      "path": "builds/zeronsh-zgui-retry4-receipt.json",
+      "bytes": 2347,
+      "sha256": "54c9b58afd60f0b07473b7c820fc04872a331d4cb95630891926e4a1f8923dc9"
+    },
+    {
+      "path": "builds/zortax-zgui-build.log",
+      "bytes": 13826,
+      "sha256": "1e566ff53f84616fa0ca7317cf2b33c487e9290ee6cd4bfc144ca7ac1700690e"
+    },
+    {
+      "path": "builds/zortax-zgui-build.sh",
+      "bytes": 928,
+      "sha256": "9be6fb6b766afd8b431185ac890a510d13f00025cdecd4920d58baad7db3bfd8"
+    },
+    {
+      "path": "builds/zortax-zgui-command.json",
+      "bytes": 122,
+      "sha256": "fad63180747365bca5112f313f9062f5e4c688ff8a8c9873f1ecf20bc88a838f"
+    },
+    {
+      "path": "builds/zortax-zgui-final-build.log",
+      "bytes": 820,
+      "sha256": "6aabd3531121a07aa9612d72f04e42bf7449db829da2157d28715cd86e1994fb"
+    },
+    {
+      "path": "builds/zortax-zgui-final-receipt.json",
+      "bytes": 50472,
+      "sha256": "f3fcb4af83a3979ad0b23fe74d75d1e46c096cbe02712867821f33c2e07ec649"
+    },
+    {
+      "path": "builds/zortax-zgui-layout-build.log",
+      "bytes": 820,
+      "sha256": "d465de0c03269f27660e5989666a8cd52a6e5cf71eea67eb52bcad91ad029183"
+    },
+    {
+      "path": "builds/zortax-zgui-layout-receipt.json",
+      "bytes": 50474,
+      "sha256": "ab721b17ce9b7439ba7aee64c410043ec25504c54ff8c494f0d8c8a60adf881f"
+    },
+    {
+      "path": "builds/zortax-zgui-qualified-build.log",
+      "bytes": 7098,
+      "sha256": "94836bd5b0669672e44d129128790c50ea6c25c76e0c06c8743d4c2649d599e8"
+    },
+    {
+      "path": "builds/zortax-zgui-qualified-receipt.json",
+      "bytes": 50417,
+      "sha256": "f23bb2594a980a48b916382857c6b883e1eb8eb79cf035ce459e0bbf935ee440"
+    },
+    {
+      "path": "builds/zortax-zgui-qualified2-build.log",
+      "bytes": 820,
+      "sha256": "19abd1dac4133391369c80ae4630b01b58c60fc1bfbb48e0c9a9965047804543"
+    },
+    {
+      "path": "builds/zortax-zgui-qualified2-receipt.json",
+      "bytes": 50240,
+      "sha256": "096160782a124ddbcd3ba9dfee7b981b3e766ee8f0dd836ae7d0cab3d05298c3"
+    },
+    {
+      "path": "builds/zortax-zgui-receipt.json",
+      "bytes": 50911,
+      "sha256": "93748c2a1f28b3bf32a203efceed24cc278e6d22076e74ca6032342a7d5faa97"
+    },
+    {
+      "path": "builds/zortax-zgui-retry2-build.log",
+      "bytes": 3001,
+      "sha256": "5a5f472c9cab198b6d76252153fab95a7c75f3a9ad9cfa6c27f368fd95e80380"
+    },
+    {
+      "path": "builds/zortax-zgui-retry2-receipt.json",
+      "bytes": 50173,
+      "sha256": "73e6a7fcdf09174af592cc523a69c266c9ee6a5582399ceeb89027d8064dd2fe"
+    },
+    {
+      "path": "builds/zortax-zgui-retry3-build.log",
+      "bytes": 7047,
+      "sha256": "1e12da2342cf4f350a636dc7fd64e86d471006513d5d0cbffedd508995b8397b"
+    },
+    {
+      "path": "builds/zortax-zgui-retry3-receipt.json",
+      "bytes": 50174,
+      "sha256": "a836ab2dc79760866405598b8b9cee51aea7ff33aa1841957be5d6aabf55242e"
+    },
+    {
+      "path": "builds/zortax-zgui-retry3-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/zortax-zgui-retry4-build.log",
+      "bytes": 3943,
+      "sha256": "60e28daf6f1001f89552428f8faac6b7ead0beb430bf492077e7ea04239ade04"
+    },
+    {
+      "path": "builds/zortax-zgui-retry4-receipt.json",
+      "bytes": 50173,
+      "sha256": "3d8366c1ceb1f16adb3e1b80f01eb3cfe325318e259c2b14e9d9f60ac105b8fd"
+    },
+    {
+      "path": "builds/zortax-zgui-retry5-build.log",
+      "bytes": 1798,
+      "sha256": "d436b9731aa967a3c73f044a924053d8c2aa90cc8c71f0fe5a08c8784b335070"
+    },
+    {
+      "path": "builds/zortax-zgui-retry5-receipt.json",
+      "bytes": 50173,
+      "sha256": "4aa0139969cfe55abf6d989ca5c78a57b7e3bf751b36e5238717b29da73497d1"
+    },
+    {
+      "path": "builds/zortax-zgui-retry5-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/zortax-zgui-retry6-build.log",
+      "bytes": 1456,
+      "sha256": "c666bfcc21e2f6e786e06c0f561965139b80477fbd025cc4ed6f4d96684ee84d"
+    },
+    {
+      "path": "builds/zortax-zgui-retry6-receipt.json",
+      "bytes": 50173,
+      "sha256": "54250ff89ff7ea8caa387871f85b298c1f78f913b9533c9a2dc51d044a6f59c6"
+    },
+    {
+      "path": "builds/zortax-zgui-retry6-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/zortax-zgui-retry7-build.log",
+      "bytes": 820,
+      "sha256": "9e637f9de780cb9a3a659b8bc21e79e8f39b20ef2ae120ad1389b1e049e56d39"
+    },
+    {
+      "path": "builds/zortax-zgui-retry7-receipt.json",
+      "bytes": 50234,
+      "sha256": "c2ef9e56e432cbfb1bd6c3bb9b6345fe110014b86e56014ebfe3cf33d1e19d7d"
+    },
+    {
+      "path": "builds/zortax-zgui-retry7-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capture-20261024/campaign-status.json",
+      "bytes": 207,
+      "sha256": "9167a87c0888a031834a8fb933c3a513edb2d68d838c5de63c151795da93ae54"
+    },
+    {
+      "path": "capture-20261024/fifteen-metrics.json",
+      "bytes": 117780,
+      "sha256": "05566a40a2d2479fa22bc5e63d1db408b5416beb1e3453f70829c0fa3ecca283"
+    },
+    {
+      "path": "capture-20261024/freeze.json",
+      "bytes": 28658,
+      "sha256": "46e9768c7b9ddd302b18872dd1527cf2d1a32d112651065f50ba4f91d7f11218"
+    },
+    {
+      "path": "capture-20261024/historical-audit.json",
+      "bytes": 508,
+      "sha256": "e408bab71d6c9eb355ab609039c09a316f5d2b507403adc28f950fb7022f0023"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-animation-r1.log",
+      "bytes": 51694,
+      "sha256": "914295779ae451f84e40195ffc891e8e10fb634cde73960ddbec79420fcb7cb2"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-animation-r2.log",
+      "bytes": 51706,
+      "sha256": "24e1124953de3338acc9ea00206ae0174b4d8cbd9ecae8087bef155356b6c168"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-animation-r3.log",
+      "bytes": 51694,
+      "sha256": "2eff858976e4dcc249cfb73fce4e5d7dcb410e8c56f4278ec6b834fde452760e"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-busy-r1.log",
+      "bytes": 8562,
+      "sha256": "07d977d3dfa08c7be80830846247a90c1c5635d2aeeb5ec4e709f8b548c0f599"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-busy-r2.log",
+      "bytes": 8562,
+      "sha256": "ec6cfc821024b3d43da92a09e54519ee924875485f374bfa48a09dd95355583c"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-busy-r3.log",
+      "bytes": 8562,
+      "sha256": "b9d584b951d5bd2f33db8e6d72daedc410f16480e5b0a3a032ec57c14c866a82"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-heavy-r1.log",
+      "bytes": 448127,
+      "sha256": "05c2362616959823d32cf169e43345f3a06fd2c32303096341a866795078f9da"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-heavy-r2.log",
+      "bytes": 448302,
+      "sha256": "410d77cddfddaea319e59a4c58b41d03fe1ad3da84701b8a8e87bf707bb9c89b"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-heavy-r3.log",
+      "bytes": 448302,
+      "sha256": "ccbe01ae994d9c9411ba2c81353fdba4c05dd9f4b77c20796e721348aa519200"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-idle-r1.log",
+      "bytes": 437,
+      "sha256": "b374613d52a94dd177f26add80fd14915c0eae2fae8661f4dd361abe679573d4"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-idle-r2.log",
+      "bytes": 437,
+      "sha256": "986a967e1c01f28ee54d2703a909e435669afc5decaf251e10a21f0562c0508b"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-idle-r3.log",
+      "bytes": 437,
+      "sha256": "2e15b9cf516e560937f83409cfa0b3914668132304894629e7b574d700a98764"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-startup-r1.log",
+      "bytes": 437,
+      "sha256": "4401eb6c130fe00f81ee8f95325c24a5760632a552a615d2924cfa919e346a89"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-startup-r2.log",
+      "bytes": 437,
+      "sha256": "c7145904d50f8b63508e1dc109d8ee8507279243c4cdfc7ac8724510e0126098"
+    },
+    {
+      "path": "capture-20261024/logs/gpui-startup-r3.log",
+      "bytes": 437,
+      "sha256": "cce168bc9d054dde084bc2f30436a018543d07a287313d29af8d786ec72c7173"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-animation-r1.log",
+      "bytes": 67560,
+      "sha256": "9b4e45121b04407d228d1ce1289c898b084bc1f7f1489d86ba9a26025f4e8ae1"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-animation-r2.log",
+      "bytes": 67846,
+      "sha256": "0cf1fa656d348cef1d1ee7d91726652d1bb4faf6a6ac9b4135f077fef7e16184"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-animation-r3.log",
+      "bytes": 67808,
+      "sha256": "81540761b83d070933f56683b99baceebd9ad0caec8d0c43af0a467bf170cbcb"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-busy-r1.log",
+      "bytes": 14019,
+      "sha256": "73e646ac4686e0c75b5a7989f9a6ca2ef21108963a82e3db4247d51ea4a9a5bf"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-busy-r2.log",
+      "bytes": 14029,
+      "sha256": "9648c1a93422c98798d3f346af79f3994db1a2746f11a2005aed69a8c3d89ef4"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-busy-r3.log",
+      "bytes": 14079,
+      "sha256": "144ac1ec0d82f31b38f94a17f8f2a045759b52c8d85397dbcda7799979953ea9"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-heavy-r1.log",
+      "bytes": 459356,
+      "sha256": "6aee369df1a7f688a985416b94e4dda4cba7653a898c8ce630bd9f2b928fd1ca"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-heavy-r2.log",
+      "bytes": 459368,
+      "sha256": "390aa16c758c043b38d28c736b23c3a2a5a13125a4e371ad9483c5b8cd162cef"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-heavy-r3.log",
+      "bytes": 459332,
+      "sha256": "847e7452384979b3a5ae725fe9daeb45ab988be41e8aeb18f2a6d63b882493d8"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-idle-r1.log",
+      "bytes": 496,
+      "sha256": "82866881382bdc8fc8687c8b07f0e7ad894abf37a7d671b65c134420ef5f37ff"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-idle-r2.log",
+      "bytes": 496,
+      "sha256": "cec6bed1d8df190c55ec11cb5cc6d76ffaed888892c0b0ea996e6ba31468d798"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-idle-r3.log",
+      "bytes": 496,
+      "sha256": "ffa053bca8c1ce5cc48a416e406869284097751dae02a346694b1408a35bb79e"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-startup-r1.log",
+      "bytes": 496,
+      "sha256": "cee21d5144eaf78c676a379ad45d992a1a3d14bca6356426923278ddba0d8ccf"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-startup-r2.log",
+      "bytes": 496,
+      "sha256": "f16667020062cc09cf697cf9640c33e8585a2d8d8a839407ec3663bc61cb4ced"
+    },
+    {
+      "path": "capture-20261024/logs/mygo-startup-r3.log",
+      "bytes": 496,
+      "sha256": "5951f03e6e9baf2cf7f17c4f9f7a6079a3b91485974df7a8043b545f06c71f0e"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-animation-r1.log",
+      "bytes": 68878,
+      "sha256": "d6288342f5a588a2e01fbebe06ce3f1a9033fdc60e2643b2db1dc2ea24d66869"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-animation-r2.log",
+      "bytes": 68806,
+      "sha256": "d3fc58062cf239aed773f2ad07ad94a9c2e1ec1f81cf002417b6ba7946757b6d"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-animation-r3.log",
+      "bytes": 68820,
+      "sha256": "87b15912acd38af3b54fda8dd4dac66990d4b5011befa3357d9bf34b30599ecc"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-busy-r1.log",
+      "bytes": 18928,
+      "sha256": "7bb4138ea6e80b6214360f7def4ac0a2f1f8c69a8493d4073e3b0397bc18145d"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-busy-r2.log",
+      "bytes": 18928,
+      "sha256": "d1161b9b43f61d6d5d187e733642ace21e53cf7de59de2d14be4ecea2f5867db"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-busy-r3.log",
+      "bytes": 18895,
+      "sha256": "8825f284061f8d41f8be45c1c0894c07177d6f4b99b3a5223437375ac208470b"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-heavy-r1.log",
+      "bytes": 461976,
+      "sha256": "2e6edac9dc3726ca07470824a0cde5ea4d77dac55c831ffee63da3eea9127f95"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-heavy-r2.log",
+      "bytes": 461976,
+      "sha256": "d2ef5f4d7b17bad13ddd51982127956b9201ebcf6d45ee79f781ed37adb8bf97"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-heavy-r3.log",
+      "bytes": 461951,
+      "sha256": "00834d1fdfe0f616f8c69a52e7a9eb0e130fdb19ec47b0cf872f765788cc1e29"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-idle-r1.log",
+      "bytes": 653,
+      "sha256": "4a6dc54ffaf94f56fe6322c9dcaadda4df744e4edd862aabeeb9525568b51c5d"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-idle-r2.log",
+      "bytes": 653,
+      "sha256": "906b21fde6b457faaff495644febc0542a0026cc71662c4943f04d52e16e6e9b"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-idle-r3.log",
+      "bytes": 653,
+      "sha256": "8b9747c71fe5d64e2b795cbbf6ecce5c623e3c60aa3f2773e4d9d905d0a3d5db"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-startup-r1.log",
+      "bytes": 653,
+      "sha256": "a102ceb14a8beb00e25c06efc62c363d359ec8f8e773aafd85d4c71ba5a46c1a"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-startup-r2.log",
+      "bytes": 653,
+      "sha256": "1880b01499153abcfd5b0e4caa88f6cd345fb598e0d704f846f4d3cfc6df1138"
+    },
+    {
+      "path": "capture-20261024/logs/nanoui-startup-r3.log",
+      "bytes": 653,
+      "sha256": "1a6d37788fc233b1bd7a954d03b7ff17d7dc51ca5e9f1a417d2e013ce8e0dd06"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-animation-r1.log",
+      "bytes": 70910,
+      "sha256": "1a5994ec40d969be368a19d1ef22d80e0b8d7350953f329d26f15d8bc040b306"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-animation-r2.log",
+      "bytes": 70949,
+      "sha256": "fdbd67ddf958f53a0438a440c03b4c44c0c020f9ce1a35d5720c8c274eccace5"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-animation-r3.log",
+      "bytes": 70897,
+      "sha256": "72e79e556914fe808ab7cf1ea5e956133f25df631d07e0c383720ea073ee4187"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-busy-r1.log",
+      "bytes": 13936,
+      "sha256": "baee7175b68893a1b8f978a86156efd5fc73ce7046a017302085b3eb9b072551"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-busy-r2.log",
+      "bytes": 13948,
+      "sha256": "57c37f7e395670eef653c7ab1d8c06d24c65166e0527009bb2664eb5b165e7ec"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-busy-r3.log",
+      "bytes": 13948,
+      "sha256": "f7fd4f96c7515a526fbae8642498b77330b4f7297bd58dff5f9466138045aade"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-heavy-r1.log",
+      "bytes": 453210,
+      "sha256": "74f87995f54bcc771c072456352094cca3250b3740935002ebb5ddd2ef601b10"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-heavy-r2.log",
+      "bytes": 452914,
+      "sha256": "fc8861868b293fa4f61709558cabd99d7b6cbcee9d32c47289b21d1a270e08a4"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-heavy-r3.log",
+      "bytes": 453229,
+      "sha256": "9c94003f551ef44108e481354bcf9b3722c41f5cb01c73b9cc4c762e919b6959"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-idle-r1.log",
+      "bytes": 543,
+      "sha256": "cc59b39a98c04b76a041b3bb488e95d7839fbf4bf917b94fd5f95dbfb65e1d7a"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-idle-r2.log",
+      "bytes": 543,
+      "sha256": "6c3360f9a9488913e75d0544efca95ec6aff9f6941089e3c5d5cabcdc675b5da"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-idle-r3.log",
+      "bytes": 543,
+      "sha256": "19721cd8c35c88502121f345c9bfafbf98a610272159bc109ee825982c279102"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-startup-r1.log",
+      "bytes": 543,
+      "sha256": "a5464d462a8763114a6920cf996ad78c7659e404afebb0aa14c28393cc031bd5"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-startup-r2.log",
+      "bytes": 543,
+      "sha256": "8bf0d0e1f85efcd0e7d0ffac28dd49060bdd3e01ab06bc1380e0d12b31fde66f"
+    },
+    {
+      "path": "capture-20261024/logs/zeronsh-zgui-startup-r3.log",
+      "bytes": 543,
+      "sha256": "29400b955d2761c98a889d0d8a0abcd62ec1f9b0be2511e0876ed4a0dd2d17e5"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-animation-r1.log",
+      "bytes": 69110,
+      "sha256": "00e99e304292347bcf95ccfca00482e1ce41ad58b3034e92f667b245faccc924"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-animation-r2.log",
+      "bytes": 69446,
+      "sha256": "1ec73482133c0b93ecc5ae2d94cfbe33ad91b2e649fad627b601037857940080"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-animation-r3.log",
+      "bytes": 69560,
+      "sha256": "24039722d047739b35a788b85625a2df09e0353841c43ddf0deeaa2cc6dba1cf"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-busy-r1.log",
+      "bytes": 13632,
+      "sha256": "d1764f59be183f7826738490eb845ae2a12f3a3c9fb2d273d9daa104f4ed86e6"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-busy-r2.log",
+      "bytes": 13388,
+      "sha256": "c272a1e6617d0e800356a96b2cb20a4c469f0ec9bef3f95229d642d703bbfab7"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-busy-r3.log",
+      "bytes": 13514,
+      "sha256": "fa4fe4b60043a0d7f0f650d958df4d8253c8c58d4a4b63c1383a6ef55f142587"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-heavy-r1.log",
+      "bytes": 452326,
+      "sha256": "12ac13a2c01360a2593170099042c76b02333ffd783187a5aa5b69fe717297a5"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-heavy-r2.log",
+      "bytes": 452812,
+      "sha256": "de4fe894a6cd125bff6d1ab078b2b71d93bd0d5a064fd820971dd2053ffe3148"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-heavy-r3.log",
+      "bytes": 452661,
+      "sha256": "1f16e81383808b33247e820f9e7cbda94c80a170525f0cd1a2a5f420c52060a4"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-idle-r1.log",
+      "bytes": 606,
+      "sha256": "06c4d388f7f844b5e99cfd9bf5e22546adc5d7ff858b1fbe3f616d58a07d8713"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-idle-r2.log",
+      "bytes": 606,
+      "sha256": "2b773f3e9b450b6aaff5b76a316d24f453f523ec21f794a71025cc3a703d4ecc"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-idle-r3.log",
+      "bytes": 606,
+      "sha256": "d284a3e117424519fea6969824c72efe570f72f9da64be2135102e4b8c91d740"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-startup-r1.log",
+      "bytes": 604,
+      "sha256": "9d63064242e8194173581c756689e50ac5474649cd5c1af52cf5a49dc0dee6c7"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-startup-r2.log",
+      "bytes": 604,
+      "sha256": "6d7cfe3951e918adec4fc25be05693b027a8a966913cc56ac6ccb1e845065743"
+    },
+    {
+      "path": "capture-20261024/logs/zortax-zgui-startup-r3.log",
+      "bytes": 604,
+      "sha256": "81b261686f4a559750f2bc7720185b5a32558ae8d9a6b562b10dd8ffea841b9b"
+    },
+    {
+      "path": "capture-20261024/manifest.json",
+      "bytes": 108101,
+      "sha256": "6568754b4d7e0b80b89faf6a6e2396052802f1084789f20054824087e52d0143"
+    },
+    {
+      "path": "capture-20261024/metadata.json",
+      "bytes": 22420,
+      "sha256": "d4b7715a9ba88f460eba04e9ed2947dd0033f67b71dbb73a04ffc0fd5905e6d2"
+    },
+    {
+      "path": "capture-20261024/qualification.json",
+      "bytes": 35458,
+      "sha256": "6693dd8b68ac32877b0e71c12d462a0846b54c788df506da93c2ceebb69383ab"
+    },
+    {
+      "path": "capture-20261024/report.md",
+      "bytes": 5129,
+      "sha256": "7f6ef57aa3f857000fd1dabd7ef4bd26264036a11648927c69c5c569f0d93415"
+    },
+    {
+      "path": "capture-20261024/results.jsonl",
+      "bytes": 19318651,
+      "sha256": "b1e0245fc8a1f93edd8d6ef325e131b712d3fa7a10c25b2ed5909502486262d7"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "add51669377111b08c1ec49cae6d621a9a416889f7b661c1ddbe8a2310189eb3"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "3624000bc4094f156a4161a4bfaff40cb2f78e554769d32a2b621d951789a8f8"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "64ad5031ba9098e506fc79c1d4c0a98f99e256ebdfc52ab5e24b8747fa399111"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "3624000bc4094f156a4161a4bfaff40cb2f78e554769d32a2b621d951789a8f8"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "83cc55a9d516a9bf9e766a81aa72e7116267b538b99ec3add67bd0b1d6ef87fe"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-animation-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "3624000bc4094f156a4161a4bfaff40cb2f78e554769d32a2b621d951789a8f8"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "90d553ee4b798f9c5d027c59bc39ccb17ef71f4ac44a076539262dc8a9b0a9e1"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "90d553ee4b798f9c5d027c59bc39ccb17ef71f4ac44a076539262dc8a9b0a9e1"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "90d553ee4b798f9c5d027c59bc39ccb17ef71f4ac44a076539262dc8a9b0a9e1"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-busy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "3107db18339be9c777905ce66645e36350571744572503a00957471c771d6712"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r1-initial.png",
+      "bytes": 39642,
+      "sha256": "ff4e301809f099079da2828f4364a4cb632af100c3ca33c918403579c0c9857f"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "068248ec4b84d247d4e400fa15c07d24bbd49fb67a789fc27ebdb1bd9ad45610"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "aae0816743b16c090e7f4afc9f3285514e62991b03a5c7993081648cce801939"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "068248ec4b84d247d4e400fa15c07d24bbd49fb67a789fc27ebdb1bd9ad45610"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "aae0816743b16c090e7f4afc9f3285514e62991b03a5c7993081648cce801939"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "068248ec4b84d247d4e400fa15c07d24bbd49fb67a789fc27ebdb1bd9ad45610"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/gpui-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "bc03506a2a9024d2a932f7f6e82e90ab2fa5f6e17eda3c7cac35f95f3ab92343"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "d23e6f5997e311eb9e461db30088fb3ede0be4061f6e09bf9b787e5da464a6e3"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "ccaff265b58561aa06a9514acfc599a729b2e64559ba62cafa2f5a8291b2c739"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-animation-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "db1e8b7f850fad9dbb5b5ed3a81a7c9d4a0e7b83eec84428663bae68b3a3de69"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "db1e8b7f850fad9dbb5b5ed3a81a7c9d4a0e7b83eec84428663bae68b3a3de69"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "db1e8b7f850fad9dbb5b5ed3a81a7c9d4a0e7b83eec84428663bae68b3a3de69"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-busy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r1-final.png",
+      "bytes": 27210,
+      "sha256": "7864f49ae7f2d2737e8bac99f29b439383c41970959a7c3bd5d8cb10caa23687"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c8ded6d95e045b45fb0f2338dc4d3af07be520198f9ead5d93c925e4c87ec839"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r1-initial.png",
+      "bytes": 1054,
+      "sha256": "cd00bc0fe5090f83bd8beb1923178c258b6228eedc39794567bfe6666df49ef4"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c8ded6d95e045b45fb0f2338dc4d3af07be520198f9ead5d93c925e4c87ec839"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c8ded6d95e045b45fb0f2338dc4d3af07be520198f9ead5d93c925e4c87ec839"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "capture-20261024/screenshots/mygo-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "cd2c0805ec7c7c2a89fda5761aa3cbebf47abbb3af73102a199017da04afdd58"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "69b0a226549c74f1f1f5f13dcb99ff04ccd87992bade7ca6042754e5fa55f861"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "458815b5012f942dcd96058cf4c06d91484d3fc5fd60562f0be235dbd0f9a7aa"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-animation-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "5d32e203b70b626cc0c11e4d84fde42229cf2e4eed811a88bf47bc79c8703483"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "5d32e203b70b626cc0c11e4d84fde42229cf2e4eed811a88bf47bc79c8703483"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "5d32e203b70b626cc0c11e4d84fde42229cf2e4eed811a88bf47bc79c8703483"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-busy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "47ca9b11693fa550278ce61b0a7cb8d40d961e56740696993b7835aed613e618"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r1-initial.png",
+      "bytes": 35804,
+      "sha256": "43a8eb92539966d4770fc3cd1b92e526c79e9cf2bb67f35b5d2df262c850d472"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8e8874f1f4df36f140302e020ba763f9360d961edf45086cb81767c8d970c6cb"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "47ca9b11693fa550278ce61b0a7cb8d40d961e56740696993b7835aed613e618"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "47ca9b11693fa550278ce61b0a7cb8d40d961e56740696993b7835aed613e618"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "capture-20261024/screenshots/nanoui-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "555e8840d4339a7cfbf433fe2eb47a96edf8a86ba2e60dad0d9da455d10ae647"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8dc4bc5c07d51fd353d41b48b9157b48411ba269cd1c5f0a9d77de7396a03fe7"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "cb76af2c7a3dab749a9050cda309f180036b5970bb770ff9272dbd84833acf13"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "205131ae8a904bc9212b1600f0024f191430adef1381b51e01cae46588472949"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "98e5645bc6987a2e1917ac93e5ff178a95c3f3ac0b4c7a876e2250fbfabfc7c8"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-animation-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8dc4bc5c07d51fd353d41b48b9157b48411ba269cd1c5f0a9d77de7396a03fe7"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8387b99f0a29bf2ef74fcbc1c7c2d0a93df4a364d45a563e6b04472a96046676"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8387b99f0a29bf2ef74fcbc1c7c2d0a93df4a364d45a563e6b04472a96046676"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8387b99f0a29bf2ef74fcbc1c7c2d0a93df4a364d45a563e6b04472a96046676"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-busy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "e728877853fef1b451e6f84840db36051b71bc031d6c192e5b31edd0509e81c0"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r1-initial.png",
+      "bytes": 34350,
+      "sha256": "19961aaa73172ee959e4d6c3e17a2fb21335fb6894431b471a6c243bf157752b"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2e111bb08853089cca06b594ac802225205a6c7ed8f26ae8dac14dd095e171f2"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "18584bafc2218d200876b3fca6fa9bdbc4ba6f589099ad9352f5a472bc3498e2"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zeronsh-zgui-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "72aa1d388af3225bea2ec450a66d1c69057ba0c2878e1c91855083ccd1532640"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "a9de62af4d112f58fad88c1a2218165592158f11b8571bc637c4520a6b8ecbf6"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "394ac5e5bdcb6ba826621598423cf4e9f5d20a0d5e6a495d099f05ea79d934aa"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-animation-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "51a7d39bd5f1c48d5831464787d4b90c701ade19b096ce9b61ff9ac1e09c7970"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "51a7d39bd5f1c48d5831464787d4b90c701ade19b096ce9b61ff9ac1e09c7970"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "51a7d39bd5f1c48d5831464787d4b90c701ade19b096ce9b61ff9ac1e09c7970"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-busy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r1-final.png",
+      "bytes": 38969,
+      "sha256": "02fa89998634768fe0933c9c04712e890971cfc96b22a3657df6316dc8fda61c"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "68b96cb86151a067d1f1d38852bfee71a1bb53a4d398b4153ef045f408064447"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r1-initial.png",
+      "bytes": 1054,
+      "sha256": "cd00bc0fe5090f83bd8beb1923178c258b6228eedc39794567bfe6666df49ef4"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1b1f99818a5565ee5133e16c7d29d7eca957c925d2cb6eb93b9a7d5faf99b685"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1b1f99818a5565ee5133e16c7d29d7eca957c925d2cb6eb93b9a7d5faf99b685"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/screenshots/zortax-zgui-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "capture-20261024/sizes.json",
+      "bytes": 86915,
+      "sha256": "6c1caa144ce0704137ab99c9ecf227f51cf4e49dbc96922ca26c6d71b5dbdade"
+    },
+    {
+      "path": "capture-driver.py",
+      "bytes": 3423,
+      "sha256": "37232bfb633af745d9e597288b8f04b024a3e2e234ee7140ff3c979ab5486290"
+    },
+    {
+      "path": "capture-input-inventory.json",
+      "bytes": 34333,
+      "sha256": "35cfbcd1396d83215ccc8384bd85a5207ca250fb1fee22fc671f66f429cf6922"
+    },
+    {
+      "path": "capture-supervisor.json",
+      "bytes": 1212,
+      "sha256": "0476e52983a081895c9110700be427da79311e5220eed70feeb02827faf95045"
+    },
+    {
+      "path": "capture-supervisor.log",
+      "bytes": 2970,
+      "sha256": "8dae9ba7a3dcade52dd4632dfbfac98e06bf475a6fb68f7604efce2cef1ac521"
+    },
+    {
+      "path": "compiler-versions.json",
+      "bytes": 305,
+      "sha256": "8e13547b0edc7cc458abbf5335a87c5ac617fd5a88936a279697e79b5f5e1f78"
+    },
+    {
+      "path": "drawable-blank-audit-v1.json",
+      "bytes": 67959,
+      "sha256": "9d49d4bdd647b8542577dd689114d0ea50d748c5090f44d2c6ea3fc657995c97"
+    },
+    {
+      "path": "fault-controls-attempt1/hover-only-suppressed-callback/logs/mygo-busy-r1.log",
+      "bytes": 1655,
+      "sha256": "71def89baba2c1bc9df4acc7b24baedcca142f3c7606aecfe6cc60a4e13e0fcb"
+    },
+    {
+      "path": "fault-controls-attempt1/hover-only-suppressed-callback/result.json",
+      "bytes": 29904,
+      "sha256": "e897786e2beb7a833776f5e91b4904353b1ee821260162dd50caaded8f2b123d"
+    },
+    {
+      "path": "fault-controls-attempt1/hover-only-suppressed-callback/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "69e430bea5187340762c8501fd9b72f6163145aca79680c44c17649259d88634"
+    },
+    {
+      "path": "fault-controls-attempt1/hover-only-suppressed-callback/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt1/missing-present/logs/mygo-idle-r1.log",
+      "bytes": 740,
+      "sha256": "9cdbeb23c26478c60793da1b0e1e93e3caa0517e5381bb8f294d899c011ade55"
+    },
+    {
+      "path": "fault-controls-attempt1/missing-present/result.json",
+      "bytes": 1669,
+      "sha256": "d063e38413ac15e65ac8bee14a62bc0ae82596f84bf4bd7486e1a9d6b5da0802"
+    },
+    {
+      "path": "fault-controls-attempt1/observer-overflow/logs/mygo-busy-r1.log",
+      "bytes": 1546,
+      "sha256": "2082a2ba3caa99a9ebe9f0e1d49c072aaf9dcb1709a3ac66c53b3736ec98bf11"
+    },
+    {
+      "path": "fault-controls-attempt1/observer-overflow/result.json",
+      "bytes": 29685,
+      "sha256": "283baf30189d213d2e79429dc46d4ddd8b04133f5f96cd6d69a62d19ef7819ea"
+    },
+    {
+      "path": "fault-controls-attempt1/observer-overflow/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-attempt1/observer-overflow/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt1/positive/logs/mygo-busy-r1.log",
+      "bytes": 1745,
+      "sha256": "736b4529cdd9aeaabca457cc42da37e2984ef3ea3d09e4fb38ff707442478fd0"
+    },
+    {
+      "path": "fault-controls-attempt1/positive/result.json",
+      "bytes": 30407,
+      "sha256": "171460dc023777295fc3a6b13bbd2577988ac01d6aab65ef1117b92deec9798c"
+    },
+    {
+      "path": "fault-controls-attempt1/positive/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-attempt1/positive/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt1/stale-marker/logs/mygo-busy-r1.log",
+      "bytes": 1756,
+      "sha256": "bbc4ce85e94e9c050f77303feb19b31522b74b1c165e1ad8923137c774f66de9"
+    },
+    {
+      "path": "fault-controls-attempt1/stale-marker/result.json",
+      "bytes": 28922,
+      "sha256": "6ebc2e65f10c6d65c421743ddcbaa480141b3ba911589543cccc1df40a9a3569"
+    },
+    {
+      "path": "fault-controls-attempt1/stale-marker/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "fad2f7b6df585a203ee0473c07fa72584a97ab4737443bde8d4223fbcf625a78"
+    },
+    {
+      "path": "fault-controls-attempt1/stale-marker/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt1/term-handled-zero/logs/mygo-idle-r1.log",
+      "bytes": 816,
+      "sha256": "c45757f82c888b5d70a6ed8e064cbb3a921d39aaeeede8403034163390d3dbdb"
+    },
+    {
+      "path": "fault-controls-attempt1/term-handled-zero/result.json",
+      "bytes": 22206,
+      "sha256": "060877dd556cb442b67a70c41f0850f2e737345ea2a046b5496becae90a5b808"
+    },
+    {
+      "path": "fault-controls-attempt1/term-handled-zero/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "fault-controls-attempt1/term-handled-zero/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt2/duplicate-ticks/logs/mygo-animation-r1.log",
+      "bytes": 45770,
+      "sha256": "e92ef5334012df6435e95dffd78cbecc6693701b8fc06d7c3b4b2eab127a4d67"
+    },
+    {
+      "path": "fault-controls-attempt2/duplicate-ticks/result.json",
+      "bytes": 118092,
+      "sha256": "07724badfb9549a407d96ab79d838768e8a79325e9c9dac55584728bb4734b8c"
+    },
+    {
+      "path": "fault-controls-attempt2/duplicate-ticks/screenshots/mygo-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "d8864dab05248cede443ba16fac92b62b007505bb0a30f3bcab98517cebe4b1e"
+    },
+    {
+      "path": "fault-controls-attempt2/duplicate-ticks/screenshots/mygo-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt2/hover-only-suppressed-callback/logs/mygo-busy-r1.log",
+      "bytes": 1654,
+      "sha256": "f11c397c8a50d2988d70610d53338ebeefd90931225ae8ab7b6b5f736cf617c3"
+    },
+    {
+      "path": "fault-controls-attempt2/hover-only-suppressed-callback/result.json",
+      "bytes": 30687,
+      "sha256": "02a070d4da3f5b5c61790e3c9e782ab81b79373e2276b96536a866483c31c1d4"
+    },
+    {
+      "path": "fault-controls-attempt2/hover-only-suppressed-callback/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "69e430bea5187340762c8501fd9b72f6163145aca79680c44c17649259d88634"
+    },
+    {
+      "path": "fault-controls-attempt2/hover-only-suppressed-callback/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt2/missing-present/logs/mygo-idle-r1.log",
+      "bytes": 740,
+      "sha256": "9cdbeb23c26478c60793da1b0e1e93e3caa0517e5381bb8f294d899c011ade55"
+    },
+    {
+      "path": "fault-controls-attempt2/missing-present/result.json",
+      "bytes": 1669,
+      "sha256": "d063e38413ac15e65ac8bee14a62bc0ae82596f84bf4bd7486e1a9d6b5da0802"
+    },
+    {
+      "path": "fault-controls-attempt2/observer-overflow/logs/mygo-busy-r1.log",
+      "bytes": 1546,
+      "sha256": "a5023a3bf60c970f84f1cec1a9e55183d8540afa0224597c55161dc8eca434bf"
+    },
+    {
+      "path": "fault-controls-attempt2/observer-overflow/result.json",
+      "bytes": 30466,
+      "sha256": "c25d2c66472487aee5037960ba825d2b8fd3cfe5dc60601cf154a33d8ad19307"
+    },
+    {
+      "path": "fault-controls-attempt2/observer-overflow/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-attempt2/observer-overflow/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt2/positive/logs/mygo-busy-r1.log",
+      "bytes": 1744,
+      "sha256": "b4346a7dbf311ed5f8c95d615e99df512a92cc4dbbdf1ba20a08dff525129e6c"
+    },
+    {
+      "path": "fault-controls-attempt2/positive/result.json",
+      "bytes": 31168,
+      "sha256": "7bffd4e029bb0d6cc2f2bf0f3923340d8052f632de1b034dd9d5afad4f599e00"
+    },
+    {
+      "path": "fault-controls-attempt2/positive/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-attempt2/positive/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "fault-controls-attempt2/stale-marker/logs/mygo-busy-r1.log",
+      "bytes": 1745,
+      "sha256": "8b31eb2afe357aba4e54906a2809d1272ef507cffea7a22a373fcc43a4e733c4"
+    },
+    {
+      "path": "fault-controls-attempt2/stale-marker/result.json",
+      "bytes": 29069,
+      "sha256": "0137008a59a028cc057f665a409eb224619417f4595b45461b393d732d00912f"
+    },
+    {
+      "path": "fault-controls-attempt2/stale-marker/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "fad2f7b6df585a203ee0473c07fa72584a97ab4737443bde8d4223fbcf625a78"
+    },
+    {
+      "path": "fault-controls-attempt2/stale-marker/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-attempt2/term-handled-zero/logs/mygo-idle-r1.log",
+      "bytes": 816,
+      "sha256": "8e0ab9698b83d1ba36f73a6166ef8e8c324aadc19c55f3c2836ab70a4214964c"
+    },
+    {
+      "path": "fault-controls-attempt2/term-handled-zero/result.json",
+      "bytes": 22222,
+      "sha256": "5a5c8ae50513f57bbc4a450ba6c6f3661a612394e565146ac1237a235540b958"
+    },
+    {
+      "path": "fault-controls-attempt2/term-handled-zero/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "fault-controls-attempt2/term-handled-zero/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-quiet/duplicate-ticks/logs/mygo-animation-r1.log",
+      "bytes": 45355,
+      "sha256": "97364aab64d06c594ab28fea59bd70325047cdd5b170eba770fe419b732b49cb"
+    },
+    {
+      "path": "fault-controls-quiet/duplicate-ticks/result.json",
+      "bytes": 117668,
+      "sha256": "c0c98db1f94ab8137052c16116093130ed281da66ea979eacfc5020051434ace"
+    },
+    {
+      "path": "fault-controls-quiet/duplicate-ticks/screenshots/mygo-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "63a96c1b0bb53cf50bb0cd69df6bdc85f8c458d788ab98730640dd383dc4e1b8"
+    },
+    {
+      "path": "fault-controls-quiet/duplicate-ticks/screenshots/mygo-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-quiet/hover-only-suppressed-callback/logs/mygo-busy-r1.log",
+      "bytes": 1345,
+      "sha256": "2412984dc9f554fe7c9672881873e35ad3942e2f2c05aa9ce9c4a3426c6c40c5"
+    },
+    {
+      "path": "fault-controls-quiet/hover-only-suppressed-callback/result.json",
+      "bytes": 29943,
+      "sha256": "50e1076530daa476c1e6b752c31f33d24278ad1fa079a9cc752c0d5e0e04f451"
+    },
+    {
+      "path": "fault-controls-quiet/hover-only-suppressed-callback/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "69e430bea5187340762c8501fd9b72f6163145aca79680c44c17649259d88634"
+    },
+    {
+      "path": "fault-controls-quiet/hover-only-suppressed-callback/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-quiet/missing-present/logs/mygo-idle-r1.log",
+      "bytes": 420,
+      "sha256": "08fad04d49c16b39da68cead405676e392ffcc516a779c20c28c4391f026eaf4"
+    },
+    {
+      "path": "fault-controls-quiet/missing-present/result.json",
+      "bytes": 1616,
+      "sha256": "cf2350b08438187e454a2b4e1f4c80d3c7de77cac0de671cd8b4525f7a39f2ac"
+    },
+    {
+      "path": "fault-controls-quiet/observer-overflow/logs/mygo-busy-r1.log",
+      "bytes": 1226,
+      "sha256": "45b4770d6a0a072343bcd2de47e543af5a28a71726ad93984e95d0c21e76df27"
+    },
+    {
+      "path": "fault-controls-quiet/observer-overflow/result.json",
+      "bytes": 29471,
+      "sha256": "8110dada996f4d4d5d939024b3810c9424e1779cb9386f145648d2364c748e2b"
+    },
+    {
+      "path": "fault-controls-quiet/observer-overflow/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-quiet/observer-overflow/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-quiet/positive/logs/mygo-busy-r1.log",
+      "bytes": 1435,
+      "sha256": "617c64de9f0209dd67c0052f9cab18d6302e6df95a230aea6a29aab1738800d6"
+    },
+    {
+      "path": "fault-controls-quiet/positive/result.json",
+      "bytes": 30205,
+      "sha256": "f2319f8b53d114527fa232367d98ea31d920647dcc2f66c0c1f373b410bb8530"
+    },
+    {
+      "path": "fault-controls-quiet/positive/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "fault-controls-quiet/positive/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-controls-quiet/stale-marker/logs/mygo-busy-r1.log",
+      "bytes": 1426,
+      "sha256": "fff7ebd28f076370759f98742e0e03a2e9ce0e6634273b5e54ebcea10b22736b"
+    },
+    {
+      "path": "fault-controls-quiet/stale-marker/result.json",
+      "bytes": 28833,
+      "sha256": "919c45cf36d89f7e36b74ea22edef72307629977b230cb044c0379415c16747e"
+    },
+    {
+      "path": "fault-controls-quiet/stale-marker/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "fad2f7b6df585a203ee0473c07fa72584a97ab4737443bde8d4223fbcf625a78"
+    },
+    {
+      "path": "fault-controls-quiet/stale-marker/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "fault-controls-quiet/summary.json",
+      "bytes": 31358,
+      "sha256": "ff5f0419a0a24b8e4914dc00daba78b532d1d50d918ffb38ce3d79ab616bf5ba"
+    },
+    {
+      "path": "fault-controls-quiet/term-handled-zero/logs/mygo-idle-r1.log",
+      "bytes": 496,
+      "sha256": "b72ebda44c870c8c72e4028ed68942248c1d7da987badf5add0f7aaa9595f461"
+    },
+    {
+      "path": "fault-controls-quiet/term-handled-zero/result.json",
+      "bytes": 22188,
+      "sha256": "be0fd906f192ea925ab92a7e4bf1451d714f5358b95e704e09400d0c8ef76bc2"
+    },
+    {
+      "path": "fault-controls-quiet/term-handled-zero/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "fault-controls-quiet/term-handled-zero/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "fault-smoke.py",
+      "bytes": 3343,
+      "sha256": "2015e8694c602c35f9d05d113c7f13c58f226a799ab92cb6a5fadbd809b9ae28"
+    },
+    {
+      "path": "full-peer-export-audit.json",
+      "bytes": 2435,
+      "sha256": "ea882e6678f49104f046de23f75aa57e08e4d2fc4ae6729accced99ecb8d16e8"
+    },
+    {
+      "path": "full-peer-export-initial-audit.json",
+      "bytes": 2435,
+      "sha256": "9c262f31d2d3a511c118e8d4f632346081c9da1099fdaabb6e60f281de80b7a1"
+    },
+    {
+      "path": "gpui-auto-profile-v1/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "gpui-auto-profile-v1/logs/gpui-idle-r1.log",
+      "bytes": 444,
+      "sha256": "b08cd3b6cd0aa95c95d4f40f065102a3c63db3cf1155af8bf04f45521e306dd8"
+    },
+    {
+      "path": "gpui-auto-profile-v1/logs/gpui-idle-r2.log",
+      "bytes": 444,
+      "sha256": "e6483bc6394dc9d5b5006f470a6dc21a1f02bc24168260ea4516e095b609c811"
+    },
+    {
+      "path": "gpui-auto-profile-v1/logs/gpui-idle-r3.log",
+      "bytes": 444,
+      "sha256": "8906894e122064a799b1a632b9f00b19cf5037ccdbe561b01f212c3b6082b477"
+    },
+    {
+      "path": "gpui-auto-profile-v1/logs/gpui-startup-r1.log",
+      "bytes": 444,
+      "sha256": "c164f520072fbce1cff4792d7bc74eee931312b2451b9179acef6ad2be3c05bc"
+    },
+    {
+      "path": "gpui-auto-profile-v1/results.jsonl",
+      "bytes": 177954,
+      "sha256": "ce6a2e96451709d9000db1734dc4baf92ab77cc601c1ef0a61c9f4834fea7c6c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-idle-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/screenshots/gpui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-profile-v1/status.json",
+      "bytes": 1590,
+      "sha256": "4eb8c8880f94923a74d93426f2df5c4d0fe83f6c9f256a93a82e174ad3dfb826"
+    },
+    {
+      "path": "gpui-auto-profile-v1/xvfb.log",
+      "bytes": 4085,
+      "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+    },
+    {
+      "path": "gpui-auto-profile-v1.log",
+      "bytes": 51,
+      "sha256": "7abc823f0a2ef60ea864dd79c53c6d23d31cc02cfc5a26d0d2b7889b4ea78a1b"
+    },
+    {
+      "path": "gpui-auto-profile-v1.py",
+      "bytes": 2641,
+      "sha256": "0545ce9491f716a88a7ecbb6c55f9d356d1d2cfd206c8d517d065dabd2eb38c2"
+    },
+    {
+      "path": "gpui-auto-startup-v2/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "gpui-auto-startup-v2/logs/gpui-startup-r1.log",
+      "bytes": 444,
+      "sha256": "8fb3be8c159f222b13f8dd3235174111412642c6237dd4d1e53fa75dc8d4d0e4"
+    },
+    {
+      "path": "gpui-auto-startup-v2/logs/gpui-startup-r2.log",
+      "bytes": 444,
+      "sha256": "162445f232207fef00ff23ad17b9e495aec73ba15762f71fa9b825ecd15bf54c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/logs/gpui-startup-r3.log",
+      "bytes": 444,
+      "sha256": "d36b0e92e0612c7a0fc2044f3d935e876ecf1e7ed2ebee24b5bb47c69588ee05"
+    },
+    {
+      "path": "gpui-auto-startup-v2/results.jsonl",
+      "bytes": 47606,
+      "sha256": "2e682104d3d42f2b1a50285b8fa521c4709251fcfd2cd746d8133ad22e2218e1"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/screenshots/gpui-startup-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "67c315bdc0e20b9110a2ef9b08425b678ac1bf6a5e7807c13c76673afa48575c"
+    },
+    {
+      "path": "gpui-auto-startup-v2/status.json",
+      "bytes": 198,
+      "sha256": "d76df5e72ecfeeb50abf6b8e2a197dd094aa09c6bf691a4a786baf6136cd257a"
+    },
+    {
+      "path": "gpui-auto-startup-v2/xvfb.log",
+      "bytes": 3268,
+      "sha256": "7dadbb57588eba0b94caef05c8fb7938d2f840fa6f3c5fa250f7c7726bc9ecbe"
+    },
+    {
+      "path": "gpui-auto-startup-v2.log",
+      "bytes": 60,
+      "sha256": "6aef5de4d39e8ee1c395592a31d3d0d09ba5934d86b0daeeb59865b1a55e31d1"
+    },
+    {
+      "path": "gpui-auto-startup-v2.py",
+      "bytes": 2672,
+      "sha256": "58b805e5690c2f1d7d99640c7759bd2f20a77c9eb4b3a4784c394695d34f6ce6"
+    },
+    {
+      "path": "gpui-smoke-initial/gpui-busy.json",
+      "bytes": 30255,
+      "sha256": "199ae28f1dd3e319e15ee4607f70d285f9ed40d9bc001349f0904fbf4d4753df"
+    },
+    {
+      "path": "gpui-smoke-initial/gpui-idle.json",
+      "bytes": 22038,
+      "sha256": "2f7970f9a6f84d9641121e8bbb0477ab378c0c7dd8a0dc52032e350d43965674"
+    },
+    {
+      "path": "gpui-smoke-initial/logs/gpui-busy-r1.log",
+      "bytes": 1341,
+      "sha256": "294ecab7a836018928c474e431423a4b707babee0ee0091614a8576a856871f4"
+    },
+    {
+      "path": "gpui-smoke-initial/logs/gpui-idle-r1.log",
+      "bytes": 759,
+      "sha256": "eebe66ca9fee41f7f32a4b18a9c0cfe898f57739115fa2cbbcec1558fdec181b"
+    },
+    {
+      "path": "gpui-smoke-initial/screenshots/gpui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8a212e1322e4b0f90bd7f9f038255e432a1339d31ebf81bf931d646911e9f34a"
+    },
+    {
+      "path": "gpui-smoke-initial/screenshots/gpui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "gpui-smoke-initial/screenshots/gpui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "gpui-smoke-initial/screenshots/gpui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "gpui-smoke.py",
+      "bytes": 2341,
+      "sha256": "54d3eee4d6024ec03d28792f64bbb76d16eb7a31a5ec6e58315b02d82f6c5f32"
+    },
+    {
+      "path": "historical/results-20261023.jsonl",
+      "bytes": 1626293,
+      "sha256": "bc7f5d08992cbe4a58e08ed970d8bc1785724453c93151c37aa0a6a6edb7dfa2"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 108101,
+      "sha256": "6568754b4d7e0b80b89faf6a6e2396052802f1084789f20054824087e52d0143"
+    },
+    {
+      "path": "native-present-control-driver-v1.py",
+      "bytes": 3741,
+      "sha256": "963512e91755074cb267cae65e4b50fd2484418dfc6edb333c154071ae3ad312"
+    },
+    {
+      "path": "native-present-control-v1/actual-native-starvation/logs/zeronsh-zgui-animation-r1.log",
+      "bytes": 44706,
+      "sha256": "8f7362b01b0e613b2e19601a38941c442ba675a24a032e21058ff4ebc1c90ae9"
+    },
+    {
+      "path": "native-present-control-v1/actual-native-starvation/result.json",
+      "bytes": 129001,
+      "sha256": "4be237377b87d3dc8936cd24c220702e5e8efde64d7e82a27d7addd33bf844b1"
+    },
+    {
+      "path": "native-present-control-v1/actual-native-starvation/screenshots/zeronsh-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "0ff16a2362db7bfadd281a5d7fc8a2d2f983b8877578f3d2d76b5e0ff392f580"
+    },
+    {
+      "path": "native-present-control-v1/actual-native-starvation/screenshots/zeronsh-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8dc4bc5c07d51fd353d41b48b9157b48411ba269cd1c5f0a9d77de7396a03fe7"
+    },
+    {
+      "path": "native-present-control-v1/freeze.json",
+      "bytes": 30508,
+      "sha256": "2ff274210643877a8dfb5af03a39cb4e0bb58950cd6b3ecf660171f8c1cbb1e4"
+    },
+    {
+      "path": "native-present-control-v1/positive/logs/zeronsh-zgui-animation-r1.log",
+      "bytes": 50030,
+      "sha256": "4122a5c0c8762d09b8db458dbaffa42641a3d1344a7893fee2c49393f87201a8"
+    },
+    {
+      "path": "native-present-control-v1/positive/result.json",
+      "bytes": 144482,
+      "sha256": "62df07dc8e263f7505a2386fe09e665da8bd2641d5ab9a52852a84e170df31f6"
+    },
+    {
+      "path": "native-present-control-v1/positive/screenshots/zeronsh-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "11827e48aeb007cccc7bd5f236bd9b66d228729770b628effe5ea36391c54c13"
+    },
+    {
+      "path": "native-present-control-v1/positive/screenshots/zeronsh-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8dc4bc5c07d51fd353d41b48b9157b48411ba269cd1c5f0a9d77de7396a03fe7"
+    },
+    {
+      "path": "native-present-control-v1/status.json",
+      "bytes": 828,
+      "sha256": "962712a821c718ff80be6b77bdac8183ff485690fe62766c5e67dcf9e45573c4"
+    },
+    {
+      "path": "native-present-control-v1/xvfb.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "native-present-control-v1-driver.log",
+      "bytes": 428,
+      "sha256": "1e52485dcfbaa9bbc84fbb8010fbf2edf358bdabd2e918e8001fe4ccabdf7b24"
+    },
+    {
+      "path": "native-present-control-v1-supervisor.log",
+      "bytes": 85,
+      "sha256": "a6d9132ad5f612007be9c1de80bc2b6a4cce089fce361e0c0eaf9d091e257d68"
+    },
+    {
+      "path": "native-present-control-v1.patch",
+      "bytes": 2546,
+      "sha256": "2b4e52c3676a7a3b643082813db5eed57dfc952ac7c01881f190a61a662ede60"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/0-type-after.ppm",
+      "bytes": 1004415,
+      "sha256": "572c82dc5fbdbdffb56a5c160f775afdc09a799977d4576c5261add83fffe488"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/0-type-before.ppm",
+      "bytes": 1004415,
+      "sha256": "5797e1a88d588fd9b38434e5a3869e6f957ba10f14541e50c62a29d7280d2cf1"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/1-add-after.ppm",
+      "bytes": 1004415,
+      "sha256": "180baa220663b8056c58858789ec1d1291713b4a22ea96326a215087d02cb5c5"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/1-add-before.ppm",
+      "bytes": 1004415,
+      "sha256": "572c82dc5fbdbdffb56a5c160f775afdc09a799977d4576c5261add83fffe488"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/2-complete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "1c96cc973322f8afceb7469c464200123bac1424b4e3335103d58b26abe08c68"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/2-complete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "180baa220663b8056c58858789ec1d1291713b4a22ea96326a215087d02cb5c5"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/3-active-after.ppm",
+      "bytes": 1004415,
+      "sha256": "d44e73fc5749fe39399a0b54b4a4ff6aa27430c515adb789daaae4deae0f89ef"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/3-active-before.ppm",
+      "bytes": 1004415,
+      "sha256": "1c96cc973322f8afceb7469c464200123bac1424b4e3335103d58b26abe08c68"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/4-done-after.ppm",
+      "bytes": 1004415,
+      "sha256": "adbc98c550bc58369eeb7c32d5f5f9c581d7a72beafe50dd5774c462f2229370"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/4-done-before.ppm",
+      "bytes": 1004415,
+      "sha256": "d44e73fc5749fe39399a0b54b4a4ff6aa27430c515adb789daaae4deae0f89ef"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/5-all-after.ppm",
+      "bytes": 1004415,
+      "sha256": "e01dc582ab15a8ffa1ae85efbda906ea0b8551d09aab76a2e22b1f7e1b04d8cd"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/5-all-before.ppm",
+      "bytes": 1004415,
+      "sha256": "adbc98c550bc58369eeb7c32d5f5f9c581d7a72beafe50dd5774c462f2229370"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/6-delete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "1b3ad0269fa0bb203477dfcc1c3bfe10d0f7aa2fc353d40d62f514fe2782b8fa"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/6-delete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "e01dc582ab15a8ffa1ae85efbda906ea0b8551d09aab76a2e22b1f7e1b04d8cd"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/7-undo-after.ppm",
+      "bytes": 1004415,
+      "sha256": "a82326a052202a87a08b947be364e904106c2cbf31b1dc23d164712e5240c310"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/7-undo-before.ppm",
+      "bytes": 1004415,
+      "sha256": "1b3ad0269fa0bb203477dfcc1c3bfe10d0f7aa2fc353d40d62f514fe2782b8fa"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/app.log",
+      "bytes": 446603,
+      "sha256": "fd6802780a2f551d119a8175455105ee6705f68190a8735e3be588274eca6178"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/result.json",
+      "bytes": 895705,
+      "sha256": "e2f61f009c431013fc09a67f86f7748d42254ed615eb26ec492103b40631c69e"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/gpui/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "068248ec4b84d247d4e400fa15c07d24bbd49fb67a789fc27ebdb1bd9ad45610"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/0-type-after.ppm",
+      "bytes": 1004415,
+      "sha256": "50130e135c90d3611c1031df1bffd1c547b15e84aec1c2233ddc5b239721d3f3"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/0-type-before.ppm",
+      "bytes": 1004415,
+      "sha256": "7f7e69a894f82afcb5915b485230e1f5863c873d8a8ee5fe5a016df3ca8c2bdc"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/1-add-after.ppm",
+      "bytes": 1004415,
+      "sha256": "8d7b037558a5ba6e9d7bf14a51e1a501d4005248200c047cef7edbdfc596f4b9"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/1-add-before.ppm",
+      "bytes": 1004415,
+      "sha256": "50130e135c90d3611c1031df1bffd1c547b15e84aec1c2233ddc5b239721d3f3"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/2-complete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "3befe80e73abc3e3fcf0a86d7ac482ee93a8426f0aa9b57956edef5f01962553"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/2-complete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "8d7b037558a5ba6e9d7bf14a51e1a501d4005248200c047cef7edbdfc596f4b9"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/3-active-after.ppm",
+      "bytes": 1004415,
+      "sha256": "cea536de559cfe4a3017d25ab1ccf0ba59958624edd383fc805817b0ad9463a0"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/3-active-before.ppm",
+      "bytes": 1004415,
+      "sha256": "3befe80e73abc3e3fcf0a86d7ac482ee93a8426f0aa9b57956edef5f01962553"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/4-done-after.ppm",
+      "bytes": 1004415,
+      "sha256": "d7abbd1dd8d71fa600dc8ff00d19f50d575934b7d4b797c6e9c147e2cd63fd9e"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/4-done-before.ppm",
+      "bytes": 1004415,
+      "sha256": "cea536de559cfe4a3017d25ab1ccf0ba59958624edd383fc805817b0ad9463a0"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/5-all-after.ppm",
+      "bytes": 1004415,
+      "sha256": "08a12637ecef1ee6fd236b41260608b15c05e9976580dd37d45c78952f9913d4"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/5-all-before.ppm",
+      "bytes": 1004415,
+      "sha256": "d7abbd1dd8d71fa600dc8ff00d19f50d575934b7d4b797c6e9c147e2cd63fd9e"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/6-delete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "5ba9f9156825f4ef1a56e8ee4ff2441a000756a15a0c67c9405c8ffb8fb40e80"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/6-delete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "08a12637ecef1ee6fd236b41260608b15c05e9976580dd37d45c78952f9913d4"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/7-undo-after.ppm",
+      "bytes": 1004415,
+      "sha256": "04295878001dff67158aaa6bd848c0512f1c3994c6496871e1431d545a897938"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/7-undo-before.ppm",
+      "bytes": 1004415,
+      "sha256": "5ba9f9156825f4ef1a56e8ee4ff2441a000756a15a0c67c9405c8ffb8fb40e80"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/app.log",
+      "bytes": 447330,
+      "sha256": "97ba767edce4069bbd53b455e4849c251ee7defda4f59c061af29725b291d84a"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/result.json",
+      "bytes": 898260,
+      "sha256": "57dd771a6dcd258d41e4e65c2f9936cd60a4def2ec2d12127447462c63275ba1"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/mygo/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "53f909f56df7b45d496945972e4e00d518f123a9a29e7179d5db93f80de31ead"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/0-type-after.ppm",
+      "bytes": 1004415,
+      "sha256": "45afdfea400c116c5712ffa53a4e67a6d255c9cb837f4e3132dad3cb67ef1a37"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/0-type-before.ppm",
+      "bytes": 1004415,
+      "sha256": "f2f2a6ee9d12e1c1929963b487bcbcd72f623ab2c4239be651ea0c784724af3d"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/1-add-after.ppm",
+      "bytes": 1004415,
+      "sha256": "3671ebe446d5f7e5634d95069561fa52c9e9211f56ff0a0e4173ac6f7d2e682d"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/1-add-before.ppm",
+      "bytes": 1004415,
+      "sha256": "45afdfea400c116c5712ffa53a4e67a6d255c9cb837f4e3132dad3cb67ef1a37"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/2-complete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "cc9ec13db94c400b54678d753d13baf9463344620c4a134e1a1ebb439c8c68fc"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/2-complete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "3671ebe446d5f7e5634d95069561fa52c9e9211f56ff0a0e4173ac6f7d2e682d"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/3-active-after.ppm",
+      "bytes": 1004415,
+      "sha256": "403d676df619d1ab0a7a651472f0318ba76513d80b36977b106789484bc9f343"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/3-active-before.ppm",
+      "bytes": 1004415,
+      "sha256": "cc9ec13db94c400b54678d753d13baf9463344620c4a134e1a1ebb439c8c68fc"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/4-done-after.ppm",
+      "bytes": 1004415,
+      "sha256": "291b63f0a4979edd3be5d6ae3b73e29307215bc0ba3f3096dbf33f5cd57c880b"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/4-done-before.ppm",
+      "bytes": 1004415,
+      "sha256": "403d676df619d1ab0a7a651472f0318ba76513d80b36977b106789484bc9f343"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/5-all-after.ppm",
+      "bytes": 1004415,
+      "sha256": "ffde4136cdf4af320571363a3afb6ac85f97004fcedd49b96649470e00d5df3b"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/5-all-before.ppm",
+      "bytes": 1004415,
+      "sha256": "291b63f0a4979edd3be5d6ae3b73e29307215bc0ba3f3096dbf33f5cd57c880b"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/6-delete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "7c9b129a96d45102ac61e75d0d408cd0b0c7b4668695816ac6b6e1db8f787793"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/6-delete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "ffde4136cdf4af320571363a3afb6ac85f97004fcedd49b96649470e00d5df3b"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/7-undo-after.ppm",
+      "bytes": 1004415,
+      "sha256": "5527546184850cb8ffa5ecd5bbcb06e0c4cb006959479bf3befcc7744e77cbd6"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/7-undo-before.ppm",
+      "bytes": 1004415,
+      "sha256": "7c9b129a96d45102ac61e75d0d408cd0b0c7b4668695816ac6b6e1db8f787793"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/app.log",
+      "bytes": 447471,
+      "sha256": "16a7fa48444fed7414120e774ba80bfe96bf3c3f1c68f67c37b33b16e15623cf"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/result.json",
+      "bytes": 898607,
+      "sha256": "cf127869c57163652eb75aca8428567c160bbfd93c5d8c92fd62ca625f185894"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/nanoui/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "9b888f47725c0f98ef05ded4e8ae186e2294a29dea89099fac95ccf62680edcc"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/status.json",
+      "bytes": 2524,
+      "sha256": "269298e97a8b2559a9c855048a00f7294f47723384b20607b800540dac8b162e"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/xvfb.log",
+      "bytes": 4902,
+      "sha256": "f8d685f9f4d11d8911ecfb6cdd0451fe993d45016b400a0f5a4e5cb243d20d7d"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/0-type-after.ppm",
+      "bytes": 1004415,
+      "sha256": "949b02b82a7a879d6dfde653a45a751dc227d3e78edae4f80891f777253e573f"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/0-type-before.ppm",
+      "bytes": 1004415,
+      "sha256": "6d426584ef99f3af97620926aa72628d35eea82f17f4c9b2c993c17ec0827a66"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/1-add-after.ppm",
+      "bytes": 1004415,
+      "sha256": "65528201963ebc4513ec4bde92b0c83f95f812c4b751f7a71c3d9bcaa057b3a9"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/1-add-before.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/2-complete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "d76f535eb0915ca6034fdad7c4ba399a0b4cbdb3ae0eca5de3e9646d081efcd6"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/2-complete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "99acaa87ea0ee990e31e2a59ad52380dd96f6497df636f07758162ea91e63dd8"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/3-active-after.ppm",
+      "bytes": 1004415,
+      "sha256": "768f02ad6f37880555ad29e43a52940448b3d9df6e64d279177f460467122163"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/3-active-before.ppm",
+      "bytes": 1004415,
+      "sha256": "69728fa72687d7e04245d07efc7c1ee1db08ac847b57b46bb47feee05b55fb02"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/4-done-after.ppm",
+      "bytes": 1004415,
+      "sha256": "9b518efb2b92b5f593e356ea1d123fb7ae1491df284dad4f2b1ef0bd77e8e752"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/4-done-before.ppm",
+      "bytes": 1004415,
+      "sha256": "eb19ece053ad08cba1544883b0f5c7441c3b78414ec8b84f5ed80da10a5da5af"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/5-all-after.ppm",
+      "bytes": 1004415,
+      "sha256": "a8485788ade4d98499eff04a8d2befecc5b80b9f6303c00b2534a1f091a2ef18"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/5-all-before.ppm",
+      "bytes": 1004415,
+      "sha256": "b43b90e0af4ba697b40e40b2e8c1dccf47d7a0c0f384b6406cb8daf394447c1c"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/6-delete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "2e4f99e48e61ff2ff16d03166b32e64e9133f4f032dd9f543c1ce24e62de4986"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/6-delete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "333d2bf037a3b63727fbd8269790223bf5cac617d841cc505eccbc7a2d3f5ea4"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/7-undo-after.ppm",
+      "bytes": 1004415,
+      "sha256": "c862f21762a8d838df24b3e2ba2fcb43886cef157685142d79659b5e0a221179"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/7-undo-before.ppm",
+      "bytes": 1004415,
+      "sha256": "19747c274e9b35fb89f2636ff2d17744ae83de7bd993083295d1f170ff6f8091"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/app.log",
+      "bytes": 446999,
+      "sha256": "544507cec9604dabc864e5b5bef9152afceec0f23257104348bf6c7cd7014659"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/result.json",
+      "bytes": 897731,
+      "sha256": "685d6f90144b34feb818019296c2fd50d9fbaa01c521c3a413e1e2c7f295beed"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zeronsh-zgui/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zortax-zgui/app.log",
+      "bytes": 446260,
+      "sha256": "36b020ca5b662b8773cbce92660c67b12ce082454bce9f7004e9920cc961d5b2"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zortax-zgui/result.json",
+      "bytes": 26927,
+      "sha256": "8a30141d2dfbef7d7c24e29281b2e2275b660d69011ae380fa36b8da93165278"
+    },
+    {
+      "path": "postcapture-heavy-qualification-v1/zortax-zgui/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v1/INVALIDATED.json",
+      "bytes": 184,
+      "sha256": "51895b8113e4d9b86544070d4864f7017c83997b71f7fefff804d7d701a66f60"
+    },
+    {
+      "path": "postcapture-measure-v1/anchor-policy.json",
+      "bytes": 492,
+      "sha256": "aa35ae365452cc9757135f6caef43f05bf3a4d16896c1d17c7aabdf7aafcd654"
+    },
+    {
+      "path": "postcapture-measure-v1/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "postcapture-measure-v1/heavy-control-delta.json",
+      "bytes": 921,
+      "sha256": "8b5639ef36f2c2346a8f768ca28866d4457927a3c4c1c12d15d13728cacced4f"
+    },
+    {
+      "path": "postcapture-measure-v1/logs/zeronsh-zgui-heavy-r1.log",
+      "bytes": 448899,
+      "sha256": "a400062668501caabf9980e543e02a6109c0eca541b67ec37ed7b79128e36f27"
+    },
+    {
+      "path": "postcapture-measure-v1/screenshots/zeronsh-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "postcapture-measure-v1/screenshots/zeronsh-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "postcapture-measure-v1/status.json",
+      "bytes": 1688,
+      "sha256": "9619b770a52bec0d08e5d5427b51b0a21e067be5649a9864824a6e197df80122"
+    },
+    {
+      "path": "postcapture-measure-v1/xvfb.log",
+      "bytes": 1634,
+      "sha256": "ee3c08f7e6b04799eb02a81297e0de66e99fee84c3dd27c9b7625972ac4a687f"
+    },
+    {
+      "path": "postcapture-measure-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "postcapture-measure-v1.py",
+      "bytes": 6457,
+      "sha256": "bf592eafeca4fba9813fe5dfece8f8bb95c731b4f7c7395b3ec74a80d761fd69"
+    },
+    {
+      "path": "postcapture-measure-v2/anchor-policy.json",
+      "bytes": 492,
+      "sha256": "aa35ae365452cc9757135f6caef43f05bf3a4d16896c1d17c7aabdf7aafcd654"
+    },
+    {
+      "path": "postcapture-measure-v2/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "postcapture-measure-v2/gpui-visible-r1.log",
+      "bytes": 437,
+      "sha256": "169623f4bb26edc740fa09a409520c4684a99568b081519fc4b0303fdf322359"
+    },
+    {
+      "path": "postcapture-measure-v2/gpui-visible-r2.log",
+      "bytes": 437,
+      "sha256": "dab80478c5b4f06474fd70e7d1140f56bd28544bd5f6f36b56e554cfa0b96f85"
+    },
+    {
+      "path": "postcapture-measure-v2/gpui-visible-r3.log",
+      "bytes": 437,
+      "sha256": "8270440ed459f9ba6be77fbd47a446be9ddc6e83b14f72bd4e391c90d230c9cb"
+    },
+    {
+      "path": "postcapture-measure-v2/heavy-control-delta.json",
+      "bytes": 921,
+      "sha256": "8b5639ef36f2c2346a8f768ca28866d4457927a3c4c1c12d15d13728cacced4f"
+    },
+    {
+      "path": "postcapture-measure-v2/heavy-results.jsonl",
+      "bytes": 323792,
+      "sha256": "8b6acc6c4f96b0ea7c8d81df411f593022e1bbfd2949fc15fb3e2e2cd7446748"
+    },
+    {
+      "path": "postcapture-measure-v2/logs/zeronsh-zgui-heavy-r1.log",
+      "bytes": 6658,
+      "sha256": "66787a3349d2b66d1e4554fca4ad6d4204a30b1c8fa84f24fa99a85a34cbe34b"
+    },
+    {
+      "path": "postcapture-measure-v2/logs/zeronsh-zgui-heavy-r2.log",
+      "bytes": 6350,
+      "sha256": "b3cf357d3cfaeecefe7a02f952aa162240db8e4546d25c6d9599f8015dd5e3cd"
+    },
+    {
+      "path": "postcapture-measure-v2/logs/zeronsh-zgui-heavy-r3.log",
+      "bytes": 6661,
+      "sha256": "e129112e5d2774449df96c2c223a631fa8b9b6b88115e3136d29b036eaafba07"
+    },
+    {
+      "path": "postcapture-measure-v2/mygo-visible-r1.log",
+      "bytes": 824,
+      "sha256": "7981724d0a29aa5962b5cb1fdb3eb1f0b0b7152c6b9459012a43a30e72a7b013"
+    },
+    {
+      "path": "postcapture-measure-v2/mygo-visible-r2.log",
+      "bytes": 824,
+      "sha256": "86e2375ef6cf950610e8e3fb382ae2decb011ea4e11b0072f0f7bef39d20ab71"
+    },
+    {
+      "path": "postcapture-measure-v2/mygo-visible-r3.log",
+      "bytes": 824,
+      "sha256": "129895d8e788f7c0c46febf9c39ab0aa8011d0e34b099d5f741cb61365191b0e"
+    },
+    {
+      "path": "postcapture-measure-v2/nanoui-visible-r1.log",
+      "bytes": 1033,
+      "sha256": "91c6750a531013915d9d4401a04ca1177cf619296f7a16a3f4422e01d761fe8c"
+    },
+    {
+      "path": "postcapture-measure-v2/nanoui-visible-r2.log",
+      "bytes": 1033,
+      "sha256": "83244d5b9465573cc4c677edb289d147324f016eb1fcfa6e0cee561c33136efc"
+    },
+    {
+      "path": "postcapture-measure-v2/nanoui-visible-r3.log",
+      "bytes": 1033,
+      "sha256": "2ae76b11a9d3155b54bb5506d37b494d14258057d55ccccd09d2107c0ad92049"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r1-first.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r1-last.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r2-first.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r2-last.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r3-first.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/gpui-visible-r3-last.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r1-first.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r1-last.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r2-first.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r2-last.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r3-first.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/mygo-visible-r3-last.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r1-first.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r1-last.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r2-first.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r2-last.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r3-first.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/nanoui-visible-r3-last.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r2-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r2-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r3-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-heavy-r3-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r1-first.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r1-last.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r2-first.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r2-last.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r3-first.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zeronsh-zgui-visible-r3-last.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r1-first.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r1-last.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r2-first.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r2-last.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r3-first.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/screenshots/zortax-zgui-visible-r3-last.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-measure-v2/status.json",
+      "bytes": 192,
+      "sha256": "d3f65ea2c06fc543b6029d7dec254b16692b954125b9c3323f1d74cfcc1e8796"
+    },
+    {
+      "path": "postcapture-measure-v2/visible-ui-results.jsonl",
+      "bytes": 21897,
+      "sha256": "95dd9ba7c549f29bb003c8a37fd2420912cd3ec4670d57ab494826bac3c5fc34"
+    },
+    {
+      "path": "postcapture-measure-v2/xvfb.log",
+      "bytes": 15523,
+      "sha256": "48b21b3695150390069fb83471d4ee148c25bfa8914a62025319317ddb9ba710"
+    },
+    {
+      "path": "postcapture-measure-v2/zeronsh-zgui-visible-r1.log",
+      "bytes": 543,
+      "sha256": "81dbbe92d7000cc73113dc7d31b1bb2311dd63201ed8df5af78480b195ba737e"
+    },
+    {
+      "path": "postcapture-measure-v2/zeronsh-zgui-visible-r2.log",
+      "bytes": 543,
+      "sha256": "270797336e09475823ee5b376a0977f4c8fe1effbd715e67ec698eb1e28e566c"
+    },
+    {
+      "path": "postcapture-measure-v2/zeronsh-zgui-visible-r3.log",
+      "bytes": 543,
+      "sha256": "66444c9862dc8b35870afe5e4713dcc48211a3b2578b1776f7033d26170305e8"
+    },
+    {
+      "path": "postcapture-measure-v2/zortax-zgui-visible-r1.log",
+      "bytes": 605,
+      "sha256": "0e3e02609fecd98fa6fe56ac404b9e439eff95b3cdff70e9fc54aa24f4b4da3e"
+    },
+    {
+      "path": "postcapture-measure-v2/zortax-zgui-visible-r2.log",
+      "bytes": 605,
+      "sha256": "64f7472176c4b23d8470651ec4a8992e35e5bceafd6cc428f909f1b0b29d71a9"
+    },
+    {
+      "path": "postcapture-measure-v2/zortax-zgui-visible-r3.log",
+      "bytes": 605,
+      "sha256": "1b88a75b7d4f92bb01cfeb9deef9794760288f5ff802f975ead0eb160154b8ef"
+    },
+    {
+      "path": "postcapture-measure-v2.log",
+      "bytes": 412,
+      "sha256": "926ff565f5298962d10699f36b945eb20df48a30d49588de28853d5d65987d66"
+    },
+    {
+      "path": "postcapture-measure-v2.py",
+      "bytes": 6457,
+      "sha256": "502dd22c45d5e52b8c813dfeb6a501af452585c6dbc85f80c7f51b5d8cdaf0cf"
+    },
+    {
+      "path": "postcapture-qualify-v1.log",
+      "bytes": 905,
+      "sha256": "489fe777d915c411a3aef1a4b799acf312f6a84f712482a02b092a0bf1611f3f"
+    },
+    {
+      "path": "postcapture-qualify-v1.py",
+      "bytes": 6235,
+      "sha256": "dec806e6bfcf02168e40e9c54e3c6f4f7a3b019ab9346d30ff55fa64a451ad2d"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/freeze.json",
+      "bytes": 28657,
+      "sha256": "ee5b2d66afddd732acf4a0b324f3386684247edf32a705f2a9634cbe2acb6977"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/status.json",
+      "bytes": 750,
+      "sha256": "8bb6718241511fd0f86499299e4a8e8b843b57a15808ee48d93ea730979c6f4e"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/xvfb.log",
+      "bytes": 1634,
+      "sha256": "ee3c08f7e6b04799eb02a81297e0de66e99fee84c3dd27c9b7625972ac4a687f"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/0-type-after.ppm",
+      "bytes": 1004415,
+      "sha256": "edf1775053aa162a512d8ecaf947d41dac1202f7ec9f570892cc1c9508497fb3"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/0-type-before.ppm",
+      "bytes": 1004415,
+      "sha256": "79cd8f80aaa8e3f9d11b3bfd2b73d3719764b1e023afc259fd981e06ccff3b3d"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/1-add-after.ppm",
+      "bytes": 1004415,
+      "sha256": "2e3e18845e18918ced3cacb89da2d41d16341c6c5688534f9743a420df1d2b3d"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/1-add-before.ppm",
+      "bytes": 1004415,
+      "sha256": "edf1775053aa162a512d8ecaf947d41dac1202f7ec9f570892cc1c9508497fb3"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/2-complete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "7c0c6bef7a331b6e06d25c0140a8d2701b97e54c635cb86fee03b45c036ec6f2"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/2-complete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "2e3e18845e18918ced3cacb89da2d41d16341c6c5688534f9743a420df1d2b3d"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/3-active-after.ppm",
+      "bytes": 1004415,
+      "sha256": "5d5bc45950c500c1758048f511f38aa042cbd9b8dcae144033876f30d8271f37"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/3-active-before.ppm",
+      "bytes": 1004415,
+      "sha256": "7c0c6bef7a331b6e06d25c0140a8d2701b97e54c635cb86fee03b45c036ec6f2"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/4-done-after.ppm",
+      "bytes": 1004415,
+      "sha256": "88244dad95db2b7ae4e9fde7b1e9617bfc1f6f589d6b2a2bcdf19787cf2c20cb"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/4-done-before.ppm",
+      "bytes": 1004415,
+      "sha256": "5d5bc45950c500c1758048f511f38aa042cbd9b8dcae144033876f30d8271f37"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/5-all-after.ppm",
+      "bytes": 1004415,
+      "sha256": "0600964c34342351e8d9ef969845b20381dbd22e8e479ee5350b379ac91fd795"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/5-all-before.ppm",
+      "bytes": 1004415,
+      "sha256": "88244dad95db2b7ae4e9fde7b1e9617bfc1f6f589d6b2a2bcdf19787cf2c20cb"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/6-delete-after.ppm",
+      "bytes": 1004415,
+      "sha256": "cbf478fd18ed9f46c42851e8fad2a7a11a99d1a48b80db21e1c5045367067abf"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/6-delete-before.ppm",
+      "bytes": 1004415,
+      "sha256": "0600964c34342351e8d9ef969845b20381dbd22e8e479ee5350b379ac91fd795"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/7-undo-after.ppm",
+      "bytes": 1004415,
+      "sha256": "42f635f5d3c9a03c6c99ae2dc835914abe613a0ee3e40cff2bef88a65c3ebc84"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/7-undo-before.ppm",
+      "bytes": 1004415,
+      "sha256": "cbf478fd18ed9f46c42851e8fad2a7a11a99d1a48b80db21e1c5045367067abf"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/app.log",
+      "bytes": 447106,
+      "sha256": "2439d6d7aa0a2119996b9b888b07ec31277dcab58eb7b1372789390cb8c4aa72"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/result.json",
+      "bytes": 922515,
+      "sha256": "d5615fa17e51b52bc69ea29baeb3c556a4266ef8d9c5b024e0a335713809b18d"
+    },
+    {
+      "path": "postcapture-zortax-input-qualification-v2/zortax-zgui/settled.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "postcapture-zortax-qualify-v2.log",
+      "bytes": 208,
+      "sha256": "439469bfa6674c0165a8974b539e16bfd4a9ce02dc805e80d218f2d5a04282fc"
+    },
+    {
+      "path": "postcapture-zortax-qualify-v2.py",
+      "bytes": 6202,
+      "sha256": "2c8d358f1a55b66f4387bc95625fa6f1c5fa58718bdcb1a3b0ea3bf9eb3922e6"
+    },
+    {
+      "path": "preflight-attempt1/campaign-status.json",
+      "bytes": 207,
+      "sha256": "1b023c0850945e713b6e53b5bbdaab2cd29675af701527aa17535bfcabaf5145"
+    },
+    {
+      "path": "preflight-attempt1/fifteen-metrics.json",
+      "bytes": 30617,
+      "sha256": "19b894bae19507efc6506dbcb8d4e5738776e69914dbcee3fe50d46def190f30"
+    },
+    {
+      "path": "preflight-attempt1/freeze.json",
+      "bytes": 28658,
+      "sha256": "8714026ee1f519eb664af8430b967b7939fe8f4b7c31e04b0939aaf41dfebd06"
+    },
+    {
+      "path": "preflight-attempt1/historical-audit.json",
+      "bytes": 508,
+      "sha256": "e408bab71d6c9eb355ab609039c09a316f5d2b507403adc28f950fb7022f0023"
+    },
+    {
+      "path": "preflight-attempt1/logs/gpui-animation-r1.log",
+      "bytes": 44546,
+      "sha256": "cba51969437477207fd27a61a0c520cb9338d5f48841ca6b582cec070dff5497"
+    },
+    {
+      "path": "preflight-attempt1/logs/gpui-busy-r1.log",
+      "bytes": 1022,
+      "sha256": "70ec1937cb9e633d79dadae3d6ef63e63fe40d3ccfcbf2689dba6f1543d6d70e"
+    },
+    {
+      "path": "preflight-attempt1/logs/gpui-heavy-r1.log",
+      "bytes": 446282,
+      "sha256": "c4394be7ddb2d16994ac90b4cc9354ce60006b0a6eb8b85ccf1b1f8ad1efaf74"
+    },
+    {
+      "path": "preflight-attempt1/logs/gpui-idle-r1.log",
+      "bytes": 437,
+      "sha256": "abbe90c8da764b1c29526c50f81b707750a2861dfe23682e23bde8f07d4c6cef"
+    },
+    {
+      "path": "preflight-attempt1/logs/gpui-startup-r1.log",
+      "bytes": 437,
+      "sha256": "a8df99b9fea71ecef4f0b5c973685ea8e4025d116abe722867f56ffcd309f81d"
+    },
+    {
+      "path": "preflight-attempt1/logs/mygo-animation-r1.log",
+      "bytes": 45385,
+      "sha256": "5562f108a8a140c82ed69692622058488d7be262e399320f8e8aa33275f0745f"
+    },
+    {
+      "path": "preflight-attempt1/logs/mygo-busy-r1.log",
+      "bytes": 1425,
+      "sha256": "e7982b05487ec2a0d1e8747f9ef9c6b76a11c9d88a9a4d2b04b5fe86e5e8c0d5"
+    },
+    {
+      "path": "preflight-attempt1/logs/mygo-heavy-r1.log",
+      "bytes": 446998,
+      "sha256": "b7398f18337e2abac4d2ead98ed8f442a9a3e10a7178e8eb7b753b018afeddb9"
+    },
+    {
+      "path": "preflight-attempt1/logs/mygo-idle-r1.log",
+      "bytes": 496,
+      "sha256": "0b197777c3d93b0cdd304c7c4946535aa7b4e0218d250b6c3b3a3345d91fe620"
+    },
+    {
+      "path": "preflight-attempt1/logs/mygo-startup-r1.log",
+      "bytes": 496,
+      "sha256": "b80d3a77976f871a912b3af69e2cdf127ae229626aa2147e0196136cf57f4e65"
+    },
+    {
+      "path": "preflight-attempt1/logs/nanoui-animation-r1.log",
+      "bytes": 45599,
+      "sha256": "98d43c739b05cccc98d3b98012ddc25a126749b9e7c472c2f785310332dfbb0b"
+    },
+    {
+      "path": "preflight-attempt1/logs/nanoui-busy-r1.log",
+      "bytes": 1859,
+      "sha256": "2cacf73dbf96b004fce41f7320f8e483377b769fe318028a94d9750f9cc880b9"
+    },
+    {
+      "path": "preflight-attempt1/logs/nanoui-heavy-r1.log",
+      "bytes": 447291,
+      "sha256": "aa0bee3e1f2c29dafa85fa6c4ce7a162639e7d13ced0bc2cf7afd10da2a1e4b8"
+    },
+    {
+      "path": "preflight-attempt1/logs/nanoui-idle-r1.log",
+      "bytes": 653,
+      "sha256": "9754981313251fc2e9029fe9c953476cb62d0ffe4c7ead11328e8b0c7b096b24"
+    },
+    {
+      "path": "preflight-attempt1/logs/nanoui-startup-r1.log",
+      "bytes": 653,
+      "sha256": "d8c965f57fc5d597fc5353414d678d65c5e7059b3237c070029bee099a813b66"
+    },
+    {
+      "path": "preflight-attempt1/logs/zeronsh-zgui-animation-r1.log",
+      "bytes": 45613,
+      "sha256": "ca4af1dd7e48a3c9f53145caf76bfc7f53d5445895e0f66bf43da2433d1e3257"
+    },
+    {
+      "path": "preflight-attempt1/logs/zeronsh-zgui-busy-r1.log",
+      "bytes": 1456,
+      "sha256": "8e4f9a3c39244d109a7af4290f5199ef57cd53c50d9e85b8cca07125fb68783e"
+    },
+    {
+      "path": "preflight-attempt1/logs/zeronsh-zgui-heavy-r1.log",
+      "bytes": 446695,
+      "sha256": "420d22b4e1c8c1c3e068c144ec9a3930787ab5287d85ca7307a220ce41340154"
+    },
+    {
+      "path": "preflight-attempt1/logs/zeronsh-zgui-idle-r1.log",
+      "bytes": 543,
+      "sha256": "2fcf05d221699db72bb2b88e6f5f82ad68e1bf52fb4f0436f6e1ea8493faf8b9"
+    },
+    {
+      "path": "preflight-attempt1/logs/zeronsh-zgui-startup-r1.log",
+      "bytes": 543,
+      "sha256": "ffab47d49183e68f96787a3fc1a363af158bfab699aa9b0200f8d313abaaaf1f"
+    },
+    {
+      "path": "preflight-attempt1/logs/zortax-zgui-animation-r1.log",
+      "bytes": 45535,
+      "sha256": "80b6ac0362350e2d6eb3949ed3dc6f34960df77dd0e2c6c08834afefe801e3bf"
+    },
+    {
+      "path": "preflight-attempt1/logs/zortax-zgui-busy-r1.log",
+      "bytes": 1487,
+      "sha256": "510330bff04e26a8f2d22133a36e1c55fcdab1ffa6bc29fb7d9d73473514699a"
+    },
+    {
+      "path": "preflight-attempt1/logs/zortax-zgui-heavy-r1.log",
+      "bytes": 446837,
+      "sha256": "9e4acd3c6b7f3c8d16e7085132c98872548a2ad90dc5ae1f41b490f028513e39"
+    },
+    {
+      "path": "preflight-attempt1/logs/zortax-zgui-idle-r1.log",
+      "bytes": 605,
+      "sha256": "2acc3e9048a55b6e52fbc48a0966276c7af5be051a3b46e375eb22e5bfbd172e"
+    },
+    {
+      "path": "preflight-attempt1/logs/zortax-zgui-startup-r1.log",
+      "bytes": 604,
+      "sha256": "b39550fc4f125cdf14902abbc5e3a196f21d33f1cd7284d53fcf348a457b98cd"
+    },
+    {
+      "path": "preflight-attempt1/manifest.json",
+      "bytes": 108097,
+      "sha256": "66756cba424c6cb6571290e0a3c3e322152b876cb5cf6c5c5f64b06564fe299a"
+    },
+    {
+      "path": "preflight-attempt1/metadata.json",
+      "bytes": 22419,
+      "sha256": "fe2dd4cc70f1a80fbd2be0d3cc926f99385e36407bdbae7decb4012582e78028"
+    },
+    {
+      "path": "preflight-attempt1/report.md",
+      "bytes": 3360,
+      "sha256": "22bc9c564f64956eeadba2012e7d6decc611b04b6c55dffd7aec0d3b3020b6d1"
+    },
+    {
+      "path": "preflight-attempt1/results.jsonl",
+      "bytes": 4544757,
+      "sha256": "f5f13608daa52caed52985d735ba28e4dc0fd0589a6d307dfd38e39714e49304"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "ae2d4ff6b6df06ddbfddc5201193221442d396c3d5de24c6b91d417c94ad98ad"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "3624000bc4094f156a4161a4bfaff40cb2f78e554769d32a2b621d951789a8f8"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8a212e1322e4b0f90bd7f9f038255e432a1339d31ebf81bf931d646911e9f34a"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "b7d12f205210891e1b8e21a9b5b43eed351a4ce646e2d048eeb4f68db92479d7"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "068248ec4b84d247d4e400fa15c07d24bbd49fb67a789fc27ebdb1bd9ad45610"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/gpui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "56362bc2bf08484706a5f82da5ab2774ceb46222ee405c78e061e0f6d39b511c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "5ddc5f1a36fb98800e2265d9bd1a801a45fe56499ebc1cdc470ddb9dde0056b9"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "41ff97a58bf86bd7b89d59cb1b679f7f406a65cc8e7bb1feaef1425d8c58d10e"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "e5e71c377add6da42879b12291d143058b125247ddb1aac685f916bbd93e7615"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/mygo-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "faf5c29d2a109a0fa5a082417e3b962ec984d4f4a94b9d1f53f4cadf42aabae2"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "af15c8bcbae0e73f952d580c933473b8f960795225654818eb28153b2d9a697c"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "eddd8ce7c2ccc2530676b93e039bca33134321479c10e5a2e1bd7724aecf88c3"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8e8874f1f4df36f140302e020ba763f9360d961edf45086cb81767c8d970c6cb"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/nanoui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "d0da48d7ad711851fed0435be8f3e2ea4070b9860abd97d1e72cad687440326a"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "8dc4bc5c07d51fd353d41b48b9157b48411ba269cd1c5f0a9d77de7396a03fe7"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8ff28f664eb007f2aff850f280fb70cee450302e2bf0f32514d9e425fc1c4ad9"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7e24c6f52139aa19518667f4c480c8fabd344393d3163bb7f1038b3874233ba8"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2613df9ef55f3820faa6200388efb6978bc547fd73fb83811a1167b9045d4af4"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zeronsh-zgui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "be871fb3f6854762566a72eaad16f494be6242c50eff1361778c3d5d2cc9887b"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "40f0154df6e8083e097e42c35bebdd257bb775340b713ad21feec407915d5d46"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-heavy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "d3fd140b441c5748a67a2cdd2700e6408fa05146572b8e0f28b67232bd39a6b1"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-heavy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-startup-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/screenshots/zortax-zgui-startup-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "preflight-attempt1/sizes.json",
+      "bytes": 17893,
+      "sha256": "5d11458c9a4de8b3abd27948ce164d945392d6d8674469adc9a57e152e66c672"
+    },
+    {
+      "path": "presentation-audit-v1.json",
+      "bytes": 58598,
+      "sha256": "142bc57ac73bb9e4dab7955259a9a6eebcbdd27745daafa93ab00daf7b5fc2e3"
+    },
+    {
+      "path": "presentation_audit.py",
+      "bytes": 6638,
+      "sha256": "a60b68d6ef1264fbcb3e637b749a134bb970a227fc339aeb9d273436a941a974"
+    },
+    {
+      "path": "provenance/audited_report.py",
+      "bytes": 13422,
+      "sha256": "920e7f640ae160469c825e0f598dc5828cacfbf48ee7b8545c36acefe908fe9b"
+    },
+    {
+      "path": "provenance/build-native-present-control-v1.sh",
+      "bytes": 1245,
+      "sha256": "294e3f7574a1edc2734f51e454f33feeb6901aab1ebe459fe65b9ab719a194e7"
+    },
+    {
+      "path": "provenance/build-run-plan.json",
+      "bytes": 7410,
+      "sha256": "79130f47bff864e9aa583ea3911644335e2907fc588c670e929d7e381cb54e88"
+    },
+    {
+      "path": "provenance/build_one.py",
+      "bytes": 3834,
+      "sha256": "75dc6670f850bd7a31f089f872c3f2b9bb2d3f8376a5911ce972f293b5e49fb4"
+    },
+    {
+      "path": "provenance/builds/driver-status.json",
+      "bytes": 75,
+      "sha256": "e3eb1b9642d0de99e58e66772b245fd9cad55a1e792ee6f440cb93ae6df8a5f8"
+    },
+    {
+      "path": "provenance/builds/driver.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/driver.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/driver.py",
+      "bytes": 1377,
+      "sha256": "722d48bd591897e04d450a817d53e5e8623da5ab1ea9ff3433beca717d5ea75d"
+    },
+    {
+      "path": "provenance/builds/gpui-build.log",
+      "bytes": 9078,
+      "sha256": "a9b7d691f35d6b29895d5bf2ee5cbb3c95be57cc08308b8e8319b3b57fcbfb63"
+    },
+    {
+      "path": "provenance/builds/gpui-build.sh",
+      "bytes": 717,
+      "sha256": "591271a71a7e7f76a72fb138e7f0de7713f561d0460717be51f5297487e36a30"
+    },
+    {
+      "path": "provenance/builds/gpui-command.json",
+      "bytes": 116,
+      "sha256": "89c49fcb3f55dbc15eb521a3b5b2db318b56d41ea78209ba3f8c258997da3d9b"
+    },
+    {
+      "path": "provenance/builds/gpui-receipt.json",
+      "bytes": 2622,
+      "sha256": "b75bedcf7f12f1aba6485d78032e3aa48aa1531941805f63cb054f61b6fddac4"
+    },
+    {
+      "path": "provenance/builds/gpui-supervisor.json",
+      "bytes": 380,
+      "sha256": "872c247dcd3523589aad57c789b5d78d8c40049a93c42594349f415be8e5b814"
+    },
+    {
+      "path": "provenance/builds/gpui-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/mygo-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/mygo-build.sh",
+      "bytes": 716,
+      "sha256": "76fb0e5da65e6a5b06a280e5a35ffaeba304ee121613dd66b00b13cecf6ea5f0"
+    },
+    {
+      "path": "provenance/builds/mygo-command.json",
+      "bytes": 116,
+      "sha256": "51e379704972b894bb61b992e584a9674cb66ef9f149bbf23a6de2f4bea100da"
+    },
+    {
+      "path": "provenance/builds/mygo-fault-controls-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/mygo-fault-controls-receipt.json",
+      "bytes": 2053,
+      "sha256": "d45414f5ce68abea67f211ffb80c0231489b4225e3740b93669c75fd8cdd6230"
+    },
+    {
+      "path": "provenance/builds/mygo-fault-controls-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/mygo-final-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/mygo-final-receipt.json",
+      "bytes": 2054,
+      "sha256": "e67dc03a027e7b1d2808e6aa62ba39d72f7d6c6f5ca3f67bd0bf6523f1ea341c"
+    },
+    {
+      "path": "provenance/builds/mygo-receipt.json",
+      "bytes": 2137,
+      "sha256": "e96dd13a962b0560978b2fea909038fea6ea7d835ba9123b13e1ef7df707428a"
+    },
+    {
+      "path": "provenance/builds/nanoui-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/nanoui-build.sh",
+      "bytes": 688,
+      "sha256": "db9ce5235d01530c7457e056ea50eaa796d425bb8e24eddda1d4deabbb7970c8"
+    },
+    {
+      "path": "provenance/builds/nanoui-command.json",
+      "bytes": 118,
+      "sha256": "4b0cefa260d78ecc61b26301b678c5f97f1cfbeac2cbb8e1c405575104d92a5f"
+    },
+    {
+      "path": "provenance/builds/nanoui-receipt.json",
+      "bytes": 2790,
+      "sha256": "761936544499bac2f24ba05105a7acc6077c60ad009292a61121c4a281315f90"
+    },
+    {
+      "path": "provenance/builds/native-present-control-v1-build.log",
+      "bytes": 332,
+      "sha256": "b26ebdfbfc92c35080ec6dea4017ad843110de31e47d8cf2fe7d066c68ab92ce"
+    },
+    {
+      "path": "provenance/builds/native-present-control-v1-receipt.json",
+      "bytes": 2377,
+      "sha256": "7e5363018ea2952167c6c9ae5c1c4fdf002ae9228009444ccfcc7e61c542301f"
+    },
+    {
+      "path": "provenance/builds/rust-peers-driver.py",
+      "bytes": 845,
+      "sha256": "743551a33b6671af6badb7cc739dcc3b7f7c57ba51ca29d7f90c92417657ac71"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry2-driver.py",
+      "bytes": 866,
+      "sha256": "4000e9ac173439f147bd161984ff64f791e7e46bf224ba124feab919725ab7b1"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry2-supervisor.json",
+      "bytes": 192,
+      "sha256": "492d1cf541d230a22bf2ef81796482d733a17fc87c37a2e67037fc8fee9d393c"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry2-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry4-driver.py",
+      "bytes": 866,
+      "sha256": "06e19f9a3373c695154f063958074a7bb5e99c449022b225d293c69f7945ae00"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry4-supervisor.json",
+      "bytes": 192,
+      "sha256": "66ee1f40c8d33ccfc055d38ffa5ee5ee0e0fbcf45d6d8f2d89959c0e37d9358f"
+    },
+    {
+      "path": "provenance/builds/rust-peers-retry4-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/rust-peers-supervisor.json",
+      "bytes": 192,
+      "sha256": "eb1d7b5f2a106b699c3d57ca194c1546780159f1763147074136a85453678b2f"
+    },
+    {
+      "path": "provenance/builds/rust-peers-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/supervisor.json",
+      "bytes": 320,
+      "sha256": "754a84267bd1fa3661c065ddb5df7e84e5b1aab64598ecb4cfe0172bc9b5f957"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-build.log",
+      "bytes": 11676,
+      "sha256": "724b0edb15ece2defbf03a6a5af69612707a6a9f4de91cab0c93207a0e5299c5"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-build.sh",
+      "bytes": 922,
+      "sha256": "67f73bfa6990f8f88cabff0a81455301966090708cc06af362d0a899e16efea7"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-command.json",
+      "bytes": 123,
+      "sha256": "4c18071f1e77bb3ca0ea9ddf8d5d86934fa6fdee48089b4d2f5a917e803db192"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-receipt.json",
+      "bytes": 2019,
+      "sha256": "6c0927d3ee5fd5d5dcd68bbbebeea430bcf024176c093147e814b75e31684465"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-retry2-build.log",
+      "bytes": 290,
+      "sha256": "7f8e32477f24a3be681b73c2e015be2a2cb7cf0459f5e09ca28298c9e3126aaa"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-retry2-receipt.json",
+      "bytes": 2108,
+      "sha256": "a6037285b3f7871c0d989e6a21bfc3ba6348aa7bd16095c06ac3cad244466b5b"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-retry4-build.log",
+      "bytes": 290,
+      "sha256": "77076541358d78367dbe7c7660f0cb3a1e688ec543e8eb00a04719fe9099bb1c"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-retry4-receipt.json",
+      "bytes": 2347,
+      "sha256": "54c9b58afd60f0b07473b7c820fc04872a331d4cb95630891926e4a1f8923dc9"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-build.log",
+      "bytes": 13826,
+      "sha256": "1e566ff53f84616fa0ca7317cf2b33c487e9290ee6cd4bfc144ca7ac1700690e"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-build.sh",
+      "bytes": 928,
+      "sha256": "9be6fb6b766afd8b431185ac890a510d13f00025cdecd4920d58baad7db3bfd8"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-command.json",
+      "bytes": 122,
+      "sha256": "fad63180747365bca5112f313f9062f5e4c688ff8a8c9873f1ecf20bc88a838f"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-final-build.log",
+      "bytes": 820,
+      "sha256": "6aabd3531121a07aa9612d72f04e42bf7449db829da2157d28715cd86e1994fb"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-final-receipt.json",
+      "bytes": 50472,
+      "sha256": "f3fcb4af83a3979ad0b23fe74d75d1e46c096cbe02712867821f33c2e07ec649"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-layout-build.log",
+      "bytes": 820,
+      "sha256": "d465de0c03269f27660e5989666a8cd52a6e5cf71eea67eb52bcad91ad029183"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-layout-receipt.json",
+      "bytes": 50474,
+      "sha256": "ab721b17ce9b7439ba7aee64c410043ec25504c54ff8c494f0d8c8a60adf881f"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-qualified-build.log",
+      "bytes": 7098,
+      "sha256": "94836bd5b0669672e44d129128790c50ea6c25c76e0c06c8743d4c2649d599e8"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-qualified-receipt.json",
+      "bytes": 50417,
+      "sha256": "f23bb2594a980a48b916382857c6b883e1eb8eb79cf035ce459e0bbf935ee440"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-qualified2-build.log",
+      "bytes": 820,
+      "sha256": "19abd1dac4133391369c80ae4630b01b58c60fc1bfbb48e0c9a9965047804543"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-qualified2-receipt.json",
+      "bytes": 50240,
+      "sha256": "096160782a124ddbcd3ba9dfee7b981b3e766ee8f0dd836ae7d0cab3d05298c3"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-receipt.json",
+      "bytes": 50911,
+      "sha256": "93748c2a1f28b3bf32a203efceed24cc278e6d22076e74ca6032342a7d5faa97"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry2-build.log",
+      "bytes": 3001,
+      "sha256": "5a5f472c9cab198b6d76252153fab95a7c75f3a9ad9cfa6c27f368fd95e80380"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry2-receipt.json",
+      "bytes": 50173,
+      "sha256": "73e6a7fcdf09174af592cc523a69c266c9ee6a5582399ceeb89027d8064dd2fe"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry3-build.log",
+      "bytes": 7047,
+      "sha256": "1e12da2342cf4f350a636dc7fd64e86d471006513d5d0cbffedd508995b8397b"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry3-receipt.json",
+      "bytes": 50174,
+      "sha256": "a836ab2dc79760866405598b8b9cee51aea7ff33aa1841957be5d6aabf55242e"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry3-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry4-build.log",
+      "bytes": 3943,
+      "sha256": "60e28daf6f1001f89552428f8faac6b7ead0beb430bf492077e7ea04239ade04"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry4-receipt.json",
+      "bytes": 50173,
+      "sha256": "3d8366c1ceb1f16adb3e1b80f01eb3cfe325318e259c2b14e9d9f60ac105b8fd"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry5-build.log",
+      "bytes": 1798,
+      "sha256": "d436b9731aa967a3c73f044a924053d8c2aa90cc8c71f0fe5a08c8784b335070"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry5-receipt.json",
+      "bytes": 50173,
+      "sha256": "4aa0139969cfe55abf6d989ca5c78a57b7e3bf751b36e5238717b29da73497d1"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry5-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry6-build.log",
+      "bytes": 1456,
+      "sha256": "c666bfcc21e2f6e786e06c0f561965139b80477fbd025cc4ed6f4d96684ee84d"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry6-receipt.json",
+      "bytes": 50173,
+      "sha256": "54250ff89ff7ea8caa387871f85b298c1f78f913b9533c9a2dc51d044a6f59c6"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry6-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry7-build.log",
+      "bytes": 820,
+      "sha256": "9e637f9de780cb9a3a659b8bc21e79e8f39b20ef2ae120ad1389b1e049e56d39"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry7-receipt.json",
+      "bytes": 50234,
+      "sha256": "c2ef9e56e432cbfb1bd6c3bb9b6345fe110014b86e56014ebfe3cf33d1e19d7d"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-retry7-supervisor.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provenance/capture-driver.py",
+      "bytes": 3423,
+      "sha256": "37232bfb633af745d9e597288b8f04b024a3e2e234ee7140ff3c979ab5486290"
+    },
+    {
+      "path": "provenance/capture-input-inventory.json",
+      "bytes": 34333,
+      "sha256": "35cfbcd1396d83215ccc8384bd85a5207ca250fb1fee22fc671f66f429cf6922"
+    },
+    {
+      "path": "provenance/capture-supervisor.json",
+      "bytes": 1212,
+      "sha256": "0476e52983a081895c9110700be427da79311e5220eed70feeb02827faf95045"
+    },
+    {
+      "path": "provenance/capture-supervisor.log",
+      "bytes": 2970,
+      "sha256": "8dae9ba7a3dcade52dd4632dfbfac98e06bf475a6fb68f7604efce2cef1ac521"
+    },
+    {
+      "path": "provenance/compiler-versions.json",
+      "bytes": 305,
+      "sha256": "8e13547b0edc7cc458abbf5335a87c5ac617fd5a88936a279697e79b5f5e1f78"
+    },
+    {
+      "path": "provenance/export-gpui.py",
+      "bytes": 2841,
+      "sha256": "1c6688269a058140e8ecb8afe4493761af9ac2e52e292c362656e1b760fa6cf3"
+    },
+    {
+      "path": "provenance/export-peers.py",
+      "bytes": 2610,
+      "sha256": "99a88bd34b7a6758dd79ab578e7984889f5060c6e4b0155775f423ebf71923ae"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/duplicate-ticks/logs/mygo-animation-r1.log",
+      "bytes": 45355,
+      "sha256": "97364aab64d06c594ab28fea59bd70325047cdd5b170eba770fe419b732b49cb"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/duplicate-ticks/result.json",
+      "bytes": 117668,
+      "sha256": "c0c98db1f94ab8137052c16116093130ed281da66ea979eacfc5020051434ace"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/duplicate-ticks/screenshots/mygo-animation-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "63a96c1b0bb53cf50bb0cd69df6bdc85f8c458d788ab98730640dd383dc4e1b8"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/duplicate-ticks/screenshots/mygo-animation-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/hover-only-suppressed-callback/logs/mygo-busy-r1.log",
+      "bytes": 1345,
+      "sha256": "2412984dc9f554fe7c9672881873e35ad3942e2f2c05aa9ce9c4a3426c6c40c5"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/hover-only-suppressed-callback/result.json",
+      "bytes": 29943,
+      "sha256": "50e1076530daa476c1e6b752c31f33d24278ad1fa079a9cc752c0d5e0e04f451"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/hover-only-suppressed-callback/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "69e430bea5187340762c8501fd9b72f6163145aca79680c44c17649259d88634"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/hover-only-suppressed-callback/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/missing-present/logs/mygo-idle-r1.log",
+      "bytes": 420,
+      "sha256": "08fad04d49c16b39da68cead405676e392ffcc516a779c20c28c4391f026eaf4"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/missing-present/result.json",
+      "bytes": 1616,
+      "sha256": "cf2350b08438187e454a2b4e1f4c80d3c7de77cac0de671cd8b4525f7a39f2ac"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/observer-overflow/logs/mygo-busy-r1.log",
+      "bytes": 1226,
+      "sha256": "45b4770d6a0a072343bcd2de47e543af5a28a71726ad93984e95d0c21e76df27"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/observer-overflow/result.json",
+      "bytes": 29471,
+      "sha256": "8110dada996f4d4d5d939024b3810c9424e1779cb9386f145648d2364c748e2b"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/observer-overflow/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/observer-overflow/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/positive/logs/mygo-busy-r1.log",
+      "bytes": 1435,
+      "sha256": "617c64de9f0209dd67c0052f9cab18d6302e6df95a230aea6a29aab1738800d6"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/positive/result.json",
+      "bytes": 30205,
+      "sha256": "f2319f8b53d114527fa232367d98ea31d920647dcc2f66c0c1f373b410bb8530"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/positive/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/positive/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/stale-marker/logs/mygo-busy-r1.log",
+      "bytes": 1426,
+      "sha256": "fff7ebd28f076370759f98742e0e03a2e9ce0e6634273b5e54ebcea10b22736b"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/stale-marker/result.json",
+      "bytes": 28833,
+      "sha256": "919c45cf36d89f7e36b74ea22edef72307629977b230cb044c0379415c16747e"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/stale-marker/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "fad2f7b6df585a203ee0473c07fa72584a97ab4737443bde8d4223fbcf625a78"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/stale-marker/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/summary.json",
+      "bytes": 31358,
+      "sha256": "ff5f0419a0a24b8e4914dc00daba78b532d1d50d918ffb38ce3d79ab616bf5ba"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/term-handled-zero/logs/mygo-idle-r1.log",
+      "bytes": 496,
+      "sha256": "b72ebda44c870c8c72e4028ed68942248c1d7da987badf5add0f7aaa9595f461"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/term-handled-zero/result.json",
+      "bytes": 22188,
+      "sha256": "be0fd906f192ea925ab92a7e4bf1451d714f5358b95e704e09400d0c8ef76bc2"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/term-handled-zero/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "provenance/fault-controls-quiet/term-handled-zero/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "provenance/fault-smoke.py",
+      "bytes": 3343,
+      "sha256": "2015e8694c602c35f9d05d113c7f13c58f226a799ab92cb6a5fadbd809b9ae28"
+    },
+    {
+      "path": "provenance/fault_controls.py",
+      "bytes": 4161,
+      "sha256": "f112e1e4eb2a4aadee4ca0a3af54c519fb1df94f0135173487289e315eeffc9b"
+    },
+    {
+      "path": "provenance/final-adapters/mygo.patch",
+      "bytes": 10804,
+      "sha256": "38b3c022b94c5b68701045cbc8a72740dc6bc7cc115fb0d01445760ed6719504"
+    },
+    {
+      "path": "provenance/final-adapters/nanoui.patch",
+      "bytes": 12119,
+      "sha256": "21cf1e86e8c9f23cb31fcf18701df8f08e854a94e5c570b29dd9e2b05ec3bcef"
+    },
+    {
+      "path": "provenance/final-adapters/zeronsh-zgui.patch",
+      "bytes": 17293,
+      "sha256": "1fa743121b4416d1b0e2b81a9f45147c68ed653a287f4749b35b83b62a37bd32"
+    },
+    {
+      "path": "provenance/final-adapters/zortax-zgui.patch",
+      "bytes": 22758,
+      "sha256": "c15fc29db6014114a72f32a6de8ecf665f917f1d3aa65d1b9ef12fb63a95dc75"
+    },
+    {
+      "path": "provenance/full-peer-export-audit.json",
+      "bytes": 2435,
+      "sha256": "ea882e6678f49104f046de23f75aa57e08e4d2fc4ae6729accced99ecb8d16e8"
+    },
+    {
+      "path": "provenance/full-peer-export-initial-audit.json",
+      "bytes": 2435,
+      "sha256": "9c262f31d2d3a511c118e8d4f632346081c9da1099fdaabb6e60f281de80b7a1"
+    },
+    {
+      "path": "provenance/gpui-auto-profile-v1.py",
+      "bytes": 2641,
+      "sha256": "0545ce9491f716a88a7ecbb6c55f9d356d1d2cfd206c8d517d065dabd2eb38c2"
+    },
+    {
+      "path": "provenance/gpui-auto-startup-v2.py",
+      "bytes": 2672,
+      "sha256": "58b805e5690c2f1d7d99640c7759bd2f20a77c9eb4b3a4784c394695d34f6ce6"
+    },
+    {
+      "path": "provenance/gpui-benchmark-overlay.patch",
+      "bytes": 179810,
+      "sha256": "62fed784665f960bb0b2a17d7f2034497ade42accf94b46376c6fc714078dd68"
+    },
+    {
+      "path": "provenance/gpui-build-source-manifest.json",
+      "bytes": 540020,
+      "sha256": "b307e6a221159a235d768b221a2219d8ca3e1eb7d30d831c63064385074c3dd2"
+    },
+    {
+      "path": "provenance/gpui-runtime-adapter.patch",
+      "bytes": 15972,
+      "sha256": "13024a098d7a49b708dc37a5e07729975571bf178dbcf42577f1d613c128d967"
+    },
+    {
+      "path": "provenance/gpui-smoke.py",
+      "bytes": 2341,
+      "sha256": "54d3eee4d6024ec03d28792f64bbb76d16eb7a31a5ec6e58315b02d82f6c5f32"
+    },
+    {
+      "path": "provenance/gtk-cairo-closure.txt",
+      "bytes": 7824,
+      "sha256": "46aa2ca72fc1a71fb89336ce8e740547e96ff267d599d2bfdbf95defc46b4cfb"
+    },
+    {
+      "path": "provenance/manifest.json",
+      "bytes": 108101,
+      "sha256": "6568754b4d7e0b80b89faf6a6e2396052802f1084789f20054824087e52d0143"
+    },
+    {
+      "path": "provenance/native-present-control-driver-v1.py",
+      "bytes": 3741,
+      "sha256": "963512e91755074cb267cae65e4b50fd2484418dfc6edb333c154071ae3ad312"
+    },
+    {
+      "path": "provenance/native-present-control-v1.patch",
+      "bytes": 2546,
+      "sha256": "2b4e52c3676a7a3b643082813db5eed57dfc952ac7c01881f190a61a662ede60"
+    },
+    {
+      "path": "provenance/pkg-config-closure.txt",
+      "bytes": 549,
+      "sha256": "2c58b7f6a21e886f98ead33fb3cd483877e89269ecb16677a2f67445a01073ba"
+    },
+    {
+      "path": "provenance/postcapture-measure-v1.py",
+      "bytes": 6457,
+      "sha256": "bf592eafeca4fba9813fe5dfece8f8bb95c731b4f7c7395b3ec74a80d761fd69"
+    },
+    {
+      "path": "provenance/postcapture-measure-v2.py",
+      "bytes": 6457,
+      "sha256": "502dd22c45d5e52b8c813dfeb6a501af452585c6dbc85f80c7f51b5d8cdaf0cf"
+    },
+    {
+      "path": "provenance/postcapture-qualify-v1.py",
+      "bytes": 6235,
+      "sha256": "dec806e6bfcf02168e40e9c54e3c6f4f7a3b019ab9346d30ff55fa64a451ad2d"
+    },
+    {
+      "path": "provenance/postcapture-zortax-qualify-v2.py",
+      "bytes": 6202,
+      "sha256": "2c8d358f1a55b66f4387bc95625fa6f1c5fa58718bdcb1a3b0ea3bf9eb3922e6"
+    },
+    {
+      "path": "provenance/presentation_audit.py",
+      "bytes": 6638,
+      "sha256": "a60b68d6ef1264fbcb3e637b749a134bb970a227fc339aeb9d273436a941a974"
+    },
+    {
+      "path": "provenance/qualification.json",
+      "bytes": 35458,
+      "sha256": "6693dd8b68ac32877b0e71c12d462a0846b54c788df506da93c2ceebb69383ab"
+    },
+    {
+      "path": "provenance/registry-inventory.json",
+      "bytes": 281,
+      "sha256": "01a39fe530e265403f44388c459036472ad57b5e56ff32d97ccdee7a2cd61d3c"
+    },
+    {
+      "path": "provenance/run.py",
+      "bytes": 26322,
+      "sha256": "1421bb918cee943ec0f95c394ca458080dd58c3a21e8a2afdc9282224ca7c2f1"
+    },
+    {
+      "path": "provenance/runtime-closure-roots.json",
+      "bytes": 9939,
+      "sha256": "64391cafc6f9b8582c6352382ca0b8cdcf3555fc1f6fa44b0347baeb4d5ecb4a"
+    },
+    {
+      "path": "provenance/seal-evidence.py",
+      "bytes": 2713,
+      "sha256": "196a7e9019ad3e441b47fd3f24c9d1fdffa38a9c0a72ef20e211de3f96297024"
+    },
+    {
+      "path": "provenance/seal-source-elf-artifacts.py",
+      "bytes": 4350,
+      "sha256": "4238d4cd3db3dbf9b9f480b91a77a3462710195e3563957482421fe9495fc7d8"
+    },
+    {
+      "path": "provenance/smoke.py",
+      "bytes": 2411,
+      "sha256": "c0d1655a64bcedc2da61bfd6bfc4d58037a3a12deb28c6a29d5c492090cd384a"
+    },
+    {
+      "path": "provenance/stage-native-coalescing.py",
+      "bytes": 2146,
+      "sha256": "09b333ff3777413d6569665971dc4a721aa8867baafaf6baaca67bc2dd70ffd3"
+    },
+    {
+      "path": "provenance/todo_core.py",
+      "bytes": 77912,
+      "sha256": "ccc9713653d52f42d2369e27ef4ffeacaa670d2f7498f9a25c1b9a0331646201"
+    },
+    {
+      "path": "provenance/verify-adapter-patches.py",
+      "bytes": 1715,
+      "sha256": "55fdbe1f7a0f54b5c84d1f48e695a6ed940831192f26db30ab6ca9d561f72c60"
+    },
+    {
+      "path": "provenance/xvfb-capture.log",
+      "bytes": 67811,
+      "sha256": "0c1409eb90f31badd2f88105ede84822c1582971fc9f61dd9871fa695b5147c7"
+    },
+    {
+      "path": "provenance/xvfb-faults.log",
+      "bytes": 5719,
+      "sha256": "f28148852d264a8c65366530e5dd1f09ca57956cbe84fd1efba7f607eecf6d8a"
+    },
+    {
+      "path": "provenance/xvfb-faults2.log",
+      "bytes": 6536,
+      "sha256": "ea6e095bde04d5f3b85426deae2cd1a6596b26b4d145b34961538e1ad6fcf361"
+    },
+    {
+      "path": "provenance/xvfb-fixed.log",
+      "bytes": 4085,
+      "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+    },
+    {
+      "path": "provenance/xvfb-gpui-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "provenance/xvfb-preflight.log",
+      "bytes": 21242,
+      "sha256": "afc411710540a83166badb8f6ff40a75ffe3efe038713bc28eef07cdec75a6ee"
+    },
+    {
+      "path": "provenance/xvfb-zeron-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "provenance/xvfb-zeron-smoke2.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "provenance/xvfb-zeron-smoke3.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "provenance/xvfb-zortax-qualified.log",
+      "bytes": 1634,
+      "sha256": "ee3c08f7e6b04799eb02a81297e0de66e99fee84c3dd27c9b7625972ac4a687f"
+    },
+    {
+      "path": "provenance/xvfb-zortax-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "provenance/xvfb.log",
+      "bytes": 4085,
+      "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+    },
+    {
+      "path": "provenance/zeron-smoke.py",
+      "bytes": 2376,
+      "sha256": "4b2129a2a80a4f6eda55c05ae477f990725690c945d1ac87774f56c64bbeb899"
+    },
+    {
+      "path": "provenance/zortax-smoke.py",
+      "bytes": 2374,
+      "sha256": "fa6b11c14ec0375785f92fd55f93d2d2369fe6aca0c0ef94f44ef2d25702684e"
+    },
+    {
+      "path": "qualification.json",
+      "bytes": 35458,
+      "sha256": "6693dd8b68ac32877b0e71c12d462a0846b54c788df506da93c2ceebb69383ab"
+    },
+    {
+      "path": "registry-inventory.json",
+      "bytes": 281,
+      "sha256": "01a39fe530e265403f44388c459036472ad57b5e56ff32d97ccdee7a2cd61d3c"
+    },
+    {
+      "path": "smoke-fixed-input/logs/mygo-busy-r1.log",
+      "bytes": 1755,
+      "sha256": "b7222048767500ca6c7295213e1d9a53908606652fbaa8f48397d07b86491d6e"
+    },
+    {
+      "path": "smoke-fixed-input/logs/mygo-idle-r1.log",
+      "bytes": 818,
+      "sha256": "27b496efd0f2148224a7a99744b42b18f8f938883337ea54c949a6f019dd8ab0"
+    },
+    {
+      "path": "smoke-fixed-input/logs/nanoui-busy-r1.log",
+      "bytes": 2170,
+      "sha256": "82b394bc5314fc9bef8340b4ce5a153aa503202757f4f564ef2d7e6f0119954b"
+    },
+    {
+      "path": "smoke-fixed-input/logs/nanoui-idle-r1.log",
+      "bytes": 976,
+      "sha256": "8f680d40096df53c69b620ff55ac489529164431e0585e00ad93cf6e585d894f"
+    },
+    {
+      "path": "smoke-fixed-input/mygo-busy.json",
+      "bytes": 31087,
+      "sha256": "1c446157dde33de3725caee2892de00fb2cc05554657895a13c946d7ec95d583"
+    },
+    {
+      "path": "smoke-fixed-input/mygo-idle.json",
+      "bytes": 22035,
+      "sha256": "07c1005df6db21213dd2cc64b7468047af7b3166fcd8b3e2f88f1c0b5225577e"
+    },
+    {
+      "path": "smoke-fixed-input/nanoui-busy.json",
+      "bytes": 32202,
+      "sha256": "322fd7fa3cdf89db6278f832e54ad248d21b9e8a947a73face18d06a6ffe42e5"
+    },
+    {
+      "path": "smoke-fixed-input/nanoui-idle.json",
+      "bytes": 22035,
+      "sha256": "c40bcffae2aaa90e9c53806b3f636c83500a0c927fd9c3b6fb392cb88be405de"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1f793145ba278b37e62d3ddd1a96aae238680a6f52bd55aa340b3f8908b6431d"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "4d989dec66107db0a3a4514e16352ee4899508928c24661bbe8e773aa4c718c6"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/nanoui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "af15c8bcbae0e73f952d580c933473b8f960795225654818eb28153b2d9a697c"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/nanoui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/nanoui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "c6e9770a857b4ffc9792b9d47483cfa300a61cb8852b3e9789e4d9c60852aaa4"
+    },
+    {
+      "path": "smoke-fixed-input/screenshots/nanoui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "smoke-initial/logs/mygo-busy-r1.log",
+      "bytes": 551,
+      "sha256": "c619f82901a87217a2624c9ee2af865e750396d43d499d502ac96bcd7f31bb5a"
+    },
+    {
+      "path": "smoke-initial/logs/mygo-idle-r1.log",
+      "bytes": 499,
+      "sha256": "b41745d1573d33f4cee2a71a86001e54647608ce2121031ab10cef8d529ccbe4"
+    },
+    {
+      "path": "smoke-initial/logs/nanoui-busy-r1.log",
+      "bytes": 599,
+      "sha256": "ea4442ed3bd6abc7cc7ccccba1ad3da59ea32c5f955a8117df1ea4a3498f9947"
+    },
+    {
+      "path": "smoke-initial/logs/nanoui-idle-r1.log",
+      "bytes": 557,
+      "sha256": "c51e2792a43aaa05f1bf9640696fedc3e2da1b018d783463bef8fdccacec08cc"
+    },
+    {
+      "path": "smoke-initial/mygo-busy.json",
+      "bytes": 19450,
+      "sha256": "a45f74b639e4c78766772dbe03c3f3a8b42ab45eff107125dcd6bf4007f01826"
+    },
+    {
+      "path": "smoke-initial/mygo-idle.json",
+      "bytes": 21873,
+      "sha256": "373f3533294d9b4b3106941d9754ad8d9f4fcb6a7ccf832932ab59578087426c"
+    },
+    {
+      "path": "smoke-initial/nanoui-busy.json",
+      "bytes": 19462,
+      "sha256": "79c063fee04b81b4b096115086d7c18a6c7851b6c83349e641a277b8d733b922"
+    },
+    {
+      "path": "smoke-initial/nanoui-idle.json",
+      "bytes": 21855,
+      "sha256": "722a56814c7bf621d012b7ceaaea248aad31435aa33f4740c0ab77ffbf746297"
+    },
+    {
+      "path": "smoke-initial/screenshots/mygo-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2609afbfcbc458d4a97e7866dcf0fa3fd9575adc22e06ccccd71ef164a02ddb6"
+    },
+    {
+      "path": "smoke-initial/screenshots/mygo-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "smoke-initial/screenshots/mygo-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "smoke-initial/screenshots/mygo-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "9c3370ce2025861de753e0f1cf5a7eabbd09d826fa2feff8449b15975305f52d"
+    },
+    {
+      "path": "smoke-initial/screenshots/nanoui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "ea2f869f875a2efc8c1f3591ec08abe49a45b17deb1895aee185c7aa6db86b99"
+    },
+    {
+      "path": "smoke-initial/screenshots/nanoui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "smoke-initial/screenshots/nanoui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "smoke-initial/screenshots/nanoui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "add0d7bf9c7fbda0951a6c80bdebbb6a85cf943ba4eda8f6375627ca8e8885a1"
+    },
+    {
+      "path": "smoke.py",
+      "bytes": 2411,
+      "sha256": "c0d1655a64bcedc2da61bfd6bfc4d58037a3a12deb28c6a29d5c492090cd384a"
+    },
+    {
+      "path": "source-elf-artifact-receipt.json",
+      "bytes": 6130,
+      "sha256": "31a41ec8085916a1f029549a5b007271f2d03c8c8313f0c0eaf428cc71bda875"
+    },
+    {
+      "path": "stage-native-coalescing.py",
+      "bytes": 2146,
+      "sha256": "09b333ff3777413d6569665971dc4a721aa8867baafaf6baaca67bc2dd70ffd3"
+    },
+    {
+      "path": "verification-summary.json",
+      "bytes": 1142,
+      "sha256": "e57a91d220a6efbe94b588fd040d23a4230e4aa355036533f388ebe875c421c5"
+    },
+    {
+      "path": "xvfb-capture.log",
+      "bytes": 67811,
+      "sha256": "0c1409eb90f31badd2f88105ede84822c1582971fc9f61dd9871fa695b5147c7"
+    },
+    {
+      "path": "xvfb-faults.log",
+      "bytes": 5719,
+      "sha256": "f28148852d264a8c65366530e5dd1f09ca57956cbe84fd1efba7f607eecf6d8a"
+    },
+    {
+      "path": "xvfb-faults2.log",
+      "bytes": 6536,
+      "sha256": "ea6e095bde04d5f3b85426deae2cd1a6596b26b4d145b34961538e1ad6fcf361"
+    },
+    {
+      "path": "xvfb-fixed.log",
+      "bytes": 4085,
+      "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+    },
+    {
+      "path": "xvfb-gpui-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "xvfb-preflight.log",
+      "bytes": 21242,
+      "sha256": "afc411710540a83166badb8f6ff40a75ffe3efe038713bc28eef07cdec75a6ee"
+    },
+    {
+      "path": "xvfb-zeron-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "xvfb-zeron-smoke2.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "xvfb-zeron-smoke3.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "xvfb-zortax-qualified.log",
+      "bytes": 1634,
+      "sha256": "ee3c08f7e6b04799eb02a81297e0de66e99fee84c3dd27c9b7625972ac4a687f"
+    },
+    {
+      "path": "xvfb-zortax-smoke.log",
+      "bytes": 2451,
+      "sha256": "79f1c9d296c52bb7005d2367536dd9a4373dc880d1f6832f8b5878adf25f4e5a"
+    },
+    {
+      "path": "xvfb.log",
+      "bytes": 4085,
+      "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+    },
+    {
+      "path": "zeron-smoke-initial/logs/zeronsh-zgui-busy-r1.log",
+      "bytes": 1186,
+      "sha256": "7826b5df0aa23880360606a9e4e0b04fde76e412661edaa78f777c34e362ba20"
+    },
+    {
+      "path": "zeron-smoke-initial/logs/zeronsh-zgui-idle-r1.log",
+      "bytes": 545,
+      "sha256": "27edda25c3bebc6d1018bb89eea3f64f9033edf55c6968475751da536988bc4d"
+    },
+    {
+      "path": "zeron-smoke-initial/screenshots/zeronsh-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "26dc5b357e2510cd503e2c2fb6db07c94b51ad61fb3618adefa1c8062af2cdf9"
+    },
+    {
+      "path": "zeron-smoke-initial/screenshots/zeronsh-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "26dc5b357e2510cd503e2c2fb6db07c94b51ad61fb3618adefa1c8062af2cdf9"
+    },
+    {
+      "path": "zeron-smoke-initial/screenshots/zeronsh-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "26dc5b357e2510cd503e2c2fb6db07c94b51ad61fb3618adefa1c8062af2cdf9"
+    },
+    {
+      "path": "zeron-smoke-initial/screenshots/zeronsh-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "26dc5b357e2510cd503e2c2fb6db07c94b51ad61fb3618adefa1c8062af2cdf9"
+    },
+    {
+      "path": "zeron-smoke-initial/zeronsh-zgui-busy.json",
+      "bytes": 28531,
+      "sha256": "4afc97383ff0819904d10c4672ec69e001a251d8b62d3233a2ecce447bc0bc07"
+    },
+    {
+      "path": "zeron-smoke-initial/zeronsh-zgui-idle.json",
+      "bytes": 22109,
+      "sha256": "2f7231f69b83b62803bea60c8b4a4b0977933e7a686ac538e8b951a7f7ce58ae"
+    },
+    {
+      "path": "zeron-smoke-qualified/logs/zeronsh-zgui-busy-r1.log",
+      "bytes": 1434,
+      "sha256": "acfeb4147ca1f72a6cb453e0d030384c9c9c7753d3963428b2c003b9205868a3"
+    },
+    {
+      "path": "zeron-smoke-qualified/logs/zeronsh-zgui-idle-r1.log",
+      "bytes": 543,
+      "sha256": "4f70a3933556cdd75f44cef01f9dcbb86fbf0a8fe613413003a9fc0c4f6d5b9a"
+    },
+    {
+      "path": "zeron-smoke-qualified/screenshots/zeronsh-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "8ff28f664eb007f2aff850f280fb70cee450302e2bf0f32514d9e425fc1c4ad9"
+    },
+    {
+      "path": "zeron-smoke-qualified/screenshots/zeronsh-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-qualified/screenshots/zeronsh-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-qualified/screenshots/zeronsh-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-qualified/zeronsh-zgui-busy.json",
+      "bytes": 30517,
+      "sha256": "0e2940a6afff4d5ed79c2ca2d26b58b517e53d8c2ad97104da5589733ec2cda6"
+    },
+    {
+      "path": "zeron-smoke-qualified/zeronsh-zgui-idle.json",
+      "bytes": 22069,
+      "sha256": "4112a2305fb22064156f0026d86ff31c67ff5c02f0767fed1213dd81cb296acc"
+    },
+    {
+      "path": "zeron-smoke-reactive/logs/zeronsh-zgui-busy-r1.log",
+      "bytes": 1262,
+      "sha256": "9ebf239ae26ea8020799af3a539705f951e89c1077ce0eed293b63b708bd9c72"
+    },
+    {
+      "path": "zeron-smoke-reactive/logs/zeronsh-zgui-idle-r1.log",
+      "bytes": 543,
+      "sha256": "e1784a86bcc90a31082252ca2fab9b2ebc1d94b547e6481e58c7f5c26f00a6a3"
+    },
+    {
+      "path": "zeron-smoke-reactive/screenshots/zeronsh-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "b7fadb20bae367cc56f4d5f71182a1835419721e07c0b06a5cf81b5a4099970a"
+    },
+    {
+      "path": "zeron-smoke-reactive/screenshots/zeronsh-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-reactive/screenshots/zeronsh-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-reactive/screenshots/zeronsh-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "1e2290432d44568acfbcc9d0ec44004d86dc9fbf9bea118e2193bea78d9cd664"
+    },
+    {
+      "path": "zeron-smoke-reactive/zeronsh-zgui-busy.json",
+      "bytes": 30050,
+      "sha256": "13f487abce380a9320f63a49cd05f0e5d63bd858f070b460f2e70b9ac8cff0c4"
+    },
+    {
+      "path": "zeron-smoke-reactive/zeronsh-zgui-idle.json",
+      "bytes": 22066,
+      "sha256": "a29372526ff9b3c6926184d083c3204b853dd6b9142a63cb3b2352e53bd585f0"
+    },
+    {
+      "path": "zeron-smoke.py",
+      "bytes": 2376,
+      "sha256": "4b2129a2a80a4f6eda55c05ae477f990725690c945d1ac87774f56c64bbeb899"
+    },
+    {
+      "path": "zortax-smoke-initial/logs/zortax-zgui-busy-r1.log",
+      "bytes": 1549,
+      "sha256": "1d28e469af7332a5ebc3ba77501fffd211c2cbb96aea72d15eb0313241e52be8"
+    },
+    {
+      "path": "zortax-smoke-initial/logs/zortax-zgui-idle-r1.log",
+      "bytes": 925,
+      "sha256": "e81711085fdde98486f52a0512be15b0a208e2197be40aed23a86be4e8206aac"
+    },
+    {
+      "path": "zortax-smoke-initial/screenshots/zortax-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "a252869a45110ab01554f497c182582b2e0c0a2a967a32e91d8c1efd0cdceb5e"
+    },
+    {
+      "path": "zortax-smoke-initial/screenshots/zortax-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "zortax-smoke-initial/screenshots/zortax-zgui-idle-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "zortax-smoke-initial/screenshots/zortax-zgui-idle-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "zortax-smoke-initial/zortax-zgui-busy.json",
+      "bytes": 29171,
+      "sha256": "225e57e04072c85aadd00e6b68521e52304e597e756d960257f2f3f235f6fea6"
+    },
+    {
+      "path": "zortax-smoke-initial/zortax-zgui-idle.json",
+      "bytes": 22191,
+      "sha256": "4967efef2f78c07258a813bfc5006c7a3ca96f3d0de6d2cc15ec4fc3aa00a9e2"
+    },
+    {
+      "path": "zortax-smoke-qualified/logs/zortax-zgui-busy-r1.log",
+      "bytes": 1807,
+      "sha256": "1fbe8d25ebea31b00903c9cfd0e383a0b146658f9ab14e382e958079fec02322"
+    },
+    {
+      "path": "zortax-smoke-qualified/screenshots/zortax-zgui-busy-r1-final.ppm",
+      "bytes": 1004415,
+      "sha256": "7ef08e12f3058a0abc5725b411594d531f85c4695e458b88758e4539b591f952"
+    },
+    {
+      "path": "zortax-smoke-qualified/screenshots/zortax-zgui-busy-r1-initial.ppm",
+      "bytes": 1004415,
+      "sha256": "2541c0a01ae5de507dd27a2dbdf626d74ab8864d9e934e556f9ab01423f9a689"
+    },
+    {
+      "path": "zortax-smoke-qualified/zortax-zgui-busy.json",
+      "bytes": 30401,
+      "sha256": "c04a8fd6b6150b74ad3242637c5fe1513c7eb2a5ebcaa17e215b068a3ef261e6"
+    },
+    {
+      "path": "zortax-smoke.py",
+      "bytes": 2374,
+      "sha256": "fa6b11c14ec0375785f92fd55f93d2d2369fe6aca0c0ef94f44ef2d25702684e"
+    }
+  ],
+  "excluded_executable_copies": [
+    {
+      "path": "provenance/builds/mygo-fault-controls-build.log.previous-binary",
+      "bytes": 13812816,
+      "sha256": "be88c3fb890ca44555646fa840fbcf61be8990b18a3b183f881f37f91671a0fe",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    },
+    {
+      "path": "provenance/builds/mygo-final-build.log.previous-binary",
+      "bytes": 13817888,
+      "sha256": "27c4e2210f0ee75284bfd84066a212c2a095c3d48d73d88ad4d198b912ae8c55",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    },
+    {
+      "path": "provenance/builds/zeronsh-zgui-retry4-build.log.previous-binary",
+      "bytes": 21215072,
+      "sha256": "3ed7ed68191217d153f97edee787db20332e2792510b53141df1321c5cb30a00",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-final-build.log.previous-binary",
+      "bytes": 46106080,
+      "sha256": "06e785092d5262ed9216317f6c5a73af665f47b58af2637d6716b215d70ab597",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-layout-build.log.previous-binary",
+      "bytes": 46106080,
+      "sha256": "0e464651b588688310f4a0ce11e75ae37c8e37cd2d2bc82afa156129d1194c6a",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    },
+    {
+      "path": "provenance/builds/zortax-zgui-qualified-build.log.previous-binary",
+      "bytes": 46106080,
+      "sha256": "c938f042a805144b23b91863fa9f3ef5ae59111001f31344e61db63316260f02",
+      "reason": "executable copy omitted; exact byte SHA256/build/source receipts retained and native frozen binaries remain on measurement host"
+    }
+  ],
+  "source_coverage": "exact frozen complete peer tracked-file manifests and final adapter patches; GPUI explicitly anchored build scope",
+  "archive_contains": "all raw results, native logs, screenshots, historical regression, initialfailedbuilds/preflights, postcapture successors, actualnativefaults,Auto wrapperfailure/retry, source/build/ELF/loader inventories and scripts",
+  "all_original_observations_preserved": true
+}

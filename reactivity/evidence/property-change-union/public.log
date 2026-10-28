@@ -1,0 +1,34 @@
+   Compiling gpui v0.1.0 (/root/gpui-property-change-union/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.09s
+     Running tests/property_actions.rs (/tmp/gpui-property-change-union-target/debug/deps/property_actions-3101e020bc047140)
+
+running 9 tests
+test post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l ... ok
+test request_and_reply_panics_restore_the_owned_route_until_close ... ok
+test empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit ... ok
+test logical_acceptance_is_distinct_from_acknowledged_presentation ... ok
+test contained_editor_allocation_ledger ... ok
+test accepted_contribution_survives_failed_preparation_then_repairs ... ok
+test proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects ... ok
+test one_editor_family_routes_geometry_color_and_six_affine_components ... ok
+test actual_contained_apply_rejects_and_recovers_without_losing_the_route ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/property_change_union.rs (/tmp/gpui-property-change-union-target/debug/deps/property_change_union-680166c1c38d8092)
+
+running 11 tests
+test changed_component_scope_counts_consumed_old_target_and_fresh_replacement ... ok
+test direct_property_setter_keeps_its_destination_through_list_realization ... ok
+test inherit_with_no_model_reply_counts_the_property_destination ... ok
+test rejected_equal_and_empty_requests_do_not_reuse_a_prior_change_marker ... ok
+test set_with_no_model_reply_counts_the_property_destination ... ok
+test failed_description_retires_the_old_target_and_discards_its_marker ... ok
+test radius_and_general_map_set_and_inherit_count_their_destination ... ok
+test a_foreign_proposal_does_not_reuse_a_previous_property_change ... ok
+test failed_prepare_keeps_logical_edit_and_repair_has_a_fresh_marker ... ok
+test overlapping_target_change_counts_once_and_a_peer_change_counts_twice ... ok
+test retirement_and_kind_replacement_count_the_old_property_target_once ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

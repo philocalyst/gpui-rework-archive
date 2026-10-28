@@ -1,0 +1,56 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-inspector-pointer-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.69s
+     Running tests/inspector.rs (/tmp/gpui-presented-basis-target/debug/deps/inspector-91e9a881bb3d84b6)
+
+running 15 tests
+test invalid_and_foreign_inspector_edits_fail_before_source_admission ... ok
+test typed_inspection_preserves_presence_and_reveals_updated_component_defaults ... ok
+test paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output ... ok
+test inspector_parent_walk_stops_at_the_application_root ... ok
+test idle_inspector_refreshes_allocate_nothing_with_or_without_selection ... ok
+test inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame ... ok
+test inspector_controls_without_a_selection_are_inert ... ok
+test inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base ... ok
+test basis_inspector_captions_resolve_partial_candidate_pool_and_scale ... ok
+test inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission ... ok
+test actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties ... ok
+test pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair ... ok
+test transform_editor_exposes_each_of_the_six_components ... ok
+test catalog_controls_edit_and_inherit_all_thirteen_picked_live_properties ... ok
+test color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.78s
+
+     Running tests/pointer.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer-80732283cc6071d7)
+
+running 9 tests
+test wheel_uses_the_ordinary_two_axis_scroll_router ... ok
+test press_focuses_and_release_rechecks_the_same_live_hit_once ... ok
+test semantic_only_publication_keeps_the_current_gesture_usable ... ok
+test a_fresh_hit_on_a_new_acknowledged_sheet_can_activate_the_surviving_target ... ok
+test pending_geometry_rejects_and_consumes_release_before_later_acknowledgement ... ok
+test session_cannot_transfer_a_press_between_window_namespaces ... ok
+test failed_prepare_or_removed_target_never_replays_a_press ... ok
+test leave_nonfinite_cancel_and_wheel_consume_a_gesture_without_blurring ... ok
+test repeated_input_clicks_allocate_nothing_after_selection_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/pointer_focus.rs (/tmp/gpui-presented-basis-target/debug/deps/pointer_focus-b105195d3da36a01)
+
+running 12 tests
+test ack_before_release_uses_the_ordinary_current_sheet ... ok
+test own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state ... ok
+test equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture ... ok
+test focus_proof_never_crosses_window_namespaces ... ok
+test viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate ... ok
+test cancellation_and_failed_new_press_consume_the_own_focus_proof ... ok
+test intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof ... ok
+test absent_point_encoding_preserves_finite_bits_and_public_debug_shape ... ok
+test inspector_panel_action_uses_the_same_focus_release_proof ... ok
+test inspector_picking_uses_actual_shape_and_cannot_select_panel_controls ... ok
+test built_in_inspector_accepts_own_focus_c_without_publishing_its_epoch_captions ... ok
+test inspector_focus_proof_does_not_cover_later_source_or_viewport_changes ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+

@@ -1,0 +1,12 @@
+
+running 7 tests
+test mapped_geometry_queries_wait_for_ack_and_invalid_output_preserves_all_sinks ... ok
+test mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_install_order ... ok
+test masked_first_direct_sink_cannot_hide_a_shared_peer_change_in_a_mapped_group ... ok
+test one_exact_inbox_updates_transform_and_32_colors_without_describing_1000_rows ... ok
+test oversized_recipe_rejects_mount_and_literal_overwrite_removes_it ... ok
+test source_authority_is_checked_before_inbox_callback_and_rebinding_replaces_recipes ... ok
+test source_dependent_question_refreshes_reader_before_exact_patch_gate ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+

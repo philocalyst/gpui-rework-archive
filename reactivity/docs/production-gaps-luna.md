@@ -1,0 +1,71 @@
+# Production readiness gaps: a11y, typed inspection, color
+
+Audited source: `/root/gpui-ce3/reactivity` at `36921e2c42efe8569889d16a27295d8ee7b790a2`. Findings below distinguish existing behavior from proposed parity work; they are not generic checklists.
+
+## Disposition after the combined native text integration
+
+The [8ea8b9d76a campaign](../evidence/native-text-integration/README.md)
+now qualifies source-directed selection and atomic selected/ranged replacement,
+real AT-SPI Unicode range edits and stale-provider retirement, plus the actual
+Apple/Windows adapters at compile time. Ordinary `native`, `desktop`, X11 and
+Wayland profiles now include accessibility; only explicitly named minimal/native-core
+profiles omit it. The negative capability assertions cited below are historical.
+Wrapped run/character/caret geometry, magnifiers, IME/clipboard, native foreign-OS
+execution and the remaining editor/platform contracts are still gaps.
+
+The [typed catalog/composition review](typed-reflection-composition-luna.md)
+and [color derivation](color-formulation-luna.md) drive separate active Sol
+spikes. The catalog already owns validation, impact and exact authoring equality;
+its tool facade must reuse them. The color primitive targets a neutral-connected
+fixed-L/h unit-cube chroma boundary, explicitly distinct from CSS local-MINDE.
+Neither slice supplies a complete inherited theme, arbitrary inspector text entry,
+palette interpolation or contrast API merely by exposing its first primitive.
+
+## Disposition after acknowledged text and typed catalog integration
+
+At `007f10ccbd` and its combined campaign, source-qualified native text selection,
+atomic replacement, wrapped/bidi TextRuns, caret/character geometry and late
+provider activation are implemented and exercised through actual Linux AT-SPI.
+Ordinary profiles include accessibility, including `native`; the historical
+negative capability/profile assertions below do not describe current behavior.
+The typed catalog now exposes all 13 properties/eight value families through
+ordinary validated transactions and native inspector controls. Arbitrary value
+entry, contained tooling owners, custom component schemas and theme cascade
+remain. Designer gamut fitting is integrated; palette/mix/contrast still remain.
+The [controlled checkbox](../evidence/typed-checkbox/README.md) now integrates
+checked state, role and existing activation/focus routes, with stable identity
+across toggles and separately pinned native action/event evidence. IME/clipboard, relationships, virtual-item
+realization and UIA/VoiceOver runtime coverage are still incomplete.
+
+## Accessibility and native feature profile
+
+**Strengths to preserve.** The native layer has a real AccessKit Winit integration, owner-thread command application, session/closed checks, bounded ingress, and lifecycle handling. Ingress tests cover deactivation revoking queued work and closure; Linux test code exercises late AT-SPI service creation, registry owner replacement and destroy. These are meaningful foundations. Feature selection is explicit: default is `simd` only; `desktop`, `x11`, and `wayland` include `accessibility`, while `native`, `x11-minimal`, and `wayland-minimal` can build without it ([Cargo.toml lines 25–36](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/Cargo.toml#L25-L36)). README explains the intended normal versus diagnostic profiles, so this is not an undisclosed default omission.
+
+**Concrete parity gap: text editing actions.** The runtime editor now has owned selection state and `select`/selection editing operations (`runtime/editing.rs`), but semantic action contract only advertises Activate, Focus, Blur, SetValue, Scroll and ScrollIntoView ([semantics.rs lines 7–32](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/runtime/semantics.rs#L7-L32)). The native TextInput projection has no text-run selection/caret mapping, and tests explicitly require that AccessKit SetTextSelection and ReplaceSelectedText are unsupported ([native/accessibility/tests.rs lines 122–132, 181–236](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/native/accessibility/tests.rs#L122-L132)). This is a direct missing action for a framework with editable text, not an abstract a11y recommendation. Add the two actions only with explicit UTF-8/scalar-to-editor selection conversion, validation against current input content/version and owner-thread routing; publish selection/value changes without requiring a layout/paint cycle if possible. Then replace the negative capability assertions with round-trip AT action tests (including Unicode and stale targets).
+
+**Lifecycle evidence exists but is environment-gated.** The Linux AT-SPI end-to-end tests cover activation/edit/invoke/reactivation and late provider/replacement/destroy, but all three are `#[ignore]` because they require isolated X11/session bus setup ([linux_tests.rs lines 365–418](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/native/accessibility/linux_tests.rs#L365-L418)). The repository also has deterministic internal transition/session tests. Therefore do not report lifecycle as absent; the practical hole is release evidence: wire these tests into a dedicated isolated X11 + AT-SPI CI job and cover Wayland and macOS provider lifecycle independently. Keep minimal/AT-disabled profiles visibly named as diagnostics, and add a shipped-application feature profile check so teams cannot accidentally select `native` while assuming it means accessible. `native` being AT-off may remain useful for headless/testing use; `desktop`/x11/wayland already make the production intent clear.
+
+**Semantic conformance risk to measure.** The current action set omits selection, but it also intentionally avoids advertising clipboard/composition APIs it cannot route. Continue this capability discipline. Gate adding more `Role`/`Action` values on end-to-end proof that platform actions reach current owner state and publish the resulting selection/value/focus; do not derive capability from just a platform widget kind.
+
+## Typed reflection and overrides
+
+The property system is unusually strong for a young runtime: properties are typed sealed selectors over two known destinations, IDs stable and explicit, declarations generate metadata and get/set dispatch, validation is centralized, and `Impact` is explicit ([property.rs lines 1–83, 360–447](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/property.rs#L1-L83)). Public `Win::property`, `contribution`, and `set_property` provide real runtime inspection/editing rather than a fake inspector-only surface ([runtime.rs lines 1324–1365](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/runtime.rs#L1324-L1365)). Contained `Component<P,C>` is a real safe ownership composition primitive with stable field identity, validated shared/mutable projections, and explicit parent scheduling grain ([component.rs lines 11–22, 50–96](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/component.rs#L11-L96)).
+
+The gap is designer-facing completeness: `PropertyInfo` currently has only destination/id/name/kind/impact; the closed schema is 13 properties; override store and `PropertyValue` are `pub(crate)`; inspector action set hardcodes pick/parent/width/background and exposes only width growth/auto/inherit and tint set/inherit ([inspector.rs lines 28–46 and 126–158](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/gpui/src/runtime/inspector.rs#L28-L46)). This means runtime edits can cover every declared property but built-in inspect/design tooling cannot discover/edit them generically or represent richer control hints. A useful evolution is typed schema metadata for editor hints (range/step/choices, labels, grouping, reset/default, serialized stable key), plus a public composition/override layer that takes existing `Property<T,D>` tokens and returns `Contribution<T>` without letting users inject arbitrary setters or claim impact. Preserve the sealed validated schema; do not turn reflection into `Any`/string-setter dispatch. Then replace inspector per-property branches with metadata-driven controls, with custom editor widgets as explicit opt-in overrides. For components, current composition is contained-owner composition only: child method changes schedule at parent grain (documented in `component.rs:15–17`), so add independent child scheduling only if profiling shows a production need and ownership can remain explicit.
+
+## Designer color work
+
+Color foundations are solid: tagged sRGB/linear sRGB/Display-P3/linear P3/OKLCH, finite checked authoring, extended RGB preservation, deterministic f64 matrix conversions, explicit output profile/format and alpha representation ([color.rs lines 3–16, 71–108, 202–239, 302–350](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/canvas/src/color.rs#L3-L16)). Existing SDR outputs offer hard clipping or explicitly per-channel Reinhard; source comments say clip is not perceptual CSS gamut mapping and Reinhard can shift hue ([color.rs lines 317–328, 444–469](https://github.com/gpui-ce/gpui-ce/blob/36921e2c42efe8569889d16a27295d8ee7b790a2/reactivity/crates/canvas/src/color.rs#L317-L328)). This makes the missing designer tools precise:
+
+1. Add `map_gamut(target)` distinct from scene tone mapping. A practical standard target is CSS Color 4 binary search with constant Oklch lightness/hue and chroma reduction; the spec documents local-MINDE and clipping alternatives ([W3C CSS Color 4, gamut mapping](https://www.w3.org/TR/2026/CRD-css-color-4-20261009/#gamut-mapping)). Return/report whether chroma was reduced so UI can explain the display preview. Test sRGB and P3 boundaries, near-neutral colors, black/white endpoint behavior, hue/lightness tolerance and monotonic search.
+2. Add `mix`/palette interpolation as a separate authoring operation with documented space, premultiplication and shorter/longer/increasing/decreasing hue route. OKLCH is useful for vivid ramps; linear-light RGB is useful for energy-correct blends. CSS Color 4 explains that OKLCH can avoid gray-looking transitions and defines hue interpolation rules ([W3C interpolation](https://www.w3.org/TR/2026/CRD-css-color-4-20261009/#interpolation)). Avoid silently changing source-over raster blending, which currently uses premultiplied linear sRGB.
+3. Add contrast utility for designer preview, accepting an explicit background stack/surface for transparency and calculating relative luminance in the selected output profile; use the current WCAG 2.2 ratio formula and sRGB transfer definition for sRGB output ([W3C WCAG 2.2 contrast minimum](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum)). Contrast is not defined by channel-distance in Oklch; keep accessibility contrast checks separate from perceptual difference.
+4. Keep exact authoring precision: `Color` stores author-space channel bits and already tests exact channels/round trips. Gamut mapping and mix should not mutate authored values or introduce an implicit 8-bit round trip. Use one SIMD-shaped formulation with the fearless_simd fallback executing the same formulas. Batch palette work and ordinary single-color calls must share that implementation; validate native and fallback outputs and inspect assembly before claiming a win. Metadata remains static and does not require a separate color pipeline.
+
+The important parity split: rendering supports modern spaces and high precision already; authoring still lacks the designer operations to choose/interpolate/match accessible colors predictably. Address these pure color APIs before building an inspector UI, then wire them into metadata-driven color controls.
+
+## Source links
+
+- Solid accessible author overview: [v2 RC discussion](https://github.com/solidjs/solid/discussions/2995). Three-series article bodies were Cloudflare-inaccessible during audit; the blog index itself lists titles/dates, not enough detail to attribute the series’ algorithms.
+- Ripple pinned source: [`track_async` runtime](https://github.com/Ripple-TS/ripple/blob/fed124465d162ce17ce009936ef50061719d9882/packages/ripple/src/runtime/internal/client/track-async.js#L220-L352) and [declaration](https://github.com/Ripple-TS/ripple/blob/fed124465d162ce17ce009936ef50061719d9882/packages/ripple/types/index.d.ts#L287-L291).
+- Hummingbird query-backed fixture: [search loading model](https://github.com/hummingbird-player/hummingbird/blob/e15e8ba0ef6ff5445294030d373e3c8ccc7d780c/src/ui/search/model.rs#L33-L112), [track search query API](https://github.com/hummingbird-player/hummingbird/blob/e15e8ba0ef6ff5445294030d373e3c8ccc7d780c/src/library/db/query/track.rs#L297-L299), [Apache-2.0 manifest](https://github.com/hummingbird-player/hummingbird/blob/e15e8ba0ef6ff5445294030d373e3c8ccc7d780c/Cargo.toml#L1-L8).

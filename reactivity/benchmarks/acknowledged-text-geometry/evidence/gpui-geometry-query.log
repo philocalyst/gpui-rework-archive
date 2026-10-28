@@ -1,0 +1,14 @@
+    Checking gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+error[E0599]: no method named `local` found for struct `gpui_reactivity_core::CoordinateSpace` in the current scope
+  --> crates/gpui/src/runtime/text_geometry.rs:73:49
+   |
+73 |         CoordinateSpace::new(self.transform()?).local(point)
+   |                                                 ^^^^^
+   |
+help: there is a method `to_local` with a similar name
+   |
+73 |         CoordinateSpace::new(self.transform()?).to_local(point)
+   |                                                 +++
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `gpui` (lib) due to 1 previous error

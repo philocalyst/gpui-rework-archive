@@ -1,0 +1,16 @@
+
+running 3 tests
+test schema_rejects_invalid_pitch_and_keeps_normal_distinct_from_inherit ... ok
+test sparse_text_and_ime_use_the_same_explicit_pitch ... ok
+test source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 3 tests
+test line_pitch_rejects_invalid_values_and_overflow_without_poisoning_reuse ... ok
+test absolute_pitch_controls_wrapped_and_hard_lines_and_matches_measurement ... ok
+test omitted_pitch_preserves_defaults_after_explicit_reuse ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

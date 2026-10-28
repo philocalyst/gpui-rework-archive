@@ -1,0 +1,22 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+     Running unittests src/lib.rs (target/debug/deps/gpui-574ecd9c191394a6)
+
+running 1 test
+GPUI_ACCESSKIT_IDLE threads_before=2 threads_after=5 conversions=0
+dbus-daemon[2418572]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=2418579 comm="/root/gpui-ce3/reactivity/target/debug/deps/gpui-5")
+AT-SPI client enabled; waiting for native window
+dbus-daemon[2418572]: Successfully activated service 'org.a11y.atspi.Registry'
+SpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry
+AT-SPI found window (":1.0", OwnedObjectPath(ObjectPath("/org/a11y/atspi/accessible/0/0")))
+test native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 111 filtered out; finished in 3.53s

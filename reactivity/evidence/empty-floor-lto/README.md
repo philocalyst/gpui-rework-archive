@@ -1,0 +1,25 @@
+# x11 empty-window profile-size and bounded runtime diagnostic
+
+Both binaries were built from GPUI cleanroom commit `88d65eae0a0e832e51a8c7156f236b1e3a8ec5dd`, the identical lockfile and the identical empty-window example, with feature `x11`. In this repository `x11` includes `accessibility` and `native`; the ThinLTO experiment keeps that feature set and the AccessKit Unix/AT-SPI code linked. The fixture is a genuinely blank `div()` window, not the zero-row header/button/text benchmark. The exact commands, binary hashes, build environment and fixture hashes are in [`manifest.json`](manifest.json).
+
+The first artifact uses Cargo's untouched release defaults. The candidate sets only `CARGO_PROFILE_RELEASE_LTO=thin` and `CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1`; the verbose build log verifies those Rust flags. Cargo documents these profile controls and the 16-unit default release profile in [The Cargo Book, Profiles](https://doc.rust-lang.org/cargo/reference/profiles.html).
+
+| Artifact | File bytes | `size` text | data | bss |
+| --- | ---: | ---: | ---: | ---: |
+| Default release | 24,558,648 | 19,079,607 | 478,064 | 10,580 |
+| ThinLTO + 1 codegen unit | 19,884,088 | 16,986,851 | 337,832 | 11,176 |
+| Change | −4,674,560 (−19.0%) | −2,092,756 (−11.0%) | −140,232 | +596 |
+
+`readelf` program headers and full sorted symbol-size dumps are included for both variants. The linked-symbol inventory still contains `accesskit_unix` functions in both binaries, including AT-SPI bus registration and adapter processing. That confirms code is present; it does not show that AT-SPI was active, that a screen reader connected, or that accessibility latency remains correct. No binary was launched during this build-only stage. A linker map was not captured.
+
+The Cargo-reported clean-target build times were 3m47s for default and 4m17s for ThinLTO. Treat this as raw context only: the builds ran at different times, filesystem state warmed between them, and other team Cargo jobs overlapped. It is not a controlled compile-time comparison.
+
+The size reduction made the profile candidate worth a guarded runtime diagnostic. The accepted run used the two frozen SHA-named binaries outside git, one persistent private Xvfb 21.1.24 (`:98`, 1280×800×24, no window manager), and a D-Bus session. `capture.py` checked the exact binary SHA before each child, source pin ancestry, no source/manifest/config diff across `Cargo.toml`, `Cargo.lock`, `crates`, `vendor`, `.cargo`, toolchain and build-script paths, no untracked files in those paths, and exact fixture/lock hashes. It alternated the two variants and ran them serially. The earlier ancestor-only run is retained under [`excluded-ancestor-only-run`](excluded-ancestor-only-run/); it is not pooled because it lacked the strict source-tree check.
+
+The blank fixture launched with `--auto`; every observed marker reported `ReferenceCpu`. Across 30 fresh starts per variant, the endpoint was the parent's monotonic time immediately before spawn through observation of the fixture's first `GPUI_PRESENT` stderr line. Default had median 13.937 ms and range 13.461–15.086 ms; ThinLTO had median 13.778 ms and range 13.219–14.513 ms. This endpoint includes process creation and parent pipe observation. It is not an X-server pixel acknowledgment, compositor presentation, or scanout measurement. Both runs reported source/presentation epochs 0 in the fixture marker; that marker's semantics should not be silently upgraded to a pixel proof.
+
+Five fresh idle processes per variant were sampled 750 ms after their first marker. The medians/ranges were: RSS 12,500 KiB (12,312–12,596) vs 12,448 KiB (12,380–12,572); PSS 10,336 KiB (10,148–10,432) vs 10,269 KiB (10,225–10,436). Median PSS components were anonymous 1,792 vs 1,652 KiB, file-backed 8,544 vs 8,617 KiB, and shared memory 0 vs 0 KiB. Both had four threads. Ranges overlap, and this small capture does not establish a meaningful residency improvement or attribute one to code pages. These are kernel mapping counters, not allocator live-byte measurements. Raw rows are in [`startup-guarded.csv`](startup-guarded.csv) and [`residency-guarded.csv`](residency-guarded.csv); their SHA-256 values are recorded in `capture-manifest.txt`.
+
+Accessibility remains compiled in (`x11` includes `accessibility` and `native`), but this run launched no screen-reader/AT-SPI client and did not observe live bridge activation. It did not check the complete rendered window pixel-by-pixel, X11 expose/resize restoration, or accessibility-tree/action behavior. Those are adoption gates; the measurements above only establish that both binaries launched far enough to emit the existing GPUI marker and remained resident for the sample. Keep the ordinary default feature set; this diagnostic does not justify a profile change.
+
+Artifacts: `default-build.log`, `thin-build.log`, `default-readelf.txt`, `thin-readelf.txt`, `default-size.txt`, `thin-size.txt`, `default-symbols.txt`, `thin-symbols.txt`, `capture.py`, the guarded raw capture CSVs, and `capture-manifest.txt`. No source files were changed for the candidate.

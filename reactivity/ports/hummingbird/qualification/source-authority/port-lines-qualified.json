@@ -1,0 +1,160 @@
+{
+  "source_commit": "9f83f23288bbb364142ff2a82d059b6d99670a7e",
+  "scope": "Hummingbird port src including binary and all cfg features; excludes tests/comments/blanks/docs, examples and test targets",
+  "non_test_code_lines": 5633,
+  "tokei_sha256": "909d15d6b5877e172437fea89f8810dd4eb5fb9a88c24d0fd15fa738faa11712",
+  "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+  "counter_sha256": "a3b703fc464042565b544b34fb2e5d905fdd693d21c3cb5e4a02b33bfeae9cbf",
+  "files": {
+    "reactivity/ports/hummingbird/src/app.rs": {
+      "sha256": "7d28ed1d2d11b740ac367750594989350576f4c6cdef6d9395be05d8ea4e21bd",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 423
+    },
+    "reactivity/ports/hummingbird/src/application.rs": {
+      "sha256": "db864f52a2acc708da74b1a15e054ca0ed2da53b16d6732a16def4ec8463d4a3",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 37
+    },
+    "reactivity/ports/hummingbird/src/audio/block.rs": {
+      "sha256": "9b88b6803c2ee56e05c1a4f8b173ae1c1b67a0326972f032440b893f3e439a39",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 31
+    },
+    "reactivity/ports/hummingbird/src/audio/cpal.rs": {
+      "sha256": "5a1b674529c62f57dcfea62b8976058e1db7f6e021f08361996994bde08520d6",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 263
+    },
+    "reactivity/ports/hummingbird/src/audio/decoder.rs": {
+      "sha256": "da6281bcd7315b9d69b1fbd3c858babf95972d4ab726e13a52156c6d16323142",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 260
+    },
+    "reactivity/ports/hummingbird/src/audio/fft.rs": {
+      "sha256": "7bbb6819c888d74094b8ec4bc0404bf6a3e68cf10cd6ebb34537bf0b66cdfdab",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 111
+    },
+    "reactivity/ports/hummingbird/src/audio/media.rs": {
+      "sha256": "80b14963ff6b399939bc7c20ee550c1124250f369f9d84844589142c7d634705",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 192
+    },
+    "reactivity/ports/hummingbird/src/audio/mod.rs": {
+      "sha256": "737284aa7de05a4476c3678c1a188cbb74c99bbb0e144e8cc7ac121e8df7f5ab",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 117
+    },
+    "reactivity/ports/hummingbird/src/audio/output.rs": {
+      "sha256": "79753c10f5d014a26f373b1899ce97f2ede5f46c2f9404b2c16f6ef1bc35b4b8",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 37
+    },
+    "reactivity/ports/hummingbird/src/audio/pipeline.rs": {
+      "sha256": "413fd86cca2646e936a6e4cfb73e93baf0fad434b3a1ef50548e4fefe4dc571a",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 243
+    },
+    "reactivity/ports/hummingbird/src/audio/service.rs": {
+      "sha256": "1f260e2c4c29a0a2d837663593752abf13cba854ff6b0379f941243960ee7014",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 691
+    },
+    "reactivity/ports/hummingbird/src/audio/timing.rs": {
+      "sha256": "7d43b47ea44d3c705e04af05cc83b28239c9e5326de9233eed881b0f52d20701",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 140
+    },
+    "reactivity/ports/hummingbird/src/database.rs": {
+      "sha256": "75248126c6a3ea14dc0ebb59319b17f399019f88084834857dc764ef7d37455f",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 142
+    },
+    "reactivity/ports/hummingbird/src/lib.rs": {
+      "sha256": "f017c546d073b893aa26a299bb7ada7b215c641a2c2520d78e79d30ba227c4e8",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 14
+    },
+    "reactivity/ports/hummingbird/src/main.rs": {
+      "sha256": "db80062a4889c0190c8a07348eda5a1ab5cbc73500fbfa5a7360be87fcc64979",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 82
+    },
+    "reactivity/ports/hummingbird/src/migrations.rs": {
+      "sha256": "6cba44fd2743d420b87cef51f591fbfd3706a517629fc45393f5b5657f981a2a",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 158
+    },
+    "reactivity/ports/hummingbird/src/query.rs": {
+      "sha256": "9f273585dd564366e2f5bfb43b4af3ce2d5786cd1ad91f58fbf6d0066260ee46",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 329
+    },
+    "reactivity/ports/hummingbird/src/query_helpers.rs": {
+      "sha256": "4fed0b718a998b2c066079d4a423950c9ac6f7151d1f521b3f0d56ae96ea8b48",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 224
+    },
+    "reactivity/ports/hummingbird/src/queue.rs": {
+      "sha256": "9644d1fb5efd77ddd9f607b42633ab80fd809b3648efbbe938dc205a0977c290",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 633
+    },
+    "reactivity/ports/hummingbird/src/queue_audio.rs": {
+      "sha256": "c3a8889f29efc775db017f163a8f3748717190b897fdec985bacf20c9385f037",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 282
+    },
+    "reactivity/ports/hummingbird/src/queue_playback.rs": {
+      "sha256": "3b1c186dc94316d2f0a22e7b3439030021869b8472c2854dc859a3bd02a265be",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 324
+    },
+    "reactivity/ports/hummingbird/src/queue_view.rs": {
+      "sha256": "9e847d6e2b9ab57504a348dc29f1f033807e186d7dca9008f71d18409f5ca0e7",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 269
+    },
+    "reactivity/ports/hummingbird/src/search.rs": {
+      "sha256": "43a0a891b1900304d3e766424683aeac24ff5fd87e2c545bab829b3893a6eddc",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 153
+    },
+    "reactivity/ports/hummingbird/src/transcript.rs": {
+      "sha256": "7969007fc1e88989376ecacbbb8772af6b530cc4ee051ac4e1d02b3377039b3a",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 165
+    },
+    "reactivity/ports/hummingbird/src/worker.rs": {
+      "sha256": "010fd7eb18a3daa51ff15248d6065c144ae5bf4d306e0ac8ef0dd62461b69312",
+      "test_only": false,
+      "unclassified": [],
+      "code_lines": 313
+    }
+  }
+}

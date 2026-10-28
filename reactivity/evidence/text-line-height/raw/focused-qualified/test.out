@@ -1,0 +1,13 @@
+
+running 3 tests
+test schema_rejects_invalid_pitch_and_keeps_normal_distinct_from_inherit ... ok
+test sparse_text_and_ime_use_the_same_explicit_pitch ... FAILED
+test source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry ... ok
+
+failures:
+
+failures:
+    sparse_text_and_ime_use_the_same_explicit_pitch
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

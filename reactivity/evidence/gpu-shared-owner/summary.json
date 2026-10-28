@@ -1,0 +1,152 @@
+[
+  {
+    "case": "baseline same device",
+    "windows": 1,
+    "requests": 9763,
+    "retained_heap": 462238,
+    "peak_heap": 822072,
+    "owner_stack": 24,
+    "retained_with_owner": 462262,
+    "peak_with_owner": 822096
+  },
+  {
+    "case": "baseline per device",
+    "windows": 1,
+    "requests": 9764,
+    "retained_heap": 462242,
+    "peak_heap": 822076,
+    "owner_stack": 24,
+    "retained_with_owner": 462266,
+    "peak_with_owner": 822100
+  },
+  {
+    "case": "final owned same device",
+    "windows": 1,
+    "requests": 9763,
+    "retained_heap": 462262,
+    "peak_heap": 822096,
+    "owner_stack": 24,
+    "retained_with_owner": 462286,
+    "peak_with_owner": 822120
+  },
+  {
+    "case": "final owned per device",
+    "windows": 1,
+    "requests": 9764,
+    "retained_heap": 462266,
+    "peak_heap": 822100,
+    "owner_stack": 24,
+    "retained_with_owner": 462290,
+    "peak_with_owner": 822124
+  },
+  {
+    "case": "final shared",
+    "windows": 1,
+    "requests": 9763,
+    "retained_heap": 462206,
+    "peak_heap": 822040,
+    "owner_stack": 80,
+    "retained_with_owner": 462286,
+    "peak_with_owner": 822120
+  },
+  {
+    "case": "baseline same device",
+    "windows": 2,
+    "requests": 17850,
+    "retained_heap": 838327,
+    "peak_heap": 1193699,
+    "owner_stack": 24,
+    "retained_with_owner": 838351,
+    "peak_with_owner": 1193723
+  },
+  {
+    "case": "baseline per device",
+    "windows": 2,
+    "requests": 19513,
+    "retained_heap": 923808,
+    "peak_heap": 1274462,
+    "owner_stack": 24,
+    "retained_with_owner": 923832,
+    "peak_with_owner": 1274486
+  },
+  {
+    "case": "final owned same device",
+    "windows": 2,
+    "requests": 17850,
+    "retained_heap": 838375,
+    "peak_heap": 1193747,
+    "owner_stack": 24,
+    "retained_with_owner": 838399,
+    "peak_with_owner": 1193771
+  },
+  {
+    "case": "final owned per device",
+    "windows": 2,
+    "requests": 19513,
+    "retained_heap": 923856,
+    "peak_heap": 1274510,
+    "owner_stack": 24,
+    "retained_with_owner": 923880,
+    "peak_with_owner": 1274534
+  },
+  {
+    "case": "final shared",
+    "windows": 2,
+    "requests": 10030,
+    "retained_heap": 475217,
+    "peak_heap": 823048,
+    "owner_stack": 80,
+    "retained_with_owner": 475297,
+    "peak_with_owner": 823128
+  },
+  {
+    "case": "baseline same device",
+    "windows": 8,
+    "requests": 66315,
+    "retained_heap": 3081469,
+    "peak_heap": 3415569,
+    "owner_stack": 24,
+    "retained_with_owner": 3081493,
+    "peak_with_owner": 3415593
+  },
+  {
+    "case": "baseline per device",
+    "windows": 8,
+    "requests": 78006,
+    "retained_heap": 3709820,
+    "peak_heap": 3987786,
+    "owner_stack": 24,
+    "retained_with_owner": 3709844,
+    "peak_with_owner": 3987810
+  },
+  {
+    "case": "final owned same device",
+    "windows": 8,
+    "requests": 66315,
+    "retained_heap": 3081661,
+    "peak_heap": 3415761,
+    "owner_stack": 24,
+    "retained_with_owner": 3081685,
+    "peak_with_owner": 3415785
+  },
+  {
+    "case": "final owned per device",
+    "windows": 8,
+    "requests": 78006,
+    "retained_heap": 3710012,
+    "peak_heap": 3987978,
+    "owner_stack": 24,
+    "retained_with_owner": 3710036,
+    "peak_with_owner": 3988002
+  },
+  {
+    "case": "final shared",
+    "windows": 8,
+    "requests": 11571,
+    "retained_heap": 539655,
+    "peak_heap": 829096,
+    "owner_stack": 80,
+    "retained_with_owner": 539735,
+    "peak_with_owner": 829176
+  }
+]

@@ -1,0 +1,90 @@
+{
+  "baseline": {
+    "text_bytes": 3288231,
+    "symbols": [
+      {
+        "address": "0x4e1ce0",
+        "bytes": 2550,
+        "name": "<gpui::runtime::Win<question_input_cost::Model, gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, u64, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()>>>::set::<u64>",
+        "operation": "set::<u64>"
+      },
+      {
+        "address": "0x4e9260",
+        "bytes": 1924,
+        "name": "<gpui::runtime::Win<question_input_cost::Model, gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, u64, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()>>>::deliver_ready",
+        "operation": "deliver_ready"
+      },
+      {
+        "address": "0x504ab0",
+        "bytes": 1418,
+        "name": "<gpui::reader::question::QuestionLane<question_input_cost::Model, u64, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>>::start_pending",
+        "operation": "start_pending"
+      },
+      {
+        "address": "0x5054b0",
+        "bytes": 1868,
+        "name": "<gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, u64, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()> as gpui::remote::LaneSet<question_input_cost::Model>>::apply_questions",
+        "operation": "apply_questions"
+      },
+      {
+        "address": "0x505cf0",
+        "bytes": 1615,
+        "name": "<gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, u64, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()> as gpui::remote::LaneSet<question_input_cost::Model>>::refresh",
+        "operation": "refresh"
+      },
+      {
+        "address": "0x509cd0",
+        "bytes": 5279,
+        "name": "<question_input_cost::one_source_operation_cost::{closure#0} as core::ops::function::FnOnce<()>>::call_once",
+        "operation": "one_source_operation_cost::{closure#0} as core::ops::function::FnOnce<()>>::call_once"
+      }
+    ]
+  },
+  "candidate": {
+    "text_bytes": 3285159,
+    "symbols": [
+      {
+        "address": "0x4e1940",
+        "bytes": 2550,
+        "name": "<gpui::runtime::Win<question_input_cost::Model, gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, gpui::source::Source<question_input_cost::Model, u64>, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()>>>::set::<u64>",
+        "operation": "set::<u64>"
+      },
+      {
+        "address": "0x5032e0",
+        "bytes": 323,
+        "name": "<gpui::source::Source<question_input_cost::Model, u64> as gpui::reader::inputs::QuestionInputs<question_input_cost::Model>>::resolve::<()>",
+        "operation": "resolve::<()>"
+      },
+      {
+        "address": "0x4e8e50",
+        "bytes": 1924,
+        "name": "<gpui::runtime::Win<question_input_cost::Model, gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, gpui::source::Source<question_input_cost::Model, u64>, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()>>>::deliver_ready",
+        "operation": "deliver_ready"
+      },
+      {
+        "address": "0x512fa0",
+        "bytes": 996,
+        "name": "<gpui::reader::question::QuestionLane<question_input_cost::Model, gpui::source::Source<question_input_cost::Model, u64>, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>>::start_pending",
+        "operation": "start_pending"
+      },
+      {
+        "address": "0x513610",
+        "bytes": 1013,
+        "name": "<gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, gpui::source::Source<question_input_cost::Model, u64>, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()> as gpui::remote::LaneSet<question_input_cost::Model>>::apply_questions",
+        "operation": "apply_questions"
+      },
+      {
+        "address": "0x513b00",
+        "bytes": 1231,
+        "name": "<gpui::reader::question::QuestionSet<gpui::reader::question::QuestionLane<question_input_cost::Model, gpui::source::Source<question_input_cost::Model, u64>, u64, u64, core::convert::Infallible, question_input_cost::open::{closure#0}, question_input_cost::open::{closure#1}, ()>, ()> as gpui::remote::LaneSet<question_input_cost::Model>>::refresh",
+        "operation": "refresh"
+      },
+      {
+        "address": "0x50e9e0",
+        "bytes": 5301,
+        "name": "<question_input_cost::one_source_operation_cost::{closure#0} as core::ops::function::FnOnce<()>>::call_once",
+        "operation": "one_source_operation_cost::{closure#0} as core::ops::function::FnOnce<()>>::call_once"
+      }
+    ]
+  }
+}

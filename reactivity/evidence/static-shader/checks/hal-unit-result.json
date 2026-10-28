@@ -1,0 +1,11 @@
+{
+  "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+  "artifact": "/tmp/gpui-static-hal-unit-target/debug/deps/wgpu_hal-7e7af7bed7937bef",
+  "copy": "/tmp/gpui-static-frozen-bins/hal-unit",
+  "sha256": "dfb960fecba8c387f2f5457ce401f2a1598b859f5851a966c6b4d58438c450df",
+  "test": "vulkan::device::stage_ownership_tests::stage_temporaries_retire_on_success_error_and_unwind_without_owning_raw_modules",
+  "exit": 0,
+  "copied_source_unchanged": true,
+  "vendor_original_source_unchanged": true,
+  "graph": "separate archived standalone graph; shipping graph tested independently"
+}

@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/0effc29900e30df2/out/gpui_canvas-0effc29900e30df2",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/000-gpui_canvas/test",
+  "sha256": "e8d4680cb63631d96f2d18345e15cffa523368c88d936710c5c8ee3a7954b452",
+  "bytes": 117680920,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "lib"
+    ],
+    "crate_types": [
+      "lib"
+    ],
+    "name": "gpui_canvas",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/src/lib.rs",
+    "edition": "2024",
+    "doc": true,
+    "doctest": true,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

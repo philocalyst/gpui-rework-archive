@@ -1,0 +1,292 @@
+diff --git a/examples/benchmark-todo/main.go b/examples/benchmark-todo/main.go
+new file mode 100644
+index 0000000..61c57cc
+--- /dev/null
++++ b/examples/benchmark-todo/main.go
+@@ -0,0 +1,251 @@
++// Native Todo application adapter. All retained rows are described eagerly.
++package main
++
++import (
++	"encoding/json"
++	"fmt"
++	"log"
++	"math"
++	"math/bits"
++	"os"
++	"os/signal"
++	"strconv"
++	"strings"
++	"syscall"
++	"time"
++
++	"github.com/egoist/mygo"
++	"github.com/egoist/mygo/internal/linux"
++	"github.com/egoist/mygo/ui"
++)
++
++type task struct {
++	ID    uint64 `json:"id"`
++	Title string `json:"title"`
++	Done  bool   `json:"done"`
++}
++type todos struct {
++	rows                                                          []task
++	draft, filter                                                 string
++	next                                                          uint64
++	deleted                                                       *task
++	deletedIndex                                                  int
++	lastScheduled, callbacks, ticks, skipped                      uint64
++	actions                                                       []string
++	suppressComplete, hoverFault                                  bool
++	suppressPresent, staleMarker, duplicateTicks, limitedObserver bool
++	animate                                                       bool
++	epoch                                                         time.Time
++	started                                                       time.Time
++	frames                                                        []int64
++	overflow                                                      uint64
++}
++
++func (s *todos) action(kind string) {
++	s.callbacks++
++	s.actions = append(s.actions, kind)
++	emit("TODO_ACTION", map[string]any{"action": kind, "callbacks": s.callbacks, "rows": len(s.rows), "draft": s.draft, "filter": s.filter})
++}
++func emit(tag string, value any) {
++	raw, err := json.Marshal(value)
++	if err != nil {
++		panic(err)
++	}
++	fmt.Fprintf(os.Stderr, "%s,%s\n", tag, raw)
++}
++func (s *todos) present(backend string) {
++	if s.suppressPresent {
++		return
++	}
++	now := time.Now()
++	if len(s.frames) == 0 {
++		s.epoch = now
++		fmt.Fprintf(os.Stderr, "TODO_RENDERER,%s\nTODO_FIRST_PRESENT,%d\n", backend, now.Sub(s.started).Nanoseconds())
++	}
++	capacity := 20000
++	if s.limitedObserver {
++		capacity = 1
++	}
++	if len(s.frames) < capacity {
++		s.frames = append(s.frames, now.Sub(s.started).Nanoseconds())
++	} else {
++		s.overflow++
++	}
++}
++func (s *todos) report() {
++	done := 0
++	for _, t := range s.rows {
++		if t.Done {
++			done++
++		}
++	}
++	var first, last *task
++	if len(s.rows) > 0 {
++		first = &s.rows[0]
++		last = &s.rows[len(s.rows)-1]
++	}
++	var deleted *uint64
++	if s.deleted != nil {
++		deleted = &s.deleted.ID
++	}
++	emit("TODO_MODEL", map[string]any{"framework": "mygo", "rows": len(s.rows), "done": done, "callbacks": s.callbacks, "actions": s.actions, "animation_ticks": s.ticks, "marker_revision": s.callbacks + s.ticks, "animation_skipped": s.skipped, "draft": s.draft, "deleted": deleted, "filter": s.filter, "next_id": s.next, "first_task": first, "last_task": last})
++	emit("TODO_STATE", map[string]any{"rows": append([]task{}, s.rows...), "filter": s.filter, "next_id": s.next, "draft": s.draft, "deleted": deleted})
++	emit("TODO_FRAMES", map[string]any{"framework": "mygo", "boundary": "gtk-render-return-or-cairo-paint", "elapsed_ns": s.frames, "observer_overflow": s.overflow})
++}
++func (s *todos) view(c *ui.Context) {
++	offset := float32(0)
++	if s.animate && s.epoch.IsZero() {
++		c.After(time.Second / 60)
++	}
++	if s.animate && !s.epoch.IsZero() {
++		scheduled := uint64(c.Now().Sub(s.epoch).Seconds() * 60)
++		if scheduled > s.lastScheduled {
++			s.skipped += scheduled - s.lastScheduled - 1
++			s.lastScheduled = scheduled
++			s.ticks++
++			if s.duplicateTicks {
++				s.ticks++
++			}
++		}
++		offset = float32(12 * math.Sin(float64(scheduled)/60*2*math.Pi))
++		next := s.epoch.Add(time.Duration(scheduled+1) * time.Second / 60)
++		c.After(max(time.Millisecond, next.Sub(c.Now())))
++	}
++	toggle, remove := -1, -1
++	ui.Column(c).Width(540).Height(620).Padding(24).Gap(12).Background(ui.RGB(248, 250, 252)).Font("Noto Sans").FontSize(16).TextColor(ui.RGB(15, 23, 42)).Children(func() {
++		ui.Text(c, "Todos").FontSize(28).Height(38.136).TextColor(ui.RGB(23, 37, 84))
++		ui.Row(c).Height(41.792).Gap(8).Children(func() {
++			ui.TextInputBase(c.Key("draft"), &s.draft).Label("New task").Width(280).Height(41.792).Padding(10).Background(ui.RGB(241, 245, 249)).Radius(0)
++			if ui.ButtonBase(c.Key("add")).Label("Add").Width(56).Height(41.792).Padding(10).Background(ui.RGB(199, 210, 254)).Children(func() { ui.Text(c, "Add") }).Clicked() {
++				title := strings.TrimSpace(s.draft)
++				if title != "" {
++					s.rows = append(s.rows, task{ID: s.next, Title: title})
++					s.next++
++					s.draft = ""
++					s.action("add")
++				}
++			}
++		})
++		ui.Scroll(c.Key("viewport")).Width(492).Height(360).Children(func() {
++			ui.Column(c).Width(492).Gap(6).Translate(0, offset).Children(func() {
++				for i, t := range s.rows {
++					if s.filter == "active" && t.Done || s.filter == "done" && !t.Done {
++						continue
++					}
++					ui.Row(c.Key(t.ID)).Height(37.792).Gap(8).Children(func() {
++						label := "Complete"
++						if t.Done {
++							label = "Reopen"
++						}
++						complete := ui.ButtonBase(c.Key("toggle")).Label(label).Width(100).Height(37.792).Padding(8).Background(ui.RGB(226, 232, 240)).Children(func() { ui.Text(c, label) })
++						// Deterministic negative-control mode only: hover can paint while
++						// the application deliberately ignores completion callbacks.
++						if s.hoverFault && complete.Hovered() {
++							complete.Background(ui.RGB(255, 170, 0))
++						}
++						if complete.Clicked() && !s.suppressComplete {
++							toggle = i
++						}
++						color := ui.RGB(15, 23, 42)
++						if t.Done {
++							color = ui.RGB(100, 116, 139)
++						}
++						ui.Text(c, t.Title).Width(220).Height(37.792).Padding(8).NoWrap().TextColor(color)
++						if ui.ButtonBase(c.Key("delete")).Label("Delete").Height(37.792).Padding(8).Background(ui.RGB(254, 226, 226)).Children(func() { ui.Text(c, "Delete") }).Clicked() {
++							remove = i
++						}
++					})
++				}
++			})
++		})
++		left := 0
++		for _, t := range s.rows {
++			if !t.Done {
++				left++
++			}
++		}
++		ui.Row(c).Height(37.792).Gap(12).Children(func() {
++			ui.Text(c, fmt.Sprintf("%d left", left)).FontSize(14).Height(37.792)
++			ui.Row(c).Gap(6).Children(func() {
++				for _, f := range []string{"all", "active", "done"} {
++					bg := ui.RGB(226, 232, 240)
++					if s.filter == f {
++						bg = ui.RGB(199, 210, 254)
++					}
++					label := strings.ToUpper(f[:1]) + f[1:]
++					if ui.ButtonBase(c.Key(f)).Label(label).Padding(8).Height(37.792).Background(bg).Children(func() { ui.Text(c, label) }).Clicked() {
++						s.filter = f
++						s.action(f)
++					}
++				}
++			})
++		})
++		if s.deleted != nil {
++			ui.Row(c).Height(37.792).Gap(8).Children(func() {
++				ui.Text(c, "Deleted "+s.deleted.Title).Height(37.792)
++				if ui.ButtonBase(c.Key("undo")).Label("Undo").Padding(8).Height(37.792).Background(ui.RGB(254, 243, 199)).Children(func() { ui.Text(c, "Undo") }).Clicked() {
++					i := min(s.deletedIndex, len(s.rows))
++					s.rows = append(s.rows, task{})
++					copy(s.rows[i+1:], s.rows[i:])
++					s.rows[i] = *s.deleted
++					s.deleted = nil
++					s.action("undo")
++				}
++			})
++		}
++	})
++	if toggle >= 0 {
++		s.rows[toggle].Done = !s.rows[toggle].Done
++		s.action("complete")
++	}
++	if remove >= 0 {
++		t := s.rows[remove]
++		s.deleted = &t
++		s.deletedIndex = remove
++		s.rows = append(s.rows[:remove], s.rows[remove+1:]...)
++		s.action("delete")
++	}
++	payload := uint32((s.callbacks + s.ticks) & 0x7fffffff)
++	if s.staleMarker {
++		payload = 0
++	}
++	encoded := payload | uint32(bits.OnesCount32(payload)&1)<<31
++	ui.Box(c).Absolute().Left(476).Top(18).Width(56).Height(28).Children(func() {
++		for bit := 0; bit < 32; bit++ {
++			color := ui.RGB(0, 0, 0)
++			if (encoded>>bit)&1 != 0 {
++				color = ui.RGB(255, 255, 255)
++			}
++			ui.Box(c).Absolute().Left(float32(bit%8*7)).Top(float32(bit/8*7)).Size(5, 5).Background(color)
++		}
++	})
++
++}
++func main() {
++	n, err := strconv.Atoi(os.Getenv("TODO_BENCH_ROWS"))
++	if err != nil {
++		n = 0
++	}
++	if n < 0 || n > 10000 {
++		panic("rows outside 0..10000")
++	}
++	s := &todos{filter: "all", animate: os.Getenv("TODO_BENCH_ANIMATE") == "1", started: time.Now(), frames: make([]int64, 0, 20000), actions: make([]string, 0, 128), suppressComplete: os.Getenv("TODO_TEST_SUPPRESS_COMPLETE") == "1", hoverFault: os.Getenv("TODO_TEST_HOVER_ONLY") == "1", suppressPresent: os.Getenv("TODO_TEST_SUPPRESS_PRESENT") == "1", staleMarker: os.Getenv("TODO_TEST_STALE_MARKER") == "1", duplicateTicks: os.Getenv("TODO_TEST_DUPLICATE_TICKS") == "1", limitedObserver: os.Getenv("TODO_TEST_OBSERVER_CAP") == "1"}
++	for i := 0; i < n; i++ {
++		s.rows = append(s.rows, task{ID: uint64(i), Title: fmt.Sprintf("Task %04d", i+1), Done: i%3 == 1})
++	}
++	s.next = uint64(n)
++	linux.TodoBenchPresented = s.present
++	defer s.report()
++	mygo.App.WhenReady(func() {
++		w := mygo.NewWindow(mygo.WindowOptions{Title: "MyGo Todo comparison", Width: 540, Height: 620, Content: ui.View(s.view)})
++		if os.Getenv("TODO_TEST_TERM_HANDLED_ZERO") == "1" {
++			w.OnClose(func(e *mygo.CloseEvent) { e.PreventDefault() })
++			signals := make(chan os.Signal, 1)
++			signal.Notify(signals, syscall.SIGTERM)
++			go func() { <-signals; s.report(); os.Exit(0) }()
++		}
++	})
++	if err := mygo.App.Run(); err != nil {
++		log.Fatal(err)
++	}
++}
+diff --git a/internal/linux/surface.go b/internal/linux/surface.go
+index 5a31e6d..5aefa98 100644
+--- a/internal/linux/surface.go
++++ b/internal/linux/surface.go
+@@ -406,6 +406,10 @@ func (s *surface) RefreshRate() float64 {
+ 	return float64(gdkMonitorGetRefreshRate(m)) / 1000
+ }
+ 
++// TodoBenchPresented is a benchmark-only host drawing observer.
++// It does not measure compositor or display scanout.
++var TodoBenchPresented func(backend string)
++
+ func (s *surface) PresentPixels(pix []byte, stride, width, height int) {
+ 	if s.cr == 0 {
+ 		if s.rendering {
+@@ -437,6 +441,9 @@ func (s *surface) PresentPixels(pix []byte, stride, width, height int) {
+ 	}
+ 	cairoSetOperator(s.cr, op)
+ 	cairoPaint(s.cr)
++	if TodoBenchPresented != nil {
++		TodoBenchPresented("GtkDrawingArea-cairo-paint")
++	}
+ 	cairoSurfaceDestroy(img)
+ }
+ 
+@@ -674,6 +681,9 @@ func initSurfaceCallbacks() {
+ 		s.rendering, s.rendered, s.inMemory = true, true, false
+ 		s.send(platform.SurfaceEvent{Kind: platform.SurfaceFrame})
+ 		s.rendering = false
++		if TodoBenchPresented != nil {
++			TodoBenchPresented("GtkGLArea-render-return")
++		}
+ 		return true
+ 	})
+ 	cbSurfaceSize = purego.NewCallback(func(widget, allocation, data ptr) {

@@ -1,0 +1,49 @@
+{
+  "shipping_pin": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+  "metadata_base": "821f486ba1aa84abe96b4150b592abfcf73c28c0",
+  "owner_source": "65c1152f25ec1f139ef874ca89ccd2eb59cc45da",
+  "owner_cherry_pick": "d4d532f1c2bf3a2b5aa85c7b841b4d9166e3ced5",
+  "measurement_only_commits": [
+    "4f86c14ab69f13335f3a6e3839765e92a11fdd96",
+    "c8af516c6bbc552b4879fec4bc1a728ddbc9920d"
+  ],
+  "matched_control": "c8af516c6bbc552b4879fec4bc1a728ddbc9920d",
+  "allfeature_gate": {
+    "source": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+    "exit": 0,
+    "guards": 2040,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 303,
+    "failed": 0,
+    "ignored": 4,
+    "harnesses": 35,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "matched_default_gpu_tests": 49,
+  "cohort_cases": 48,
+  "exact_cohort_non_timing_checks": 1056,
+  "float_normalization_bit_checks": 4290840,
+  "rectangle_field_bit_checks": 46620,
+  "negative_inexact_reciprocal_exit": 101,
+  "first_party_lines_control": 32403,
+  "first_party_lines_candidate": 32433,
+  "new_dependencies_vs_owner_baseline": 0,
+  "retained_bytes_delta_vs_owner_metadata_control": 0,
+  "probe_text_bytes_control": 2234535,
+  "probe_text_bytes_candidate": 2234695,
+  "gpu_text_bytes_control": 6429111,
+  "gpu_text_bytes_candidate": 6429415,
+  "owner_gpu_text_bytes": 6428759,
+  "metric_clippy_runtime_docs_rerun": false,
+  "reason_optional_checks_stopped": "Root requested immediate sealed handoff and released targets; previous owner-specific50 runtime tests/Clippy/borrow/Miri are separately pinned",
+  "latency_or_speedup_claim": false
+}

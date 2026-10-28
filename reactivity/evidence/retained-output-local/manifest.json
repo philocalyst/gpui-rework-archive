@@ -1,0 +1,194 @@
+{
+  "README.md": {
+    "bytes": 10857,
+    "sha256": "f75592bccab6d32ac7beae32769c3c48af5adba6b68d5a87fa1d5083a2416a8d"
+  },
+  "ROOT-REVIEW.md": {
+    "bytes": 2619,
+    "sha256": "31ba7bbddb32bb925fe13bb290c155ce696cf699fc057000ebe38709ddd21643"
+  },
+  "candidate.patch": {
+    "bytes": 48894,
+    "sha256": "601e8816c4cb177b996a88b2f176493cd25b21e7f780ec192ddfac49292342cf"
+  },
+  "external-artifacts.json": {
+    "bytes": 861,
+    "sha256": "c294cc1d73bef4d9808453aee0f44092015f728ca3bdd6eff1a90241593824ea"
+  },
+  "measure.py": {
+    "bytes": 4275,
+    "sha256": "36fd00846dc1597715652b3e4ffd1f4fa90ac2891c8acbd5329184df2dabf26b"
+  },
+  "mutant.patch": {
+    "bytes": 503,
+    "sha256": "8cb9816ee6adc429d8a64a7104b3c9a650d9b53b3d2131260267cd4699fe66e1"
+  },
+  "qualification/compiler.txt": {
+    "bytes": 214,
+    "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  "qualification/gpu-clippy.log": {
+    "bytes": 595,
+    "sha256": "f6af2f1d845064585fe2f66ec51d28672daacd6fe09cd088f4e53a9bce752685"
+  },
+  "qualification/gpu-tests.log": {
+    "bytes": 6454,
+    "sha256": "7c686c37c8b17ccb33ae70f809755e3e1b94ef1585d9604f5e13f92bef586193"
+  },
+  "qualification/gpui-clippy.log": {
+    "bytes": 642,
+    "sha256": "94f881bff6217f7bfcdf77062c966908821804b6fc75119da82b145a1dc9302c"
+  },
+  "qualification/gpui-tests.log": {
+    "bytes": 93081,
+    "sha256": "af13e301c779b11c13716cfb2bd180055061f8c444599021105c0a95834430f3"
+  },
+  "qualification/inputs-before.json": {
+    "bytes": 205895,
+    "sha256": "d7214c5294d2798ad426eb26af68e1527442d49cd32baf9cea8d7a8d6c9a07a4"
+  },
+  "qualification/inputs-verified.json": {
+    "bytes": 102,
+    "sha256": "8dd9fc0765946493afac7107f995fa11acca5138a3c5882a27f2a2a1f80b3ddf"
+  },
+  "qualification/native-x11.log": {
+    "bytes": 2256,
+    "sha256": "6ae216614158fc8e3cba2bc7edd0001af0b9d4eb568c2ab7836f482a0f46ce88"
+  },
+  "qualification/negative-control.log": {
+    "bytes": 112951,
+    "sha256": "e37cf3fec9d7c805c4949173ba4727a9c1a11ff8f7ff2e9bd1056cf7a44495e6"
+  },
+  "qualification/openbox.log": {
+    "bytes": 85,
+    "sha256": "6f748c3cd02a858c087697c3afac639205c62b7b206558bd40d1bcbd98165a5c"
+  },
+  "qualification/rebuild-identity.json": {
+    "bytes": 227,
+    "sha256": "8577b0df79108d0c92b4117f645cdc2260deb3c0a9e23200af308505f339290a"
+  },
+  "qualification/release-build.jsonl": {
+    "bytes": 153099,
+    "sha256": "6e55c4c4f42b73b2a3b22665cc0e6fe513f0626a60d589c8ac2c18f2932b0c25"
+  },
+  "qualification/release-build.log": {
+    "bytes": 585,
+    "sha256": "eba209bf038fb3d214eebad1dfe84ada90f1363bc30a1187e9d6b9f591cf06e8"
+  },
+  "qualification/release-clean.log": {
+    "bytes": 37,
+    "sha256": "a50099214d29c9cea8c7ffc21bbd56abee909820d51117fcc97efd621c8ad0be"
+  },
+  "qualification/shader-identity.json": {
+    "bytes": 480,
+    "sha256": "8cf1fd2556f74107b71f43b17245ecfdd5d0b078106d90e00017b001301e1050"
+  },
+  "qualification/xvfb.log": {
+    "bytes": 1174,
+    "sha256": "f172a1b0f5cf2a0d462c51dfc335af1a1dfc8e873cb66f61d018c8b1b35fe416"
+  },
+  "qualification.json": {
+    "bytes": 4157,
+    "sha256": "87c46d6aac6e32edf3768049a17100aa820ec0de57145684bcf536738843787a"
+  },
+  "raw/paired/0.csv": {
+    "bytes": 20832,
+    "sha256": "686db63f0ea6f86f76eeecbfc2141a749fa89d72bbde9502dadbbdce9f4d4deb"
+  },
+  "raw/paired/0.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "raw/paired/0.status.json": {
+    "bytes": 18,
+    "sha256": "df4d721d233a2334088d2d2e0110346ae9e509ff46bf0b379fbcfa85c715af4d"
+  },
+  "raw/paired/1.csv": {
+    "bytes": 20747,
+    "sha256": "d60a4f56a11219e2f7b9edcb7619ad33479c49306fd312b4e9d11120fcfc3a9e"
+  },
+  "raw/paired/1.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "raw/paired/1.status.json": {
+    "bytes": 18,
+    "sha256": "df4d721d233a2334088d2d2e0110346ae9e509ff46bf0b379fbcfa85c715af4d"
+  },
+  "raw/paired/2.csv": {
+    "bytes": 20724,
+    "sha256": "0cfa831fc218eeafd09e16a8f125e7eedc314d26633ec44cc5458fc0acdfcb2d"
+  },
+  "raw/paired/2.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "raw/paired/2.status.json": {
+    "bytes": 18,
+    "sha256": "df4d721d233a2334088d2d2e0110346ae9e509ff46bf0b379fbcfa85c715af4d"
+  },
+  "raw/paired/3.csv": {
+    "bytes": 20809,
+    "sha256": "3f161adcbeb2f442917a5950188fe2c1974b2a6f3225040c3b89c61e65ba6727"
+  },
+  "raw/paired/3.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "raw/paired/3.status.json": {
+    "bytes": 18,
+    "sha256": "df4d721d233a2334088d2d2e0110346ae9e509ff46bf0b379fbcfa85c715af4d"
+  },
+  "raw/paired/4.csv": {
+    "bytes": 20834,
+    "sha256": "ae8cc60555eff22ff90f39d565174b44588b04cda185d1e3816015a701b49150"
+  },
+  "raw/paired/4.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "raw/paired/4.status.json": {
+    "bytes": 18,
+    "sha256": "df4d721d233a2334088d2d2e0110346ae9e509ff46bf0b379fbcfa85c715af4d"
+  },
+  "raw/paired/metadata.json": {
+    "bytes": 13807,
+    "sha256": "4970e68b021d82643e34f681c3d48dec605b7c9fabee20a76b850bb33e0bd155"
+  },
+  "raw/paired/quantiles.json": {
+    "bytes": 15890,
+    "sha256": "70a68b0b033a320dcca4d249f05e3e9c434d5de6e5c86a9c68ce8926fdd7cd2b"
+  },
+  "raw/paired/summary.json": {
+    "bytes": 11508,
+    "sha256": "d4c8233406c9f572bea215347d8dfa02dfdbe129cc70e6d13fee6f8f28d436f4"
+  },
+  "raw/paired.log": {
+    "bytes": 492,
+    "sha256": "db5deaedd8467b9aa4848e3fd51ee2068aff5b477d326a105307ec8381c2d74e"
+  },
+  "raw/probe.csv": {
+    "bytes": 20817,
+    "sha256": "1062f9a913a1f09629509aca13e8291a20086724c87adf8776ad4da207f311fd"
+  },
+  "raw/probe.log": {
+    "bytes": 364,
+    "sha256": "7b35bc2b4ca6e27b5d2eca29c4742407c2fad48e76af1d85016be91f88095a5c"
+  },
+  "static/baseline-lines.json": {
+    "bytes": 54094,
+    "sha256": "75aa0017a49c813039a61b83d4c49f04d29b79d3ae751f6012b6f057a79f93e6"
+  },
+  "static/binary-size.txt": {
+    "bytes": 148,
+    "sha256": "46f3792f32f69ae81f6fcc692085385b0b23431f68f2fcc9de84cb5d5901d900"
+  },
+  "static/candidate-lines.json": {
+    "bytes": 54555,
+    "sha256": "199cc7d0ddaa4227034bab034ce7de65486283608f839594b8e1e2facb4ae42b"
+  },
+  "verify.py": {
+    "bytes": 4288,
+    "sha256": "d5450b4dee4ec679f4e00792054404d31f0b642d59b41575db3b48a217bb571e"
+  }
+}

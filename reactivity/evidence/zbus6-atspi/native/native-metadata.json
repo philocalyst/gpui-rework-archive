@@ -1,0 +1,50 @@
+{
+  "base": "bd37da00c21e2bd086efc60d5fcfaa60ee706c82",
+  "binary": "/tmp/gpui-zbus6-atspi-target/debug/deps/gpui-bf5ba1ac3adcc811",
+  "binary_sha256": "2871ed71652e66c8a6e151d010e8b3f2fa24e5b9e43fd35b92d12d67e1777ddb",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-zbus6-atspi/reactivity/crates/gpui#0.1.0",
+    "manifest_path": "/root/gpui-zbus6-atspi/reactivity/crates/gpui/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/root/gpui-zbus6-atspi/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [
+      "accessibility",
+      "default",
+      "native",
+      "simd",
+      "x11",
+      "x11-minimal"
+    ],
+    "filenames": [
+      "/tmp/gpui-zbus6-atspi-target/debug/deps/gpui-bf5ba1ac3adcc811"
+    ],
+    "executable": "/tmp/gpui-zbus6-atspi-target/debug/deps/gpui-bf5ba1ac3adcc811",
+    "fresh": false
+  },
+  "display": ":125",
+  "xvfb": "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+  "launcher": "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+  "source_before_after_identical": true,
+  "owned_xvfb_stopped": true,
+  "limits": "Actual X11/Xvfb/private D-Bus protocol gates, no OS screen-reader, physical display or hardware GPU assertion. Production AccessKit retains zbus5.19; test harness uses zbus6."
+}

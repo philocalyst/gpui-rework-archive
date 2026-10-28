@@ -1,0 +1,6 @@
+{
+  "rejected_commit": "c9fc88fa29e0ee842d3a1c64efa4d0f5dd9c2131",
+  "base": "df8ca59f69813e7dd05711fead98ed4278f1688d",
+  "cause": "New --no-checkout worktree index was not initialized before sparse-checkout set; first commit included unintended staged removals. Detected from commit statistics before any build, test or performance observation.",
+  "correction": "Restored index and checkout from exact base using git read-tree --reset -u, retained protocol, and verified resulting production diff is empty. Bad local commit retained in history; no existing source worktree changed."
+}

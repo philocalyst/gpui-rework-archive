@@ -1,0 +1,7 @@
+{
+  "archive_path": "/tmp/gpui-lattice-seed-evidence/lattice-linked-cost-ae1618396c.tar.gz",
+  "archive_bytes": 75476437,
+  "archive_sha256": "80b4faf7f04a47c235d9f8ceab22176ce7df2af95002f157c70a7f9515b30859",
+  "remote_archive": "/home/miles/gpui-ce3-compute-20261024/evidence/lattice-linked-cost-ae1618396c.tar.gz",
+  "scope": "Unadopted e872->ae1618396c static comparison. Full original evidence/ELFs/assembly retained in this external archive; not a new Main timing or functional gate."
+}

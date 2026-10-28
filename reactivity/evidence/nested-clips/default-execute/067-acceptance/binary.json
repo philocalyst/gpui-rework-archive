@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/8c6d726780cb1dad/out/acceptance-8c6d726780cb1dad",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/067-acceptance/test",
+  "sha256": "944f98cbd1f77c1f827f18d05695adbccd64fb1475dc48626c9dfec4f941bfa0",
+  "bytes": 156260128,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "acceptance",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/acceptance.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

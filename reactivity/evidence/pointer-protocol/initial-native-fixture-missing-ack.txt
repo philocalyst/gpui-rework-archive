@@ -1,0 +1,34 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-semantic-stream/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.20s
+     Running unittests src/lib.rs (/tmp/gpui-pointer-target/debug/deps/gpui-2d920c189301dba3)
+
+running 1 test
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... GPUI_SOLID_MEMORY,initial_solid,0,0,0
+GPUI_SOLID_MEMORY,normal_buffer,2097152,1876,938
+GPUI_SOLID_MEMORY,solid_after_buffer,0,0,0
+GPUI_SOLID_MEMORY,native_redraw,0,0,0
+GPUI_SOLID_MEMORY,resized,0,0,0
+GPUI_SOLID_MEMORY,resumed,0,0,0
+
+thread 'native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection' (3314701) panicked at crates/gpui/src/native.rs:1461:30:
+called `Result::unwrap()` on an `Err` value: PresentationStale
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 132 filtered out; finished in 0.23s
+
+error: test failed, to rerun pass `-p gpui --lib`

@@ -1,0 +1,7 @@
+{"case":"small32","lane":"typed","stage":"C0-ACK","parts":34,"texts":32,"checksum":8610852908871471691,"parents":9508930077845266922,"scene":3825025879495621741,"source":0,"presentation":0,"prepared":null,"valid":true}
+{"case":"small32","lane":"typed","stage":"C1-P-old","parts":34,"texts":32,"checksum":8610852908871471691,"parents":9508930077845266922,"scene":13256957480536325229,"source":1,"presentation":0,"prepared":1,"valid":true}
+{"case":"small32","lane":"typed","stage":"C1-ACK","parts":34,"texts":32,"checksum":17070105476867138018,"parents":9508930077845266922,"scene":13256957480536325229,"source":1,"presentation":1,"prepared":null,"valid":true}
+{"case":"small32","lane":"typed","stage":"C2-P-old","parts":34,"texts":32,"checksum":17070105476867138018,"parents":9508930077845266922,"scene":13256957480536325229,"source":3,"presentation":1,"prepared":3,"valid":true}
+{"case":"small32","lane":"typed","stage":"C2-ACK","parts":34,"texts":32,"checksum":17070105476867138018,"parents":9508930077845266922,"scene":13256957480536325229,"source":3,"presentation":3,"prepared":null,"valid":true}
+{"case":"small32","lane":"typed","stage":"proof","map_count_before":32,"map_count_after":32,"maps_preserved":32,"descriptions":0,"owner_reruns":0,"source_operations":3,"paint_passes":3,"route":"Source.direct"}
+{"case":"small32","lane":"typed","stage":"sample-final","parts":34,"texts":32,"checksum":17070105476867138018,"parents":9508930077845266922,"scene":13256957480536325229,"source":3,"presentation":3,"prepared":null,"valid":true}

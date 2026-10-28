@@ -1,0 +1,104 @@
+{
+  "method": "Existing fixture GPUI_TEXT_PIXELS writes explicit little-endian BGRX words; matched across all three immutable release binaries. Fresh processes; no timing comparison.",
+  "results": [
+    {
+      "source": "dc577564e5",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "fe4fb6ad4b4267e4cd27b13847b542909d3fe9158be7b5a467ee294d31c2d848"
+      }
+    },
+    {
+      "source": "dc577564e5",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "e00ba80e6a1b6156d6172a51634257da583c9f0ad88421cbb49959fc9d13f05c"
+      }
+    },
+    {
+      "source": "dc577564e5",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "edited.bgrx": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae",
+        "initial.bgrx": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+      }
+    },
+    {
+      "source": "b39a6b79c0",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "fe4fb6ad4b4267e4cd27b13847b542909d3fe9158be7b5a467ee294d31c2d848"
+      }
+    },
+    {
+      "source": "b39a6b79c0",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "e00ba80e6a1b6156d6172a51634257da583c9f0ad88421cbb49959fc9d13f05c"
+      }
+    },
+    {
+      "source": "b39a6b79c0",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "initial.bgrx": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d",
+        "edited.bgrx": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+      }
+    },
+    {
+      "source": "697c66c773",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "fe4fb6ad4b4267e4cd27b13847b542909d3fe9158be7b5a467ee294d31c2d848"
+      }
+    },
+    {
+      "source": "697c66c773",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "render.bgrx": "e00ba80e6a1b6156d6172a51634257da583c9f0ad88421cbb49959fc9d13f05c"
+      }
+    },
+    {
+      "source": "697c66c773",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "pixel_artifacts": {
+        "edited.bgrx": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae",
+        "initial.bgrx": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+      }
+    }
+  ]
+}

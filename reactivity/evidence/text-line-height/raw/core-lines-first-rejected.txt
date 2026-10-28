@@ -1,0 +1,1 @@
+Rejected inventory: --ref HEAD resolved in counter script repository, not candidate worktree. The recorded source_commit is not candidate. Use explicit commit hashes for corrected inventories.

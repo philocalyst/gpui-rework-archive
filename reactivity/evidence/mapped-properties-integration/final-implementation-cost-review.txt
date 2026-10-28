@@ -1,0 +1,102 @@
+Final frozen mapped-properties combined implementation cost review,2026-10-24
+
+Measured final pin4b44b21a187c5029a83357eb03034cdad5aec141, from /tmp/gpui-mapped-combined-root. Comparators are exact7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2,original mapped0062bf589829c4f28807ad0fde3e13285379294c,and outlineda89fc0241aa32cbf7db9bcd62983bb943f186028. The two earlier dossiers/artifacts remain unchanged. No Main mutation/integration or cost-tuning iteration occurred.
+
+Build/provenance
+Final counter and mapped_properties used the SAME physical remote source path as the freshly measured three comparator pins: /home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source. Same target cache,nightly7189d39d9/rustc1.101/LLVM23.1.4,Clang21,ordinary .cargo config(v0 symbols/cfg tokio_unstable),offline/locked release,default features plus x11/native/accessibility,debug0/incremental0/jobs2. No special LTO,panic,stack,inline or codegen flags. Both final builds passed. gpui fresh=false on final counter transition; both examples fresh=false. Exact git archive,compiler JSON,source manifests and ELF hashes retained. Both before/after sourceguards and both copied-ELF SHA values match. As in the prior same-path pass,gpui Rust input mtimes were touched before sourceguard capture/build to force freshness after restoring a new pin at the same path; source content remained immutable during builds.
+BenchmarkSol explicitly released its EX runtime lease before the final SH build/copy work. Every remote build/copy reaped before explicit release back to BenchmarkSol.8GiB floor respected(final filesystem13GiB free). All analysis and native proof below ran locally. No timing collected here.
+
+Source inspection
+Againsta89,the only shipping change is runtime.rs: private transient ColorPatch summary and extra eligibility/transaction work inside concrete MappedFanout::publish_colors,plus Runtime::patch routing one effective color change through existing finish_color_slot. Existing tests/native paint tests were extended. No retained fields,allocation-list additions,public Paint API changes or new unsafe helper implementation. InlineCall source remains SHAfd7a17dd45f972bb3b7387ebf36edc7bf93efd4828d2c04bc7f1ec335c2525ad; parent-owned64-execution Miri qualification applies to that same source. This review does not replace pending parent functional gates or decide adoption.
+
+Exact Syn+Tokei shipping source bill
+Unmodified core_lines.py plus exact same-policy new-helper count:
+Baseline7df six libraries                    31814
+Final4b44 six libraries                     32315
+New shipping inline-call helper                50
+Final all shipping libraries/helpers        32365
+Final delta versus7df                         +551
+The helper has no build script. Full per-file inventories include tool/source hashes,test ranges and uncertainty diagnostics. This is an actual pinned inventory,not provisional arithmetic. Final total is+46 versusa89's32319 and+43 versus0062's32322.
+
+Ordinary native counter linked cost
+                          baseline7df      original0062      outlineda89      final4b44
+ELF bytes                   23829320          23851320          23840400        23849600
+GNU size text               19007539          19027127          19014007        19023895
+GNU size data                 441608            441792            441880          442096
+GNU size bss                    7720              7720              7720            7720
+ELF .text                   10890432          10906512          10903968        10903280
+ELF .rodata                  5852992           5853248           5843136         5853504
+ELF .eh_frame                1139676           1141580           1141180         1141268
+ELF .gcc_except_table         413948            414744            414384          414344
+ELF .data.rel.ro              395856            395936            396016          396232
+
+Final versus7df: whole ELF+20280B; executable .text+12848B; .rodata+512B; GNU text+16356B;data+488B.
+Final versus0062: whole ELF−1720B; executable .text−3232B; .rodata+256B;GNU text−3232B;data+304B.
+Final versusa89: whole ELF+9200B; executable .text−688B; .rodata+10368B;GNU text+9888B;data+216B.
+The whole-file increase overa89 is predominantly readonly growth while executable instructions shrink slightly. GNU size text includes readonly/unwind material; it is not executable .text. All whole linked charges remain included. No source-based attribution is assigned to the readonly change.
+
+Actual ordinary code bytes / maximum fixed CFA offsets
+                                         baseline7df    original0062    outlineda89    final4b44
+RuntimeMut<Counter>::after_source_changed  8002/1104      10213/1728      9862/1216      9017/1200
+Runtime<Counter>::describe_inner          30998/2320      33837/2480     31853/2336     31853/2336
+ElementExtra::into_parts                   1200/240        2137/576       1738/288       1738/288
+El::flatten_lists<describe closure1>       9406/1968      11423/2096     11455/2096     11455/2096
+
+Remaining final CFA growth versus7df is+96B after_source_changed,+16B describe_inner,+48B into_parts,+128B flatten_lists. The original0062 recursion in into_parts remains removed. No standalone optimized El::properties/property_input/literal_properties or Counter::view symbol survives; no frame is guessed from source.
+
+Concrete final helper code bytes / CFA:
+Fanout::freeze                         1533/320 (unchangeda89)
+Fanout::map                             836/288 (unchangeda89)
+Fanout::finish_description             1488/176 (unchangeda89)
+MappedFanout::publish_colors            833/208 (a89313/144; therefore+520code/+64CFA)
+Runtime<Counter>::finish_color_slot     496/240 (new standalone outline,now reused at two call sites)
+Runtime<Panel>::finish_color_slot       468/240
+All four shared Fanout/MappedFanout helpers have identical code/CFA in counter and mapped app.
+
+CFA counts include saved registers/return addresses and establish per-function fixed frames,not total process peak stack. Caller/helper frames can coexist; the caller reduction is not a peak-stack claim. Cited frames have no dynamic CFA expression. Actual prologues/CFI and all callers are retained.
+
+Actual ordinary caller evidence:
+- activate_property,activate_with_editing,replace_input call after_source_changed as before.
+- after_source_changed calls Fanout::freeze at0xf9a45 and publish_colors at0xfac7a through relocation-resolved GOT slots.
+- after_source_changed calls Runtime::finish_color_slot directly at0xf9f53 and0xfb093.
+- describe_with_changed calls describe_inner; describe_inner calls Fanout::map at0x10f7e7 through GOT.
+- describe_inner loads finish_description's concrete address0x1a1750 into%rbx at0x110295 and calls through that register with no intervening register reassignment; bounded data-flow excerpt retained. The general resolver leaves other unproven register targets unresolved.
+- flatten_lists calls into_parts at0x13a2d5 through GOT; final into_parts has no self-call.
+The mapped app's after_admission_changed similarly calls freeze/publish_colors and has two direct finish_color_slot call sites; raw edges retained.
+
+Representative mapped33 native app
+Same32-color bit row,one affine on1000-child column,400x240,Frame32B/Signal40B,ReferenceCpu,one update payload. Legitimate7df baseline uses literal value projections and owner-level with_inbox;0062/a89/4b44 use map/map_with and with_inbox_for. This is the explicit baseline representable visual-update comparator,with different invalidation/lowering work.
+
+                          baseline owner   original0062      outlineda89      final4b44
+ELF bytes                   23865456          23898832          23893760        23907064
+GNU size text               19018525          19041385          19035245        19045125
+GNU size data                 441512            441968            442016          442232
+GNU size bss                    7736              7736              7736            7736
+ELF .text                   10899632          10917552          10921296        10920592
+ELF .rodata                  5853120           5853376           5843392         5853760
+
+Final versus baseline owner: ELF+41608B,executable .text+20960B,GNU text+26600B,data+720B.
+Final versus0062: ELF+8232B,executable .text+3040B,.rodata+384B,GNU text+3740B,data+264B.
+Final versusa89: ELF+13304B,executable .text−704B,.rodata+10368B,GNU text+9880B,data+216B.
+Mapped root describe_inner remains31853code/CFA2336; after_admission_changed becomes9015code/CFA1200(original006210402/1760;a899841/1216). Its flatten_lists remains11516/2080. Two InlineCall thunks remain140code/CFA80 and120code/CFA64; ordinary counter has none.33ports share two thunk types rather than33code bodies.
+
+Fresh final mapped native proof passed on the exact copied release ELF: source_epoch1,presentation_epoch1,owner_reruns0,row_rebuilds0,initial_rows1000,Frame32,Signal40,ReferenceCpu. Xvfb readiness was confirmed via displayfd before launch; process/Xvfb reaped. This probe exercises the mapped33 multi-output route. Parent's separate single-effective-color,HDR/alpha,inspector and allocation tests cover the specialized transaction semantics. No timing/speed or full-suite qualification claim is inferred from the native operation counts.
+
+Layout/allocation ledger
+Retained headers and existing erased operands remain as0062/a89: ordinary Destination4,Binding/Draft24,ElementExtra56,Decorations48,Fanout32; erased PropInput Color/Affine/numeric48 versus baseline24/32/16. Recipe24,MapOperand40,MapBinding/MapDraft48,MappedRecord32,MappedFanout88,PropertyValue28;33-record fanout2068B excluding existing scaffolding. The new ColorPatch summary is transient; its actual caller/helper frame effects are charged above. This pass did not independently measure its Rust size or repeat allocator tests. Earlier isolated allocator figures are preserved in prior dossiers,including the original first-large-color1.2MB preparation bill; they are not silently promoted to final native allocation evidence.
+
+Conclusion for review
+Final4b44 keeps the decomposition recursion removed and substantially reduces original0062's cited root frames,but ordinary code/data/frame overhead versus7df remains. Shared helper frames and two finish_color_slot calls are explicitly charged. Versusa89,both app ELF files grow primarily through readonly material while executable .text falls slightly. Exact shipping core is32365,+551. Functional/adoption status remains parent-owned; this pass supplies bounded actual cost evidence and introduces no further successor iteration.
+
+Evidence index
+final-comparisons.json: all eight same-path artifacts,exact source bill and section deltas.
+paired-costs.json,summary-verification.txt: final ELF hashes,sections,frames,freshness,sourceguards.
+prior-same-path-costs.json: immutable comparator ledger copied from the prior pass.
+*.nm.txt,*.sections.txt,*.analysis.json: symbol/section/frame accounting.
+*.asm.txt.gz,*.frames.txt.gz: complete actual disassembly/CFI.
+*.key-functions.{asm,cfi}.txt,*.resolved-calls.json,key-callers.txt: bounded function/caller evidence.
+final-finish-description-register-call.asm.txt: actual register-call data flow.
+source4b44.tar.gz,source4b44-vsa89.patch,*-build.{jsonl,log,exit},*-source-{before,after}.sha256,elf.sha256: source/build provenance.
+final-six-core-lines.json,baseline-six-core-lines.json,final-helper-core-lines.json,source-bill.json,count-helper.py: exact source inventory and tool identity.
+final-mapped-run.{log,exit},xvfb-display.ready: fresh native proof.
+Prior originals remain /tmp/gpui-mapped-cost-sol-evidence and /tmp/gpui-mapped-cost-sol-successor-653-evidence.

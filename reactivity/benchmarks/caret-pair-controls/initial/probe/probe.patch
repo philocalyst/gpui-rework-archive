@@ -1,0 +1,195 @@
+diff --git a/reactivity/crates/canvas/Cargo.toml b/reactivity/crates/canvas/Cargo.toml
+index 6c8605bf63..d59e9ddd74 100644
+--- a/reactivity/crates/canvas/Cargo.toml
++++ b/reactivity/crates/canvas/Cargo.toml
+@@ -17,7 +17,7 @@ gpui_reactivity_core = { path = "../core" }
+ ttf-parser = "=0.25.1"
+ swash = "=0.2.10"
+ skrifa = "=0.49.0"
+-parley = { version = "=0.12.0", default-features = false, features = ["std", "complex-scripts"] }
++parley = { version = "=0.12.0", default-features = false, features = ["std", "complex-scripts", "cursor-pair-probe"] }
+ fontique = { version = "=0.12.0", default-features = false, features = ["std"] }
+ icu_segmenter = { version = "=2.3.0", default-features = false, features = ["compiled_data"] }
+ icu_properties = { version = "=2.3.0", default-features = false, features = ["compiled_data"] }
+diff --git a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+index 5644b36354..5c99765bb0 100644
+--- a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
++++ b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+@@ -1,6 +1,6 @@
+ //! Compare the bulk pair with two independent, unindexed producer queries.
+ use super::*;
+-use parley::{Alignment, AlignmentOptions};
++use parley::{Alignment, AlignmentOptions, CursorPairProbe};
+ 
+ fn bits(bounds: parley::BoundingBox) -> [u64; 4] {
+     [bounds.x0, bounds.y0, bounds.x1, bounds.y1].map(f64::to_bits)
+@@ -15,6 +15,7 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+     let mut accepted = 0;
+     let mut snapped = 0;
+     let mut distinct = 0;
++    let mut paths = CursorPairProbe::default();
+     for source in [
+         "",
+         "a",
+@@ -70,7 +71,7 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+                                             })
+                                         },
+                                     );
+-                                    let actual = geometry.geometries_at(byte, width);
++                                    let actual = geometry.geometries_at_probed(byte, width, &mut paths);
+                                     let expected = direct[0].zip(direct[1]).map(|(a, b)| [a, b]);
+                                     assert_eq!(
+                                         actual.map(|pair| pair.map(bits)),
+@@ -98,6 +99,14 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+         "wrap/bidi/run affinity exceptions must occur"
+     );
+     eprintln!("cursor_pairs,accepted={accepted},snapped={snapped},distinct={distinct}");
++    assert!(paths.endpoint > 0 && paths.ltr_shared > 0 && paths.rtl_shared > 0);
++    assert!(paths.fallback >= distinct);
++    assert_eq!(paths.snapped, snapped);
++    assert_eq!(paths.endpoint + paths.ltr_shared + paths.rtl_shared + paths.fallback, accepted);
++    eprintln!(
++        "cursor_pair_probe,endpoint={},ltr_shared={},rtl_shared={},fallback={},snapped={}",
++        paths.endpoint, paths.ltr_shared, paths.rtl_shared, paths.fallback, paths.snapped
++    );
+ }
+ 
+ fn assert_lowered_stops(layout: &parley::Layout<()>, source: &str) {
+diff --git a/reactivity/vendor/parley/Cargo.toml b/reactivity/vendor/parley/Cargo.toml
+index eab26d3d1b..c95c595454 100644
+--- a/reactivity/vendor/parley/Cargo.toml
++++ b/reactivity/vendor/parley/Cargo.toml
+@@ -45,6 +45,7 @@ bytemuck = [
+     "parley_engine/bytemuck",
+ ]
+ complex-scripts = ["parley_engine/complex-scripts"]
++cursor-pair-probe = []
+ default = ["system"]
+ libm = [
+     "fontique/libm",
+diff --git a/reactivity/vendor/parley/src/editing/geometry.rs b/reactivity/vendor/parley/src/editing/geometry.rs
+index 41e9388c30..696049e085 100644
+--- a/reactivity/vendor/parley/src/editing/geometry.rs
++++ b/reactivity/vendor/parley/src/editing/geometry.rs
+@@ -14,6 +14,38 @@ struct Entry {
+     offset: f32,
+ }
+ 
++#[derive(Clone, Copy)]
++enum CursorPairPath {
++    Snapped,
++    Endpoint,
++    LtrShared,
++    RtlShared,
++    Fallback,
++}
++
++#[cfg(feature = "cursor-pair-probe")]
++#[derive(Default)]
++pub struct CursorPairProbe {
++    pub snapped: usize,
++    pub endpoint: usize,
++    pub ltr_shared: usize,
++    pub rtl_shared: usize,
++    pub fallback: usize,
++}
++
++#[cfg(feature = "cursor-pair-probe")]
++impl CursorPairProbe {
++    fn record(&mut self, path: CursorPairPath) {
++        match path {
++            CursorPairPath::Snapped => self.snapped = self.snapped.saturating_add(1),
++            CursorPairPath::Endpoint => self.endpoint = self.endpoint.saturating_add(1),
++            CursorPairPath::LtrShared => self.ltr_shared = self.ltr_shared.saturating_add(1),
++            CursorPairPath::RtlShared => self.rtl_shared = self.rtl_shared.saturating_add(1),
++            CursorPairPath::Fallback => self.fallback = self.fallback.saturating_add(1),
++        }
++    }
++}
++
+ /// Transient lookup over one immutably borrowed, fully line-broken layout.
+ ///
+ /// Construction visits each visible cluster and covered source byte once.
+@@ -96,6 +128,25 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
+     /// visual entries also share the exact f32 boundary recurrence, so their
+     /// two rectangles need only one geometry evaluation.
+     pub fn geometries_at(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
++        self.geometries_at_inner(byte, width, |_| {})
++    }
++
++    #[cfg(feature = "cursor-pair-probe")]
++    pub fn geometries_at_probed(
++        &self,
++        byte: usize,
++        width: f32,
++        probe: &mut CursorPairProbe,
++    ) -> Option<[BoundingBox; 2]> {
++        self.geometries_at_inner(byte, width, |path| probe.record(path))
++    }
++
++    fn geometries_at_inner(
++        &self,
++        byte: usize,
++        width: f32,
++        mut record: impl FnMut(CursorPairPath),
++    ) -> Option<[BoundingBox; 2]> {
+         let next = self.indexed_cluster(byte);
+         let upstream = Cursor::from_source_cluster(
+             self.layout,
+@@ -103,6 +154,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
+             next.map(|(_, cluster)| cluster),
+         );
+         if upstream.index() != byte {
++            record(CursorPairPath::Snapped);
+             return None;
+         }
+         let previous = byte.checked_sub(1).and_then(|b| self.indexed_cluster(b));
+@@ -133,19 +185,25 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
+             })
+         };
+         let first = geometry(upstream);
+-        Some([
+-            first,
+-            if same_edge {
+-                first
++        if same_edge {
++            let path = if byte == 0 || next.is_none() {
++                CursorPairPath::Endpoint
++            } else if previous.is_some_and(|(_, cluster)| cluster.is_rtl()) {
++                CursorPairPath::RtlShared
+             } else {
+-                let downstream = Cursor::from_source_cluster(
+-                    self.layout,
+-                    Affinity::Downstream,
+-                    next.map(|(_, cluster)| cluster),
+-                );
+-                geometry(downstream)
+-            },
+-        ])
++                CursorPairPath::LtrShared
++            };
++            record(path);
++            Some([first, first])
++        } else {
++            record(CursorPairPath::Fallback);
++            let downstream = Cursor::from_source_cluster(
++                self.layout,
++                Affinity::Downstream,
++                next.map(|(_, cluster)| cluster),
++            );
++            Some([first, geometry(downstream)])
++        }
+     }
+ 
+     /// The existing Cursor geometry policy, using cached source/prefix lookups.
+diff --git a/reactivity/vendor/parley/src/editing/mod.rs b/reactivity/vendor/parley/src/editing/mod.rs
+index a0ffbbd5fa..b3f50d1a36 100644
+--- a/reactivity/vendor/parley/src/editing/mod.rs
++++ b/reactivity/vendor/parley/src/editing/mod.rs
+@@ -9,4 +9,6 @@ mod selection;
+ pub use self::cursor::*;
+ pub use self::editor::*;
+ pub use self::geometry::CursorGeometry;
++#[cfg(feature = "cursor-pair-probe")]
++pub use self::geometry::CursorPairProbe;
+ pub use self::selection::*;

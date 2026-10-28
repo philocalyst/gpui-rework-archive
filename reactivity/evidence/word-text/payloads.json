@@ -1,0 +1,546 @@
+{
+  "source/Cargo.lock": {
+    "original": "/tmp/gpui-short-text-root/Cargo.lock",
+    "bytes": 609,
+    "sha256": "cddae46f2086cdb7abc2fd5a6f8aeca73f82a747f86c27f1e4e6988c8af73c15",
+    "stored_sha256": "cddae46f2086cdb7abc2fd5a6f8aeca73f82a747f86c27f1e4e6988c8af73c15",
+    "compression": null
+  },
+  "source/Cargo.toml": {
+    "original": "/tmp/gpui-short-text-root/Cargo.toml",
+    "bytes": 311,
+    "sha256": "9755599dbe43a9b8702c54ecf5ab8e5258df778da13b6af898fbc2cc6301ab54",
+    "stored_sha256": "9755599dbe43a9b8702c54ecf5ab8e5258df778da13b6af898fbc2cc6301ab54",
+    "compression": null
+  },
+  "source/README.md": {
+    "original": "/tmp/gpui-short-text-root/README.md",
+    "bytes": 4583,
+    "sha256": "c17d76013df0130fc5fe50e8225d85b495cd021cfd5b4f19cb1eeaf6d8728455",
+    "stored_sha256": "c17d76013df0130fc5fe50e8225d85b495cd021cfd5b4f19cb1eeaf6d8728455",
+    "compression": null
+  },
+  "source/src/lib.rs": {
+    "original": "/tmp/gpui-short-text-root/src/lib.rs",
+    "bytes": 4232,
+    "sha256": "29fccbc51156b4186d9b51d0824e9b367ab7d512794ef5ea1d9ee5ec5ef8a96f",
+    "stored_sha256": "29fccbc51156b4186d9b51d0824e9b367ab7d512794ef5ea1d9ee5ec5ef8a96f",
+    "compression": null
+  },
+  "source/tests/ownership.rs": {
+    "original": "/tmp/gpui-short-text-root/tests/ownership.rs",
+    "bytes": 3323,
+    "sha256": "0d0098bdcc02a93e580a755726a3e174620ccd3e10e3784f4b9d1753b63da02d",
+    "stored_sha256": "0d0098bdcc02a93e580a755726a3e174620ccd3e10e3784f4b9d1753b63da02d",
+    "compression": null
+  },
+  "nightly/after.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/after.json",
+    "bytes": 5364,
+    "sha256": "cd8c99bf1c851cffcbba8d79ad6b05cf0d85b91668cad60e9eeb905ceb4f621f",
+    "stored_sha256": "cd8c99bf1c851cffcbba8d79ad6b05cf0d85b91668cad60e9eeb905ceb4f621f",
+    "compression": null
+  },
+  "nightly/before.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/before.json",
+    "bytes": 5364,
+    "sha256": "cd8c99bf1c851cffcbba8d79ad6b05cf0d85b91668cad60e9eeb905ceb4f621f",
+    "stored_sha256": "cd8c99bf1c851cffcbba8d79ad6b05cf0d85b91668cad60e9eeb905ceb4f621f",
+    "compression": null
+  },
+  "nightly/miri-setup-x86_64-command.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/miri-setup-x86_64-command.json",
+    "bytes": 646,
+    "sha256": "b0bb46fe1695e462607535a7248180afa2a419e6164f0180c80d428a310e29db",
+    "stored_sha256": "b0bb46fe1695e462607535a7248180afa2a419e6164f0180c80d428a310e29db",
+    "compression": null
+  },
+  "nightly/miri-setup-x86_64.exit": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/miri-setup-x86_64.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "nightly/miri-setup-x86_64.log": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/miri-setup-x86_64.log",
+    "bytes": 2276,
+    "sha256": "a9bb2d19bf8dddea494da35eb6c3283100d18008e3f03cf476d8b566376846b6",
+    "stored_sha256": "a9bb2d19bf8dddea494da35eb6c3283100d18008e3f03cf476d8b566376846b6",
+    "compression": null
+  },
+  "nightly/results.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/results.json",
+    "bytes": 148,
+    "sha256": "36ee9afb0deea47afca79df9e835e4009608de518d47963abd1aeee2ff5ce28f",
+    "stored_sha256": "36ee9afb0deea47afca79df9e835e4009608de518d47963abd1aeee2ff5ce28f",
+    "compression": null
+  },
+  "nightly/strict-command.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/strict-command.json",
+    "bytes": 706,
+    "sha256": "26e5c5f57a0c089125cd6db6846e2a5ec5e0a498f0854c691029733ae7273c70",
+    "stored_sha256": "26e5c5f57a0c089125cd6db6846e2a5ec5e0a498f0854c691029733ae7273c70",
+    "compression": null
+  },
+  "nightly/strict.exit": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/strict.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "nightly/strict.log": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/strict.log",
+    "bytes": 207,
+    "sha256": "020fa9a4fec61cfe78ff3606d15f985bab4ff37a7f73c09f8e6483182324711d",
+    "stored_sha256": "020fa9a4fec61cfe78ff3606d15f985bab4ff37a7f73c09f8e6483182324711d",
+    "compression": null
+  },
+  "nightly/tests-command.json": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/tests-command.json",
+    "bytes": 668,
+    "sha256": "5546a4094e8a3a1ac6021db005e295413b6292f58d6b5ec9c8e0645e8b669936",
+    "stored_sha256": "5546a4094e8a3a1ac6021db005e295413b6292f58d6b5ec9c8e0645e8b669936",
+    "compression": null
+  },
+  "nightly/tests.exit": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/tests.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "nightly/tests.log": {
+    "original": "/tmp/gpui-short-text-qualification-3d6/tests.log",
+    "bytes": 966,
+    "sha256": "5ee232af16992135b9c4df7eb540a695ae443b2bc9b7f8a123dc9ac962f67dbf",
+    "stored_sha256": "5ee232af16992135b9c4df7eb540a695ae443b2bc9b7f8a123dc9ac962f67dbf",
+    "compression": null
+  },
+  "miri/after.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/after.json",
+    "bytes": 560,
+    "sha256": "c5b616693d073d70952608900b8af2e13d80219cd450a56247a030b6d0aa3a94",
+    "stored_sha256": "c5b616693d073d70952608900b8af2e13d80219cd450a56247a030b6d0aa3a94",
+    "compression": null
+  },
+  "miri/before.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/before.json",
+    "bytes": 560,
+    "sha256": "c5b616693d073d70952608900b8af2e13d80219cd450a56247a030b6d0aa3a94",
+    "stored_sha256": "c5b616693d073d70952608900b8af2e13d80219cd450a56247a030b6d0aa3a94",
+    "compression": null
+  },
+  "miri/i686-setup-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-setup-command.json",
+    "bytes": 662,
+    "sha256": "ab942ee02bb6cfd7acb5ddcc2b462907588eb64196bd9abfcc0aef579c93ee5f",
+    "stored_sha256": "ab942ee02bb6cfd7acb5ddcc2b462907588eb64196bd9abfcc0aef579c93ee5f",
+    "compression": null
+  },
+  "miri/i686-setup.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-setup.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/i686-setup.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-setup.log",
+    "bytes": 2252,
+    "sha256": "2414b0e3aab939bf9ebc2c7cbb096e4eeca7b4688109c0bedadea0f3e49c2c74",
+    "stored_sha256": "2414b0e3aab939bf9ebc2c7cbb096e4eeca7b4688109c0bedadea0f3e49c2c74",
+    "compression": null
+  },
+  "miri/i686-stacked-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-stacked-command.json",
+    "bytes": 884,
+    "sha256": "d440117febee058665ac171e7052e5e761e80c102bea4bfcb38eb2d7ee8bb4c4",
+    "stored_sha256": "d440117febee058665ac171e7052e5e761e80c102bea4bfcb38eb2d7ee8bb4c4",
+    "compression": null
+  },
+  "miri/i686-stacked.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-stacked.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/i686-stacked.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-stacked.log",
+    "bytes": 933,
+    "sha256": "639e03dc4143eefbd3f3bc09624283f1fd9bed005b5c095d30253d9156fe248b",
+    "stored_sha256": "639e03dc4143eefbd3f3bc09624283f1fd9bed005b5c095d30253d9156fe248b",
+    "compression": null
+  },
+  "miri/i686-tree-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-tree-command.json",
+    "bytes": 904,
+    "sha256": "fd93db63d7cbce04efbd8aae84c8d287c59122fbc127f12d5459b09a7b4174ed",
+    "stored_sha256": "fd93db63d7cbce04efbd8aae84c8d287c59122fbc127f12d5459b09a7b4174ed",
+    "compression": null
+  },
+  "miri/i686-tree.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-tree.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/i686-tree.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/i686-tree.log",
+    "bytes": 798,
+    "sha256": "6f7f6f2e764ce40786477af8c9f8f57ea1d1f91a9dc73365c01ab104d665094e",
+    "stored_sha256": "6f7f6f2e764ce40786477af8c9f8f57ea1d1f91a9dc73365c01ab104d665094e",
+    "compression": null
+  },
+  "miri/results.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/results.json",
+    "bytes": 405,
+    "sha256": "ef13f44cddee1fac4996790e49d00b17a7a79433792ddfd14cc97d10cbd34aad",
+    "stored_sha256": "ef13f44cddee1fac4996790e49d00b17a7a79433792ddfd14cc97d10cbd34aad",
+    "compression": null
+  },
+  "miri/s390x-setup-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-setup-command.json",
+    "bytes": 664,
+    "sha256": "5ef879fd886cde43576d3a631c551e40aa8845b62ecc6b194c08203687fd44df",
+    "stored_sha256": "5ef879fd886cde43576d3a631c551e40aa8845b62ecc6b194c08203687fd44df",
+    "compression": null
+  },
+  "miri/s390x-setup.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-setup.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/s390x-setup.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-setup.log",
+    "bytes": 2150,
+    "sha256": "c382b90f122345d259d16d5831606e401d99a0b2ba4345ca967e25f821a8076e",
+    "stored_sha256": "c382b90f122345d259d16d5831606e401d99a0b2ba4345ca967e25f821a8076e",
+    "compression": null
+  },
+  "miri/s390x-stacked-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-stacked-command.json",
+    "bytes": 886,
+    "sha256": "207689ae27b35c600b97451d77c99bdef17f6c13364754e19d73cfa7288d276c",
+    "stored_sha256": "207689ae27b35c600b97451d77c99bdef17f6c13364754e19d73cfa7288d276c",
+    "compression": null
+  },
+  "miri/s390x-stacked.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-stacked.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/s390x-stacked.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-stacked.log",
+    "bytes": 935,
+    "sha256": "49081e122f28e33ec5068b55d67395cfe40245df2d21f1ddce02a4a91ec82684",
+    "stored_sha256": "49081e122f28e33ec5068b55d67395cfe40245df2d21f1ddce02a4a91ec82684",
+    "compression": null
+  },
+  "miri/s390x-tree-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-tree-command.json",
+    "bytes": 906,
+    "sha256": "00625744deb9353af56bdf2e2d3f840a90bbe791e72dd90899d1d08c807bccd2",
+    "stored_sha256": "00625744deb9353af56bdf2e2d3f840a90bbe791e72dd90899d1d08c807bccd2",
+    "compression": null
+  },
+  "miri/s390x-tree.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-tree.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/s390x-tree.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/s390x-tree.log",
+    "bytes": 800,
+    "sha256": "50d083846cd37dfe6a03a16233879fa1c01712e3d11aa790535638bef1468bfe",
+    "stored_sha256": "50d083846cd37dfe6a03a16233879fa1c01712e3d11aa790535638bef1468bfe",
+    "compression": null
+  },
+  "miri/x86_64-stacked-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-stacked-command.json",
+    "bytes": 888,
+    "sha256": "ccf613d6c5ff0c404dea48d98c70cd1a6b1acc0c8523fa92830c7d8d3a7f205a",
+    "stored_sha256": "ccf613d6c5ff0c404dea48d98c70cd1a6b1acc0c8523fa92830c7d8d3a7f205a",
+    "compression": null
+  },
+  "miri/x86_64-stacked.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-stacked.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/x86_64-stacked.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-stacked.log",
+    "bytes": 937,
+    "sha256": "485bf4959c45cc9283365d0fe1161cb4227b3ec8c6b03094a3be69dddb3ca254",
+    "stored_sha256": "485bf4959c45cc9283365d0fe1161cb4227b3ec8c6b03094a3be69dddb3ca254",
+    "compression": null
+  },
+  "miri/x86_64-tree-command.json": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-tree-command.json",
+    "bytes": 908,
+    "sha256": "4239fb531326eb57bedcca8ad95debaf28fe5f284fb707a666e6b19cc618cd98",
+    "stored_sha256": "4239fb531326eb57bedcca8ad95debaf28fe5f284fb707a666e6b19cc618cd98",
+    "compression": null
+  },
+  "miri/x86_64-tree.exit": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-tree.exit",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "stored_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "compression": null
+  },
+  "miri/x86_64-tree.log": {
+    "original": "/tmp/gpui-short-text-miri-3d6/x86_64-tree.log",
+    "bytes": 802,
+    "sha256": "f5b68edf43d8f4f37bd9ef47c4cec68fed797ba465f40550f40f5ffd574dc5cf",
+    "stored_sha256": "f5b68edf43d8f4f37bd9ef47c4cec68fed797ba465f40550f40f5ffd574dc5cf",
+    "compression": null
+  },
+  "negative/address/after.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/after.json",
+    "bytes": 430,
+    "sha256": "7ab6f3344e8cf1ed47e6bfdd82c7584cf063f5b32e43658e68be87266858d6cd",
+    "stored_sha256": "7ab6f3344e8cf1ed47e6bfdd82c7584cf063f5b32e43658e68be87266858d6cd",
+    "compression": null
+  },
+  "negative/address/before.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/before.json",
+    "bytes": 430,
+    "sha256": "7ab6f3344e8cf1ed47e6bfdd82c7584cf063f5b32e43658e68be87266858d6cd",
+    "stored_sha256": "7ab6f3344e8cf1ed47e6bfdd82c7584cf063f5b32e43658e68be87266858d6cd",
+    "compression": null
+  },
+  "negative/address/command.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/command.json",
+    "bytes": 1045,
+    "sha256": "6d8a0a07eda90bd8a6a03b4d4b3c1d9c24eea188937c32be317867008b9608f2",
+    "stored_sha256": "6d8a0a07eda90bd8a6a03b4d4b3c1d9c24eea188937c32be317867008b9608f2",
+    "compression": null
+  },
+  "negative/address/exit": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/exit",
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "stored_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "compression": null
+  },
+  "negative/address/result.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/result.json",
+    "bytes": 243,
+    "sha256": "b92a3d4e69d49f083a443f638a59c30097c1a5fb1160dae53e5d46363b6231a9",
+    "stored_sha256": "b92a3d4e69d49f083a443f638a59c30097c1a5fb1160dae53e5d46363b6231a9",
+    "compression": null
+  },
+  "negative/address/rustc.txt": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/rustc.txt",
+    "bytes": 214,
+    "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "stored_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "compression": null
+  },
+  "negative/address/stderr.log": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/stderr.log",
+    "bytes": 2115,
+    "sha256": "8b7a8bb38207945fcae6c8353cc43dbd4ce141469afe3e7922d88b8e03c022bf",
+    "stored_sha256": "8b7a8bb38207945fcae6c8353cc43dbd4ce141469afe3e7922d88b8e03c022bf",
+    "compression": null
+  },
+  "negative/address/stdout.log": {
+    "original": "/tmp/gpui-short-text-negative-evidence/address/stdout.log",
+    "bytes": 86,
+    "sha256": "7f3b0732b421a1c111033d876e15196132548fe32802272120cdbd42f290f189",
+    "stored_sha256": "7f3b0732b421a1c111033d876e15196132548fe32802272120cdbd42f290f189",
+    "compression": null
+  },
+  "negative/drop/after.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/after.json",
+    "bytes": 430,
+    "sha256": "1027aadde9682ea5d300fcdad61bcc608e7dbe6027cf0ca6ffbf1dc53745977b",
+    "stored_sha256": "1027aadde9682ea5d300fcdad61bcc608e7dbe6027cf0ca6ffbf1dc53745977b",
+    "compression": null
+  },
+  "negative/drop/before.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/before.json",
+    "bytes": 430,
+    "sha256": "1027aadde9682ea5d300fcdad61bcc608e7dbe6027cf0ca6ffbf1dc53745977b",
+    "stored_sha256": "1027aadde9682ea5d300fcdad61bcc608e7dbe6027cf0ca6ffbf1dc53745977b",
+    "compression": null
+  },
+  "negative/drop/command.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/command.json",
+    "bytes": 1036,
+    "sha256": "d86246da8c9bba29952dd4e7e3687ace9cf54aa2c39acd57ea21b3e6468690e0",
+    "stored_sha256": "d86246da8c9bba29952dd4e7e3687ace9cf54aa2c39acd57ea21b3e6468690e0",
+    "compression": null
+  },
+  "negative/drop/exit": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/exit",
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "stored_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "compression": null
+  },
+  "negative/drop/result.json": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/result.json",
+    "bytes": 243,
+    "sha256": "36c0b7b68f513647254fc6a1301215927fa55ffe6a362f1ec08394e6c0d42fe6",
+    "stored_sha256": "36c0b7b68f513647254fc6a1301215927fa55ffe6a362f1ec08394e6c0d42fe6",
+    "compression": null
+  },
+  "negative/drop/rustc.txt": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/rustc.txt",
+    "bytes": 214,
+    "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "stored_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "compression": null
+  },
+  "negative/drop/stderr.log": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/stderr.log",
+    "bytes": 3537,
+    "sha256": "32c2638cb9e0c8ed372b25c74fcadec1f037637ee48f3732aa715ab2067963f2",
+    "stored_sha256": "32c2638cb9e0c8ed372b25c74fcadec1f037637ee48f3732aa715ab2067963f2",
+    "compression": null
+  },
+  "negative/drop/stdout.log": {
+    "original": "/tmp/gpui-short-text-negative-evidence/drop/stdout.log",
+    "bytes": 86,
+    "sha256": "7f3b0732b421a1c111033d876e15196132548fe32802272120cdbd42f290f189",
+    "stored_sha256": "7f3b0732b421a1c111033d876e15196132548fe32802272120cdbd42f290f189",
+    "compression": null
+  },
+  "negative/drop.patch": {
+    "bytes": 446,
+    "sha256": "f442bbdd3a0b7bf018af9da6a8a89f4f4d5c3236a9180158aca2ea405474ef16",
+    "stored_sha256": "f442bbdd3a0b7bf018af9da6a8a89f4f4d5c3236a9180158aca2ea405474ef16",
+    "compression": null
+  },
+  "negative/address.patch": {
+    "bytes": 587,
+    "sha256": "f92f97fd3e4ecfc5da3786fccd74750de66d24cd98a13253217d8512dda8fb1e",
+    "stored_sha256": "f92f97fd3e4ecfc5da3786fccd74750de66d24cd98a13253217d8512dda8fb1e",
+    "compression": null
+  },
+  "toolchain/verified-download.json": {
+    "original": "/tmp/gpui-shorttext-miri-provision/verified-download.json",
+    "bytes": 205,
+    "sha256": "53b5daab4912b0d452a0388b45f38d41b16f1344b40af300acc4a386fb1134a8",
+    "stored_sha256": "53b5daab4912b0d452a0388b45f38d41b16f1344b40af300acc4a386fb1134a8",
+    "compression": null
+  },
+  "toolchain/nix-adaptation.json": {
+    "original": "/tmp/gpui-shorttext-miri-provision/nix-adaptation.json",
+    "bytes": 1725,
+    "sha256": "babbc6743dbeb7e5510aac0ebb08792ca657478b861e2f6056972922617aef29",
+    "stored_sha256": "babbc6743dbeb7e5510aac0ebb08792ca657478b861e2f6056972922617aef29",
+    "compression": null
+  },
+  "toolchain/fetch.log": {
+    "original": "/tmp/gpui-shorttext-miri-provision/fetch.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compression": null
+  },
+  "toolchain/install.log": {
+    "original": "/tmp/gpui-shorttext-miri-provision/install.log",
+    "bytes": 161,
+    "sha256": "5c676f0dbf2433f47205896b3e4837897dc0384297bd313c076a7a5b581c5284",
+    "stored_sha256": "5c676f0dbf2433f47205896b3e4837897dc0384297bd313c076a7a5b581c5284",
+    "compression": null
+  },
+  "support/gpui-qualify-shorttext-root.py": {
+    "original": "/tmp/gpui-qualify-shorttext-root.py",
+    "bytes": 2938,
+    "sha256": "3b347d2b8d3094da58f06d2d9a93ce4a76b5917e245e3392edc1b434228fb695",
+    "stored_sha256": "3b347d2b8d3094da58f06d2d9a93ce4a76b5917e245e3392edc1b434228fb695",
+    "compression": null
+  },
+  "support/gpui-shorttext-miri-runs-root.py": {
+    "original": "/tmp/gpui-shorttext-miri-runs-root.py",
+    "bytes": 2837,
+    "sha256": "db8d3bd7b96a4302945646009a3aad48dbdb61fb0d68563e0793d92bd26af0fb",
+    "stored_sha256": "db8d3bd7b96a4302945646009a3aad48dbdb61fb0d68563e0793d92bd26af0fb",
+    "compression": null
+  },
+  "support/gpui-run-frozen-gate-root.py": {
+    "original": "/tmp/gpui-run-frozen-gate-root.py",
+    "bytes": 2985,
+    "sha256": "70681e76e70924a146bbe7ac4abd60a4dda5e1922b9460dc3df14a94a6e2071e",
+    "stored_sha256": "70681e76e70924a146bbe7ac4abd60a4dda5e1922b9460dc3df14a94a6e2071e",
+    "compression": null
+  },
+  "support/gpui-provision-shorttext-miri.py": {
+    "original": "/tmp/gpui-provision-shorttext-miri.py",
+    "bytes": 2746,
+    "sha256": "6d141cf091dc6254224ad9b0f750d5a92340e134a92602d74c5c8990ee9ea9b9",
+    "stored_sha256": "6d141cf091dc6254224ad9b0f750d5a92340e134a92602d74c5c8990ee9ea9b9",
+    "compression": null
+  },
+  "support/gpui-resume-shorttext-miri-tools.py": {
+    "original": "/tmp/gpui-resume-shorttext-miri-tools.py",
+    "bytes": 1606,
+    "sha256": "2f8f078eaa6d6c94a5168c6e5788984e6ea48f5128aa45ac5cb24d36b10c2f88",
+    "stored_sha256": "2f8f078eaa6d6c94a5168c6e5788984e6ea48f5128aa45ac5cb24d36b10c2f88",
+    "compression": null
+  },
+  "support/gpui-resume-shorttext-miri-tools-v2.py": {
+    "original": "/tmp/gpui-resume-shorttext-miri-tools-v2.py",
+    "bytes": 1762,
+    "sha256": "515003501ae5bf6dec7f8a90454162211049e00311b05fddfa358ded99e7a7e6",
+    "stored_sha256": "515003501ae5bf6dec7f8a90454162211049e00311b05fddfa358ded99e7a7e6",
+    "compression": null
+  },
+  "support/gpui-shorttext-miri-provision-root.log": {
+    "original": "/tmp/gpui-shorttext-miri-provision-root.log",
+    "bytes": 1428,
+    "sha256": "2fce87dda1330e8dea673a65a1e887c69ca7d29007d6a24e70cea22a251932c5",
+    "stored_sha256": "2fce87dda1330e8dea673a65a1e887c69ca7d29007d6a24e70cea22a251932c5",
+    "compression": null
+  },
+  "support/gpui-shorttext-miri-tools-resume.log": {
+    "original": "/tmp/gpui-shorttext-miri-tools-resume.log",
+    "bytes": 257,
+    "sha256": "288783755151579e1c50a688c713788cc5666efd772b0a5ccfef4a35d392b91e",
+    "stored_sha256": "288783755151579e1c50a688c713788cc5666efd772b0a5ccfef4a35d392b91e",
+    "compression": null
+  },
+  "support/gpui-shorttext-miri-tools-resume-v2.log": {
+    "original": "/tmp/gpui-shorttext-miri-tools-resume-v2.log",
+    "bytes": 48,
+    "sha256": "fb93b9e5f8ad8847deb3d5ad1797291f6ea7af4c71738cd8d6160c28346d81d7",
+    "stored_sha256": "fb93b9e5f8ad8847deb3d5ad1797291f6ea7af4c71738cd8d6160c28346d81d7",
+    "compression": null
+  },
+  "support/gpui-short-text-first-test.log": {
+    "original": "/tmp/gpui-short-text-first-test.log",
+    "bytes": 930,
+    "sha256": "7843a6ed567d1b80c2875ae307b5fabd283a7c543d586f4fb04979386204882d",
+    "stored_sha256": "7843a6ed567d1b80c2875ae307b5fabd283a7c543d586f4fb04979386204882d",
+    "compression": null
+  },
+  "adversarial-review.md": {
+    "original": "/tmp/gpui-short-text-luna/findings.md",
+    "bytes": 17417,
+    "sha256": "ca7741462ee1da2f0aa4c086524fdab7fd20d7b88544c2d781e5a948e773ee20",
+    "stored_sha256": "ca7741462ee1da2f0aa4c086524fdab7fd20d7b88544c2d781e5a948e773ee20",
+    "compression": null
+  },
+  "verify-and-archive-root.py": {
+    "original": "/tmp/gpui-archive-shorttext-root.py",
+    "bytes": 6054,
+    "sha256": "5c9f64cdc59e6aa57ef59d6f7be4ae99ef83a47793cca38b0da3cb3ccf19659a",
+    "stored_sha256": "5c9f64cdc59e6aa57ef59d6f7be4ae99ef83a47793cca38b0da3cb3ccf19659a",
+    "compression": null
+  }
+}

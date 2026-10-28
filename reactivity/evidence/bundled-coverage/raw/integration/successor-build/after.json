@@ -1,0 +1,7 @@
+{
+  "Cargo.lock": "88d80117db49da5e4388d7e3ac32ba6f9268cef5d9dc77175e42555fe5e0353b",
+  "Cargo.toml": "c79ef0bf0f26264d8f1e8a96c8d2099a567003af13f361b4eb9cbe45a97c1994",
+  "assets/NotoSans.ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d",
+  "origin.json": "67616fe0a93ecf944b762af630cf733f90f76dfdad3213c0c674e4cfd89c3c26",
+  "src/main.rs": "901e16172a9e15886f580aecab96289dd1ef99da0c5e55b661d9e3e132dbc3fa"
+}

@@ -1,0 +1,6 @@
+{"cases": 10, "passed": 0, "library_sha256": "2e89803cf9b5a2b849f09f0b6963cc90b85b6cb96051d590a367727d1ba8483e"}
+Traceback (most recent call last):
+  File "/tmp/gpui-source-overlap-sol/reactivity/evidence/signal-value/compile_contracts.py", line 52, in <module>
+    assert all(result["pass"] for result in results)
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

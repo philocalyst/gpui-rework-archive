@@ -1,0 +1,174 @@
+
+/tmp/gpui-literal-dispatch-base-target/release/examples/literal_startup:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004ed0d0 <literal_startup::literal_builder_probe>:
+  4ed0d0:	41 57                	push   %r15
+  4ed0d2:	41 56                	push   %r14
+  4ed0d4:	41 54                	push   %r12
+  4ed0d6:	53                   	push   %rbx
+  4ed0d7:	48 81 ec f8 01 00 00 	sub    $0x1f8,%rsp
+  4ed0de:	49 89 d6             	mov    %rdx,%r14
+  4ed0e1:	48 89 fb             	mov    %rdi,%rbx
+  4ed0e4:	0f 10 05 45 b6 b5 ff 	movups -0x4a49bb(%rip),%xmm0        # 48730 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110>
+  4ed0eb:	0f 11 44 24 10       	movups %xmm0,0x10(%rsp)
+  4ed0f0:	0f 10 0d 49 b6 b5 ff 	movups -0x4a49b7(%rip),%xmm1        # 48740 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x10>
+  4ed0f7:	0f 11 4c 24 20       	movups %xmm1,0x20(%rsp)
+  4ed0fc:	0f 10 15 4d b6 b5 ff 	movups -0x4a49b3(%rip),%xmm2        # 48750 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x20>
+  4ed103:	0f 11 54 24 30       	movups %xmm2,0x30(%rsp)
+  4ed108:	0f 10 1d 51 b6 b5 ff 	movups -0x4a49af(%rip),%xmm3        # 48760 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x30>
+  4ed10f:	0f 11 5c 24 40       	movups %xmm3,0x40(%rsp)
+  4ed114:	0f 10 25 55 b6 b5 ff 	movups -0x4a49ab(%rip),%xmm4        # 48770 <anon.84f3eb709a5e1c644c293c71a31fec4f.18.llvm.5731258225279900110+0x40>
+  4ed11b:	0f 11 64 24 50       	movups %xmm4,0x50(%rsp)
+  4ed120:	48 b8 00 00 00 00 01 	movabs $0x3000100000000,%rax
+  4ed127:	00 03 00
+  4ed12a:	48 89 44 24 60       	mov    %rax,0x60(%rsp)
+  4ed12f:	0f 57 ed             	xorps  %xmm5,%xmm5
+  4ed132:	0f 11 ac 24 88 00 00 	movups %xmm5,0x88(%rsp)
+  4ed139:	00
+  4ed13a:	48 c7 84 24 98 00 00 	movq   $0x0,0x98(%rsp)
+  4ed141:	00 00 00 00 00
+  4ed146:	48 c7 84 24 a0 00 00 	movq   $0x8,0xa0(%rsp)
+  4ed14d:	00 08 00 00 00
+  4ed152:	48 c7 84 24 a8 00 00 	movq   $0x0,0xa8(%rsp)
+  4ed159:	00 00 00 00 00
+  4ed15e:	48 c7 84 24 b0 00 00 	movq   $0xffffffffffffffff,0xb0(%rsp)
+  4ed165:	00 ff ff ff ff
+  4ed16a:	0f 10 2c 24          	movups (%rsp),%xmm5
+  4ed16e:	0f 11 ac 24 b8 00 00 	movups %xmm5,0xb8(%rsp)
+  4ed175:	00
+  4ed176:	0f 11 84 24 c8 00 00 	movups %xmm0,0xc8(%rsp)
+  4ed17d:	00
+  4ed17e:	0f 11 8c 24 d8 00 00 	movups %xmm1,0xd8(%rsp)
+  4ed185:	00
+  4ed186:	0f 11 94 24 e8 00 00 	movups %xmm2,0xe8(%rsp)
+  4ed18d:	00
+  4ed18e:	0f 11 9c 24 f8 00 00 	movups %xmm3,0xf8(%rsp)
+  4ed195:	00
+  4ed196:	0f 11 a4 24 08 01 00 	movups %xmm4,0x108(%rsp)
+  4ed19d:	00
+  4ed19e:	48 89 84 24 18 01 00 	mov    %rax,0x118(%rsp)
+  4ed1a5:	00
+  4ed1a6:	48 c7 84 24 20 01 00 	movq   $0x0,0x120(%rsp)
+  4ed1ad:	00 00 00 00 00
+  4ed1b2:	0f 10 84 24 80 00 00 	movups 0x80(%rsp),%xmm0
+  4ed1b9:	00
+  4ed1ba:	0f 11 84 24 28 01 00 	movups %xmm0,0x128(%rsp)
+  4ed1c1:	00
+  4ed1c2:	48 8b 84 24 90 00 00 	mov    0x90(%rsp),%rax
+  4ed1c9:	00
+  4ed1ca:	48 89 84 24 38 01 00 	mov    %rax,0x138(%rsp)
+  4ed1d1:	00
+  4ed1d2:	c6 84 24 40 01 00 00 	movb   $0x0,0x140(%rsp)
+  4ed1d9:	00
+  4ed1da:	89 f0                	mov    %esi,%eax
+  4ed1dc:	0f 57 c0             	xorps  %xmm0,%xmm0
+  4ed1df:	f2 48 0f 2a c0       	cvtsi2sd %rax,%xmm0
+  4ed1e4:	48 c7 44 24 70 00 00 	movq   $0x0,0x70(%rsp)
+  4ed1eb:	00 00
+  4ed1ed:	f2 0f 11 44 24 78    	movsd  %xmm0,0x78(%rsp)
+  4ed1f3:	4c 8d bc 24 48 01 00 	lea    0x148(%rsp),%r15
+  4ed1fa:	00
+  4ed1fb:	48 8d b4 24 98 00 00 	lea    0x98(%rsp),%rsi
+  4ed202:	00
+  4ed203:	48 8d 4c 24 70       	lea    0x70(%rsp),%rcx
+  4ed208:	4c 89 ff             	mov    %r15,%rdi
+  4ed20b:	ba 01 00 00 00       	mov    $0x1,%edx
+  4ed210:	e8 3b d4 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ed215:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4ed21c:	00
+  4ed21d:	48 b8 00 00 00 00 00 	movabs $0x4034000000000000,%rax
+  4ed224:	00 34 40
+  4ed227:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4ed22c:	4c 8d a4 24 98 00 00 	lea    0x98(%rsp),%r12
+  4ed233:	00
+  4ed234:	48 89 e1             	mov    %rsp,%rcx
+  4ed237:	4c 89 e7             	mov    %r12,%rdi
+  4ed23a:	4c 89 fe             	mov    %r15,%rsi
+  4ed23d:	ba 02 00 00 00       	mov    $0x2,%edx
+  4ed242:	e8 09 d4 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ed247:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4ed24e:	00
+  4ed24f:	48 b8 00 00 00 00 00 	movabs $0x4020000000000000,%rax
+  4ed256:	00 20 40
+  4ed259:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4ed25e:	4c 8d bc 24 48 01 00 	lea    0x148(%rsp),%r15
+  4ed265:	00
+  4ed266:	48 89 e1             	mov    %rsp,%rcx
+  4ed269:	4c 89 ff             	mov    %r15,%rdi
+  4ed26c:	4c 89 e6             	mov    %r12,%rsi
+  4ed26f:	ba 03 00 00 00       	mov    $0x3,%edx
+  4ed274:	e8 d7 d3 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ed279:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4ed280:	00
+  4ed281:	48 b8 00 00 00 00 00 	movabs $0x4010000000000000,%rax
+  4ed288:	00 10 40
+  4ed28b:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4ed290:	4c 8d a4 24 98 00 00 	lea    0x98(%rsp),%r12
+  4ed297:	00
+  4ed298:	48 89 e1             	mov    %rsp,%rcx
+  4ed29b:	4c 89 e7             	mov    %r12,%rdi
+  4ed29e:	4c 89 fe             	mov    %r15,%rsi
+  4ed2a1:	ba 04 00 00 00       	mov    $0x4,%edx
+  4ed2a6:	e8 a5 d3 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ed2ab:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4ed2b2:	00
+  4ed2b3:	48 b8 00 00 00 00 00 	movabs $0x4030000000000000,%rax
+  4ed2ba:	00 30 40
+  4ed2bd:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+  4ed2c2:	4c 8d bc 24 48 01 00 	lea    0x148(%rsp),%r15
+  4ed2c9:	00
+  4ed2ca:	48 89 e1             	mov    %rsp,%rcx
+  4ed2cd:	4c 89 ff             	mov    %r15,%rdi
+  4ed2d0:	4c 89 e6             	mov    %r12,%rsi
+  4ed2d3:	ba 05 00 00 00       	mov    $0x5,%edx
+  4ed2d8:	e8 73 d3 00 00       	call   4fa650 <<gpui::element::El>::property_operand::<f64>>
+  4ed2dd:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+  4ed2e4:	41 0f 10 06          	movups (%r14),%xmm0
+  4ed2e8:	0f 11 44 24 04       	movups %xmm0,0x4(%rsp)
+  4ed2ed:	4c 8d a4 24 98 00 00 	lea    0x98(%rsp),%r12
+  4ed2f4:	00
+  4ed2f5:	48 89 e1             	mov    %rsp,%rcx
+  4ed2f8:	4c 89 e7             	mov    %r12,%rdi
+  4ed2fb:	4c 89 fe             	mov    %r15,%rsi
+  4ed2fe:	ba 06 00 00 00       	mov    $0x6,%edx
+  4ed303:	e8 88 cf 00 00       	call   4fa290 <<gpui::element::El>::property_operand::<gpui_canvas::color::Color>>
+  4ed308:	c7 04 24 00 00 00 00 	movl   $0x0,(%rsp)
+  4ed30f:	41 0f 10 06          	movups (%r14),%xmm0
+  4ed313:	0f 11 44 24 04       	movups %xmm0,0x4(%rsp)
+  4ed318:	4c 8d b4 24 48 01 00 	lea    0x148(%rsp),%r14
+  4ed31f:	00
+  4ed320:	48 89 e1             	mov    %rsp,%rcx
+  4ed323:	4c 89 f7             	mov    %r14,%rdi
+  4ed326:	4c 89 e6             	mov    %r12,%rsi
+  4ed329:	ba 07 00 00 00       	mov    $0x7,%edx
+  4ed32e:	e8 5d cf 00 00       	call   4fa290 <<gpui::element::El>::property_operand::<gpui_canvas::color::Color>>
+  4ed333:	0f 28 05 a6 ac b5 ff 	movaps -0x4a535a(%rip),%xmm0        # 47fe0 <anon.5f884de6e78125e25881320d811d32df.391.llvm.17146438997930651657+0x12f0>
+  4ed33a:	0f 29 04 24          	movaps %xmm0,(%rsp)
+  4ed33e:	f2 0f 10 05 ea a2 b5 	movsd  -0x4a5d16(%rip),%xmm0        # 47630 <anon.5f884de6e78125e25881320d811d32df.391.llvm.17146438997930651657+0x940>
+  4ed345:	ff
+  4ed346:	f2 0f 11 44 24 10    	movsd  %xmm0,0x10(%rsp)
+  4ed34c:	4c 8d bc 24 98 00 00 	lea    0x98(%rsp),%r15
+  4ed353:	00
+  4ed354:	48 89 e2             	mov    %rsp,%rdx
+  4ed357:	4c 89 ff             	mov    %r15,%rdi
+  4ed35a:	4c 89 f6             	mov    %r14,%rsi
+  4ed35d:	e8 6e e2 00 00       	call   4fb5d0 <<gpui::element::El>::transform::<gpui_reactivity_core::geometry::Affine>>
+  4ed362:	c7 84 24 48 01 00 00 	movl   $0x0,0x148(%rsp)
+  4ed369:	00 00 00 00
+  4ed36d:	c7 84 24 50 01 00 00 	movl   $0x20000,0x150(%rsp)
+  4ed374:	00 00 02 00
+  4ed378:	48 8d b4 24 48 01 00 	lea    0x148(%rsp),%rsi
+  4ed37f:	00
+  4ed380:	48 89 df             	mov    %rbx,%rdi
+  4ed383:	4c 89 fa             	mov    %r15,%rdx
+  4ed386:	e8 a5 15 01 00       	call   4fe930 <<gpui::style::Flex as gpui::style::FlexRecipe>::apply_to>
+  4ed38b:	48 89 d8             	mov    %rbx,%rax
+  4ed38e:	48 81 c4 f8 01 00 00 	add    $0x1f8,%rsp
+  4ed395:	5b                   	pop    %rbx
+  4ed396:	41 5c                	pop    %r12
+  4ed398:	41 5e                	pop    %r14
+  4ed39a:	41 5f                	pop    %r15
+  4ed39c:	c3                   	ret

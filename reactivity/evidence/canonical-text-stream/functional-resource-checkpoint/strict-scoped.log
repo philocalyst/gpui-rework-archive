@@ -1,0 +1,17 @@
+    Checking core_maths v0.1.1
+    Checking ttf-parser v0.25.1
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/core)
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/gpu)
+    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/host)
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/state)
+    Checking gpui v0.1.0 (/tmp/gpui-text-selection-foundation-sol/reactivity/crates/gpui)
+    Checking foldhash v0.1.5
+    Checking hashbrown v0.15.5
+    Checking unicode-script v0.5.8
+    Checking unicode-bidi-mirroring v0.4.0
+    Checking unicode-properties v0.1.4
+    Checking unicode-ccc v0.4.0
+    Checking rustybuzz v0.20.1
+    Checking fontdue v0.9.5
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 35.63s

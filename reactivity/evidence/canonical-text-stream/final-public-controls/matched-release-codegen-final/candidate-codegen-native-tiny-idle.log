@@ -1,0 +1,7 @@
+NATIVE_CONTROL discovery ready
+NATIVE_CONTROL first ACK
+NATIVE_CONTROL real provider discovered
+NATIVE_CONTROL geometry checked
+NATIVE_CONTROL provider cycles complete; closing X11 window
+NATIVE_CONTROL client complete
+{"ack_epochs":[[0,0],[1,1],[2,2],[3,3],[4,4],[6,6]],"busy":false,"checksum":9836595482207501293,"count":4,"elapsed_ns":[],"failed_prepare_old_p_checked":true,"host_ack_60hz_budget_exceeded":0,"host_ack_elapsed_ns":[],"provider_60hz_budget_exceeded":0,"provider_completed_cycles":4,"source_epoch_before_close":6}

@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/03d8b288cf357af1/out/font_quality-03d8b288cf357af1",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/021-font_quality/test",
+  "sha256": "b50ad74c3103a85512eed4b6ee5e044e4632a03b8011253fe782b1fefa802ccc",
+  "bytes": 126894320,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "font_quality",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/font_quality.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

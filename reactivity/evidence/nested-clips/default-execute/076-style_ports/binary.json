@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/03e80b3dd3b1f056/out/style_ports-03e80b3dd3b1f056",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/076-style_ports/test",
+  "sha256": "d671a27a5b7dfd08df595bdeb3fda60f0d7d2a767b238bc57ab892fac618357b",
+  "bytes": 175050296,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "style_ports",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/style_ports.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

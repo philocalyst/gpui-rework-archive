@@ -1,0 +1,44 @@
+[package]
+name = "canonical-text-public-control"
+version = "0.0.0"
+edition = "2024"
+[workspace]
+[dependencies]
+gpui = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/crates/gpui", default-features = false }
+gpui_canvas = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/crates/canvas", default-features = false }
+serde_json = "1"
+x11rb = { version = "=0.14.0", optional = true }
+zbus = { version = "=6.0.0", default-features = false, features = ["default-rt", "proxy", "service"], optional = true }
+zruntime = { version = "=0.2.0", default-features = false, features = ["runtime", "mpmc"], optional = true }
+icu_segmenter = { version = "=2.3.0", default-features = false, features = ["compiled_data"], optional = true }
+[features]
+default = ["simd"]
+simd = ["gpui/simd"]
+native = ["gpui/x11", "dep:x11rb", "dep:zbus", "dep:zruntime", "dep:icu_segmenter"]
+[[bin]]
+name = "canonical-text-native-control"
+path = "src/native.rs"
+required-features = ["native"]
+[[bin]]
+name = "x11_close_probe"
+path = "src/bin/x11_close_probe.rs"
+required-features = ["native"]
+[profile.release]
+opt-level = 3
+lto = false
+codegen-units = 1
+debug = 0
+strip = "none"
+[patch.crates-io]
+wgpu = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu" }
+parley = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/parley" }
+parley_engine = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/parley_engine" }
+winit = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/winit" }
+wgpu-hal = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu-hal" }
+wgpu-core = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/wgpu-core" }
+softbuffer = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/softbuffer" }
+accesskit_unix = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_unix" }
+accesskit_atspi_common = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_atspi_common" }
+accesskit = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit" }
+accesskit_consumer = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_consumer" }
+accesskit_macos = { path = "/tmp/gpui-canonical-text-control-sol/reactivity/vendor/accesskit_macos" }

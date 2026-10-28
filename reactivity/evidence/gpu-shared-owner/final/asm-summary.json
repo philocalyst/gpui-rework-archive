@@ -1,0 +1,29 @@
+{
+  "baseline": {
+    "binary_sha256": "448af173c149e8e6474660bede9564aea701a0937b55d4d373ed6444cc9ade9e",
+    "entries": {
+      "render": {
+        "address": "0000000000845fc0",
+        "bytes": 9265
+      },
+      "redraw": {
+        "address": "0000000000845e90",
+        "bytes": 292
+      }
+    }
+  },
+  "final": {
+    "binary_sha256": "b0fb40d9158f94c7f506680997aa17a4b444ac01e4835c292f4176643c123f1a",
+    "entries": {
+      "render": {
+        "address": "0000000000846990",
+        "bytes": 9317
+      },
+      "redraw": {
+        "address": "0000000000846850",
+        "bytes": 314
+      }
+    },
+    "owned_forwarders_have_out_of_line_symbols": false
+  }
+}

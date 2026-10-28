@@ -1,0 +1,79 @@
+[
+  {
+    "variant": "f019",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup18single_width_probe",
+    "address": 5168688,
+    "bytes": 365,
+    "file": "asm/f019-4ede30.txt"
+  },
+  {
+    "variant": "f019",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup20literal_recipe_probe",
+    "address": 5169056,
+    "bytes": 674,
+    "file": "asm/f019-4edfa0.txt"
+  },
+  {
+    "variant": "f019",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup21literal_builder_probe",
+    "address": 5169744,
+    "bytes": 616,
+    "file": "asm/f019-4ee250.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RINvMs4_NtCsgID3RIcF1fr_4gpui7elementNtB6_2El16property_operandNtNtCs7XZEQI6Z5Ts_11gpui_canvas5color5ColorECs2y5gCbkiglF_15literal_startup.llvm.1175825284840303753",
+    "address": 5218960,
+    "bytes": 955,
+    "file": "asm/baseline-4fa290.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RINvMs4_NtCsgID3RIcF1fr_4gpui7elementNtB6_2El16property_operanddECs2y5gCbkiglF_15literal_startup.llvm.1175825284840303753",
+    "address": 5219920,
+    "bytes": 947,
+    "file": "asm/baseline-4fa650.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup18single_width_probe",
+    "address": 5164272,
+    "bytes": 300,
+    "file": "asm/baseline-4eccf0.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup20literal_recipe_probe",
+    "address": 5164576,
+    "bytes": 674,
+    "file": "asm/baseline-4ece20.txt"
+  },
+  {
+    "variant": "baseline",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup21literal_builder_probe",
+    "address": 5165264,
+    "bytes": 717,
+    "file": "asm/baseline-4ed0d0.txt"
+  },
+  {
+    "variant": "candidate",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup18single_width_probe",
+    "address": 5213728,
+    "bytes": 209,
+    "file": "asm/candidate-4f8e20.txt"
+  },
+  {
+    "variant": "candidate",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup20literal_recipe_probe",
+    "address": 5213952,
+    "bytes": 1126,
+    "file": "asm/candidate-4f8f00.txt"
+  },
+  {
+    "variant": "candidate",
+    "symbol": "_RNvCs2y5gCbkiglF_15literal_startup21literal_builder_probe",
+    "address": 5215088,
+    "bytes": 1194,
+    "file": "asm/candidate-4f9370.txt"
+  }
+]

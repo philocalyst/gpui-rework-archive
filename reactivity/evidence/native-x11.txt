@@ -1,0 +1,204 @@
+   Compiling zbus v5.19.0
+   Compiling wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+   Compiling winit v0.30.13 (/root/gpui-ce3/reactivity/vendor/winit)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+   Compiling softbuffer v0.4.8 (/root/gpui-ce3/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
+   Compiling atspi-common v0.13.0
+   Compiling wgpu-core-deps-windows-linux-android v29.0.4
+   Compiling wgpu-core v29.0.4
+   Compiling atspi-proxies v0.13.0
+   Compiling accesskit_atspi_common v0.21.0
+   Compiling wgpu v29.0.4
+   Compiling atspi v0.29.0
+   Compiling accesskit_unix v0.24.0
+   Compiling gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+   Compiling accesskit_winit v0.34.1
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 54.91s
+     Running unittests src/lib.rs (reactivity/target/debug/deps/gpui-574ecd9c191394a6)
+
+running 1 test
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... GPUI_SOLID_MEMORY,initial_solid,0,0,0
+GPUI_SOLID_MEMORY,normal_buffer,2097152,1876,938
+GPUI_SOLID_MEMORY,solid_after_buffer,0,0,0
+GPUI_SOLID_MEMORY,native_redraw,0,0,0
+GPUI_SOLID_MEMORY,resized,0,0,0
+GPUI_SOLID_MEMORY,resumed,0,0,0
+native GPU port: Stats { submissions: 6, draws: 58, tile_references: 319, original_tile_references: 353, skipped_tile_references: 34, uniform_tiles: 34, sample_evaluations: 700416, sample_draw_evaluations: 1306624, instance_upload_bytes: 13980, draw_record_bytes: 3024, shared_groups: 9, compact_draws: 51, inline_draws: 7, mask_upload_bytes: 0, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 31, atlas_key_capacity: 56, cpu_index_capacity_bytes: 20600, correction_records: 1, correction_key_capacity: 0 }
+Auto rejected actual CPU adapter before requesting a device/pipeline
+native GPU port: Stats { submissions: 1, draws: 72, tile_references: 381, original_tile_references: 399, skipped_tile_references: 18, uniform_tiles: 18, sample_evaluations: 765952, sample_draw_evaluations: 1560576, instance_upload_bytes: 14756, draw_record_bytes: 3552, shared_groups: 10, compact_draws: 65, inline_draws: 7, mask_upload_bytes: 3638, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 33, atlas_key_capacity: 56, cpu_index_capacity_bytes: 19604, correction_records: 1, correction_key_capacity: 0 }
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 111 filtered out; finished in 9.24s
+
+     Running tests/acceptance.rs (reactivity/target/debug/deps/acceptance-49cde695ccf13f09)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/application.rs (reactivity/target/debug/deps/application-703f934f8e889c90)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/color_packing.rs (reactivity/target/debug/deps/color_packing-d84aad773e1d6a66)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/components.rs (reactivity/target/debug/deps/components-7f4604af7e23a7b6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests/dpi.rs (reactivity/target/debug/deps/dpi-6c4ed03ec4831e54)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/field_identity.rs (reactivity/target/debug/deps/field_identity-df655b0227938e3c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/focus.rs (reactivity/target/debug/deps/focus-dee56ebcb27884e9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/identity_recovery.rs (reactivity/target/debug/deps/identity_recovery-d351dad1673a0cac)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/immutable_text.rs (reactivity/target/debug/deps/immutable_text-73d23ca47dbf3185)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/inspector.rs (reactivity/target/debug/deps/inspector-9e879b389df28eea)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/library.rs (reactivity/target/debug/deps/library-88b895ae85ef37da)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests/lists.rs (reactivity/target/debug/deps/lists-a8ccace64d27d272)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+
+     Running tests/ports.rs (reactivity/target/debug/deps/ports-edc372ff1296d918)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/presentation.rs (reactivity/target/debug/deps/presentation-24a62a97bc77122e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/queries.rs (reactivity/target/debug/deps/queries-e89e5253e964aa15)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/question_cost.rs (reactivity/target/debug/deps/question_cost-89f1fa866931cbe6)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/question_mailbox.rs (reactivity/target/debug/deps/question_mailbox-8caa23d47a52265c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/question_storage.rs (reactivity/target/debug/deps/question_storage-043b950f7c46ddda)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests/questions.rs (reactivity/target/debug/deps/questions-2297fc916821606d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
+
+     Running tests/remote.rs (reactivity/target/debug/deps/remote-9b976bc679df1659)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+     Running tests/retained_styles.rs (reactivity/target/debug/deps/retained_styles-f8a5f581d7ed26d1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (reactivity/target/debug/deps/runtime-f6428b5eeea4bc50)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+     Running tests/search_library.rs (reactivity/target/debug/deps/search_library-c81df7299cf6da7a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/semantic_metadata.rs (reactivity/target/debug/deps/semantic_metadata-31d278d448c26e5e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+     Running tests/semantics.rs (reactivity/target/debug/deps/semantics-d8058eb758595dcf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/text_cache.rs (reactivity/target/debug/deps/text_cache-bda1b53978793909)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests/unicode_text.rs (reactivity/target/debug/deps/unicode_text-9639c7b44290fbdf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s

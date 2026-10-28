@@ -1,0 +1,1802 @@
+[
+  {
+    "case": "both",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 13,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 13,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "scroll",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 11,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 11,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 2,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-full",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 5,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 5,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 4,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 4,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-flat",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 6,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 6,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 9,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 9,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 7,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "both",
+    "pair": 7,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 3,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 3,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 10,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 10,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "fractional",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 14,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 14,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 12,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "stream-owner",
+    "pair": 12,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 8,
+    "variant": "control",
+    "frames": 64
+  },
+  {
+    "case": "list-tiny",
+    "pair": 8,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 64
+  },
+  {
+    "case": "exposure",
+    "pair": 1,
+    "variant": "control",
+    "frames": 64
+  }
+]

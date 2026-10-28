@@ -1,0 +1,333 @@
+{
+  "identity": {
+    "canvas_source": "21d22b16b44a4d719aea1a485cf7ed0a09bdad82",
+    "fixture": "35fdf80a1a5d45d6769ca0e5fc8f1c64b3595eb0",
+    "original_path": "/tmp/gpui-coverage-text-oracle-root-target/release/browser-text-oracle",
+    "frozen_path": "/tmp/gpui-coverage-integration-evidence/successor-oracle-frozen",
+    "bytes": 10423888,
+    "sha256": "53f8ce080bfdabcbb2de2c397f2048832768e3d1ef5fb051d8298703aaeb2e23"
+  },
+  "sections": {
+    ".interp": {
+      "bytes": 83,
+      "flags": "A"
+    },
+    ".note.ABI-tag": {
+      "bytes": 32,
+      "flags": "A"
+    },
+    ".dynsym": {
+      "bytes": 1680,
+      "flags": "A"
+    },
+    ".gnu.version": {
+      "bytes": 140,
+      "flags": "A"
+    },
+    ".gnu.version_r": {
+      "bytes": 288,
+      "flags": "A"
+    },
+    ".gnu.hash": {
+      "bytes": 28,
+      "flags": "A"
+    },
+    ".dynstr": {
+      "bytes": 1073,
+      "flags": "A"
+    },
+    ".rela.dyn": {
+      "bytes": 72264,
+      "flags": "A"
+    },
+    ".rela.plt": {
+      "bytes": 48,
+      "flags": "AI"
+    },
+    ".rodata": {
+      "bytes": 8465764,
+      "flags": "AMS"
+    },
+    ".gcc_except_table": {
+      "bytes": 48736,
+      "flags": "A"
+    },
+    ".eh_frame_hdr": {
+      "bytes": 17852,
+      "flags": "A"
+    },
+    ".eh_frame": {
+      "bytes": 106656,
+      "flags": "A"
+    },
+    ".text": {
+      "bytes": 1202086,
+      "flags": "AX"
+    },
+    ".init": {
+      "bytes": 27,
+      "flags": "AX"
+    },
+    ".fini": {
+      "bytes": 13,
+      "flags": "AX"
+    },
+    ".plt": {
+      "bytes": 48,
+      "flags": "AX"
+    },
+    ".tdata": {
+      "bytes": 48,
+      "flags": "WAT"
+    },
+    ".tbss": {
+      "bytes": 32,
+      "flags": "WAT"
+    },
+    ".fini_array": {
+      "bytes": 8,
+      "flags": "WA"
+    },
+    ".init_array": {
+      "bytes": 16,
+      "flags": "WAo"
+    },
+    ".data.rel.ro": {
+      "bytes": 45032,
+      "flags": "WA"
+    },
+    ".dynamic": {
+      "bytes": 464,
+      "flags": "WA"
+    },
+    ".got": {
+      "bytes": 8648,
+      "flags": "WA"
+    },
+    ".got.plt": {
+      "bytes": 40,
+      "flags": "WA"
+    },
+    ".relro_padding": {
+      "bytes": 1920,
+      "flags": "WA"
+    },
+    ".tm_clone_table": {
+      "bytes": 0,
+      "flags": "WA"
+    },
+    ".data": {
+      "bytes": 2704,
+      "flags": "WA"
+    },
+    ".bss": {
+      "bytes": 298,
+      "flags": "WA"
+    },
+    ".comment": {
+      "bytes": 166,
+      "flags": "MS"
+    },
+    ".symtab": {
+      "bytes": 102720,
+      "flags": "33"
+    },
+    ".shstrtab": {
+      "bytes": 320,
+      "flags": "0"
+    },
+    ".strtab": {
+      "bytes": 343958,
+      "flags": "0"
+    }
+  },
+  "allocated_sections": 9976028,
+  "selected_functions": [
+    {
+      "address": 8859360,
+      "bytes": 351,
+      "name": "gpui_canvas::text::coverage::visit::<gpui_canvas::Error, <gpui_canvas::text::planner::Planner>::coverage::{closure#1}>",
+      "fde_ranges": [
+        {
+          "start": 8859360,
+          "end": 8859711,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            64,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 64
+    },
+    {
+      "address": 8858512,
+      "bytes": 844,
+      "name": "gpui_canvas::text::coverage::emit::<gpui_canvas::Error, <gpui_canvas::text::planner::Planner>::coverage::{closure#1}>",
+      "fde_ranges": [
+        {
+          "start": 8858512,
+          "end": 8859356,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            2928,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            2928
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 2928
+    },
+    {
+      "address": 8879056,
+      "bytes": 1118,
+      "name": "<&mut core::iter::adapters::map::map_fold<parley::layout::line::PositionedLayoutItem<()>, usize, usize, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}, <usize as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, parley::layout::line::GlyphRunIter<()>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#4}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}>>::{closure#0}>::{closure#0} as core::ops::function::FnMut<(usize, parley::layout::line::PositionedLayoutItem<()>)>>::call_mut",
+      "fde_ranges": [
+        {
+          "start": 8879056,
+          "end": 8880174,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            352,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            352
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 352
+    },
+    {
+      "address": 8730976,
+      "bytes": 7910,
+      "name": "browser_text_oracle::main",
+      "fde_ranges": [
+        {
+          "start": 8730976,
+          "end": 8738886,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            1280,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            1280
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 1280
+    },
+    {
+      "address": 8840512,
+      "bytes": 15475,
+      "name": "<gpui_canvas::text::planner::Planner>::shape",
+      "fde_ranges": [
+        {
+          "start": 8840512,
+          "end": 8855987,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            4152,
+            4800,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            4800
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 4800
+    }
+  ],
+  "files": {
+    "disassembly.txt": {
+      "bytes": 21490587,
+      "sha256": "4ef1bfb9506ef38d9089d4a231e33bc0b4f590b9a2aaa45ab2fe8a044106050d"
+    },
+    "symbols.txt": {
+      "bytes": 408532,
+      "sha256": "254cb2705f8d39f32f58d8d920a5ad12eaeb00df1be164f9e6cfbcff0319cdd4"
+    },
+    "symbols.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sections.txt": {
+      "bytes": 3458,
+      "sha256": "e1d472cdde26aa3bce4a51a4711758a1cef618f1c6f6c1bfa0ffa953f0bb7df7"
+    },
+    "sections.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "frames.txt": {
+      "bytes": 1464249,
+      "sha256": "dbd2eebaf267934fa9e95a3280a376172f0340fb93edcc9d3effdfb90b5b5462"
+    },
+    "frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "selected-code.txt": {
+      "bytes": 370259,
+      "sha256": "c081becea396b18dd41f96890ecc4ae2ff410c080817e7cee91279ad4f9149b9"
+    }
+  }
+}

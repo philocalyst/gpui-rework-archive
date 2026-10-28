@@ -1,0 +1,9 @@
+{
+  "archive_original_files_verified": 505,
+  "raw_observation_streams_verified": 438,
+  "completed_observations_verified": 219,
+  "complete_pairs_verified": 109,
+  "frozen_fixture_files_verified": 3,
+  "campaign_status": "incomplete",
+  "independent_complete_cell_gate": "origin32k update FAIL"
+}

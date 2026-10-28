@@ -1,0 +1,262 @@
+{
+  "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+  "gates": {
+    "build": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "execute-guard": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "strict": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "docs": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 2,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "scalar": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 190,
+      "failed": 0,
+      "ignored": 5,
+      "harnesses": 3,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "wire-guard": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "probe-guard": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "hummingbird-build": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2777,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor",
+        "reactivity/ports/hummingbird"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "hummingbird-execute": {
+      "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+      "exit": 0,
+      "guards": 2777,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor",
+        "reactivity/ports/hummingbird"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "gpui": {
+    "harnesses": 68,
+    "passed": 700,
+    "failed": 0,
+    "ignored": 36,
+    "all_exit_zero": true,
+    "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+  },
+  "hummingbird": {
+    "harnesses": 18,
+    "passed": 70,
+    "failed": 0,
+    "ignored": 2,
+    "all_exit_zero": true,
+    "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+  },
+  "native": {
+    "source": "88e68054ba637e1a840d1311b56bfa53fa74544f",
+    "binary_sha256": "e8800cbf3e9bd2331cb90f293f0aafd93cbd3f11190a6ebd67d0d147a2f5ded8",
+    "all_exit_zero": true,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "results": [
+      {
+        "name": "native-gpu-paint",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      },
+      {
+        "name": "native-atspi-clips",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      }
+    ],
+    "scope": "Actual private-X11 renderer/paint/inspector bridge and AT-SPI rounded-clip pointer/ACK wire test at1.25 scale and negative screen origin; no hardware, latency or RSS claim."
+  },
+  "exact_public_artifacts": 120,
+  "semantic_mutant": {
+    "source": "c9617ea5c103a56fcce0c310a0392e749b1ae834",
+    "expected_semantic_failure": true,
+    "one_test_entered": true,
+    "failed": 1,
+    "elf_sha256": "74efde6a8cd3d9443161b30393222b7a2b0c82c208de057cd8d0b3077d4bf9b0",
+    "sha256_after_matches": true,
+    "source_guard": {
+      "source": "c9617ea5c103a56fcce0c310a0392e749b1ae834",
+      "exit": 101,
+      "guards": 2056,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "shipping_non_test_non_comment_code_lines": 34697,
+  "delta_vs_previous_main": 17,
+  "scope": "Functional, identity and allocation qualification. Overlapping counts are not summed; no timing, RSS, startup or hardware-GPU improvement is claimed."
+}

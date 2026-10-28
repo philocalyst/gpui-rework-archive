@@ -1,0 +1,12 @@
+[package]
+name = "accesskit-lifecycle-upstream-regression"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+accesskit = "=0.25.1"
+accesskit_unix = "=0.24.0"
+accesskit_consumer = "=0.39.1"
+zbus = { version = "=5.19.0", features = ["blocking-api"] }
+[[test]]
+name = "service_lifecycle"
+path = "tests/service_lifecycle.rs"

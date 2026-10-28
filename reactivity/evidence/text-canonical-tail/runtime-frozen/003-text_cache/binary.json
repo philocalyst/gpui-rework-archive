@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui/8d8939460fa51afc/out/text_cache-8d8939460fa51afc",
+  "frozen": "/tmp/text-sol-evidence/runtime-frozen/003-text_cache/test",
+  "sha256": "cf5dcc9d1eebfc8fc0475f954eac6407407f81e1ca1976d9abd8fc96fd226bdd",
+  "bytes": 149013504,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "text_cache",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/gpui/tests/text_cache.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

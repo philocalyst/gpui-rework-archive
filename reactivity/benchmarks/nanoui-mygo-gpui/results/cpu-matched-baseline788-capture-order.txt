@@ -1,0 +1,16 @@
+Corrected CPU-matched capture chunk
+
+Scope: Linux/Xvfb DISPLAY=:94. The Xvfb server stayed up across cells; each cell used one observer process and X11 connection across 100 app starts. Each cell used 10 clicks per start and five 750 ms idle observations. GPUI binary is baseline source pin 78824355bc4ceb1523bdbd21404b8380a50d9e7d; source fixture/binaries are recorded in binary-and-fixture-sha256.txt. This is not the current integrated GPUI main build.
+
+Cell order (the order was rotated across workloads):
+1. gpui eager 0
+2. mygo eager 0
+3. nanoui eager 0
+4. mygo eager 1000
+5. nanoui eager 1000
+6. gpui eager 1000
+7. nanoui virtual 250000
+8. gpui virtual 250000
+9. mygo virtual 250000
+
+This chunk ended before production source/build work resumed. No other timed capture ran concurrently in this chunk. The first process of each cell followed earlier builds, so the page cache is warm or unknown; no cache drop was performed.

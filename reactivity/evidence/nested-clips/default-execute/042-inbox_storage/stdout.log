@@ -1,0 +1,14 @@
+
+running 9 tests
+test abandoned_inbox_revokes_before_a_reentrant_panicking_payload_drop ... ok
+test all_lane_producers_are_revoked_before_a_payload_drop_can_unwind ... ok
+test concurrent_clone_drop_and_prebind_fifo_end_with_one_terminal ... ok
+test logical_capacity_bounds_zst_values_and_zero_capacity ... ok
+test mixed_question_chain_is_cancelled_before_retired_inbox_payload_unwinds ... ok
+test payload_drop_unwind_after_callback_fault_keeps_the_owner_quarantined ... ok
+test receiver_drop_releases_the_lock_before_payload_destructors_reenter ... ok
+test shared_transport_does_not_require_payload_sync ... ok
+test simultaneous_final_two_producers_publish_one_bound_terminal ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

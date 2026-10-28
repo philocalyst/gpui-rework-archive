@@ -1,0 +1,511 @@
+{
+  "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+  "binary": {
+    "cargo_artifact": "/tmp/gpui-static-shader-sol-target/debug/static-lifetime",
+    "copy": "/tmp/gpui-static-frozen-bins/static-lifetime",
+    "sha256": "068855796ea10694f0fcc64083cf7b0f2934ae7c1c25039baddb67f435a5a48e"
+  },
+  "layer": {
+    "sha256": "666729aeef276baf9091d3d38423462640f50d39dfc108d23ecef435b4a32093",
+    "source_sha256": "6bb1d71f3e3bfbf1a526097c6e9722b51326a43cc551249c9053189048770c7a",
+    "build": [
+      "clang",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-shared",
+      "-fPIC",
+      "-pthread",
+      "-I/nix/store/y5cj46l7dvhhz63rwgqd71h723i3q8c0-vulkan-headers-1.4.341.0/include",
+      "/tmp/gpui-static-shader-sol/reactivity/evidence/static-shader/drivers/layer.c",
+      "-o",
+      "/tmp/gpui-static-final-layer.so"
+    ],
+    "manifest": {
+      "file_format_version": "1.2.0",
+      "layer": {
+        "name": "VK_LAYER_GPUI_static_probe",
+        "type": "GLOBAL",
+        "library_path": "/tmp/gpui-static-final-layer.so",
+        "api_version": "1.4.341",
+        "implementation_version": "1",
+        "description": "Test-only native static SPIR-V ownership observer and failure injector"
+      }
+    },
+    "headers": {
+      "vk_layer.h": "bfe6804d3f527138fcfebb0845c1c0077c5718725bf338be09b0f9be3e8dede5",
+      "vulkan_core.h": "03964df1e28a162285726ec7cf9098e5e0271cb1df21933e7bfef9f6fa08937f",
+      "vk_platform.h": "949d517bb83e1d88fd4f1cef02bd3cb9ab50d44e8354cc68227cf2dccfdd3307"
+    }
+  },
+  "cases": {
+    "success": {
+      "exit": 0,
+      "log_sha256": "5db081090fe4d671e9a6a0707fbfebd097d7ffe372a739506d2edeb2f2afc305",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-render-first": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 1,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-render-repeat": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 1,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-concurrent": {
+          "created": 8,
+          "destroyed": 8,
+          "calls": 8,
+          "graphics": 4,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-compute-repeat": {
+          "created": 3,
+          "destroyed": 3,
+          "calls": 3,
+          "graphics": 0,
+          "compute": 3,
+          "ray": 0,
+          "live": 0
+        },
+        "static-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-pipelines-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "raw-create": {
+          "created": 3,
+          "destroyed": 0,
+          "calls": 3,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 3
+        },
+        "raw-render-repeat": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 2,
+          "compute": 0,
+          "ray": 0,
+          "live": 3
+        },
+        "raw-concurrent": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 4,
+          "compute": 0,
+          "ray": 0,
+          "live": 3
+        },
+        "raw-compute-repeat": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 3,
+          "ray": 0,
+          "live": 3
+        },
+        "raw-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 3
+        },
+        "raw-pipelines-drop": {
+          "created": 0,
+          "destroyed": 3,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "missing-feature": {
+      "exit": 0,
+      "log_sha256": "fa3c8f68a17206b33f0f979a986c04b175b412ee6356c25dd92ed99d703bf694",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "missing-feature": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "unsupported-backend": {
+      "exit": 0,
+      "log_sha256": "63780556f774b339af8671ccd2ccf2f15acfe9e7718d2f16eb9f03ff6111abb4",
+      "phases": {
+        "initial-device": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "unsupported-backend": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "static-module-first-failure": {
+      "exit": 0,
+      "log_sha256": "1bc976cd4bfc99e33b53fc78efcc1b4f6e0fbc5ad59113dcb2f7324b80eef5eb",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-module-first-failure": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 1,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "static-module-second-failure": {
+      "exit": 0,
+      "log_sha256": "733d155d87f7c73d369105d3f6516ba818a333142a7f11fe2609793365d17e13",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-module-second-failure": {
+          "created": 1,
+          "destroyed": 1,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "static-pipeline-failure": {
+      "exit": 0,
+      "log_sha256": "fbd04a221f5a0825cf925eff982fce500e4bbd8d1871e0c2d61dfe528f6c4921",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-pipeline-failure": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 1,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "static-compute-module-failure": {
+      "exit": 0,
+      "log_sha256": "34f739e27a9ec9b0377134d636785243c1e3a51e3b4c697adea519f40a02528a",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-compute-module-failure": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 1,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "static-compute-pipeline-failure": {
+      "exit": 0,
+      "log_sha256": "12885917381373354ca3bcf299d94ddb779f526010809e722e2c29205fcbfdc6",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "static-create": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        },
+        "static-compute-pipeline-failure": {
+          "created": 1,
+          "destroyed": 1,
+          "calls": 1,
+          "graphics": 0,
+          "compute": 1,
+          "ray": 0,
+          "live": 0
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    },
+    "raw-pipeline-failure": {
+      "exit": 0,
+      "log_sha256": "f29adbf1f46db11d247d6cc39b378904a4862ae58d56aba973e077c97752bda0",
+      "phases": {
+        "initial-device": {
+          "created": 2,
+          "destroyed": 2,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 2,
+          "ray": 0,
+          "live": 0
+        },
+        "raw-create": {
+          "created": 2,
+          "destroyed": 0,
+          "calls": 2,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 2
+        },
+        "raw-pipeline-failure": {
+          "created": 0,
+          "destroyed": 0,
+          "calls": 0,
+          "graphics": 1,
+          "compute": 0,
+          "ray": 0,
+          "live": 2
+        },
+        "failed-public-shaders-drop": {
+          "created": 0,
+          "destroyed": 2,
+          "calls": 0,
+          "graphics": 0,
+          "compute": 0,
+          "ray": 0,
+          "live": 0
+        }
+      }
+    }
+  },
+  "trace": {
+    "files": {
+      "data1.spv": {
+        "bytes": 436,
+        "sha256": "ddd399c796ead9f39bbadd03fbf1bff1fb9920cc267d8a36bbc1bda1dd22c6c4"
+      },
+      "data2.spv": {
+        "bytes": 344,
+        "sha256": "d364a021922e78df36f2c1721dd2a3c2e6dc806588d8f1fccb93734d128b1afb"
+      },
+      "data3.spv": {
+        "bytes": 224,
+        "sha256": "c3756ca54079db9cf26e72d66f3ba032d42293d334397fc3f8153f91aea207d0"
+      },
+      "data4.spv": {
+        "bytes": 436,
+        "sha256": "ddd399c796ead9f39bbadd03fbf1bff1fb9920cc267d8a36bbc1bda1dd22c6c4"
+      },
+      "data5.spv": {
+        "bytes": 344,
+        "sha256": "d364a021922e78df36f2c1721dd2a3c2e6dc806588d8f1fccb93734d128b1afb"
+      },
+      "data6.spv": {
+        "bytes": 224,
+        "sha256": "c3756ca54079db9cf26e72d66f3ba032d42293d334397fc3f8153f91aea207d0"
+      },
+      "trace.ron": {
+        "bytes": 24944,
+        "sha256": "3e6ab3aff0160cfd9d3e2910acb670c2ebfd81c090e4fa8c0dd4da92ef69b3a3"
+      }
+    },
+    "passthrough_actions": 6,
+    "static_and_raw_capture_same_exact_words": true,
+    "replay": "Existing passthrough action contains source bytes and no static provenance. Ordinary replay cannot infer static lifetime and uses Raw ownership. Replay execution was not tested."
+  }
+}

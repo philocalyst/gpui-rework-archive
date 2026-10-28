@@ -1,0 +1,5 @@
+   Compiling cephal v0.1.1 (/root/gpui-cephal-hidden-marker/reactivity/vendor/cephal)
+   Compiling allocation-counter v0.8.1
+   Compiling gpui_reactivity_core v0.1.0 (/root/gpui-cephal-hidden-marker/reactivity/crates/core)
+   Compiling gpui-cephal-hidden-driver v0.0.0 (/tmp/gpui-cephal-hidden-driver)
+    Finished `release` profile [optimized] target(s) in 13.73s

@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-adaptive-adaptive-fallback-parity-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1704      856
+.gnu.version           142     2560
+.gnu.version_r         336     2704
+.gnu.hash               28     3040
+.dynstr               1098     3068
+.rela.dyn            15312     4168
+.rela.plt               48    19480
+.rodata             160304    19536
+.gcc_except_table    45376   179840
+.eh_frame_hdr         4292   225216
+.eh_frame            21420   229512
+.text               266917   255040
+.init                   27   521960
+.fini                   13   521988
+.plt                    48   522016
+.tdata                  32   526160
+.tbss                   48   526192
+.fini_array              8   526192
+.init_array             16   526200
+.data.rel.ro          7352   526216
+.dynamic               480   533568
+.got                  2232   534048
+.got.plt                40   536280
+.relro_padding         256   536320
+.tm_clone_table          0   540416
+.data                 2496   540416
+.bss                   202   542912
+.comment               157        0
+Total               530499
+
+

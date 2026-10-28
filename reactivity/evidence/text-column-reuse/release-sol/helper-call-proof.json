@@ -1,0 +1,22 @@
+{
+  "helper": {
+    "address": 7573472,
+    "code_bytes": 731,
+    "mangled": "_RNvNtNtCsbc7Hpuzry1j_4gpui7runtime13text_geometry6append",
+    "name": "gpui[8266c9969df81933]::runtime::text_geometry::append",
+    "normalized_name": "gpui::runtime::text_geometry::append",
+    "stack_bytes": 120
+  },
+  "got_relocation": "0000000000a42d80  0000000000000008 R_X86_64_RELATIVE                         738fe0",
+  "present_inner_call_sites": [
+    {
+      "line": 12361,
+      "assembly": "  701ca6:\tmov    0x8(%rax),%rsi\n  701caa:\tmov    0x10(%rax),%rdx\n  701cae:\tmov    0x1d0(%rsp),%r9d\n  701cb6:\tmov    0xe0(%rsp),%rax\n  701cbe:\tmov    %rax,(%rsp)\n  701cc2:\tlea    0x160(%rsp),%rdi\n  701cca:\tmov    0x2b0(%rsp),%rcx\n  701cd2:\tmov    0x178(%rsp),%r8\n  701cda:\tmovss  0x1e0(%rsp),%xmm0\n  701ce3:\tmovss  0x2c8(%rsp),%xmm1\n  701cec:\tcall   *0x34108e(%rip)        # a42d80 <_DYNAMIC+0x7e8>\n  701cf2:\tincq   0x178(%rsp)\n  701cfa:\tcmp    $0xffffffff,%ebx\n  701cfd:\tje     701d32 <<gpui::runtime::Runtime<text_column_public_control::Input>>::present_inner+0x35b2>"
+    },
+    {
+      "line": 16922,
+      "assembly": "  711326:\tmov    0x8(%rax),%rsi\n  71132a:\tmov    0x10(%rax),%rdx\n  71132e:\tmov    0x1d0(%rsp),%r9d\n  711336:\tmov    0xe0(%rsp),%rax\n  71133e:\tmov    %rax,(%rsp)\n  711342:\tlea    0x160(%rsp),%rdi\n  71134a:\tmov    0x2b0(%rsp),%rcx\n  711352:\tmov    0x178(%rsp),%r8\n  71135a:\tmovss  0x1e0(%rsp),%xmm0\n  711363:\tmovss  0x2c8(%rsp),%xmm1\n  71136c:\tcall   *0x331a0e(%rip)        # a42d80 <_DYNAMIC+0x7e8>\n  711372:\tincq   0x178(%rsp)\n  71137a:\tcmp    $0xffffffff,%ebx\n  71137d:\tje     7113b2 <<gpui::runtime::Runtime<text_column_public_control::Model>>::present_inner+0x35b2>"
+    }
+  ],
+  "qualification": "Out-of-line helper is called from the admitted-text row loop in both real public Model and Input Runtime monomorphizations; callee120B fixed metadata is separate from caller frame; no summed dynamic-stack or CPU inference."
+}

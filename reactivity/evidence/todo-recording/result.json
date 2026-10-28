@@ -1,0 +1,335 @@
+{
+  "adopted_source": "5222d7cfb790ecee1a74e8fef297ed6afb9f04d2",
+  "fixture_review_source": "fe4e535c403cae935723adf6005e7345e6bb0cf8",
+  "fixture_bytes_identical": true,
+  "main_gates": {
+    "build": {
+      "source": "5222d7cfb790ecee1a74e8fef297ed6afb9f04d2",
+      "exit": 0,
+      "guards": 2074,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "execute": {
+      "source": "5222d7cfb790ecee1a74e8fef297ed6afb9f04d2",
+      "exit": 0,
+      "guards": 2074,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "strict": {
+      "source": "5222d7cfb790ecee1a74e8fef297ed6afb9f04d2",
+      "exit": 0,
+      "guards": 2074,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "main_results": {
+    "binary_sha256": "6d04d3b75f3c095adb20c55fde8d389baac401af83695245d54902e5147aec9b",
+    "results": [
+      {
+        "rows": 0,
+        "exit": 0,
+        "validated": true,
+        "artifact_hash_matches": true
+      },
+      {
+        "rows": 1000,
+        "exit": 0,
+        "validated": true,
+        "artifact_hash_matches": true
+      },
+      {
+        "rows": 10000,
+        "exit": 0,
+        "validated": true,
+        "artifact_hash_matches": true
+      }
+    ],
+    "scope": "Single local recording diagnostics; no native performance inference."
+  },
+  "actual_frozen_local_executables": [
+    {
+      "path": "/tmp/gpui-heavy-recording-full-model-executables-root/todo_recording_cost",
+      "sha256": "30b7a66e68b873921a777458dc722cafb592d8ec24396ba9914e4a4749967eec",
+      "bytes": 10220216,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "todo_recording_cost",
+          "src_path": "/tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui/examples/todo_recording_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        },
+        "features": [
+          "default",
+          "simd"
+        ],
+        "filenames": [
+          "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost"
+        ],
+        "executable": "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost",
+        "fresh": false
+      }
+    },
+    {
+      "path": "/tmp/gpui-heavy-recording-final-executables-root/todo_recording_cost",
+      "sha256": "80464be99e2b91f8b367ccb78b0260e442310a98f9968c3fb6ccc84eecc1b263",
+      "bytes": 10220224,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "todo_recording_cost",
+          "src_path": "/tmp/gpui-heavy-recording-root-20261024/reactivity/crates/gpui/examples/todo_recording_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        },
+        "features": [
+          "default",
+          "simd"
+        ],
+        "filenames": [
+          "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost"
+        ],
+        "executable": "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost",
+        "fresh": false
+      }
+    },
+    {
+      "path": "/tmp/gpui-heavy-recording-main-executables-root/todo_recording_cost",
+      "sha256": "6d04d3b75f3c095adb20c55fde8d389baac401af83695245d54902e5147aec9b",
+      "bytes": 10237680,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///root/gpui-ce3/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/root/gpui-ce3/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "todo_recording_cost",
+          "src_path": "/root/gpui-ce3/reactivity/crates/gpui/examples/todo_recording_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        },
+        "features": [
+          "default",
+          "simd"
+        ],
+        "filenames": [
+          "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost"
+        ],
+        "executable": "/tmp/gpui-heavy-recording-root-target-20261024/release/examples/todo_recording_cost",
+        "fresh": false
+      }
+    }
+  ],
+  "mothership": {
+    "directory": "/home/miles/gpui-ce3-compute-20261024/evidence/heavy-recording-root-e509",
+    "source": "e509a13890e45fa2d956ae2d2f3d4e0003615646",
+    "rows": [
+      0,
+      1000,
+      10000
+    ],
+    "all_states_identical_to_local": true,
+    "cpu_affinity": [
+      0
+    ],
+    "loader": "/nix/store/pqyiidz5mi73wv5f91d48s9plcqyj5bz-glibc-2.44-57/lib/ld-linux-x86-64.so.2",
+    "loader_sha256": "d2fbe26249c12dd8ac1cfb618c705fe37d625d5a4dd4035b27869766480c1244"
+  },
+  "shipping_library_code_added": 0,
+  "log_archive": {
+    "file": "logs.tar.gz",
+    "bytes": 1287198,
+    "sha256": "b3c47c4d21d6d36c844161cc9e07e48c28c315bb6408d174fd3972ce56e6dd16",
+    "members_sha256": {
+      "attempts/gpui-heavy-recording-build-root/after.json": "5e6370ed6f756274121773e73ae9dd065d208135c839fc776e82d01e9106a8ea",
+      "attempts/gpui-heavy-recording-build-root/before.json": "5e6370ed6f756274121773e73ae9dd065d208135c839fc776e82d01e9106a8ea",
+      "attempts/gpui-heavy-recording-build-root/command.json": "7787734c478891cb302dfbe61a3ab89d2ce20815f9c197cfb0059b03c9064392",
+      "attempts/gpui-heavy-recording-build-root/exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "attempts/gpui-heavy-recording-build-root/result.json": "59e0ef80fb8659f1a1a04f2be7a169f8a0eca2fa76f946e2f953d60a2fc6841d",
+      "attempts/gpui-heavy-recording-build-root/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "attempts/gpui-heavy-recording-build-root/stderr.log": "a43cc5e259d6658f17b542def7405440d5218c39246c0f3cc26d1f38f86ca9a0",
+      "attempts/gpui-heavy-recording-build-root/stdout.log": "6eea15aa6df9b9e7d98aedbcbfbd1701b3eea5542fb03f7b51911950e4b9c2ba",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/after.json": "e67bd0ea239cfb0e1f144f4a40b00bd9168f2732e261abb9314cc99f32035676",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/before.json": "e67bd0ea239cfb0e1f144f4a40b00bd9168f2732e261abb9314cc99f32035676",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/command.json": "65151fe03f8b964d3a6ac6d9f16494e93e4e0a43d204941ff676d59a7aeb98f9",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/result.json": "f4e341dd82faa8f57e71c6317f8b59f51d2d5c64553cc8d8a748a3e1c6b3425f",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/stderr.log": "a971850f543c94464d7e747fdad2bb8309f63f17d018fa76533d41d8e9d08f50",
+      "attempts/gpui-heavy-recording-full-model-strict-corrected-root/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "attempts/gpui-heavy-recording-full-model-strict-root/after.json": "4d821d756b31dd8bf1a20b0fa86d46d4e9415483c53685fe2486dfcc0d4d037e",
+      "attempts/gpui-heavy-recording-full-model-strict-root/before.json": "4d821d756b31dd8bf1a20b0fa86d46d4e9415483c53685fe2486dfcc0d4d037e",
+      "attempts/gpui-heavy-recording-full-model-strict-root/command.json": "3fc74ee53d60172717179c201d6984787048933802957fb1ce61e269d74d7aed",
+      "attempts/gpui-heavy-recording-full-model-strict-root/exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "attempts/gpui-heavy-recording-full-model-strict-root/result.json": "56684159fd03061d490daae98cc477d7937ccb9618c30791431b43e1336caac7",
+      "attempts/gpui-heavy-recording-full-model-strict-root/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "attempts/gpui-heavy-recording-full-model-strict-root/stderr.log": "ec9470583e0266279f3c702ec456e073951935fe3e61a877c76dc61bf0a8a82a",
+      "attempts/gpui-heavy-recording-full-model-strict-root/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "executables-final/binary.json": "46c5208d10068d0f8282c92ee9fdc00ca9c21cdd6286aed11624d0d3ed6acf78",
+      "executables-final/result.json": "c914f82644a796fea982437ed6cd166bac62d2df1b3304ac8da6c71d54e7f142",
+      "executables-final/rows-0.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-final/rows-0.stdout": "a5f874bff92fd4bf69b9c3f3b8b87e4d1263e5bc12713fc56eba0adef7347c67",
+      "executables-final/rows-1000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-final/rows-1000.stdout": "8f15c9d79db83800aa78417de599402abdb7902a3708e22952ac1bd93689488c",
+      "executables-final/rows-10000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-final/rows-10000.stdout": "2f0762a19e0e0d8ffee83fe14fdd9dfc806878ee9edba9435a9c51ee5748609c",
+      "executables-full-model/binary.json": "7423551f4feca84f40e60a02464a3d6da8ed7a597026d66a8de500397839d48e",
+      "executables-full-model/result.json": "d404129af39c21b419429224508797ae5878af5074d3dcc245595fd22f2c35c7",
+      "executables-full-model/rows-0.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-full-model/rows-0.stdout": "5b49c570b363ddd0fedc8012fc3d5895bfd7473c9eeff3d6c308e0e75d376cc1",
+      "executables-full-model/rows-1000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-full-model/rows-1000.stdout": "1559f10274c67cb3fe24098243716987da61b619b23c8597c67ff20734b1d2d7",
+      "executables-full-model/rows-10000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-full-model/rows-10000.stdout": "5fffae6ae6072b4fdab31c3e7dc4876a45b3ce56bf575b1a27ee0c1df7cfd91d",
+      "executables-main/binary.json": "e3f56b365822702954f7829ba9f10e95f95a9c646b26aa301b14fe59922ab13f",
+      "executables-main/result.json": "68112d5681fe731499f181794e3097dbbd420a2d983f5af7f2cf3617fc8c8ee8",
+      "executables-main/rows-0.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-main/rows-0.stdout": "cdfae857b4aecfdc7ce38affc50461ac151ba7fc921bf9e8878f225b7d7a073e",
+      "executables-main/rows-1000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-main/rows-1000.stdout": "95f03a8be985c34fa52de89d6fe985af154513043c60560c70dc402731bd848f",
+      "executables-main/rows-10000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "executables-main/rows-10000.stdout": "9fa5be3b5f3aa8aafabfae8508460ba60665d0e7b2a3071ca991200d61233956",
+      "helpers/frozen-gate.py": "ff38b55ebf8eb466a7204ce601861efb940f8cc45bc5d783cb6fb320b4dc470b",
+      "helpers/run.py": "53289989fd0daedb19330cc197f3c4d75ff93d2c45eec4dc73ba3385f6b66225",
+      "helpers/seal.py": "dabddee2462810f448624613edcf798943aadf739fc65a62952e7e22bc8d5ce1",
+      "main-build/after.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-build/before.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-build/command.json": "a42ec4fa2c35d0a367e51fa67720cfae43d66d6704e031a74cbb31509ef71f97",
+      "main-build/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "main-build/result.json": "98cc607072200d8862c2f80aa3077e725e81b38812b70d53a5fdf15265ed0551",
+      "main-build/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "main-build/stderr.log": "2a0d7de893f99c2e29fc3d16db0461813c902a3ec9545524994f3fccdf4e5613",
+      "main-build/stdout.log": "d8944f58c6b5bf8b0eab93f8aca7ec161f171f2c03f67a0ba681f9f56fa7c670",
+      "main-execute/after.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-execute/before.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-execute/command.json": "b9e5e4cdc8620b5b593da1fc895e6e160f81ea6492fd396b3f747bfe3f42061e",
+      "main-execute/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "main-execute/result.json": "98cc607072200d8862c2f80aa3077e725e81b38812b70d53a5fdf15265ed0551",
+      "main-execute/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "main-execute/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "main-execute/stdout.log": "f894fb802080bba790b677595d2b95932738dc15eb39bc5692abdd4f33d00d44",
+      "main-strict/after.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-strict/before.json": "1f85f097c9c0399d50aa3740ef2786eb6c025a78b8a304420b5ce4a29b89ec53",
+      "main-strict/command.json": "66d2b43f746977a773a51e61f4722e5fe972248a03ac1078467eaf976cdc0fcf",
+      "main-strict/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "main-strict/result.json": "98cc607072200d8862c2f80aa3077e725e81b38812b70d53a5fdf15265ed0551",
+      "main-strict/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "main-strict/stderr.log": "ccd3b785f2fa763927e71964134d73d41a1b315f2fca786e29d52fe884490c5c",
+      "main-strict/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mothership/loader-list.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mothership/loader-list.stdout": "443ceec2681828658159a143adc80f3757d90c006345da1b00f142057565d30a",
+      "mothership/result.json": "4557332cba0bccb45e868baa25a2c69ca8b15eec95cddd1aa752e50e3ae54bcb",
+      "mothership/rows-0.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "mothership/rows-0.stdout": "d82148f741bbf03211aa2d09af11b9c8c27bdcffadd8a0ca0d7bfc7138f55f5d",
+      "mothership/rows-1000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "mothership/rows-1000.stdout": "cb6a5a5983cfbc92f48389674cfa2eb3b503a71aa873e55b8194a2fba77fea5e",
+      "mothership/rows-10000.stderr": "88454d51adb9442e9bd22ec92572d9f291b60d18ef74f0f6b5763f446af19104",
+      "mothership/rows-10000.stdout": "cc01c4de0d07dd6b699efdeaeff8e7b2026d3bf438a3808ab01f51e45eb68697",
+      "mothership-stage/binary.json": "7423551f4feca84f40e60a02464a3d6da8ed7a597026d66a8de500397839d48e",
+      "mothership-stage/build-result.json": "300ed4c0dd6ab9e02a0c74fb1caa41c88d8de02d01ef5e7b3585059cdb9eb8f2",
+      "mothership-stage/command.json": "77388fc7369696b47be72a265059878e5c0f16cc88b9ecdfc03cb0e87f907181",
+      "mothership-stage/manifest.json": "1698e932583be6ab7289d6e53e01b846379be01f271870f5b9e7c093d7023f8e",
+      "mothership-stage/run.py": "3907e48fcc1334cee8a841dbe3263dfb8a6191adaa8f412525e5f49d7b6c55e2",
+      "mothership-stage/source-guard.json": "4d821d756b31dd8bf1a20b0fa86d46d4e9415483c53685fe2486dfcc0d4d037e",
+      "todo_recording_cost.rs": "0f24e0b6e9bcd5dec4b3b280af9d65d39f8de29f802b6456c5986aae97a26608"
+    }
+  },
+  "limits": [
+    "Single-process per-size recording diagnostics, not a registered repeated native benchmark.",
+    "Recording excludes OS window creation, framebuffer rasterization, GPU and scanout.",
+    "Mothership runs the unchanged e509 ELF using its explicit compatible glibc2.44 loader; it is not a native build on that host.",
+    "Per-edit allocation counters charge requested calling-thread bytes, not allocator usable size or process RSS.",
+    "Main IME adds eight retained bytes to this fixture mount versus the pre-IME baseline, with unchanged allocation count.",
+    "Native strict work/latency gates and the historical five-framework failures remain unchanged."
+  ]
+}

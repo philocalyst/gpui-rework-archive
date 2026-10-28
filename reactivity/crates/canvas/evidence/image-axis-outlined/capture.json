@@ -1,0 +1,22 @@
+{
+  "argv": {
+    "baseline": "/tmp/gpui-image-axis-baseline",
+    "candidate": "/tmp/gpui-image-axis-outlined",
+    "baseline_sha256": "25a8ea798afb772d67d5399ba3fa017985f9f723f3fa0dce83d39596ac3d0c89",
+    "candidate_sha256": "9dda99a1616e6da0d0b879671aebdc78c253ec2bf1ff503e156cde672ecb1872",
+    "nm": "/nix/store/31gnwsgag5qa14hfblqi5hyn71pyx7py-binutils-2.46/bin/nm",
+    "cpu": 2,
+    "output": "crates/canvas/evidence/image-axis-outlined"
+  },
+  "elapsed_seconds": 52.584069272037596,
+  "rows": 1260,
+  "warm_frames_per_variant_case": 35,
+  "warm_frames": "frames 2..8; cold frames retained, excluded from quantiles",
+  "cpu_affinity": 2,
+  "logical_cpus": 16,
+  "binary_sha256": {
+    "baseline": "25a8ea798afb772d67d5399ba3fa017985f9f723f3fa0dce83d39596ac3d0c89",
+    "candidate": "9dda99a1616e6da0d0b879671aebdc78c253ec2bf1ff503e156cde672ecb1872"
+  },
+  "runner_sha256": "3c107ce83592f9489096ec0e4d01dee1809f3996fad4534c6827a2b4dcbc1ec9"
+}

@@ -1,0 +1,5 @@
+{
+  "from": "2918548ac01768945aebb935474a66e725578760",
+  "to": "48e73461cee520bd1908f266d32996e3b3974ab4",
+  "diff": "diff --git a/reactivity/crates/gpui/tests/rounded.rs b/reactivity/crates/gpui/tests/rounded.rs\nindex dc53f287c3..22f3fd409d 100644\n--- a/reactivity/crates/gpui/tests/rounded.rs\n+++ b/reactivity/crates/gpui/tests/rounded.rs\n@@ -73,7 +73,7 @@ fn alternating_scroll_and_radius_builders_reuse_one_cold_extension_allocation()\n             element = Some(pane);\n         });\n         assert_eq!(measured.count_total, if named { 2 } else { 1 });\n-        assert_eq!(measured.bytes_total, if named { 104 } else { 56 });\n+        assert_eq!(measured.bytes_total, if named { 112 } else { 64 });\n         drop(element);\n     }\n }\n"
+}

@@ -1,0 +1,13 @@
+
+running 1 test
+test native::accessibility::linux_tests::failure::native_atspi_failed_source_keeps_old_p_and_public_action_repairs ... NATIVE_FAILURE_STAGE window discovered
+NATIVE_FAILURE_STAGE failing edit queued
+NATIVE_FAILURE_ERROR Canvas(MissingGlyph('🚀'))
+NATIVE_FAILURE_STAGE presentation error observed
+NATIVE_FAILURE_STAGE original repair action queued
+NATIVE_FAILURE_STAGE repair acknowledged
+GPUI_NATIVE_FAILURE old-P seed+extents preserved; old-provider source edit rejected; original Repair Action restored source; caret2+value done acknowledged
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 246 filtered out; finished in 2.27s
+

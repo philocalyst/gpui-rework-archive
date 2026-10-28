@@ -1,0 +1,378 @@
+    Blocking waiting for file lock on build directory
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-lazy-indirect-sol-baseline)
+error: the `Err`-variant returned from this function is very large
+   --> src/command/bundle.rs:323:10
+    |
+323 |     ) -> Result<Arc<RenderBundle>, RenderBundleError> {
+    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 128 bytes
+    |
+    = help: try reducing the size of `command::bundle::RenderBundleError`, for example by boxing large elements or replacing it with `Box<command::bundle::RenderBundleError>`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+    = note: `-D clippy::result-large-err` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::result_large_err)]`
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/render.rs:2260:38
+     |
+2260 |         cmd_buf_data.push_with(|| -> Result<_, RenderPassError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/render.rs:2298:6
+     |
+2298 | ) -> Result<(), RenderPassError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/render.rs:4095:10
+     |
+4095 |     ) -> Result<(), RenderPassError> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/render.rs:4191:10
+     |
+4191 |     ) -> Result<(), RenderPassError> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/render.rs:4269:10
+     |
+4269 |     ) -> Result<(), RenderPassError> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/render.rs:4353:10
+     |
+4353 |     ) -> Result<(), RenderPassError> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 136 bytes
+     |
+     = help: try reducing the size of `command::render::RenderPassError`, for example by boxing large elements or replacing it with `Box<command::render::RenderPassError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/transfer.rs:848:38
+     |
+ 848 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/transfer.rs:877:38
+     |
+ 877 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/transfer.rs:914:38
+     |
+ 914 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/transfer.rs:951:38
+     |
+ 951 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/transfer.rs:985:6
+     |
+ 985 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/transfer.rs:1141:6
+     |
+1141 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/transfer.rs:1259:6
+     |
+1259 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/transfer.rs:1384:6
+     |
+1384 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+    ::: src/command/mod.rs:1667:5
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/mod.rs:1096:10
+     |
+1096 |     ) -> Result<(), CommandEncoderError> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/mod.rs:1404:36
+     |
+1404 |     pub fn take_finished(&self) -> Result<CommandBufferMutable, CommandEncoderError> {
+     |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/mod.rs:1829:38
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1829 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/mod.rs:1847:38
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1847 |         cmd_buf_data.push_with(|| -> Result<_, CommandEncoderError> {
+     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this closure is very large
+    --> src/command/mod.rs:1865:30
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1865 |             .push_with(|| -> Result<_, CommandEncoderError> { Ok(ArcCommand::PopDebugGroup) })
+     |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/mod.rs:1872:6
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1872 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/mod.rs:1889:6
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1889 | ) -> Result<(), CommandEncoderError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/command/mod.rs:1901:61
+     |
+1667 |     RenderPass(#[from] RenderPassError),
+     |     ----------------------------------- the largest variant contains at least 136 bytes
+...
+1901 | pub(crate) fn pop_debug_group(state: &mut EncodingState) -> Result<(), CommandEncoderError> {
+     |                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `command::CommandEncoderError`, for example by boxing large elements or replacing it with `Box<command::CommandEncoderError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/device/queue.rs:1351:10
+     |
+1351 |     ) -> Result<SubmissionIndex, (SubmissionIndex, QueueSubmitError)> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 144 bytes
+     |
+     = help: try reducing the size of `(u64, device::queue::QueueSubmitError)`, for example by boxing large elements or replacing it with `Box<(u64, device::queue::QueueSubmitError)>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/device/queue.rs:1970:10
+     |
+1970 |     ) -> Result<SubmissionIndex, (SubmissionIndex, QueueSubmitError)> {
+     |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 144 bytes
+     |
+     = help: try reducing the size of `(u64, device::queue::QueueSubmitError)`, for example by boxing large elements or replacing it with `Box<(u64, device::queue::QueueSubmitError)>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: the `Err`-variant returned from this function is very large
+    --> src/device/queue.rs:2061:6
+     |
+ 569 |     CommandEncoder(#[from] CommandEncoderError),
+     |     ------------------------------------------- the largest variant contains at least 136 bytes
+...
+2061 | ) -> Result<(), QueueSubmitError> {
+     |      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: try reducing the size of `device::queue::QueueSubmitError`, for example by boxing large elements or replacing it with `Box<device::queue::QueueSubmitError>`
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#result_large_err
+
+error: this `if` can be collapsed into the outer `match`
+    --> src/device/resource.rs:1972:17
+     |
+1972 | /                 if !resolved_array_layer_count.is_multiple_of(6) {
+1973 | |                     return Err(
+1974 | |                         resource::CreateTextureViewError::InvalidCubemapArrayTextureDepth {
+1975 | |                             depth: resolved_array_layer_count,
+1976 | |                         },
+1977 | |                     );
+1978 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#collapsible_match
+     = note: `-D clippy::collapsible-match` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::collapsible_match)]`
+help: collapse nested if block
+     |
+1971 ~             TextureViewDimension::CubeArray
+1972 ~                 if !resolved_array_layer_count.is_multiple_of(6) => {
+1973 |                     return Err(
+ ...
+1977 |                     );
+1978 ~                 }
+     |
+
+error: this `if` can be collapsed into the outer `match`
+    --> src/device/resource.rs:1985:17
+     |
+1985 | /                 if texture.desc.size.width != texture.desc.size.height {
+1986 | |                     return Err(resource::CreateTextureViewError::InvalidCubeTextureViewSize);
+1987 | |                 }
+     | |_________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#collapsible_match
+help: collapse nested if block
+     |
+1984 ~             TextureViewDimension::Cube | TextureViewDimension::CubeArray
+1985 ~                 if texture.desc.size.width != texture.desc.size.height => {
+1986 |                     return Err(resource::CreateTextureViewError::InvalidCubeTextureViewSize);
+1987 ~                 }
+     |
+
+error: all variants have the same prefix: `Incompatible`
+   --> src/device/mod.rs:84:1
+    |
+ 84 | / pub enum RenderPassCompatibilityError {
+ 85 | |     #[error(
+ 86 | |         "Incompatible color attachments at indices {indices:?}: the RenderPass uses textures with formats {expected:?} but the {r...
+ 87 | |     )]
+...   |
+115 | |     },
+116 | | }
+    | |_^
+    |
+    = help: remove the prefixes and use full paths to the variants instead of glob imports
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#enum_variant_names
+    = note: `-D clippy::enum-variant-names` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::enum_variant_names)]`
+
+error: all variants have the same postfix: `Filter`
+    --> src/resource.rs:2293:1
+     |
+2293 | / pub enum SamplerFilterErrorType {
+2294 | |     MagFilter,
+2295 | |     MinFilter,
+2296 | |     MipmapFilter,
+2297 | | }
+     | |_^
+     |
+     = help: remove the postfixes and use full paths to the variants instead of glob imports
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#enum_variant_names
+
+error: could not compile `wgpu-core` (lib) due to 30 previous errors

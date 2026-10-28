@@ -1,0 +1,9 @@
+STATUS_ABSENT_BEFORE_ADAPTER mode=failed-connect
+SESSION_CONNECT_INVALID_BEFORE_ADAPTER
+ADAPTER_READY mode=failed-connect
+SESSION_ADDRESS_RESTORED
+STATUS_STILL_ABSENT_AFTER_2S mode=failed-connect
+SERVICE_READY unique=Some(OwnedUniqueName(":1.1"))
+STATUS_PRESENT mode=failed-connect
+ACTIVATION_MISSED mode=failed-connect activated=0 deactivated=0
+PROBE_FAILED mode=failed-connect: timed out waiting for activation

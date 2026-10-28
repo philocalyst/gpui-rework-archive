@@ -1,0 +1,254 @@
+{
+  "records": [
+    {
+      "variant": "public-oof",
+      "core_layout_sha256": "e7f54524d8659c99553de7992af88c5b11e4c9c82c2f09a9d470b90fa70f267f",
+      "artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///root/gpui-cephal-flat-oof/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+          "manifest_path": "/root/gpui-cephal-flat-oof/reactivity/crates/core/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui_reactivity_core",
+            "src_path": "/root/gpui-cephal-flat-oof/reactivity/crates/core/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "default",
+            "layout"
+          ],
+          "filenames": [
+            "/tmp/gpui-cephal-oof-target/release/deps/libgpui_reactivity_core-e316f09e9167d069.rlib",
+            "/tmp/gpui-cephal-oof-target/release/deps/libgpui_reactivity_core-e316f09e9167d069.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///root/gpui-cephal-flat-oof/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/root/gpui-cephal-flat-oof/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/root/gpui-cephal-flat-oof/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "default",
+            "simd"
+          ],
+          "filenames": [
+            "/tmp/gpui-cephal-oof-target/release/deps/libgpui-d4cdae9a6c733abe.rlib",
+            "/tmp/gpui-cephal-oof-target/release/deps/libgpui-d4cdae9a6c733abe.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///tmp/gpui-cephal-oof-public#0.0.0",
+          "manifest_path": "/tmp/gpui-cephal-oof-public/Cargo.toml",
+          "target": {
+            "kind": [
+              "bin"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "gpui-cephal-oof-public",
+            "src_path": "/tmp/gpui-cephal-oof-public/src/main.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [],
+          "filenames": [
+            "/tmp/gpui-cephal-oof-target/release/gpui-cephal-oof-public"
+          ],
+          "executable": "/tmp/gpui-cephal-oof-target/release/gpui-cephal-oof-public",
+          "fresh": false
+        }
+      ],
+      "frozen": {
+        "/tmp/gpui-cephal-oof-captures/public-oof-libgpui_reactivity_core-e316f09e9167d069.rlib": {
+          "sha256": "84e06e4bcaed3a79d431514e437a38e8f71a5642ffbaf43df8eb5215b08761dd",
+          "bytes": 2139392
+        },
+        "/tmp/gpui-cephal-oof-captures/public-oof-libgpui-d4cdae9a6c733abe.rlib": {
+          "sha256": "750d6496c9bb28000b86798ecab26cafb9d6953c7f907a9e8546e44dcc38bdcd",
+          "bytes": 5048992
+        },
+        "/tmp/gpui-cephal-oof-captures/public-oof-gpui-cephal-oof-public": {
+          "sha256": "e050d4e4ac5d31e154a2302f85565f2103515470bb7e21918995650120196f5f",
+          "bytes": 9744872
+        }
+      }
+    },
+    {
+      "variant": "public-flat",
+      "core_layout_sha256": "23fe22caa9a956f70bb3b115103c196ad3a7109b4580e4c2db581ad32e7862f3",
+      "artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///root/gpui-cephal-flat-oof/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+          "manifest_path": "/root/gpui-cephal-flat-oof/reactivity/crates/core/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui_reactivity_core",
+            "src_path": "/root/gpui-cephal-flat-oof/reactivity/crates/core/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "default",
+            "layout"
+          ],
+          "filenames": [
+            "/tmp/gpui-cephal-flat-target/release/deps/libgpui_reactivity_core-e316f09e9167d069.rlib",
+            "/tmp/gpui-cephal-flat-target/release/deps/libgpui_reactivity_core-e316f09e9167d069.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///root/gpui-cephal-flat-oof/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/root/gpui-cephal-flat-oof/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/root/gpui-cephal-flat-oof/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "default",
+            "simd"
+          ],
+          "filenames": [
+            "/tmp/gpui-cephal-flat-target/release/deps/libgpui-d4cdae9a6c733abe.rlib",
+            "/tmp/gpui-cephal-flat-target/release/deps/libgpui-d4cdae9a6c733abe.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///tmp/gpui-cephal-oof-public#0.0.0",
+          "manifest_path": "/tmp/gpui-cephal-oof-public/Cargo.toml",
+          "target": {
+            "kind": [
+              "bin"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "gpui-cephal-oof-public",
+            "src_path": "/tmp/gpui-cephal-oof-public/src/main.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [],
+          "filenames": [
+            "/tmp/gpui-cephal-flat-target/release/gpui-cephal-oof-public"
+          ],
+          "executable": "/tmp/gpui-cephal-flat-target/release/gpui-cephal-oof-public",
+          "fresh": false
+        }
+      ],
+      "frozen": {
+        "/tmp/gpui-cephal-oof-captures/public-flat-libgpui_reactivity_core-e316f09e9167d069.rlib": {
+          "sha256": "3a0b0d14418c1bd2c8e971356166506bc3a446e508876709e80070e8bec0146e",
+          "bytes": 2057178
+        },
+        "/tmp/gpui-cephal-oof-captures/public-flat-libgpui-d4cdae9a6c733abe.rlib": {
+          "sha256": "62275f04d80601b32f86cc54b0a1fbfd59389f437b8240475a1978077a15b17a",
+          "bytes": 5048960
+        },
+        "/tmp/gpui-cephal-oof-captures/public-flat-gpui-cephal-oof-public": {
+          "sha256": "4f1c353e61cc70add6a904e739c7d3e576f84e50c8ec3bfb12f0a0d158415df6",
+          "bytes": 9712528
+        }
+      }
+    }
+  ],
+  "flat_provenance": "All library production sources equal31e38bc00e: only production delta since that commit is core/layout.rs, restored from its exact git object during this isolated build. Newer uncompiled integration tests and evidence remain in worktree. Candidate source restored byte-for-byte.",
+  "candidate_production_source_restored": true
+}

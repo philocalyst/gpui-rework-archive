@@ -1,0 +1,10 @@
+a69220c6de2688b83ed95a84a560f9f17432b6d93bc1a954988dfa365548b7cb  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/README.md
+da053aac51c29f2b01f9c1cfa7408d6999b3cb2f67987a7d30b966c0b1774957  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/capture-manifest.txt
+af9be1a18e3b986562b54d00d75e0e6d46a13088cfb3d69a397c98d6c07a236d  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/summary.csv
+f67ef7e5a6e1c376c7e0da3965b7966e4c82e903e272c4539ee0a67020ee2145  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/final-summary.csv
+2e9170163f397f312ee9b3b53fedc29ae24af324ba53870ab05cd0e86b3194da  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/order.csv
+b9ba0c7bd2c3108c2e4da4c2baefaea4f8d38e9a4378e11b69f57fa4b0ef6d51  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/summarize.py
+341ed4dcbb5ca5a458e57d04c18ef26f7fefecfb19d8342bade9d5cf26b4cd16  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/summarize-final.py
+3e204d81ac83e1da323e46f0b04ca8cfa17f4331cecb9dd999b6977e49cade4d  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-20261021/raw-sha256.txt
+6fe35ffc79dc7dc1b504cbd9048dc9fc8bdc4c8707236eefcba6895e7c073266  benchmarks/nanoui-mygo-gpui/run-one.sh
+0801d0d52bcdf94aeab4e6e5aa287fbb97820c7c45425d0712d0666a527e3fb6  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/recapture-nanoui.sh

@@ -1,0 +1,3 @@
+HEAD is now at d0bd2f4ea5 Keep the picking-only sheet borrow out of ordinary pointer frames
+Switched to branch 'inspector-pointer-sol'
+matched source/flags/freshness/layout/behavior guards PASS

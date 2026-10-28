@@ -1,0 +1,16 @@
+status=superseded-by-private97-20261021-click (this first pass did not inject a click)
+display=:97 (private Xvfb; no shared :94 input)
+workloads=eager-0,eager-1000,virtual-250000
+profile=native-default; GPUI renderer=Auto; MyGo default GTK renderer; NanoUI Linux CPU/Cairo
+gpui_source=724ece73cb665a1f6d83e97ae7d431eee11a887a
+gpui_source_tree=/root/gpui-current-native-bench
+gpui_binary_sha256=795b54cc4c8feef2d39fb4f73e4fd6b7cf2799b45fadec192888564fb85b6a91
+gpui_feature=x11 (AccessKit compiled; runtime AT-SPI activation not established by this preflight)
+mygo_source=ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
+mygo_binary_sha256=e68767b866432dad27fc44e646217b60b1e5e60cb6e43fb2e80c8e41be4785df
+nanoui_source=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
+nanoui_binary_sha256=4cb7822c45a757f4d93ada2c0ab45fb2521cbdcb8397e8824e4cc0ef4d9d60a0
+fixture_sha256=a2c7b0a4992efa06719127cba59978aff62536d8d61994ca8c4c7dceb4f67c29
+checks=observer-preflight,800x600-client,exact-marker,button-and-row-ink,visible-row-sequence
+renderer-font-AT-inequalities=GPUI Auto vs GTK vs Cairo; GPUI bundled Noto vs peers DejaVu; GPUI AccessKit compiled vs MyGo ATK vs NanoUI absent; runtime AT-SPI unverified
+screenshots_and_logs=/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/preflights/private97-20261021

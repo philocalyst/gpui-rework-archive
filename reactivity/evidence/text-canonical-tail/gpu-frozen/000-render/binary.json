@@ -1,0 +1,37 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_gpu/afe157e2369925c6/out/render-afe157e2369925c6",
+  "frozen": "/tmp/text-sol-evidence/gpu-frozen/000-render/test",
+  "sha256": "ea3832de3b43066e9d47ce27ea25b918c55d3d1d2087f76dad4518c2716923b7",
+  "bytes": 227535648,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "render",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/gpu/tests/render.rs",
+    "edition": "2024",
+    "required-features": [
+      "vulkan-tests"
+    ],
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd",
+    "vulkan-tests"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

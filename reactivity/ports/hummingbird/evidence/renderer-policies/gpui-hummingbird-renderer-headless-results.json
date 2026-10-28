@@ -1,0 +1,53 @@
+{
+  "artifact": "/root/gpui-ce3/reactivity/target/debug/hummingbird-gpui-port",
+  "binary_sha256": "83c5de1c3f167460766ddb3bcb547448f645c925507a122524255ec150ac52e9",
+  "cases": [
+    {
+      "case": "headless",
+      "args": [
+        "--headless"
+      ],
+      "exit": 0,
+      "expected_exit": 0
+    },
+    {
+      "case": "invalid",
+      "args": [
+        "--native",
+        "--renderer",
+        "invalid"
+      ],
+      "exit": 1,
+      "expected_exit": 1
+    },
+    {
+      "case": "missing",
+      "args": [
+        "--native",
+        "--renderer"
+      ],
+      "exit": 1,
+      "expected_exit": 1
+    },
+    {
+      "case": "headless-policy",
+      "args": [
+        "--renderer",
+        "auto"
+      ],
+      "exit": 1,
+      "expected_exit": 1
+    },
+    {
+      "case": "native-feature",
+      "args": [
+        "--native",
+        "--renderer",
+        "gpu"
+      ],
+      "exit": 1,
+      "expected_exit": 1
+    }
+  ],
+  "source_note": "Current main2d491d011f plus the three renderer CLI/transcript/readme file changes, before Future adapter integration; native rendering not exercised by these headless checks."
+}

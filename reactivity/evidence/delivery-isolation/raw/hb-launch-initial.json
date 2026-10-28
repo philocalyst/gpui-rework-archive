@@ -1,0 +1,7 @@
+{
+  "status": 127,
+  "phase": "support launcher before gate/build",
+  "diagnostic": "python3: command not found after environment setup",
+  "application_coverage": false,
+  "correction": "Invoke already-pinned absolute Python executable; no source/deadline change"
+}

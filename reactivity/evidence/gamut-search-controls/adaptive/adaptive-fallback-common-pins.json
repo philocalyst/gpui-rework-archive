@@ -1,0 +1,25 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-adaptive-common-consumer/Cargo.toml",
+    "--message-format=json",
+    "--no-default-features",
+    "--features",
+    "primitive"
+  ],
+  "executable": "/tmp/gpui-gamut-adaptive-adaptive-fallback-common-frozen",
+  "sha256": "f921cb19dde5d81e1487191bf5c5e250d7abceab6ff4881357c72b3c91b218dc",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-adaptive-consumer-fallback-target/release/deps/libgpui_canvas-d17da7d4e7c2fd08.rlib",
+      "sha256": "7c07229f5134086c154422396b7e98542730b9c8f7413b413aea30de5aefd307",
+      "bytes": 6973408
+    }
+  ],
+  "timing_qualified": false
+}

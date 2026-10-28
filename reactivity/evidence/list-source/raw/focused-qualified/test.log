@@ -1,0 +1,10 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-list-source-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 14.52s
+     Running tests/list_source.rs (/home/user/gpui-list-source-target/release/build/gpui/1e2d2117f6eebdce/out/list_source-1e2d2117f6eebdce)
+
+thread 'rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field' (1495530) panicked at crates/gpui/tests/list_source.rs:187:5:
+assertion `left == right` failed
+  left: Err(StaleTarget)
+ right: Err(PresentationStale)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test list_source`

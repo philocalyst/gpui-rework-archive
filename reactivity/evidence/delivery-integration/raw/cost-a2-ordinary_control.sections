@@ -1,0 +1,35 @@
+/tmp/gpui-delivery-integration-captures/cost-a2-ordinary_control.elf  :
+section                 size       addr
+.interp                   83        736
+.note.ABI-tag             32        820
+.dynsym                 1944        856
+.gnu.version             162       2800
+.gnu.version_r           384       2964
+.gnu.hash                 28       3352
+.dynstr                 1199       3380
+.rela.dyn             210888       4584
+.rela.plt                 48     215472
+.gcc_except_table      82348     215520
+.rodata              6511552     297872
+.eh_frame_hdr          40180    6809424
+.eh_frame             271828    6849608
+.text                3675847    7125536
+.init                     27   10801384
+.fini                     13   10801412
+.plt                      48   10801440
+.tdata                   936   10805584
+.tbss                   3176   10806520
+.fini_array                8   10806520
+.init_array               16   10806528
+.data.rel.ro          153376   10806544
+.dynamic                 480   10959920
+.got                   14728   10960400
+.got.plt                  40   10975128
+.relro_padding          2112   10975168
+.tm_clone_table            0   10979264
+.data                   2744   10979264
+.bss                     283   10982008
+.comment                 166          0
+Total               10974676
+
+

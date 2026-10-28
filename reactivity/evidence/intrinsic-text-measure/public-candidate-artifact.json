@@ -1,0 +1,11 @@
+{
+  "source": "dcba9ba1e809fdaf620a4f698097c1c1d9c5567c",
+  "artifact": "/tmp/gpui-intrinsic-public-target/debug/ack-query-control",
+  "frozen": "/tmp/gpui-intrinsic-text-controls/public-candidate",
+  "sha256": "bf2f71250d6cb3245ef2bd69f997b8680efd5895f9ff58cfde15c552c5a224a8",
+  "profile": "dev",
+  "features": [
+    "gpui/x11"
+  ],
+  "isolated_target": "/tmp/gpui-intrinsic-public-target"
+}

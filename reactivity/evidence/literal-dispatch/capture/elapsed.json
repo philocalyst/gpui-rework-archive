@@ -1,0 +1,47 @@
+[
+  {
+    "round": 1,
+    "variant": "f019",
+    "wall_seconds": 0.06393531098729
+  },
+  {
+    "round": 1,
+    "variant": "baseline",
+    "wall_seconds": 0.2641404860187322
+  },
+  {
+    "round": 1,
+    "variant": "candidate",
+    "wall_seconds": 0.11427646595984697
+  },
+  {
+    "round": 2,
+    "variant": "baseline",
+    "wall_seconds": 0.26608482899609953
+  },
+  {
+    "round": 2,
+    "variant": "candidate",
+    "wall_seconds": 0.11389239795971662
+  },
+  {
+    "round": 2,
+    "variant": "f019",
+    "wall_seconds": 0.06392824102658778
+  },
+  {
+    "round": 3,
+    "variant": "candidate",
+    "wall_seconds": 0.11444355000276119
+  },
+  {
+    "round": 3,
+    "variant": "f019",
+    "wall_seconds": 0.06387630995595828
+  },
+  {
+    "round": 3,
+    "variant": "baseline",
+    "wall_seconds": 0.26421463798033074
+  }
+]

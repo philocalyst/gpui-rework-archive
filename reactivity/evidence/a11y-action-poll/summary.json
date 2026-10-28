@@ -1,0 +1,33 @@
+{
+  "production": "5b4a2d7fc792a4e9929589eaf4c0ac94f144de39",
+  "final_test_source": "e96c1b748e49ae3988fffcab154a36090ff5ac68",
+  "base": "a6ac3ea81f3610cc70cdab56536e75f34d3337a2",
+  "noncomment_nontest_core": 30696,
+  "prior_core": 30686,
+  "core_delta": 10,
+  "linked_empty_delta": {
+    ".rodata": 0,
+    ".text": -3696,
+    ".data.rel.ro": 40,
+    ".stack_sizes": -15
+  },
+  "native_full_lib": {
+    "passed": 216,
+    "ignored": 27,
+    "source": "normal source restored after negative; before adding already-qualified112c provider fixture"
+  },
+  "actual_native_driver_scenarios": [
+    "fatal leaves next command unconsumed",
+    "recoverable glyph presentation failure then repair",
+    "sixteen stale sessions consume budget and rearm"
+  ],
+  "negative_control": "delayed sixteen-result batch consumes next command; intended actual native assertion fails; exact restore passes",
+  "actual_registry_failure_repair": {
+    "passed": true,
+    "source": "e96c1b748e49ae3988fffcab154a36090ff5ac68"
+  },
+  "strict_alltargets_x11": true,
+  "apple_arm64_native_lib_check": true,
+  "windows_msvc_native_lib_check": true,
+  "limits": "Static code/frame and functional checks. No dynamic stack peak, timing, RSS, hardware GPU or foreign runtime claim."
+}

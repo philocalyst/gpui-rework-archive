@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "status": "complete primary75cell capture and independent postcapture audits; partial qualified comparisons, allHeavystrictfailures retained; raw evidence archived",
+  "apps": {
+    "gpui": {
+      "revision": "63e0a521f4",
+      "source": "reactivity",
+      "example": "todo_comparison_five",
+      "language": "Rust"
+    },
+    "zeronsh-zgui": {
+      "repository": "https://github.com/zeronsh/zgui",
+      "revision": "7d82e5b4f8fcc9f5d4a4df769ce65d708a3af15e",
+      "example": "benchmark_todo",
+      "language": "Rust"
+    },
+    "zortax-zgui": {
+      "repository": "https://github.com/Zortax/zgui",
+      "revision": "f6badfb1af02b08ed1924687237028fb98a97bd8",
+      "example": "benchmark_todo",
+      "language": "Rust"
+    },
+    "nanoui": {
+      "repository": "https://github.com/justrach/nanoui",
+      "revision": "05f158020c772c5c867d056cf51e6c7b81ab460f",
+      "example": "benchmark-todo",
+      "language": "Zig"
+    },
+    "mygo": {
+      "repository": "https://github.com/egoist/mygo",
+      "revision": "818f07e29b46a7d0ddf337ed1c6b3450cbf01fe7",
+      "example": "benchmark-todo",
+      "language": "Go"
+    }
+  },
+  "window": {
+    "width": 540,
+    "height": 620,
+    "scale": 1,
+    "padding": 24,
+    "gap": 12,
+    "font": "Noto Sans",
+    "eager_list_viewport_height": 360,
+    "row_height": 37.792,
+    "row_gap": 6
+  },
+  "workloads": {
+    "idle": {
+      "initial_rows": 0,
+      "activity": "none"
+    },
+    "busy": {
+      "initial_rows": 0,
+      "macro": [
+        "type bench-NNN",
+        "add",
+        "complete/reopen first row",
+        "active",
+        "done",
+        "all",
+        "delete first row",
+        "undo"
+      ],
+      "absolute_slot_seconds": 0.25,
+      "requested_events_per_trial": 120
+    },
+    "heavy": {
+      "initial_rows": 10000,
+      "eager_nonvirtualized": true,
+      "activity": "same 120-event busy macro"
+    },
+    "animation": {
+      "initial_rows": 1000,
+      "eager_nonvirtualized": true,
+      "scheduled_hz": 60,
+      "amplitude_logical_pixels": 12,
+      "period_seconds": 1,
+      "phase": "absolute scheduled sample index / 60 * TAU",
+      "backlog_replay": false,
+      "allowed_skipped_samples": 0,
+      "count_tolerance": "max(3, 1% of expected lifetime ticks)"
+    }
+  },
+  "seed": {
+    "id": "index",
+    "title": "Task %04d, index + 1",
+    "done": "index % 3 == 1"
+  },
+  "capture": {
+    "repeats": 3,
+    "measurement_seconds": 30,
+    "settle_after_first_present_seconds": 5,
+    "proc_sample_seconds": 0.1,
+    "startup_repeats": 3,
+    "startup_cache": "warm-page-cache",
+    "app_order": "rotate starting app by repeat and reverse every even repeat",
+    "exclusive_host_lease": true,
+    "compilation_during_capture": false,
+    "completed_utc": "2026-10-24T07:15:36Z"
+  },
+  "metrics": {
+    "cpu": [
+      "idle",
+      "busy",
+      "heavy",
+      "animation"
+    ],
+    "gpu": [
+      "busy",
+      "heavy",
+      "animation"
+    ],
+    "memory": [
+      "idle",
+      "heavy",
+      "animation"
+    ],
+    "smoothness": [
+      "busy",
+      "heavy",
+      "animation"
+    ],
+    "startup_work": "external spawn to first successful host draw/submission plus CPU ticks and faults; exact backend boundary retained",
+    "app_size": "as-built and stripped-copy executable bytes, plus external assets and required ELF libraries"
+  },
+  "required_evidence": [
+    "frozen upstream and adapter source identities",
+    "binary SHA256",
+    "compiler and exact build flags",
+    "dependency lockfile hashes",
+    "backend/driver identity",
+    "font identity and provisioning policy",
+    "accessibility capability differences",
+    "initial/final screenshots",
+    "per-action native drawable-change acknowledgments",
+    "full macro final model",
+    "animation scheduling/delivery/skips",
+    "buffered successful host drawing/submission receipts",
+    "normal window close",
+    "raw process samples",
+    "all failed and unsupported cells"
+  ],
+  "limitations": [
+    "software Vulkan or OpenGL does not establish physical GPU utilization",
+    "host submission intervals do not establish compositor/scanout/perceptual smoothness",
+    "matching ASCII text does not establish Unicode/IME/assistive-technology equivalence",
+    "the historical 2026-10-23 Todo campaign remains unchanged, including its six failing GPUI cells"
+  ],
+  "preflight_evidence": {
+    "remote_root": "/home/miles/gpui-ce3-compute-20261024/evidence/five-app",
+    "initial_all_mode_probe": "preflight-attempt1",
+    "zortax_final_visual_input_delta": "zortax-smoke-qualified",
+    "source_build_receipts": "builds",
+    "full_peer_export_audit": "full-peer-export-audit.json",
+    "performance_values_from_preflight_reused": false
+  },
+  "postcapture": {
+    "host_receipt_audit": "presentation_audit.py policyv1, fixed before reading primaryanimation; originalrowsunchanged",
+    "heavy_successor": "Zeronmode-specificfiltercoords118/177/247; threequiet30+5sreruns fail unchangedstrictgates; originalcoordsclassifiedharnessfailure",
+    "visible_ui_startup": "separate3repeatsperapp, chromeanchors+marker0, nofocus/pointerevent,8sdeadline; Zortax3timeouts",
+    "native_presentation_fault": "separateZeronbinary, backenddeferred449draws,485ticks,28receipts/6s; originalgatepasses/newauditrejects; positive360receipts",
+    "gpui_auto_supplement": "samefrozenbinary, Auto\u2192ReferenceCpu, separate3idle+3startup; notpooledwithprimaryGpu"
+  }
+}

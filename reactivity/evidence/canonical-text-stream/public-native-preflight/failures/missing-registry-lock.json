@@ -1,0 +1,6 @@
+{
+  "source_head": "5354fe8a8ddee2d923d68bbbdb922311824da9bf",
+  "source_files_unchanged": 1982,
+  "failure": "new oracle did not hold BUNDLED_TEST_LOCK; existing weak-font release assertion failed and poisoned dependents",
+  "correction": "new oracle takes existing registry lock before obtaining bundled font; subsequent allocation/owner suites run serially"
+}

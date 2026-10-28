@@ -1,0 +1,23 @@
+{
+  "qualified_source": "8c56ff0bbedbcdfde7484a97182b104aadccdbf5",
+  "baseline_production": "a221d24c315e40dbe3c3f93daa28a41bf5ff561b",
+  "negative_source": "3676ac1420181e495ced6d32a1e7409c032cc3b4",
+  "negative_and_fixed_materialized_files": 12010,
+  "negative_vs_fixed_changed_files": [
+    "reactivity/crates/gpui/src/runtime/turn.rs"
+  ],
+  "root": {
+    "passed": 240,
+    "ignored": 5,
+    "harnesses": 10,
+    "strict_all_targets_exit": 0
+  },
+  "negative": {
+    "exit": 101,
+    "failed": 1,
+    "compiled_successfully": true
+  },
+  "core_non_test_non_comment_lines": 31814,
+  "core_delta": 1,
+  "scope": "Public Reader/source correctness and default strict checks; no timing, RSS or native-platform runtime claim."
+}

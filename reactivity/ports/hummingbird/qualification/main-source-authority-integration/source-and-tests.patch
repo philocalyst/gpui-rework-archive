@@ -1,0 +1,635 @@
+diff --git a/reactivity/ports/hummingbird/src/app.rs b/reactivity/ports/hummingbird/src/app.rs
+index a9c8eb27c8c6667e8fc5f4926111afaf7c27a25e..ee6549fe10dedc89971d6d3f6fe4ab0a004193dd 100644
+--- a/reactivity/ports/hummingbird/src/app.rs
++++ b/reactivity/ports/hummingbird/src/app.rs
+@@ -175,9 +175,18 @@ impl Library {
+                         self.preparation = Preparation::Canceled;
+                         #[cfg(feature = "audio")]
+                         if let Some(revision) = play_revision {
+-                            match self.queue.play_now_if(&track, revision) {
+-                                Ok(true) => {}
+-                                Ok(false) => return,
++                            match self.worker.with_current_source(selection.generation, || {
++                                self.queue.play_now_if(&track, revision)
++                            }) {
++                                Ok(Some(Ok(true))) => {}
++                                Ok(Some(Ok(false))) | Ok(None) => return,
++                                Ok(Some(Err(error))) => {
++                                    self.preparation = Preparation::Failed {
++                                        selection,
++                                        error: error.to_string(),
++                                    };
++                                    return;
++                                }
+                                 Err(error) => {
+                                     self.preparation = Preparation::Failed {
+                                         selection,
+@@ -246,7 +255,14 @@ impl Library {
+     }
+     fn enqueue(&mut self, track: TrackRef, selection: Selection) {
+         if self.current_selection(selection) {
+-            self.queue.enqueue(track);
++            match self
++                .worker
++                .with_current_source(selection.generation, || self.queue.enqueue(track))
++            {
++                Ok(Some(())) => {}
++                Ok(None) => self.notice = "The library source changed".into(),
++                Err(error) => self.notice = error.to_string(),
++            }
+         } else {
+             self.notice = "This prepared recording is no longer the current selection".into();
+         }
+diff --git a/reactivity/ports/hummingbird/src/database.rs b/reactivity/ports/hummingbird/src/database.rs
+index a0e2da9460cc713a0bfdef7b10416e8b9ab8fb6e..5180ffda4425c9360d81cb0493fb3cbcd5227e54 100644
+--- a/reactivity/ports/hummingbird/src/database.rs
++++ b/reactivity/ports/hummingbird/src/database.rs
+@@ -138,11 +138,14 @@ impl Database {
+         Ok(())
+     }
+     pub(crate) fn prepend_fixture_track(&mut self) -> Result<TrackSearchRow> {
++        let transaction = self.connection.unchecked_transaction()?;
+         self.insert_track(5000, "A New Arrival", None, Some("New Artist"), 220, None)?;
+-        Ok(crate::query::tracks()
++        let row = crate::query::tracks()
+             .by_id(5000)
+             .for_search()
+             .fetch_rows(&self.connection)?
+-            .remove(0))
++            .remove(0);
++        transaction.commit()?;
++        Ok(row)
+     }
+ }
+diff --git a/reactivity/ports/hummingbird/src/search.rs b/reactivity/ports/hummingbird/src/search.rs
+index 0a8b29ce8915ed78e8ed3335c99408f734d788a6..ec1248d98527a2df453f532485edc972676d9dc8 100644
+--- a/reactivity/ports/hummingbird/src/search.rs
++++ b/reactivity/ports/hummingbird/src/search.rs
+@@ -56,6 +56,9 @@ pub enum SourceError {
+     Sqlite(rusqlite::Error),
+     QueryTooLong,
+     MissingTrack(i64),
++    SourceAuthorityUnavailable,
++    SourceClosed,
++    SourceNotCommitted,
+     NoSelection,
+     OutdatedSource,
+     VersionExhausted,
+@@ -68,6 +71,13 @@ impl fmt::Display for SourceError {
+             Self::QueryTooLong => f.write_str("Use at most 1,024 UTF-8 bytes in a search"),
+             Self::NoSelection => f.write_str("No recording selected"),
+             Self::MissingTrack(id) => write!(f, "Recording {id} is no longer available"),
++            Self::SourceNotCommitted => {
++                f.write_str("Commit the source database before attaching it")
++            }
++            Self::SourceClosed => f.write_str("Library worker is closed"),
++            Self::SourceAuthorityUnavailable => {
++                f.write_str("Library source authority is unavailable")
++            }
+             Self::OutdatedSource => f.write_str("The library source changed"),
+             Self::VersionExhausted => f.write_str("Library revision space exhausted"),
+             Self::NotificationsUnavailable => f.write_str("Library updates are unavailable"),
+diff --git a/reactivity/ports/hummingbird/src/worker.rs b/reactivity/ports/hummingbird/src/worker.rs
+index 1094a3c057849a6ce81354bdb7c279ae41416a4c..6e48bfc194520bfc12a213d08716c8f4cae685c6 100644
+--- a/reactivity/ports/hummingbird/src/worker.rs
++++ b/reactivity/ports/hummingbird/src/worker.rs
+@@ -6,7 +6,10 @@ use crate::{
+     search::{SearchInput, SearchPage, Searcher, SourceError, Version},
+ };
+ use gpui::{Completion, Inbox, Remote, StartError};
+-use std::{sync::mpsc, thread};
++use std::{
++    sync::{Arc, Mutex, Weak, mpsc},
++    thread,
++};
+ 
+ #[derive(Debug)]
+ pub struct QueueError(pub StartError);
+@@ -52,14 +55,75 @@ enum Command {
+ 
+ #[derive(Clone)]
+ pub struct WorkerHandle {
++    shared: Arc<Producer>,
++}
++struct Producer {
+     sender: mpsc::SyncSender<Command>,
++    version: Mutex<Version>,
++}
++// MAX is already excluded from every live source generation. Reserve it for
++// terminal publication rather than growing the retained Version with a flag.
++struct SourceLife(Weak<Producer>);
++impl Drop for SourceLife {
++    fn drop(&mut self) {
++        if let Some(shared) = self.0.upgrade() {
++            shared
++                .version
++                .lock()
++                .unwrap_or_else(std::sync::PoisonError::into_inner)
++                .generation = u64::MAX;
++        }
++    }
+ }
+ impl WorkerHandle {
+     fn enqueue(&self, command: Command) -> Result<(), StartError> {
+-        self.sender.try_send(command).map_err(|error| match error {
+-            mpsc::TrySendError::Full(_) => StartError::Busy,
+-            mpsc::TrySendError::Disconnected(_) => StartError::Closed,
+-        })
++        self.shared
++            .sender
++            .try_send(command)
++            .map_err(|error| match error {
++                mpsc::TrySendError::Full(_) => StartError::Busy,
++                mpsc::TrySendError::Disconnected(_) => StartError::Closed,
++            })
++    }
++    /// Validate the worker's published source version across an application
++    /// edit. This grants no access to its SQLite connection. Do not re-enter
++    /// this handle from commit. The app takes Source before Audio authority;
++    /// queue scans/allocation may scale and are not a hard latency bound.
++    pub fn with_current_version<R>(
++        &self,
++        expected: Version,
++        commit: impl FnOnce() -> R,
++    ) -> Result<Option<R>, SourceError> {
++        self.with_version(|version| version == expected, commit)
++    }
++    /// Existing prepared track leases survive same-source imports. This
++    /// capability rejects source replacement and terminal worker retirement.
++    pub fn with_current_source<R>(
++        &self,
++        generation: u64,
++        commit: impl FnOnce() -> R,
++    ) -> Result<Option<R>, SourceError> {
++        self.with_version(|version| version.generation == generation, commit)
++    }
++    fn with_version<R>(
++        &self,
++        accepts: impl FnOnce(Version) -> bool,
++        commit: impl FnOnce() -> R,
++    ) -> Result<Option<R>, SourceError> {
++        let version = self
++            .shared
++            .version
++            .lock()
++            .map_err(|_| SourceError::SourceAuthorityUnavailable)?;
++        if version.generation == u64::MAX {
++            return Err(SourceError::SourceClosed);
++        }
++        if !accepts(*version) {
++            return Ok(None);
++        }
++        let result = commit();
++        drop(version);
++        Ok(Some(result))
+     }
+     pub fn search(
+         &self,
+@@ -85,14 +149,37 @@ pub struct Worker {
+ }
+ impl Worker {
+     pub fn new(mut database: Database) -> std::io::Result<(Self, Inbox<LibraryEvent>)> {
++        if !database.connection().is_autocommit() {
++            return Err(std::io::Error::new(
++                std::io::ErrorKind::InvalidInput,
++                SourceError::SourceNotCommitted,
++            ));
++        }
+         let (sender, commands) = mpsc::sync_channel(4);
+         let (updates, inbox) = Remote::bounded(8);
++        let shared = Arc::new(Producer {
++            sender,
++            version: Mutex::new(Version::default()),
++        });
++        let producer = Arc::downgrade(&shared);
+         let thread = thread::Builder::new()
+             .name("hummingbird-library".into())
+             .spawn(move || {
++                // Local drops before the closure's captured updates Remote,
++                // publishing terminal source authority before disconnect wake.
++                let source = SourceLife(producer);
+                 let mut searcher = Searcher::default();
+-                let mut version = Version::default();
+                 while let Ok(command) = commands.recv() {
++                    // This turn's sender drops before the next blocking recv.
++                    // Keeping only Weak between turns preserves final-handle
++                    // disconnection; the worker cannot own its waiting sender.
++                    let Some(shared) = source.0.upgrade() else {
++                        break;
++                    };
++                    let version = match shared.version.lock() {
++                        Ok(version) => *version,
++                        Err(_) => break,
++                    };
+                     match command {
+                         Command::Search(input, completion) => {
+                             let _ = completion.run_cancellable(input, |input, cancellation| {
+@@ -119,14 +206,19 @@ impl Worker {
+                         Command::Prepend(reply) => {
+                             let result = next_revision(version).and_then(|next| {
+                                 let row = database.prepend_fixture_track()?;
+-                                version = next;
++                                // SQL is committed before Version publication. The
++                                // single worker cannot start a new read before it.
++                                *shared
++                                    .version
++                                    .lock()
++                                    .map_err(|_| SourceError::SourceAuthorityUnavailable)? = next;
+                                 updates
+                                     .try_send(LibraryEvent::Imported {
+                                         id: row.id,
+-                                        version,
++                                        version: next,
+                                     })
+                                     .map_err(|_| SourceError::NotificationsUnavailable)?;
+-                                Ok(version)
++                                Ok(next)
+                             });
+                             let failed_delivery =
+                                 matches!(result, Err(SourceError::NotificationsUnavailable));
+@@ -137,17 +229,25 @@ impl Worker {
+                         }
+                         Command::Replace(replacement, reply) => {
+                             let result = next_revision(version).and_then(|mut next| {
++                                if !replacement.connection().is_autocommit() {
++                                    return Err(SourceError::SourceNotCommitted);
++                                }
+                                 next.generation = next
+                                     .generation
+                                     .checked_add(1)
+                                     .filter(|&generation| generation < u64::MAX)
+                                     .ok_or(SourceError::VersionExhausted)?;
+                                 database = replacement;
+-                                version = next;
++                                // SQL is committed before Version publication. The
++                                // single worker cannot start a new read before it.
++                                *shared
++                                    .version
++                                    .lock()
++                                    .map_err(|_| SourceError::SourceAuthorityUnavailable)? = next;
+                                 updates
+-                                    .try_send(LibraryEvent::Replaced { version })
++                                    .try_send(LibraryEvent::Replaced { version: next })
+                                     .map_err(|_| SourceError::NotificationsUnavailable)?;
+-                                Ok(version)
++                                Ok(next)
+                             });
+                             let failed_delivery =
+                                 matches!(result, Err(SourceError::NotificationsUnavailable));
+@@ -165,7 +265,7 @@ impl Worker {
+             })?;
+         Ok((
+             Self {
+-                handle: WorkerHandle { sender },
++                handle: WorkerHandle { shared },
+                 thread,
+             },
+             inbox,
+@@ -210,7 +310,7 @@ impl Worker {
+     /// revokes cloned service handles; their next enqueue returns Closed.
+     /// Ordinary Drop detaches the join handle instead of blocking a UI callback.
+     pub fn finish(self) -> thread::Result<()> {
+-        let _ = self.handle.sender.send(Command::Stop);
++        let _ = self.handle.shared.sender.send(Command::Stop);
+         drop(self.handle);
+         self.thread.join()
+     }
+@@ -248,3 +348,151 @@ fn prepare(
+         title: row.title,
+     }))
+ }
++
++#[cfg(test)]
++mod authority_tests {
++    use super::*;
++    use std::{
++        cell::Cell,
++        sync::Barrier,
++        time::{Duration, Instant},
++    };
++    #[test]
++    fn source_guard_serializes_publication_and_rejects_closed_or_stale_callbacks() {
++        let (worker, _inbox) = Worker::new(Database::fixture().unwrap()).unwrap();
++        let handle = worker.handle();
++        let entered = Arc::new(Barrier::new(2));
++        let release = Arc::new(Barrier::new(2));
++        let publishing = {
++            let handle = handle.clone();
++            let entered = entered.clone();
++            let release = release.clone();
++            thread::spawn(move || {
++                handle.with_current_source(0, || {
++                    entered.wait();
++                    release.wait();
++                })
++            })
++        };
++        entered.wait();
++        let replacement = worker
++            .replace_database(Database::fixture().unwrap())
++            .unwrap();
++        let until = Instant::now() + Duration::from_secs(5);
++        // Worker, this handle and the callback thread already own three strong
++        // refs; the fourth proves the worker has entered the replacement turn.
++        while Arc::strong_count(&handle.shared) < 4 {
++            assert!(Instant::now() < until);
++            thread::yield_now();
++        }
++        assert!(matches!(
++            replacement.try_recv(),
++            Err(mpsc::TryRecvError::Empty)
++        ));
++        release.wait();
++        assert!(publishing.join().unwrap().unwrap().is_some());
++        let version = replacement
++            .recv_timeout(Duration::from_secs(5))
++            .unwrap()
++            .unwrap();
++        assert_eq!(version.generation, 1);
++        let called = Cell::new(false);
++        assert!(
++            handle
++                .with_current_source(0, || called.set(true))
++                .unwrap()
++                .is_none()
++        );
++        assert!(!called.get());
++        assert!(
++            handle
++                .with_current_version(version, || ())
++                .unwrap()
++                .is_some()
++        );
++        worker.finish().unwrap();
++        assert!(matches!(
++            handle.with_current_source(1, || called.set(true)),
++            Err(SourceError::SourceClosed)
++        ));
++        assert!(matches!(
++            handle.with_current_source(u64::MAX, || called.set(true)),
++            Err(SourceError::SourceClosed)
++        ));
++        assert!(!called.get());
++    }
++    #[test]
++    fn capability_is_allocation_free_and_callback_panic_retires_poisoned_authority() {
++        use std::panic::{AssertUnwindSafe, catch_unwind};
++        let (worker, _inbox) = Worker::new(Database::fixture().unwrap()).unwrap();
++        let handle = worker.handle();
++        let requests = allocation_counter::measure(|| {
++            assert!(handle.with_current_source(0, || ()).unwrap().is_some());
++            assert!(
++                handle
++                    .with_current_version(Version::default(), || ())
++                    .unwrap()
++                    .is_some()
++            );
++        });
++        assert_eq!(requests.count_total, 0);
++        assert!(
++            catch_unwind(AssertUnwindSafe(
++                || handle.with_current_source(0, || panic!("owner callback fault"))
++            ))
++            .is_err()
++        );
++        let called = Cell::new(false);
++        assert!(matches!(
++            handle.with_current_source(0, || called.set(true)),
++            Err(SourceError::SourceAuthorityUnavailable)
++        ));
++        assert!(!called.get());
++        worker.finish().unwrap();
++    }
++    #[test]
++    fn final_producer_drop_disconnects_waiting_worker_and_weak_does_not_keep_sender_alive() {
++        let (worker, _inbox) = Worker::new(Database::fixture().unwrap()).unwrap();
++        let Worker { handle, thread } = worker;
++        let weak = Arc::downgrade(&handle.shared);
++        drop(handle);
++        let until = Instant::now() + Duration::from_secs(5);
++        while !thread.is_finished() {
++            assert!(Instant::now() < until);
++            thread::yield_now();
++        }
++        thread.join().unwrap();
++        assert!(weak.upgrade().is_none());
++    }
++    #[test]
++    fn failed_import_does_not_publish_a_new_version_and_header_bill_is_explicit() {
++        let database = Database::fixture().unwrap();
++        database
++            .insert_track(5000, "Already here", None, None, 1, None)
++            .unwrap();
++        let (worker, _inbox) = Worker::new(database).unwrap();
++        assert!(
++            worker
++                .prepend_fixture_track()
++                .unwrap()
++                .recv_timeout(Duration::from_secs(5))
++                .unwrap()
++                .is_err()
++        );
++        assert!(
++            worker
++                .handle()
++                .with_current_version(Version::default(), || ())
++                .unwrap()
++                .is_some()
++        );
++        println!(
++            "SOURCE_HEADERS handle={} producer={} producer_arc_allocation={} version={}",
++            size_of::<WorkerHandle>(),
++            size_of::<Producer>(),
++            size_of::<Producer>() + 2 * size_of::<usize>(),
++            size_of::<Version>()
++        );
++        worker.finish().unwrap();
++    }
++}
+diff --git a/reactivity/ports/hummingbird/tests/library_audio.rs b/reactivity/ports/hummingbird/tests/library_audio.rs
+index 25bca9a8a12a50636dc4eb850a1a279929904d84..81e8b9c7639217a57e5d0539571d9820f455fdd8 100644
+--- a/reactivity/ports/hummingbird/tests/library_audio.rs
++++ b/reactivity/ports/hummingbird/tests/library_audio.rs
+@@ -1187,3 +1187,127 @@ fn public_prepare_and_play_command_cannot_turn_a_pure_owner_prepare_into_playbac
+     assert!(capture.lock().unwrap().streams.is_empty());
+     close(win, audio, worker);
+ }
++
++#[test]
++fn published_source_replace_rejects_buffered_named_play_before_owner_notification() {
++    let (worker, audio, capture, _, mut win) = owner();
++    row_prepare(&mut win, 44);
++    win.activate(
++        win.role(Role::Button)
++            .name("Play Καλημέρα now")
++            .one()
++            .unwrap(),
++    )
++    .unwrap();
++    worker
++        .checkpoint()
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap();
++    let replacement = worker
++        .replace_database(database())
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap()
++        .unwrap();
++    worker
++        .checkpoint()
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap();
++    assert_eq!(replacement.generation, 1);
++    assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
++    settle(&mut win, &worker).unwrap();
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().queue().len())
++            .unwrap(),
++        0,
++        "buffered old-source preparation edited queue after replacement acknowledgement"
++    );
++    assert!(capture.lock().unwrap().opened.is_empty());
++    close(win, audio, worker);
++}
++
++#[test]
++fn published_source_replace_rejects_visible_prepared_enqueue_before_owner_notification() {
++    let (worker, audio, capture, _, mut win) = owner();
++    let prepare = row_prepare(&mut win, 44);
++    win.activate(prepare).unwrap();
++    worker
++        .checkpoint()
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap();
++    worker
++        .replace_database(database())
++        .unwrap()
++        .recv_timeout(Duration::from_secs(10))
++        .unwrap()
++        .unwrap();
++    win.deliver_ready(1).unwrap();
++    assert!(win.with_model(|model| model.prepared().is_some()).unwrap());
++    assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
++    win.activate(win.button("Add prepared recording 44 to queue"))
++        .unwrap();
++    assert_eq!(
++        win.with_model(|model| model.queue.playback().queue().len())
++            .unwrap(),
++        0,
++        "visible old-source prepared action edited queue after replacement acknowledgement"
++    );
++    assert!(capture.lock().unwrap().opened.is_empty());
++    close(win, audio, worker);
++}
++
++#[test]
++fn source_import_keeps_buffered_existing_named_play_authorized_but_finish_retires_it() {
++    for finish in [false, true] {
++        let (worker, audio, capture, _, mut win) = owner();
++        row_prepare(&mut win, 44);
++        win.activate(
++            win.role(Role::Button)
++                .name("Play Καλημέρα now")
++                .one()
++                .unwrap(),
++        )
++        .unwrap();
++        worker
++            .checkpoint()
++            .unwrap()
++            .recv_timeout(Duration::from_secs(10))
++            .unwrap();
++        if finish {
++            worker.finish().unwrap();
++            win.deliver_ready(32).unwrap();
++            assert!(
++                win.with_model(|model| model.queue.playback().queue().is_empty())
++                    .unwrap()
++            );
++            assert!(capture.lock().unwrap().opened.is_empty());
++            drop(win);
++            assert!(audio.finish(Duration::from_secs(2)));
++        } else {
++            worker
++                .prepend_fixture_track()
++                .unwrap()
++                .recv_timeout(Duration::from_secs(10))
++                .unwrap()
++                .unwrap();
++            settle(&mut win, &worker).unwrap();
++            until(&mut win, &capture, false, |_, sink| sink.opened.len() == 1);
++            assert_eq!(
++                win.with_model(|model| model
++                    .queue
++                    .playback()
++                    .plan()
++                    .unwrap()
++                    .current
++                    .track
++                    .track_id)
++                    .unwrap(),
++                Some(44)
++            );
++            close(win, audio, worker);
++        }
++    }
++}
+diff --git a/reactivity/ports/hummingbird/tests/source_authority.rs b/reactivity/ports/hummingbird/tests/source_authority.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..a64458288f62ba1a142723f4cc1ba67eed6a1e1b
+--- /dev/null
++++ b/reactivity/ports/hummingbird/tests/source_authority.rs
+@@ -0,0 +1,49 @@
++//! SQLite transaction admission is part of source publication, not a UI hint.
++use hummingbird_gpui_port::{database::Database, search::Version, worker::Worker};
++use std::time::Duration;
++fn uncommitted() -> Database {
++    let database = Database::fixture().unwrap();
++    database
++        .connection()
++        .execute_batch("BEGIN IMMEDIATE; UPDATE track SET title='Transient' WHERE id=44")
++        .unwrap();
++    database
++}
++#[test]
++fn initial_uncommitted_database_is_rejected_before_starting_a_worker() {
++    assert!(Worker::new(uncommitted()).is_err());
++}
++#[test]
++fn replacement_with_uncommitted_sql_never_publishes_or_consumes_a_version() {
++    let (worker, _inbox) = Worker::new(Database::fixture().unwrap()).unwrap();
++    let result = worker
++        .replace_database(uncommitted())
++        .unwrap()
++        .recv_timeout(Duration::from_secs(5))
++        .unwrap();
++    assert!(
++        result.is_err(),
++        "replacement acknowledged an active SQL transaction"
++    );
++    assert!(
++        worker
++            .handle()
++            .with_current_version(Version::default(), || ())
++            .unwrap()
++            .is_some()
++    );
++    let committed = worker
++        .replace_database(Database::fixture().unwrap())
++        .unwrap()
++        .recv_timeout(Duration::from_secs(5))
++        .unwrap()
++        .unwrap();
++    assert_eq!(
++        committed,
++        Version {
++            revision: 1,
++            generation: 1
++        }
++    );
++    worker.finish().unwrap();
++}

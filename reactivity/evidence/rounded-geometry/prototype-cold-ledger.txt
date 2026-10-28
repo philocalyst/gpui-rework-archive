@@ -1,0 +1,25 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui_canvas v0.1.0 (/root/gpui-rounded-rectangles/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/root/gpui-rounded-rectangles/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 06s
+     Running unittests src/lib.rs (/tmp/gpui-rounded-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 1 test
+rounded_gpui,Style=88,El=176,Extra=56,Annotations=48,ImageSpec=16,Node=40,P=80,Runtime=2384,Metadata=248,Sheet=96,Geometry=96,Entry=16,PropertyStyle=8,PropertyGeometry=8
+rounded_element,absent,allocations=0,bytes=0
+rounded_element,rounded,allocations=1,bytes=56
+rounded_element,named,allocations=1,bytes=56
+rounded_element,rounded_named,allocations=2,bytes=104
+rounded_element,named_rounded,allocations=2,bytes=104
+test runtime::geometry::tests::cold_geometry_storage_is_absent_from_plain_owners_and_reclaimed_after_removal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.01s
+

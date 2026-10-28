@@ -1,0 +1,90 @@
+{
+  "parent": "131c6123f5",
+  "source_sha256": {
+    "crates/canvas/src/canvas.rs": "1aac6a52ce8c9c5cb64ad707a5b5bf343005053ccfddcf135976b1cc3e947ba5",
+    "crates/canvas/src/canvas/bins.rs": "2e03d85da420c94ba02aa2ead9b671db7d7b9064778dcbf8bb02a58544f588d9",
+    "crates/canvas/src/canvas/columns.rs": "a54e0cbbb1c67d2d23e6d53f535a0a51aa7992da6a94e855896b5c206381360d",
+    "crates/canvas/src/canvas/paint.rs": "39bc755b9aa00c5072505c83655a2390507685aeeef93ce35d358c5a789a15a6",
+    "crates/canvas/src/damage.rs": "25f5fe53314d02d0180a3334cc22549711cb7dd21d2e8ed72e27520975529941",
+    "crates/canvas/src/lib.rs": "a7939dd1e3bde533f3a11bb9f86a0fc798926e9a31e91cdd2ecb3f2a416b9e7c",
+    "crates/canvas/tests/bins.rs": "4d493cf9a57eac71b6fb7f98a95dd7c229aed0decb6a08a8bd6111afe4cd5ad9",
+    "crates/canvas/tests/literal_cow.rs": "1393f5a7c80b336df93bf9f47959c35828c2a7fa04612e1a817192c6ceb52799",
+    "crates/canvas/tests/slots.rs": "fcf59e176bc4236f0e5f3797af8327793d5512d0051b23e065587bd0939511cc",
+    "crates/gpu/src/lib.rs": "c0332fde3a6de5484192df4400913a1156e05e6f890a3e1d0f7943b8e3e732e0",
+    "crates/gpu/src/renderer.rs": "e8e4952234d622f1d4cb4dff2c28d02269507ab9fa1b1a49570b990ce95ed0bf",
+    "crates/gpu/src/renderer/paint.rs": "a8575714addf36db1d3a9e3a14a3fa12afd1c6435610193178ed0ab89c2330a1",
+    "crates/gpu/src/renderer/slots.rs": "15616a42e0e517f4e3bd647bfa523ece03a40f6d7ea96cd780be70c99fc8966c",
+    "crates/gpu/src/shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd",
+    "crates/gpu/tests/render.rs": "fd6930e1a543af226cd3c3493fa191fd6eec734b4fa43ffd13409329e672d7bd",
+    "crates/gpui/examples/paint_slot_storage.rs": "ab1af17d3e9e6716e00baef1a7ca813d59f9b96b0e1a27018e7732acf1df85eb",
+    "crates/gpui/src/native.rs": "9f47212762ac438c283c933f8828c1d58e4aa1fbf2c6f7a8b2b55f4fb0a28579",
+    "crates/gpui/src/native/paint_tests.rs": "d707ac30de3807dab254387a3ec9f2addf4964eb8bf7b2ad45d65281ae3faf2d",
+    "crates/gpui/src/native/upgrade.rs": "b2ee2ee95310f45c076b49b243b574d022a49e5bfc13900826538aea6badfd6e",
+    "crates/gpui/src/property.rs": "424dca27c32289e757e7fdd31103fedd0010cbe983121205247d3c8f5f12ce0e",
+    "crates/gpui/src/runtime.rs": "e8f320b2a44d8751ccb20acbf0874a44d4df42b5beb125365faee08581581f38",
+    "crates/gpui/src/runtime/metadata.rs": "9f94d384d5546b1d25c0107fe6effc0e8bc7722877976c13deaffd62e114eca1",
+    "crates/gpui/src/runtime/paint.rs": "f855396a24349ea82f9d0c15224bb23eda85964c54632ac4aa225f7ab826e6a0",
+    "crates/gpui/src/runtime/style_ledger.rs": "64a8b18be6cbd0768eb0ac3338e200165be28fb32e2ca3ddb803df47b66aba5d",
+    "crates/gpui/src/runtime/styles.rs": "a1725a643a1d6969e1407f3af8339921f152284fe5a85f721f30373103ce0dea",
+    "crates/gpui/src/runtime/styles/colours.rs": "ff3474cd6c6e4243fa6dddd66c36319c46ae57b85299c3a1bec64523e113d794",
+    "crates/gpui/src/runtime/turn.rs": "1c2c81b0555131d8cb74026941dcb70b11b66842e9595e116604c637c87b1763",
+    "crates/gpui/tests/paint_slot_rebind.rs": "112a19d44d85ef9d568c85c83c7f01f00e338e4ae9505307a5f666ba4c22dd12",
+    "crates/gpui/tests/paint_slots.rs": "a015bdb80473691b9efb0685ef0911d22265440d6d4cac89cefd49e80dc79580",
+    "crates/gpui/tests/style_ports.rs": "9e3a45302142b7ddb757ab57ab412f7b23f2ad0da733797522db7bce7977e166"
+  },
+  "gates": {
+    "core-initial": {
+      "groups": 71,
+      "passed": 572,
+      "failed": 0,
+      "ignored": 12
+    },
+    "bins": {
+      "groups": 1,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "public-final": {
+      "groups": 4,
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    "vulkan": {
+      "groups": 1,
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native": {
+      "groups": 1,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "clippy-initial-rejected": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "clippy-final": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "success": true
+    },
+    "fmt": {
+      "groups": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "success": true
+    }
+  },
+  "gate_scope": "core-initial predates temporary-field-Vec elimination; final public/native/Vulkan/Clippy checks include it. Bins predates lexical-only guard scope correction. No historical timing or allocation observation is retagged to final source.",
+  "timing_claim": "none",
+  "native_environment": "private Xvfb :120; Mesa26.1.4 llvmpipe"
+}

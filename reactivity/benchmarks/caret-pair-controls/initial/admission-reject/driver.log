@@ -1,0 +1,12 @@
+{"case": "tiny", "scope": "cold", "median_ns": {"baseline": 35430.187, "candidate": 36185.083}, "candidate_vs_baseline": 0.021306576790012466}
+{"case": "tiny", "scope": "warm", "median_ns": {"baseline": 8558.58, "candidate": 8563.881}, "candidate_vs_baseline": 0.0006193784482939613}
+{"case": "label", "scope": "cold", "median_ns": {"baseline": 48123.15, "candidate": 46303.748}, "candidate_vs_baseline": -0.03780720921219838}
+{"case": "label", "scope": "warm", "median_ns": {"baseline": 17559.89, "candidate": 14761.488}, "candidate_vs_baseline": -0.15936329897282953}
+Traceback (most recent call last):
+  File "/tmp/gpui-caret-pair-controls/run.py", line 51, in <module>
+    allocation = [invoke(name, case, scope, 'alloc', 1, -1) for name in variants]
+                  ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/gpui-caret-pair-controls/run.py", line 38, in invoke
+    assert result.returncode == 0, row
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'variant': 'baseline', 'case': 'latin', 'scope': 'cold', 'mode': 'alloc', 'rounds': 1, 'pair': -1, 'exit': 101, 'stdout': '', 'stderr': "\nthread 'main' (1462428) panicked at crates/canvas/examples/caret_pair_measure.rs:22:10:\ncalled `Result::unwrap()` on an `Err` value: ResourceLimit\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"}

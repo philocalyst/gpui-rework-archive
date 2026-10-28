@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/58d4254f95ad45e7/out/prepared_scene-58d4254f95ad45e7",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/020-prepared_scene/test",
+  "sha256": "06b164b4b68a61d93c0c9af746e3caf67972ebe8a116c64438f5b045387e8d5e",
+  "bytes": 102545552,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "prepared_scene",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/prepared_scene.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

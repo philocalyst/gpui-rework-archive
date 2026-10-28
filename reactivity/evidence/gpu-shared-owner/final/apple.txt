@@ -1,0 +1,3 @@
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-shared-gpu-sol/reactivity/crates/gpu)
+    Checking gpui v0.1.0 (/tmp/gpui-shared-gpu-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 25.82s

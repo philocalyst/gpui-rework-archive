@@ -1,0 +1,264 @@
+
+/tmp/gpui-literal-dispatch-target/release/examples/literal_startup:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004f8f00 <literal_startup::literal_recipe_probe>:
+  4f8f00:	41 57                	push   %r15
+  4f8f02:	41 56                	push   %r14
+  4f8f04:	53                   	push   %rbx
+  4f8f05:	48 81 ec 80 01 00 00 	sub    $0x180,%rsp
+  4f8f0c:	49 89 d6             	mov    %rdx,%r14
+  4f8f0f:	48 89 fb             	mov    %rdi,%rbx
+  4f8f12:	0f 10 05 6b fe b4 ff 	movups -0x4b0195(%rip),%xmm0        # 48d84 <anon.a881572fc7186dd856ca85af3d211034.18.llvm.17243807378767217725+0x8>
+  4f8f19:	0f 29 84 24 d0 00 00 	movaps %xmm0,0xd0(%rsp)
+  4f8f20:	00
+  4f8f21:	0f 10 0d 6c fe b4 ff 	movups -0x4b0194(%rip),%xmm1        # 48d94 <anon.a881572fc7186dd856ca85af3d211034.18.llvm.17243807378767217725+0x18>
+  4f8f28:	0f 29 8c 24 e0 00 00 	movaps %xmm1,0xe0(%rsp)
+  4f8f2f:	00
+  4f8f30:	0f 10 15 6d fe b4 ff 	movups -0x4b0193(%rip),%xmm2        # 48da4 <anon.a881572fc7186dd856ca85af3d211034.18.llvm.17243807378767217725+0x28>
+  4f8f37:	0f 29 94 24 f0 00 00 	movaps %xmm2,0xf0(%rsp)
+  4f8f3e:	00
+  4f8f3f:	0f 10 1d 6e fe b4 ff 	movups -0x4b0192(%rip),%xmm3        # 48db4 <anon.a881572fc7186dd856ca85af3d211034.18.llvm.17243807378767217725+0x38>
+  4f8f46:	0f 29 9c 24 00 01 00 	movaps %xmm3,0x100(%rsp)
+  4f8f4d:	00
+  4f8f4e:	0f 10 25 6f fe b4 ff 	movups -0x4b0191(%rip),%xmm4        # 48dc4 <anon.a881572fc7186dd856ca85af3d211034.18.llvm.17243807378767217725+0x48>
+  4f8f55:	0f 29 a4 24 10 01 00 	movaps %xmm4,0x110(%rsp)
+  4f8f5c:	00
+  4f8f5d:	0f 57 ed             	xorps  %xmm5,%xmm5
+  4f8f60:	0f 11 ac 24 b8 00 00 	movups %xmm5,0xb8(%rsp)
+  4f8f67:	00
+  4f8f68:	89 f0                	mov    %esi,%eax
+  4f8f6a:	0f 57 ed             	xorps  %xmm5,%xmm5
+  4f8f6d:	f3 48 0f 2a e8       	cvtsi2ss %rax,%xmm5
+  4f8f72:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+  4f8f79:	00
+  4f8f7a:	48 c7 44 24 08 08 00 	movq   $0x8,0x8(%rsp)
+  4f8f81:	00 00
+  4f8f83:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+  4f8f8a:	00 00
+  4f8f8c:	48 c7 44 24 18 ff ff 	movq   $0xffffffffffffffff,0x18(%rsp)
+  4f8f93:	ff ff
+  4f8f95:	c7 44 24 30 01 00 00 	movl   $0x1,0x30(%rsp)
+  4f8f9c:	00
+  4f8f9d:	f3 0f 11 6c 24 34    	movss  %xmm5,0x34(%rsp)
+  4f8fa3:	0f 11 64 24 78       	movups %xmm4,0x78(%rsp)
+  4f8fa8:	0f 11 5c 24 68       	movups %xmm3,0x68(%rsp)
+  4f8fad:	0f 11 54 24 58       	movups %xmm2,0x58(%rsp)
+  4f8fb2:	0f 11 4c 24 48       	movups %xmm1,0x48(%rsp)
+  4f8fb7:	0f 11 44 24 38       	movups %xmm0,0x38(%rsp)
+  4f8fbc:	48 c7 84 24 88 00 00 	movq   $0x0,0x88(%rsp)
+  4f8fc3:	00 00 00 00 00
+  4f8fc8:	0f 10 84 24 b0 00 00 	movups 0xb0(%rsp),%xmm0
+  4f8fcf:	00
+  4f8fd0:	0f 11 84 24 90 00 00 	movups %xmm0,0x90(%rsp)
+  4f8fd7:	00
+  4f8fd8:	48 8b 84 24 c0 00 00 	mov    0xc0(%rsp),%rax
+  4f8fdf:	00
+  4f8fe0:	48 89 84 24 a0 00 00 	mov    %rax,0xa0(%rsp)
+  4f8fe7:	00
+  4f8fe8:	c6 84 24 a8 00 00 00 	movb   $0x0,0xa8(%rsp)
+  4f8fef:	00
+  4f8ff0:	48 b9 01 00 00 00 00 	movabs $0x41a0000000000001,%rcx
+  4f8ff7:	00 a0 41
+  4f8ffa:	48 89 4c 24 38       	mov    %rcx,0x38(%rsp)
+  4f8fff:	48 85 c0             	test   %rax,%rax
+  4f9002:	0f 85 b0 01 00 00    	jne    4f91b8 <literal_startup::literal_recipe_probe+0x2b8>
+  4f9008:	48 8d bc 24 d0 00 00 	lea    0xd0(%rsp),%rdi
+  4f900f:	00
+  4f9010:	48 89 e6             	mov    %rsp,%rsi
+  4f9013:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f9018:	ff 15 82 2a 2d 00    	call   *0x2d2a82(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f901e:	c7 84 24 14 01 00 00 	movl   $0x40800000,0x114(%rsp)
+  4f9025:	00 00 80 40
+  4f9029:	48 83 bc 24 70 01 00 	cmpq   $0x0,0x170(%rsp)
+  4f9030:	00 00
+  4f9032:	0f 85 98 01 00 00    	jne    4f91d0 <literal_startup::literal_recipe_probe+0x2d0>
+  4f9038:	48 89 e7             	mov    %rsp,%rdi
+  4f903b:	48 8d b4 24 d0 00 00 	lea    0xd0(%rsp),%rsi
+  4f9042:	00
+  4f9043:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f9048:	ff 15 52 2a 2d 00    	call   *0x2d2a52(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f904e:	c7 44 24 48 00 00 80 	movl   $0x41800000,0x48(%rsp)
+  4f9055:	41
+  4f9056:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f905d:	00 00
+  4f905f:	0f 85 83 01 00 00    	jne    4f91e8 <literal_startup::literal_recipe_probe+0x2e8>
+  4f9065:	48 8d bc 24 d0 00 00 	lea    0xd0(%rsp),%rdi
+  4f906c:	00
+  4f906d:	48 89 e6             	mov    %rsp,%rsi
+  4f9070:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f9075:	ff 15 25 2a 2d 00    	call   *0x2d2a25(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f907b:	4d 8b 3e             	mov    (%r14),%r15
+  4f907e:	4d 8b 76 08          	mov    0x8(%r14),%r14
+  4f9082:	4c 89 bc 24 1c 01 00 	mov    %r15,0x11c(%rsp)
+  4f9089:	00
+  4f908a:	4c 89 b4 24 24 01 00 	mov    %r14,0x124(%rsp)
+  4f9091:	00
+  4f9092:	48 83 bc 24 70 01 00 	cmpq   $0x0,0x170(%rsp)
+  4f9099:	00 00
+  4f909b:	0f 85 5f 01 00 00    	jne    4f9200 <literal_startup::literal_recipe_probe+0x300>
+  4f90a1:	48 89 e7             	mov    %rsp,%rdi
+  4f90a4:	48 8d b4 24 d0 00 00 	lea    0xd0(%rsp),%rsi
+  4f90ab:	00
+  4f90ac:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f90b1:	ff 15 e9 29 2d 00    	call   *0x2d29e9(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f90b7:	4c 89 7c 24 5c       	mov    %r15,0x5c(%rsp)
+  4f90bc:	4c 89 74 24 64       	mov    %r14,0x64(%rsp)
+  4f90c1:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f90c8:	00 00
+  4f90ca:	0f 85 48 01 00 00    	jne    4f9218 <literal_startup::literal_recipe_probe+0x318>
+  4f90d0:	4c 8d b4 24 d0 00 00 	lea    0xd0(%rsp),%r14
+  4f90d7:	00
+  4f90d8:	48 89 e6             	mov    %rsp,%rsi
+  4f90db:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f90e0:	4c 89 f7             	mov    %r14,%rdi
+  4f90e3:	ff 15 b7 29 2d 00    	call   *0x2d29b7(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f90e9:	0f 28 05 20 ee b4 ff 	movaps -0x4b11e0(%rip),%xmm0        # 47f10 <anon.5f884de6e78125e25881320d811d32df.391.llvm.17146438997930651657+0x1300>
+  4f90f0:	0f 29 84 24 b0 00 00 	movaps %xmm0,0xb0(%rsp)
+  4f90f7:	00
+  4f90f8:	f2 0f 10 05 70 e4 b4 	movsd  -0x4b1b90(%rip),%xmm0        # 47570 <anon.5f884de6e78125e25881320d811d32df.391.llvm.17146438997930651657+0x960>
+  4f90ff:	ff
+  4f9100:	f2 0f 11 84 24 c0 00 	movsd  %xmm0,0xc0(%rsp)
+  4f9107:	00 00
+  4f9109:	48 89 e7             	mov    %rsp,%rdi
+  4f910c:	48 8d 94 24 b0 00 00 	lea    0xb0(%rsp),%rdx
+  4f9113:	00
+  4f9114:	4c 89 f6             	mov    %r14,%rsi
+  4f9117:	e8 44 80 ff ff       	call   4f1160 <<gpui::element::El>::transform::<gpui_reactivity_core::geometry::Affine>>
+  4f911c:	c6 84 24 84 00 00 00 	movb   $0x0,0x84(%rsp)
+  4f9123:	00
+  4f9124:	4c 8d b4 24 a0 00 00 	lea    0xa0(%rsp),%r14
+  4f912b:	00
+  4f912c:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f9133:	00 00
+  4f9135:	0f 85 f5 00 00 00    	jne    4f9230 <literal_startup::literal_recipe_probe+0x330>
+  4f913b:	c7 44 24 40 00 00 00 	movl   $0x41000000,0x40(%rsp)
+  4f9142:	41
+  4f9143:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f914a:	00 00
+  4f914c:	0f 85 f1 00 00 00    	jne    4f9243 <literal_startup::literal_recipe_probe+0x343>
+  4f9152:	c6 84 24 86 00 00 00 	movb   $0x2,0x86(%rsp)
+  4f9159:	02
+  4f915a:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f9161:	00 00
+  4f9163:	0f 85 ed 00 00 00    	jne    4f9256 <literal_startup::literal_recipe_probe+0x356>
+  4f9169:	c6 84 24 87 00 00 00 	movb   $0x0,0x87(%rsp)
+  4f9170:	00
+  4f9171:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f9178:	00 00
+  4f917a:	0f 85 e9 00 00 00    	jne    4f9269 <literal_startup::literal_recipe_probe+0x369>
+  4f9180:	c6 84 24 85 00 00 00 	movb   $0x0,0x85(%rsp)
+  4f9187:	00
+  4f9188:	48 83 bc 24 a0 00 00 	cmpq   $0x0,0xa0(%rsp)
+  4f918f:	00 00
+  4f9191:	0f 85 e5 00 00 00    	jne    4f927c <literal_startup::literal_recipe_probe+0x37c>
+  4f9197:	48 89 e6             	mov    %rsp,%rsi
+  4f919a:	ba b0 00 00 00       	mov    $0xb0,%edx
+  4f919f:	48 89 df             	mov    %rbx,%rdi
+  4f91a2:	ff 15 f8 28 2d 00    	call   *0x2d28f8(%rip)        # 7cbaa0 <memcpy@GLIBC_2.14>
+  4f91a8:	48 89 d8             	mov    %rbx,%rax
+  4f91ab:	48 81 c4 80 01 00 00 	add    $0x180,%rsp
+  4f91b2:	5b                   	pop    %rbx
+  4f91b3:	41 5e                	pop    %r14
+  4f91b5:	41 5f                	pop    %r15
+  4f91b7:	c3                   	ret
+  4f91b8:	48 8d bc 24 a0 00 00 	lea    0xa0(%rsp),%rdi
+  4f91bf:	00
+  4f91c0:	be 02 00 00 00       	mov    $0x2,%esi
+  4f91c5:	ff 15 c5 2c 2d 00    	call   *0x2d2cc5(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f91cb:	e9 38 fe ff ff       	jmp    4f9008 <literal_startup::literal_recipe_probe+0x108>
+  4f91d0:	48 8d bc 24 70 01 00 	lea    0x170(%rsp),%rdi
+  4f91d7:	00
+  4f91d8:	be 04 00 00 00       	mov    $0x4,%esi
+  4f91dd:	ff 15 ad 2c 2d 00    	call   *0x2d2cad(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f91e3:	e9 50 fe ff ff       	jmp    4f9038 <literal_startup::literal_recipe_probe+0x138>
+  4f91e8:	48 8d bc 24 a0 00 00 	lea    0xa0(%rsp),%rdi
+  4f91ef:	00
+  4f91f0:	be 05 00 00 00       	mov    $0x5,%esi
+  4f91f5:	ff 15 95 2c 2d 00    	call   *0x2d2c95(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f91fb:	e9 65 fe ff ff       	jmp    4f9065 <literal_startup::literal_recipe_probe+0x165>
+  4f9200:	48 8d bc 24 70 01 00 	lea    0x170(%rsp),%rdi
+  4f9207:	00
+  4f9208:	be 06 00 00 00       	mov    $0x6,%esi
+  4f920d:	ff 15 7d 2c 2d 00    	call   *0x2d2c7d(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f9213:	e9 89 fe ff ff       	jmp    4f90a1 <literal_startup::literal_recipe_probe+0x1a1>
+  4f9218:	48 8d bc 24 a0 00 00 	lea    0xa0(%rsp),%rdi
+  4f921f:	00
+  4f9220:	be 07 00 00 00       	mov    $0x7,%esi
+  4f9225:	ff 15 65 2c 2d 00    	call   *0x2d2c65(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f922b:	e9 a0 fe ff ff       	jmp    4f90d0 <literal_startup::literal_recipe_probe+0x1d0>
+  4f9230:	4c 89 f7             	mov    %r14,%rdi
+  4f9233:	be 08 00 00 00       	mov    $0x8,%esi
+  4f9238:	ff 15 52 2c 2d 00    	call   *0x2d2c52(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f923e:	e9 f8 fe ff ff       	jmp    4f913b <literal_startup::literal_recipe_probe+0x23b>
+  4f9243:	4c 89 f7             	mov    %r14,%rdi
+  4f9246:	be 03 00 00 00       	mov    $0x3,%esi
+  4f924b:	ff 15 3f 2c 2d 00    	call   *0x2d2c3f(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f9251:	e9 fc fe ff ff       	jmp    4f9152 <literal_startup::literal_recipe_probe+0x252>
+  4f9256:	4c 89 f7             	mov    %r14,%rdi
+  4f9259:	be 0a 00 00 00       	mov    $0xa,%esi
+  4f925e:	ff 15 2c 2c 2d 00    	call   *0x2d2c2c(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f9264:	e9 00 ff ff ff       	jmp    4f9169 <literal_startup::literal_recipe_probe+0x269>
+  4f9269:	4c 89 f7             	mov    %r14,%rdi
+  4f926c:	be 0b 00 00 00       	mov    $0xb,%esi
+  4f9271:	ff 15 19 2c 2d 00    	call   *0x2d2c19(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f9277:	e9 04 ff ff ff       	jmp    4f9180 <literal_startup::literal_recipe_probe+0x280>
+  4f927c:	4c 89 f7             	mov    %r14,%rdi
+  4f927f:	be 0c 00 00 00       	mov    $0xc,%esi
+  4f9284:	ff 15 06 2c 2d 00    	call   *0x2d2c06(%rip)        # 7cbe90 <_DYNAMIC+0x660>
+  4f928a:	e9 08 ff ff ff       	jmp    4f9197 <literal_startup::literal_recipe_probe+0x297>
+  4f928f:	48 89 c3             	mov    %rax,%rbx
+  4f9292:	48 89 e7             	mov    %rsp,%rdi
+  4f9295:	e8 86 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f929a:	e9 b9 00 00 00       	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f929f:	ff 15 23 28 2d 00    	call   *0x2d2823(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f92a5:	48 89 c3             	mov    %rax,%rbx
+  4f92a8:	48 89 e7             	mov    %rsp,%rdi
+  4f92ab:	e8 70 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f92b0:	e9 a3 00 00 00       	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f92b5:	ff 15 0d 28 2d 00    	call   *0x2d280d(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f92bb:	48 89 c3             	mov    %rax,%rbx
+  4f92be:	48 89 e7             	mov    %rsp,%rdi
+  4f92c1:	e8 5a 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f92c6:	e9 8d 00 00 00       	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f92cb:	ff 15 f7 27 2d 00    	call   *0x2d27f7(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f92d1:	48 89 c3             	mov    %rax,%rbx
+  4f92d4:	48 89 e7             	mov    %rsp,%rdi
+  4f92d7:	e8 44 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f92dc:	eb 7a                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f92de:	ff 15 e4 27 2d 00    	call   *0x2d27e4(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f92e4:	48 89 c3             	mov    %rax,%rbx
+  4f92e7:	48 89 e7             	mov    %rsp,%rdi
+  4f92ea:	e8 31 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f92ef:	eb 67                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f92f1:	ff 15 d1 27 2d 00    	call   *0x2d27d1(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f92f7:	48 89 c3             	mov    %rax,%rbx
+  4f92fa:	48 89 e7             	mov    %rsp,%rdi
+  4f92fd:	e8 1e 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f9302:	eb 54                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f9304:	ff 15 be 27 2d 00    	call   *0x2d27be(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f930a:	48 89 c3             	mov    %rax,%rbx
+  4f930d:	48 8d bc 24 d0 00 00 	lea    0xd0(%rsp),%rdi
+  4f9314:	00
+  4f9315:	e8 06 8b ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f931a:	eb 3c                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f931c:	ff 15 a6 27 2d 00    	call   *0x2d27a6(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f9322:	48 89 c3             	mov    %rax,%rbx
+  4f9325:	48 89 e7             	mov    %rsp,%rdi
+  4f9328:	e8 f3 8a ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f932d:	eb 29                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f932f:	ff 15 93 27 2d 00    	call   *0x2d2793(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f9335:	48 89 c3             	mov    %rax,%rbx
+  4f9338:	48 8d bc 24 d0 00 00 	lea    0xd0(%rsp),%rdi
+  4f933f:	00
+  4f9340:	e8 db 8a ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f9345:	eb 11                	jmp    4f9358 <literal_startup::literal_recipe_probe+0x458>
+  4f9347:	ff 15 7b 27 2d 00    	call   *0x2d277b(%rip)        # 7cbac8 <_DYNAMIC+0x298>
+  4f934d:	48 89 c3             	mov    %rax,%rbx
+  4f9350:	48 89 e7             	mov    %rsp,%rdi
+  4f9353:	e8 c8 8a ff ff       	call   4f1e20 <core::ptr::drop_glue::<gpui::element::El>>
+  4f9358:	48 89 df             	mov    %rbx,%rdi
+  4f935b:	e8 50 f4 2a 00       	call   7a87b0 <_Unwind_Resume@plt>
+  4f9360:	ff 15 62 27 2d 00    	call   *0x2d2762(%rip)        # 7cbac8 <_DYNAMIC+0x298>

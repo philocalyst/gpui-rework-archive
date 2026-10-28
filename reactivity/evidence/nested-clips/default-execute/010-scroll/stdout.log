@@ -1,0 +1,32 @@
+
+running 27 tests
+test auto_viewport_resize_clamps_from_actual_layout ... ok
+test changing_axes_clamps_disabled_offsets_and_removed_targets_stay_stale ... ok
+test deep_residual_routing_has_no_fixed_ancestry_limit_or_repeated_application ... ok
+test invalid_offsets_and_foreign_targets_leave_epochs_and_scene_token_unchanged ... ok
+test later_overlay_blocks_background_wheel ... ok
+test metadata_only_publication_preserves_cohort_indexed_viewport_dimensions ... ok
+test nested_aperture_contains_both_cephal_and_transformed_overflow ... ok
+test nested_scaled_wheel_converts_displacement_and_residual_exactly_once ... ok
+test nested_wheel_consumes_once_then_passes_only_residual ... ok
+test ordinary_resize_and_paint_geometry_overrides_never_redescribe_the_owner ... ok
+test ordinary_scroll_is_two_dimensional_retained_and_keeps_offscreen_semantics ... ok
+test parent_flow_changes_match_cold_scroll_layout_for_source_and_property ... ok
+test published_metadata_and_targets_do_not_advance_before_ack ... ok
+test reflected_dpi_wheel_routes_displacements_instead_of_points ... ok
+test reflected_fractional_and_collapsed_viewport_clips_match_ordinary_raster_membership ... ok
+test reveal_propagates_the_visible_fragment_through_nested_apertures ... ok
+test scroll_builder_rejects_role_replacement_and_preserves_container_annotations ... ok
+test scroll_into_view_uses_retained_offscreen_bounds ... ok
+test semantic_cardinal_action_rechecks_the_frozen_enabled_axis ... ok
+test semantic_scroll_actions_use_the_public_mutation_path_and_frozen_support ... ok
+test tab_reveals_offscreen_controls_but_explicit_focus_remains_logical ... ok
+test transformed_negative_overflow_is_reachable_without_relayout ... ok
+test unsupported_viewport_transform_keeps_old_p_geometry_and_metadata ... ok
+test virtual_focus_retires_with_candidate_authority_and_never_returns ... ok
+test virtual_list_and_ordinary_ancestor_share_one_scroll_cohort ... ok
+test virtual_rows_hidden_by_an_ordinary_ancestor_never_revive_old_targets ... ok
+test wide_overflow_endpoints_match_continuous_reference_after_p_narrowing ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

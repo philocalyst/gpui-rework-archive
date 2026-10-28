@@ -1,0 +1,165 @@
+{
+  "selected_source": "023e584a0504c05e7db33c887de980671f096257",
+  "adopted_commit": "f0859ea215e637befd76a56471d99658ac495b45",
+  "previous_production_base": "2b52030aed8344ed9c5f6dcf54b2ba19acf8ddf4",
+  "production_adopted": true,
+  "gates": {
+    "certificate-default-tests": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 188,
+      "failed": 0,
+      "ignored": 3,
+      "harnesses": 40,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "certificate-fallback-tests": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 188,
+      "failed": 0,
+      "ignored": 3,
+      "harnesses": 40,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "certificate-strict-default": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "certificate-strict-fallback": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "certificate-check-apple": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "certificate-check-msvc": {
+      "source": "023e584a0504c05e7db33c887de980671f096257",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "oracle": {
+    "canvas_source": "023e584a0504c05e7db33c887de980671f096257",
+    "fixture": "35fdf80a1a5d45d6769ca0e5fc8f1c64b3595eb0",
+    "old_sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+    "actual_sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+    "bytes": 285940280,
+    "cases": 1120,
+    "shape_or_error_records": 2240,
+    "stdout_byte_equal": true,
+    "scope": "Existing shape and interactive layout/error/selection oracle only; no new measurement API, timing or GPU result."
+  },
+  "section_deltas_bytes": {
+    ".bss": 0,
+    ".comment": 0,
+    ".data": 0,
+    ".data.rel.ro": -48,
+    ".dynamic": 0,
+    ".dynstr": 0,
+    ".dynsym": 0,
+    ".eh_frame": -176,
+    ".eh_frame_hdr": 8,
+    ".fini": 0,
+    ".fini_array": 0,
+    ".gcc_except_table": -236,
+    ".gnu.hash": 0,
+    ".gnu.version": 0,
+    ".gnu.version_r": 0,
+    ".got": 8,
+    ".got.plt": 0,
+    ".init": 0,
+    ".init_array": 0,
+    ".interp": 0,
+    ".note.ABI-tag": 0,
+    ".plt": 0,
+    ".rela.dyn": -24,
+    ".rela.plt": 0,
+    ".relro_padding": 1272,
+    ".rodata": 832,
+    ".shstrtab": 0,
+    ".strtab": -309,
+    ".symtab": -216,
+    ".tbss": 0,
+    ".tdata": 0,
+    ".text": -1632,
+    ".tm_clone_table": 0
+  },
+  "all_allocated_sections_delta_bytes": 4,
+  "shape_code_bytes": {
+    "old": 15119,
+    "new": 13544
+  },
+  "shape_max_observed_rsp_cfa_bytes": {
+    "old": 4656,
+    "new": 3056
+  },
+  "added_events_next": {
+    "code_bytes": 508,
+    "max_observed_rsp_cfa_bytes": 80
+  },
+  "core_noncomment_nontest": {
+    "old": 31232,
+    "new": 31321,
+    "delta": 89
+  },
+  "data": {
+    "maximal_intervals": 195,
+    "bytes": 585,
+    "bits": "21-bit inclusive end, 3-bit font presence"
+  },
+  "scope": "Matched public fixture at the same path/compiler/flags; selected scalar/layout/error/selection oracle. Cross compilation is not native execution. Static frames are not dynamic stack peaks.",
+  "rejected_boundaries": {
+    "callback_f7a1192": "Larger shape frame and outlined callback despite smaller whole text.",
+    "iterator_b92220b": "Shape max observed rsp CFA +192 before composing the font certificate."
+  },
+  "failures_retained": [
+    "Initial strict checks found two real test lints; repaired in successor.",
+    "Direct thin-RLIB metadata/link invocations failed before passing explicit rmeta+rlib.",
+    "One-bit font certificate and wrong UTF-8 continuation predicate fail their controls."
+  ],
+  "claims_not_made": [
+    "speed",
+    "RSS",
+    "new allocation measurement",
+    "GPU performance",
+    "bounded binary-search comparison count",
+    "entire Cmap header removed"
+  ],
+  "policy": {
+    "sha256": "47a95f0957da515a979049654ec81ff0554f358300c47c0a02573f4041210121",
+    "scope": "Tracked clippy.toml is guarded before and after strict gates. Driving shell selected CLIPPY_CONF_DIR explicitly; generic command logger omits this variable."
+  }
+}

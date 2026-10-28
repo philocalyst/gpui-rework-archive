@@ -1,0 +1,7 @@
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

@@ -1,0 +1,35 @@
+/tmp/gpui-gamut-original-common-frozen  :
+section               size     addr
+.interp                 83      736
+.note.ABI-tag           32      820
+.dynsym               1752      856
+.gnu.version           146     2608
+.gnu.version_r         368     2756
+.gnu.hash               28     3128
+.dynstr               1139     3156
+.rela.dyn            16560     4296
+.rela.plt               48    20856
+.rodata              25432    20912
+.gcc_except_table    45452    46344
+.eh_frame_hdr         4540    91796
+.eh_frame            22744    96336
+.text               267893   123184
+.init                   27   391080
+.fini                   13   391108
+.plt                    48   391136
+.tdata                  32   395280
+.tbss                 3168   395312
+.fini_array              8   395312
+.init_array             16   395320
+.data.rel.ro          8008   395336
+.dynamic               480   403344
+.got                  2416   403824
+.got.plt                40   406240
+.relro_padding        3320   406280
+.tm_clone_table          0   410376
+.data                 2504   410376
+.bss                   208   412880
+.comment               157        0
+Total               406662
+
+

@@ -1,0 +1,8 @@
+
+running 1 test
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... inspector_blank_headless_retained,plain_bytes=1797652,plain_allocs=22,tool_bytes=1844408,tool_allocs=180,delta_bytes=46756 (includes font/text/layout/paint resources)
+inspector_bytes,Node=40,Runtime=1904,Metadata=264,Inspector=24,Handler=16,WindowAction=1,tool_nodes=17,texts_capacity=14
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 193 filtered out; finished in 0.05s
+

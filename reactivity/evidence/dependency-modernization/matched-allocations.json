@@ -1,0 +1,2683 @@
+{
+  "method": "matched existing fixture bytes, fresh process per case, three repeats; requested thread-local heap; timing columns discarded before persistence",
+  "before_source": "dc577564e5",
+  "after_source": "b39a6b79c0",
+  "results": [
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 109728,
+          "peak_new_bytes": 46780,
+          "allocations": 201,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2144,
+          "peak_new_bytes": 2032,
+          "allocations": 9,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 2800724,
+          "peak_new_bytes": 231712,
+          "allocations": 10945,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184660,
+          "total_requested": 2693140,
+          "peak_new_bytes": 186964,
+          "allocations": 10753,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 307160,
+          "peak_new_bytes": 175628,
+          "allocations": 430,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 4176,
+          "peak_new_bytes": 3280,
+          "allocations": 16,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 5725612,
+          "peak_new_bytes": 783421,
+          "allocations": 20609,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608369,
+          "total_requested": 5422628,
+          "peak_new_bytes": 610945,
+          "allocations": 20195,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 131730,
+          "peak_new_bytes": 61912,
+          "allocations": 302,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 116728,
+          "peak_new_bytes": 47721,
+          "allocations": 242,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 5904284,
+          "peak_new_bytes": 1824740,
+          "allocations": 14707,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 4841298,
+          "peak_new_bytes": 469722,
+          "allocations": 15042,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 110418,
+          "peak_new_bytes": 47548,
+          "allocations": 208,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2882,
+          "peak_new_bytes": 2816,
+          "allocations": 15,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 3291408,
+          "peak_new_bytes": 232236,
+          "allocations": 15947,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184504,
+          "total_requested": 3183872,
+          "peak_new_bytes": 187504,
+          "allocations": 15754,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 308122,
+          "peak_new_bytes": 177340,
+          "allocations": 434,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 5882,
+          "peak_new_bytes": 5704,
+          "allocations": 19,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 7315999,
+          "peak_new_bytes": 784976,
+          "allocations": 30271,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608212,
+          "total_requested": 7013759,
+          "peak_new_bytes": 613212,
+          "allocations": 29856,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 132420,
+          "peak_new_bytes": 61896,
+          "allocations": 309,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 117008,
+          "peak_new_bytes": 48303,
+          "allocations": 248,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 6394968,
+          "peak_new_bytes": 1824568,
+          "allocations": 19709,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 5159732,
+          "peak_new_bytes": 469722,
+          "allocations": 19544,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 109728,
+          "peak_new_bytes": 46780,
+          "allocations": 201,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2144,
+          "peak_new_bytes": 2032,
+          "allocations": 9,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 2800724,
+          "peak_new_bytes": 231712,
+          "allocations": 10945,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184660,
+          "total_requested": 2693140,
+          "peak_new_bytes": 186964,
+          "allocations": 10753,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 307160,
+          "peak_new_bytes": 175628,
+          "allocations": 430,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 4176,
+          "peak_new_bytes": 3280,
+          "allocations": 16,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 5725612,
+          "peak_new_bytes": 783421,
+          "allocations": 20609,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608369,
+          "total_requested": 5422628,
+          "peak_new_bytes": 610945,
+          "allocations": 20195,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 131730,
+          "peak_new_bytes": 61912,
+          "allocations": 302,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 116728,
+          "peak_new_bytes": 47721,
+          "allocations": 242,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 5904284,
+          "peak_new_bytes": 1824740,
+          "allocations": 14707,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 4841298,
+          "peak_new_bytes": 469722,
+          "allocations": 15042,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 110418,
+          "peak_new_bytes": 47548,
+          "allocations": 208,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2882,
+          "peak_new_bytes": 2816,
+          "allocations": 15,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 3291408,
+          "peak_new_bytes": 232236,
+          "allocations": 15947,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184504,
+          "total_requested": 3183872,
+          "peak_new_bytes": 187504,
+          "allocations": 15754,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 308122,
+          "peak_new_bytes": 177340,
+          "allocations": 434,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 5882,
+          "peak_new_bytes": 5704,
+          "allocations": 19,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 7315999,
+          "peak_new_bytes": 784976,
+          "allocations": 30271,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608212,
+          "total_requested": 7013759,
+          "peak_new_bytes": 613212,
+          "allocations": 29856,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 132420,
+          "peak_new_bytes": 61896,
+          "allocations": 309,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 117008,
+          "peak_new_bytes": 48303,
+          "allocations": 248,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 6394968,
+          "peak_new_bytes": 1824568,
+          "allocations": 19709,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 5159732,
+          "peak_new_bytes": 469722,
+          "allocations": 19544,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 109728,
+          "peak_new_bytes": 46780,
+          "allocations": 201,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2144,
+          "peak_new_bytes": 2032,
+          "allocations": 9,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 2800724,
+          "peak_new_bytes": 231712,
+          "allocations": 10945,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184660,
+          "total_requested": 2693140,
+          "peak_new_bytes": 186964,
+          "allocations": 10753,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 307160,
+          "peak_new_bytes": 175628,
+          "allocations": 430,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 4176,
+          "peak_new_bytes": 3280,
+          "allocations": 16,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "4e42624c3f810c81770a580e01a7c8a5f554353ee184265ef927b52b8d5dd1ef",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 5725612,
+          "peak_new_bytes": 783421,
+          "allocations": 20609,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608369,
+          "total_requested": 5422628,
+          "peak_new_bytes": 610945,
+          "allocations": 20195,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "6be1978186a61b30d8a101346a54cfddbb9c52c7cb517339752ceef028835d36",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 131730,
+          "peak_new_bytes": 61912,
+          "allocations": 302,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 116728,
+          "peak_new_bytes": 47721,
+          "allocations": 242,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "ef1a651eb131e7cb7480001115c675ee45844717e4f803029a83bb1ce7a6e65d",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 5904284,
+          "peak_new_bytes": 1824740,
+          "allocations": 14707,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 4841298,
+          "peak_new_bytes": 469722,
+          "allocations": 15042,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "0"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 0,
+          "stage": "textless",
+          "retained_delta": 0,
+          "total_requested": 0,
+          "peak_new_bytes": 0,
+          "allocations": 0,
+          "glyphs": 0,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 168,
+          "total_requested": 110418,
+          "peak_new_bytes": 47548,
+          "allocations": 208,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 128,
+          "total_requested": 2882,
+          "peak_new_bytes": 2816,
+          "allocations": 15,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 6182,
+          "total_requested": 9982,
+          "peak_new_bytes": 6856,
+          "allocations": 46,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 4972,
+          "total_requested": 4972,
+          "peak_new_bytes": 4972,
+          "allocations": 3,
+          "glyphs": 8,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "labels",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 184040,
+          "total_requested": 3291408,
+          "peak_new_bytes": 232236,
+          "allocations": 15947,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 184504,
+          "total_requested": 3183872,
+          "peak_new_bytes": 187504,
+          "allocations": 15754,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 448637,
+          "total_requested": 1214429,
+          "peak_new_bytes": 629085,
+          "allocations": 1128,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "labels",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 125860,
+          "total_requested": 125860,
+          "peak_new_bytes": 125860,
+          "allocations": 3,
+          "glyphs": 11500,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "cold_pass",
+          "retained_delta": 744,
+          "total_requested": 308122,
+          "peak_new_bytes": 177340,
+          "allocations": 434,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "warm_pass",
+          "retained_delta": 704,
+          "total_requested": 5882,
+          "peak_new_bytes": 5704,
+          "allocations": 19,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "prepare",
+          "retained_delta": 10576,
+          "total_requested": 17204,
+          "peak_new_bytes": 12404,
+          "allocations": 84,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5168,
+          "total_requested": 5168,
+          "peak_new_bytes": 5168,
+          "allocations": 3,
+          "glyphs": 27,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "text_shaping",
+      "arguments": [
+        "unicode",
+        "1000"
+      ],
+      "binary_sha256": "8dbb0207c99ff7003327365dff986502bf3b90061119cdae561f59791e265734",
+      "rows": [
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "cold_pass",
+          "retained_delta": 571008,
+          "total_requested": 7315999,
+          "peak_new_bytes": 784976,
+          "allocations": 30271,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "warm_pass",
+          "retained_delta": 608212,
+          "total_requested": 7013759,
+          "peak_new_bytes": 613212,
+          "allocations": 29856,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "prepare",
+          "retained_delta": 931043,
+          "total_requested": 2304515,
+          "peak_new_bytes": 1324791,
+          "allocations": 1153,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        },
+        {
+          "mode": "unicode",
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 165392,
+          "total_requested": 165392,
+          "peak_new_bytes": 165392,
+          "allocations": 3,
+          "glyphs": 16011,
+          "layout_header": 56,
+          "glyph_bytes": 16
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 1,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -488,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "font_memory",
+      "arguments": [
+        "8"
+      ],
+      "binary_sha256": "eb4d6dd58f04ed779027f1f9c8372f2070c608379ea0055f86028d0120653c74",
+      "rows": [
+        {
+          "services": 8,
+          "init_live": 64,
+          "init_peak": 64,
+          "init_allocs": 1,
+          "shape_live": 296,
+          "prepare_live": 7839,
+          "prepare_peak": 8831,
+          "render_live": 5052,
+          "mask_payload": 1207,
+          "clear_live": -4328,
+          "drop_services_live": -992,
+          "digest": 8963869237621293549
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "0"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 0,
+          "stage": "mount",
+          "retained_delta": 5436,
+          "total_requested": 6664,
+          "peak_new_bytes": 5596,
+          "allocations": 33,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "render",
+          "retained_delta": 4860,
+          "total_requested": 4860,
+          "peak_new_bytes": 4860,
+          "allocations": 2,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        },
+        {
+          "count": 0,
+          "stage": "edit",
+          "retained_delta": 0,
+          "total_requested": 1660,
+          "peak_new_bytes": 1436,
+          "allocations": 12,
+          "nodes": 1,
+          "draws": 0,
+          "measure_calls": 0
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1,
+          "stage": "mount",
+          "retained_delta": 16302,
+          "total_requested": 132420,
+          "peak_new_bytes": 61896,
+          "allocations": 309,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "render",
+          "retained_delta": 5252,
+          "total_requested": 5252,
+          "peak_new_bytes": 5252,
+          "allocations": 3,
+          "nodes": 2,
+          "draws": 9,
+          "measure_calls": 2
+        },
+        {
+          "count": 1,
+          "stage": "edit",
+          "retained_delta": 708,
+          "total_requested": 117008,
+          "peak_new_bytes": 48303,
+          "allocations": 248,
+          "nodes": 2,
+          "draws": 10,
+          "measure_calls": 2
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "fixture": "unicode_text_measure",
+      "arguments": [
+        "1000"
+      ],
+      "binary_sha256": "9f8337a1055e722306123a391041c04d082bff3bd298652535373e3dae5984a9",
+      "rows": [
+        {
+          "count": 1000,
+          "stage": "mount",
+          "retained_delta": 1697564,
+          "total_requested": 6394968,
+          "peak_new_bytes": 1824568,
+          "allocations": 19709,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "render",
+          "retained_delta": 12020,
+          "total_requested": 12020,
+          "peak_new_bytes": 12020,
+          "allocations": 3,
+          "nodes": 1001,
+          "draws": 211,
+          "measure_calls": 2000
+        },
+        {
+          "count": 1000,
+          "stage": "edit",
+          "retained_delta": 138867,
+          "total_requested": 5159732,
+          "peak_new_bytes": 469722,
+          "allocations": 19544,
+          "nodes": 1001,
+          "draws": 231,
+          "measure_calls": 2000
+        }
+      ]
+    }
+  ]
+}

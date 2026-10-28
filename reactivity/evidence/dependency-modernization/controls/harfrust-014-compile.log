@@ -1,0 +1,141 @@
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+     Locking 4 packages to latest Rust 1.97.1 compatible versions
+    Updating harfrust v0.12.0 -> v0.14.0
+      Adding read-fonts v0.45.1
+      Adding read-fonts v0.46.0
+      Adding skrifa v0.49.0
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+ Downloading crates ...
+  Downloaded skrifa v0.49.0
+  Downloaded harfrust v0.14.0
+  Downloaded read-fonts v0.45.1
+  Downloaded read-fonts v0.46.0
+   Compiling yoke v0.8.3
+   Compiling smallvec v1.16.3
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling read-fonts v0.41.0
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling icu_provider v2.3.1
+   Compiling icu_collections v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.45.1
+   Compiling read-fonts v0.46.0
+   Compiling fontique v0.12.0
+   Compiling skrifa v0.49.0
+   Compiling harfrust v0.14.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling parley_engine v0.12.0 (/tmp/gpui-dependencies-sol/reactivity/vendor/parley_engine)
+error[E0433]: cannot find `UnicodeBuffer` in `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:103:44
+    |
+103 |             unicode_buffer: Some(harfrust::UnicodeBuffer::new()),
+    |                                            ^^^^^^^^^^^^^ could not find `UnicodeBuffer` in `harfrust`
+
+error[E0433]: cannot find `FontRef` in `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:278:23
+    |
+278 |             harfrust::FontRef::from_index(font.font.data.as_ref(), font.font.index).unwrap();
+    |                       ^^^^^^^ could not find `FontRef` in `harfrust`
+
+error[E0433]: cannot find `ShaperData` in `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:283:26
+    |
+283 |             || harfrust::ShaperData::new(&font_ref),
+    |                          ^^^^^^^^^^ could not find `ShaperData` in `harfrust`
+
+error[E0433]: cannot find `ShaperInstance` in `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:293:27
+    |
+293 |                 harfrust::ShaperInstance::from_variations(
+    |                           ^^^^^^^^^^^^^^ could not find `ShaperInstance` in `harfrust`
+
+error[E0433]: cannot find `BufferClusterLevel` in `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:329:44
+    |
+329 |         buffer.set_cluster_level(harfrust::BufferClusterLevel::MonotoneCharacters);
+    |                                            ^^^^^^^^^^^^^^^^^^ could not find `BufferClusterLevel` in `harfrust`
+    |
+help: an enum with a similar name exists
+    |
+329 -         buffer.set_cluster_level(harfrust::BufferClusterLevel::MonotoneCharacters);
+329 +         buffer.set_cluster_level(harfrust::ClusterLevel::MonotoneCharacters);
+    |
+
+error[E0425]: cannot find type `GlyphBuffer` in crate `harfrust`
+   --> vendor/parley_engine/src/shape/shaped_text.rs:274:34
+    |
+274 |         glyph_buffer: &harfrust::GlyphBuffer,
+    |                                  ^^^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find type `NormalizedCoord` in crate `harfrust`
+   --> vendor/parley_engine/src/shape/shaped_text.rs:275:40
+    |
+275 |         normalized_coords: &[harfrust::NormalizedCoord],
+    |                                        ^^^^^^^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find type `ShaperData` in crate `harfrust`
+  --> vendor/parley_engine/src/shape/shaper.rs:88:63
+   |
+88 |     shape_data_cache: LruCache<cache::ShapeDataKey, harfrust::ShaperData>,
+   |                                                               ^^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find type `ShaperInstance` in crate `harfrust`
+  --> vendor/parley_engine/src/shape/shaper.rs:89:70
+   |
+89 |     shape_instance_cache: LruCache<cache::ShapeInstanceId, harfrust::ShaperInstance>,
+   |                                                                      ^^^^^^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find type `UnicodeBuffer` in crate `harfrust`
+  --> vendor/parley_engine/src/shape/shaper.rs:91:38
+   |
+91 |     unicode_buffer: Option<harfrust::UnicodeBuffer>,
+   |                                      ^^^^^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find type `Variation` in crate `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:436:37
+    |
+436 | ) -> impl Iterator<Item = harfrust::Variation> + 'a {
+    |                                     ^^^^^^^^^ not found in `harfrust`
+
+error[E0422]: cannot find struct, variant or union type `Variation` in crate `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:440:39
+    |
+440 |         .map(|(tag, value)| harfrust::Variation {
+    |                                       ^^^^^^^^^ not found in `harfrust`
+
+error[E0422]: cannot find struct, variant or union type `Variation` in crate `harfrust`
+   --> vendor/parley_engine/src/shape/shaper.rs:444:54
+    |
+444 |         .chain(item.iter().map(|variation| harfrust::Variation {
+    |                                                      ^^^^^^^^^ not found in `harfrust`
+
+error[E0425]: cannot find value `UNKNOWN` in `harfrust::script`
+   --> vendor/parley_engine/src/shape/shaper.rs:452:38
+    |
+452 |         .unwrap_or(harfrust::script::UNKNOWN)
+    |                                      ^^^^^^^ not found in `harfrust::script`
+
+error[E0603]: module `script` is private
+   --> vendor/parley_engine/src/shape/shaper.rs:452:30
+    |
+452 |         .unwrap_or(harfrust::script::UNKNOWN)
+    |                              ^^^^^^ private module
+    |
+note: the module `script` is defined here
+   --> /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/harfrust-0.14.0/src/lib.rs:55:1
+    |
+ 55 | mod script;
+    | ^^^^^^^^^^
+
+Some errors have detailed explanations: E0422, E0425, E0433, E0603.
+For more information about an error, try `rustc --explain E0422`.
+error: could not compile `parley_engine` (lib) due to 15 previous errors
+warning: build failed, waiting for other jobs to finish...

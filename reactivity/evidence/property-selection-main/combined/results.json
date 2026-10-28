@@ -1,0 +1,267 @@
+[
+  {
+    "case": "gpui-full",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "-p",
+      "gpui_gpu",
+      "--features",
+      "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache,gpui_gpu/offline-shader,gpui_gpu/vulkan-tests",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "log_sha256": "73a1354faff3fe1beba3d7db03012fd51aabd458bc8225b76f1e5db77f51acd3"
+  },
+  {
+    "case": "gpui-strict",
+    "command": [
+      "cargo",
+      "clippy",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "-p",
+      "gpui_gpu",
+      "--features",
+      "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache,gpui_gpu/offline-shader,gpui_gpu/vulkan-tests",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "log_sha256": "520b7052f7117da188fd18e09bda5f1ace4dc11c02136acff2ebf20cb77be420"
+  },
+  {
+    "case": "format",
+    "command": [
+      "cargo",
+      "fmt",
+      "--package",
+      "gpui",
+      "--package",
+      "gpui_canvas",
+      "--package",
+      "gpui_gpu",
+      "--package",
+      "gpui_reactivity_core",
+      "--",
+      "--check"
+    ],
+    "exit": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "case": "apple",
+    "command": [
+      "cargo",
+      "check",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--all-targets",
+      "--features",
+      "desktop,gpui_canvas/parallel,gpui_gpu/offline-shader",
+      "--target",
+      "aarch64-apple-darwin",
+      "-Zbuild-std=std,panic_abort",
+      "--jobs",
+      "2"
+    ],
+    "exit": 0,
+    "log_sha256": "3cf37d1f77283a0853e00fec4ecc553c0f767c6751226c8e0ad9a2590bf8e753"
+  },
+  {
+    "case": "msvc",
+    "command": [
+      "cargo",
+      "check",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--all-targets",
+      "--features",
+      "desktop,gpui_canvas/parallel,gpui_gpu/offline-shader",
+      "--target",
+      "x86_64-pc-windows-msvc",
+      "-Zbuild-std=std,panic_abort",
+      "--jobs",
+      "2"
+    ],
+    "exit": 0,
+    "log_sha256": "3d2d68362574b49331440c4bcbccc1eccb0fe8877c02dbeac5a365f2ddb294a2"
+  },
+  {
+    "case": "hummingbird-build",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native",
+      "--bin",
+      "hummingbird-gpui-port",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "log_sha256": "78ce6b341f2c9c7806e351bacbcd6930605a4522c603f1ed06f09e36b82036ad"
+  },
+  {
+    "case": "hummingbird-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "ports/hummingbird/Cargo.toml",
+      "--features",
+      "native"
+    ],
+    "exit": 0,
+    "log_sha256": "e72b27100c03c4a2cbbbb9e39a9df1b0f6801ca7c08e09d5a8f17118cd2015bb"
+  },
+  {
+    "case": "hummingbird-headless",
+    "command": [
+      "/tmp/gpui-selection-main-gates/hummingbird-frozen",
+      "--headless"
+    ],
+    "exit": 0,
+    "log_sha256": "111b4d0afb990a7cc0251e6f71c768213dc148f95b854d918c6db4091b419fbf"
+  },
+  {
+    "case": "catalog-client",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "evidence/typed-catalog/client-fixture/Cargo.toml"
+    ],
+    "exit": 0,
+    "log_sha256": "49503364816fe90492c0366531c2a7f31d9df4bb442435896531ddbd0f8b7a40"
+  },
+  {
+    "case": "hummingbird-gpu",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+      "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py",
+      "/tmp/gpui-selection-main-gates/hummingbird-frozen",
+      "--xvfb",
+      "/nix/store/iw8dx6lhrkdc5wzszjzqzl677y68y88r-xvfb-21.1.24/bin/Xvfb",
+      "--xdotool",
+      "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool",
+      "--atspi-launcher",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "--output",
+      "/tmp/gpui-selection-main-gates/hummingbird-gpu.json",
+      "--display",
+      ":152",
+      "--renderer",
+      "gpu"
+    ],
+    "exit": 0,
+    "log_sha256": "1e09033cd2742e80a9b1c3e100a9c3d15cfdceff80d88f10a03d961e4b67fab1"
+  },
+  {
+    "case": "actual-registry",
+    "command": [
+      "bash",
+      "/root/gpui-ce3/reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "/tmp/gpui-selection-main-gates/gpui-frozen"
+    ],
+    "exit": 0,
+    "log_sha256": "b14e15fa7ea871ee92c7cb93d7fec843c89ba41b77314728a325bd36ec8029d3"
+  },
+  {
+    "case": "contained-property-native",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-selection-main-gates/gpui-frozen",
+      "native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "cbd98bbd40f4b1d267850f461e4329e936fa2c002a09a827e98d7904a3ee3145"
+  },
+  {
+    "case": "checkbox-native",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-selection-main-gates/gpui-frozen",
+      "native::accessibility::linux_tests::checkbox::native_atspi_checkbox_action_state_and_events",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "49bfe7042bcb9aa70addbe02571d0fa59cfcf117acb19a1935cf71f4d9257c4d"
+  },
+  {
+    "case": "late-service",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-selection-main-gates/gpui-frozen",
+      "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "a17cbcfb7a4086c5920c468d3f7d6ea6411acb89d12bb62df45808afa405cc80"
+  },
+  {
+    "case": "future-wake",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-selection-main-gates/gpui-frozen",
+      "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "8ea3e40056ce409ececcaa6e8b25b43df31a1991ae3a3f47abbe78ea026fb3c4"
+  },
+  {
+    "case": "blank-handoff",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-selection-main-gates/gpui-frozen",
+      "native::upgrade_tests::automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "4d2755c76534a092162575441c005fd2ede33e128405ccb110e8e512f4f0aacf"
+  }
+]

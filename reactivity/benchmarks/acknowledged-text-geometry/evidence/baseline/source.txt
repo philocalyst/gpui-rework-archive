@@ -1,0 +1,14 @@
+58f4a18593267010df20d7ee90d866aa8ae6564e
+ reactivity/crates/canvas/src/text.rs               |  2 +
+ .../crates/canvas/src/text/geometry_ledger.rs      | 70 ++++++++++++++++++++++
+ reactivity/crates/gpui/src/runtime.rs              |  6 ++
+ 3 files changed, 78 insertions(+)
+100644 blob 0f654b51000e2704d2c6361637457c2d21edc900	reactivity/crates/canvas/src/text.rs
+100644 blob 44237034b2214746d7f5e35d30821bd2e1cbcafa	reactivity/crates/canvas/src/text/layout.rs
+100644 blob 7fe001e82e6f24fb96e806edd8af9c029d2ae7bb	reactivity/crates/canvas/src/text/layout/interaction.rs
+100644 blob e5cb7ae72a8d195ff4f70578e78465978ceaf766	reactivity/crates/canvas/src/text/planner.rs
+100644 blob fc7de3d041921db5bc8aaab0116178ab524036a4	reactivity/crates/gpui/src/native/accessibility/text.rs
+100644 blob c13dce1c2986f03f49cf20408a1e9de0e6d19d16	reactivity/crates/gpui/src/runtime.rs
+100644 blob e7e21510024850d8b91776ba7e4870d43d893e2e	reactivity/crates/gpui/src/runtime/query.rs
+4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780  reactivity/Cargo.lock
+e634aaf326e1c64d194dab19a7004b6f15f14e48f7eaaefb266b2167bd462234  reactivity/crates/gpui/Cargo.toml

@@ -1,0 +1,83 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling synstructure v0.14.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+    Checking bytemuck v1.25.2
+   Compiling zerovec-derive v0.11.6
+    Checking yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling zerocopy-derive v0.8.63
+    Checking zerovec v0.11.8
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+    Checking zerocopy v0.8.63
+   Compiling thiserror-impl v2.0.21
+    Checking thiserror v2.0.21
+    Checking icu_provider v2.3.1
+    Checking font-types v0.12.7
+    Checking read-fonts v0.41.0
+    Checking half v2.7.1
+    Checking naga v29.0.4
+    Checking icu_collections v2.3.0
+    Checking wgpu-types v29.0.4
+   Compiling foreign-types-macros v0.2.4
+   Compiling snafu-derive v0.8.9
+    Checking wgpu-naga-bridge v29.0.4
+    Checking wgpu-hal v29.0.4 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+    Checking foreign-types v0.5.0
+    Checking icu_properties v2.3.0
+    Checking skrifa v0.44.0
+    Checking icu_locale_fallback v2.3.0
+    Checking icu_segmenter v2.3.0
+    Checking wgpu-core-deps-apple v29.0.4
+    Checking parley_data v0.11.1
+    Checking core-graphics v0.23.2
+   Compiling snafu v0.8.9
+    Checking icu_normalizer v2.3.0
+    Checking fontique v0.11.1
+    Checking harfrust v0.12.0
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+    Checking parley v0.11.1 (/root/gpui-ce3/reactivity/vendor/parley)
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Checking swash v0.2.10
+    Checking winit v0.30.13 (/root/gpui-ce3/reactivity/vendor/winit)
+    Checking wgpu-core v29.0.4
+   Compiling serde_derive v1.0.229
+    Checking wgpu v29.0.4
+    Checking serde v1.0.229
+    Checking wgsl-rs v0.1.0-beta.1
+    Checking gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+    Checking gpui_reactivity_state v0.1.0 (/root/gpui-ce3/reactivity/crates/state)
+    Checking gpui_reactivity_host v0.1.0 (/root/gpui-ce3/reactivity/crates/host)
+    Checking accesskit_winit v0.34.1
+    Checking gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+    Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+error: method `render` is never used
+   --> crates/gpui/src/native.rs:256:8
+    |
+254 | impl GpuSurface {
+    | --------------- method in this implementation
+255 |     #[cfg(test)]
+256 |     fn render(
+    |        ^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: could not compile `gpui` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

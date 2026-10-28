@@ -1,0 +1,42 @@
+{
+  "harnesses": 4,
+  "passed": 20,
+  "failed": 0,
+  "ignored": 0,
+  "all_exit_zero": true,
+  "results": [
+    {
+      "target": "dpi",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "text_transaction",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "grouped",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "render",
+      "exit": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    }
+  ],
+  "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+}

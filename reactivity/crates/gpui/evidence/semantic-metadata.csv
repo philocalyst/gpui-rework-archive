@@ -1,0 +1,4 @@
+case,nodes,allocations,retained_bytes,peak_bytes,logical_column_capacity_bytes,name_column_capacity_bytes,description_column_capacity_bytes,fanout_capacity_bytes,promotions
+absent,10001,3649,6120100,7138844,0,0,0,0,0
+name,10001,13682,6826436,7845180,400000,240000,0,65536,1
+name_and_description,10001,13684,7131972,8150716,400000,240000,240000,131072,1

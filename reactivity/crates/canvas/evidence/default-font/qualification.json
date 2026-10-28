@@ -1,0 +1,1211 @@
+{
+  "base": "2fefe2d26692e7839231318a71dc4055a694f456",
+  "implementation": "486e5462909e9825913d00e506a910fc7bc3c3bd",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)",
+  "rustc_bootstrap": null,
+  "rustflags": null,
+  "jobs": 1,
+  "clippy_conf_dir": "/tmp/gpui-default-font-sol",
+  "clippy_sha256": "47a95f0957da515a979049654ec81ff0554f358300c47c0a02573f4041210121",
+  "sourceguard_files": 11068,
+  "sourceguard_manifest_sha256": "f7df5fac053bd91e6ad71d01dca80ba163d3f99c3c70d8b821c0099a80ee0cc5",
+  "full_tests": {
+    "passed": 203,
+    "failed": 0,
+    "ignored": 4,
+    "test_binaries": 42,
+    "doctests_passed": 2,
+    "clippy_all_targets_all_features": "pass -D warnings",
+    "format": "pass"
+  },
+  "watchdogs_seconds": {
+    "initial_test_build": 900,
+    "full_test_build": 900,
+    "full_test_run": 600,
+    "release_oracle_build": 900,
+    "release_baseline_incremental_build": 300,
+    "oracle_run_each": 120,
+    "payload_run": 60,
+    "negative_build": 120,
+    "negative_run": 120,
+    "restored_build": 120,
+    "restored_run": 180,
+    "normal_release_build_each": 300
+  },
+  "candidate_runs": {
+    "browser-text-oracle": {
+      "exit": 0,
+      "bytes": 285940280,
+      "sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39"
+    },
+    "pixels": {
+      "exit": 0,
+      "bytes": 138240000,
+      "sha256": "b4ab85bcc1397d4fc6c4e7ae49822dd82ec2aef6a543b1ffe01733b1d3a1b355"
+    },
+    "payload": {
+      "exit": 0,
+      "bytes": 1472,
+      "sha256": "1e5fdebfb1a185da0206503cda4be36e7a00125efae24d52124b418787ffe860"
+    }
+  },
+  "baseline_runs": {
+    "browser-text-oracle": {
+      "exit": 0,
+      "bytes": 285940280,
+      "sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+      "candidate_byte_equal": true
+    },
+    "pixels": {
+      "exit": 0,
+      "bytes": 138240000,
+      "sha256": "b4ab85bcc1397d4fc6c4e7ae49822dd82ec2aef6a543b1ffe01733b1d3a1b355",
+      "candidate_byte_equal": true
+    },
+    "payload": {
+      "exit": 0,
+      "bytes": 1472,
+      "sha256": "29b1491449d82476e17eae4785abefa9764fe769eecd267f447339bbce2720d2",
+      "candidate_byte_equal": false
+    }
+  },
+  "coverage": {
+    "records": 195,
+    "bytes": 585,
+    "sha256": "45efa6adf765161f311a0dba3b0fc36388082efa33c209a5d5e6af1fa3aad384",
+    "matches_committed": true
+  },
+  "dependency_tree_sha256": "9cf6df93c65ff1404bd11926d68a9b5feac1753dc5b16fcee1fca930596d9199",
+  "dependency_tree_equal": true,
+  "compile_work": {
+    "candidate_cold_compiling_package_lines": 62,
+    "baseline_incremental_rustc_invocations": 4,
+    "baseline_jobs": [
+      "gpui_canvas",
+      "browser-text-oracle",
+      "pixels",
+      "payload"
+    ],
+    "note": "Different cold/incremental states; these counts are not a compile-time speed comparison. No runtime dependency or production Rust source other than the embedded asset reference changed."
+  },
+  "negative_control": {
+    "glyph": "A",
+    "glyph_id": 36,
+    "point": 0,
+    "old": [
+      545,
+      0
+    ],
+    "new": [
+      546,
+      0
+    ],
+    "sha256": "2504037da76f3f8450f5eccf1903c2aabbe4fdd10a7c9a4a98c3ca2c2fbfeefc",
+    "exit": 101,
+    "rejected_at": "commands gid=36 size=16",
+    "log_sha256": "55d5de2d85fa65611d40836a0b590a865629da288f01c5db12bf451ecb9dfaf4"
+  },
+  "skipped_cells": [
+    "test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release",
+    "test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture",
+    "test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes",
+    "test pool_memory_measurement ... ignored, process RSS/thread measurement; run separately with GPUI_RENDER_WORKERS=1,2,4,8",
+    "RSS/startup/latency/timing campaign: not run; no claims.",
+    "OpenType Sanitizer: unavailable; independent parser/runtime checks use ttf-parser 0.25.1, Skrifa 0.49.0, Swash 0.2.10 and Rustybuzz 0.20.1."
+  ],
+  "artifacts": {
+    "baseline-browser-text-oracle.err": {
+      "bytes": 11,
+      "sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+    },
+    "baseline-dependency-tree.txt": {
+      "bytes": 7756,
+      "sha256": "9cf6df93c65ff1404bd11926d68a9b5feac1753dc5b16fcee1fca930596d9199"
+    },
+    "baseline-payload-census.csv": {
+      "bytes": 1252,
+      "sha256": "caa9b6cdce9e9e14310c661dbfb31c8b824c416981d27ab386a63235492057c1"
+    },
+    "baseline-payload.err": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-pixels.err": {
+      "bytes": 10,
+      "sha256": "0acc4729a40a342f55601e9c1a33332e297b652779633ce7278251cbf96b0aed"
+    },
+    "baseline-runs.json": {
+      "bytes": 532,
+      "sha256": "b823d6cf4071687092f2b26705e9b9df055bced772407e3b78728bfd1f1ed31b"
+    },
+    "baseline-sections.txt": {
+      "bytes": 3458,
+      "sha256": "956937262db050c1f69c28f28100fae62396fdd8db1575f870ebba99728fb348"
+    },
+    "baseline-sourceguard-verdict.json": {
+      "bytes": 205,
+      "sha256": "00401db69fecd7a8109ad89d4b0825d6b40f7e7bdc65552e7a2e49e12cefed81"
+    },
+    "binary-size-comparison.json": {
+      "bytes": 7451,
+      "sha256": "f34cd7249420930c6d482bb5077b10fce3abac5366bceede085c390067c8731b"
+    },
+    "candidate-browser-text-oracle.err": {
+      "bytes": 11,
+      "sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+    },
+    "candidate-dependency-tree.txt": {
+      "bytes": 7756,
+      "sha256": "9cf6df93c65ff1404bd11926d68a9b5feac1753dc5b16fcee1fca930596d9199"
+    },
+    "candidate-payload-census.csv": {
+      "bytes": 1252,
+      "sha256": "e1605651640d67fd709592e10530c80dbcd593a29770b0a038cf6dc04a44c1d0"
+    },
+    "candidate-payload.err": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-pixels.err": {
+      "bytes": 10,
+      "sha256": "0acc4729a40a342f55601e9c1a33332e297b652779633ce7278251cbf96b0aed"
+    },
+    "candidate-runs.json": {
+      "bytes": 429,
+      "sha256": "85adb8d7ce17048ac32f14f4db79e1ff0c4276ef7015493690baa9c93989dae4"
+    },
+    "candidate-sections.txt": {
+      "bytes": 3458,
+      "sha256": "28bc65bf46917c35e4fa24a8b39e4f856c38959fbc8b7886730348324a42960b"
+    },
+    "candidate-sourceguard-verdict.json": {
+      "bytes": 119,
+      "sha256": "7f41f1bc89f8d266cda406b0f5df92f5621c8fb3b4bf3f770bca89e24da2ec6c"
+    },
+    "negative-control-input.json": {
+      "bytes": 193,
+      "sha256": "7cc7e9e5a0c3f60d6c9039a55aac86d7c711ddf04b37b1e5e98ea4988b8d3330"
+    },
+    "/tmp/gpui-default-font-sol-all-build.log": {
+      "bytes": 6447,
+      "sha256": "4b94e133362dda256a3e0f63078195f508d3cbdde700d2ef62138dda26b30c3d"
+    },
+    "/tmp/gpui-default-font-sol-all-run.log": {
+      "bytes": 28453,
+      "sha256": "715297e352bd3e96d554102438e387aa0c7bcdc4511221fbee29d57754a2075b"
+    },
+    "/tmp/gpui-default-font-sol-clippy.log": {
+      "bytes": 2532,
+      "sha256": "a555de8dca1403706542a3f99dd8cf0e7695640aa0e2b7d8ad1e73f4620abe2d"
+    },
+    "/tmp/gpui-default-font-sol-fmt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/tmp/gpui-default-font-sol-doc.log": {
+      "bytes": 400,
+      "sha256": "2441fdd4163ee08171848e7695d774a8afc82abc025e8cb7a0904628cd7971ab"
+    },
+    "/tmp/gpui-default-font-sol-build.log": {
+      "bytes": 3640,
+      "sha256": "dc718af0a8ec78affb78975b9673101988a431d1d771334d1523f5cd35d65010"
+    },
+    "/tmp/gpui-default-font-sol-build-2.log": {
+      "bytes": 305,
+      "sha256": "795b5acd5c410d16c18cabad4f664110fd32393e227b1ba8b9270d88757890c6"
+    },
+    "/tmp/gpui-default-font-sol-parity.log": {
+      "bytes": 1031,
+      "sha256": "e590709b72b9d974ddac2065472e4f3fa4708f49fa16f3e1f58fafe70c172e4d"
+    },
+    "/tmp/gpui-default-font-sol-negative-build.log": {
+      "bytes": 306,
+      "sha256": "306fd850bc4ecdf4f89316112fc86fd62744befcecf661ff16640badd69b4755"
+    },
+    "/tmp/gpui-default-font-sol-negative-run.log": {
+      "bytes": 2221,
+      "sha256": "55d5de2d85fa65611d40836a0b590a865629da288f01c5db12bf451ecb9dfaf4"
+    },
+    "/tmp/gpui-default-font-sol-restored-build.log": {
+      "bytes": 305,
+      "sha256": "8aec6420b25d022a897e9ed848ab2e58eeed9377288379586dc891b818c499b3"
+    },
+    "/tmp/gpui-default-font-sol-restored-run.log": {
+      "bytes": 570,
+      "sha256": "5f94a1ae893d7a2dd6f0c981e15d7c26dec28aad3b6bbabac670164521e8ebda"
+    },
+    "baseline-normal-census.csv": {
+      "bytes": 1252,
+      "sha256": "1d29ba82272bc3480fc812b688397dc1a2deb86598c474853e4621ef7c07509a"
+    },
+    "baseline-normal-dependency-tree.txt": {
+      "bytes": 7047,
+      "sha256": "45336e51a08270817c36c8a2d1cd8022b452c8cbaabd927e0e1116aebbe8ff05"
+    },
+    "baseline-normal-sections.txt": {
+      "bytes": 3458,
+      "sha256": "2aac3f08f7347cc13fc09c746593ea1d996e3a0329a703ceec01654f8bf2631d"
+    },
+    "candidate-normal-census.csv": {
+      "bytes": 1252,
+      "sha256": "359e9ca1af2ef65cc0a63b2fe1e7cb41a981a0743562500fb1e4dd4d13822373"
+    },
+    "candidate-normal-dependency-tree.txt": {
+      "bytes": 7047,
+      "sha256": "45336e51a08270817c36c8a2d1cd8022b452c8cbaabd927e0e1116aebbe8ff05"
+    },
+    "candidate-normal-sections.txt": {
+      "bytes": 3458,
+      "sha256": "f8f0bbe80bea281ef69b43a600551bfcbd1bffdcf86c3efd26735e7e5f9974b8"
+    },
+    "normal-binary-size-comparison.json": {
+      "bytes": 7447,
+      "sha256": "0c81f431eeb3276b1d8ab81e419775ad49b540ed0ab108627f24d324fce15ed2"
+    }
+  },
+  "heap_cohorts": {
+    "values": {
+      "baseline": [
+        {
+          "services": 1,
+          "init": {
+            "count_total": 1,
+            "count_current": 1,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 64,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 408,
+            "count_current": 5,
+            "count_max": 267,
+            "bytes_total": 299580,
+            "bytes_current": 824,
+            "bytes_max": 175048
+          },
+          "prepare": {
+            "count_total": 86,
+            "count_current": 60,
+            "count_max": 63,
+            "bytes_total": 17839,
+            "bytes_current": 11107,
+            "bytes_max": 13047
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 4220178580692967551
+        },
+        {
+          "services": 2,
+          "init": {
+            "count_total": 1,
+            "count_current": 0,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 0,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 816,
+            "count_current": 10,
+            "count_max": 272,
+            "bytes_total": 599160,
+            "bytes_current": 1648,
+            "bytes_max": 175872
+          },
+          "prepare": {
+            "count_total": 91,
+            "count_current": 62,
+            "count_max": 64,
+            "bytes_total": 20847,
+            "bytes_current": 12275,
+            "bytes_max": 14007
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 2724085055719581883
+        },
+        {
+          "services": 8,
+          "init": {
+            "count_total": 1,
+            "count_current": 0,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 0,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 3264,
+            "count_current": 40,
+            "count_max": 302,
+            "bytes_total": 2396640,
+            "bytes_current": 6592,
+            "bytes_max": 180816
+          },
+          "prepare": {
+            "count_total": 114,
+            "count_current": 74,
+            "count_max": 75,
+            "bytes_total": 39151,
+            "bytes_current": 19411,
+            "bytes_max": 23147
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 2536387010791647336
+        }
+      ],
+      "candidate": [
+        {
+          "services": 1,
+          "init": {
+            "count_total": 1,
+            "count_current": 1,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 64,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 405,
+            "count_current": 5,
+            "count_max": 264,
+            "bytes_total": 298140,
+            "bytes_current": 824,
+            "bytes_max": 172296
+          },
+          "prepare": {
+            "count_total": 86,
+            "count_current": 60,
+            "count_max": 63,
+            "bytes_total": 17839,
+            "bytes_current": 11107,
+            "bytes_max": 13047
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 4220178580692967551
+        },
+        {
+          "services": 2,
+          "init": {
+            "count_total": 1,
+            "count_current": 0,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 0,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 810,
+            "count_current": 10,
+            "count_max": 269,
+            "bytes_total": 596280,
+            "bytes_current": 1648,
+            "bytes_max": 173120
+          },
+          "prepare": {
+            "count_total": 91,
+            "count_current": 62,
+            "count_max": 64,
+            "bytes_total": 20847,
+            "bytes_current": 12275,
+            "bytes_max": 14007
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 2724085055719581883
+        },
+        {
+          "services": 8,
+          "init": {
+            "count_total": 1,
+            "count_current": 0,
+            "count_max": 1,
+            "bytes_total": 64,
+            "bytes_current": 0,
+            "bytes_max": 64
+          },
+          "shape": {
+            "count_total": 3240,
+            "count_current": 40,
+            "count_max": 299,
+            "bytes_total": 2385120,
+            "bytes_current": 6592,
+            "bytes_max": 178064
+          },
+          "prepare": {
+            "count_total": 114,
+            "count_current": 74,
+            "count_max": 75,
+            "bytes_total": 39151,
+            "bytes_current": 19411,
+            "bytes_max": 23147
+          },
+          "layout_header": 56,
+          "glyph_header": 16,
+          "font_header": 8,
+          "mask_payload": 2279,
+          "digest": 2536387010791647336
+        }
+      ]
+    },
+    "note": "Cohorts1,2,8 execute sequentially in a fresh process per implementation. Only1 is process-cold;2/8 include release of the prior registry Weak control block, so net init retention is zero. Shape constructs a fresh shaper per service; output/cache bytes and headers are equal. No timings recorded by this harness."
+  },
+  "restored_positive": {
+    "passed": 4,
+    "failed": 0,
+    "log_sha256": "5f94a1ae893d7a2dd6f0c981e15d7c26dec28aad3b6bbabac670164521e8ebda"
+  },
+  "instrumented_binary_size": {
+    "baseline": {
+      "file_bytes": 10492488,
+      "allocated_section_bytes": 9683224,
+      "rodata_bytes": 6485568,
+      "text_bytes": 2585815,
+      "sha256": "a0ff49f2ef05c015a260f33794f882833f1422130b7fdff05b9d4a9b7a5caa48",
+      "sections": {
+        "NULL": {
+          "type": "0000000000000000",
+          "size": 0,
+          "flags": "0"
+        },
+        ".interp": {
+          "type": "PROGBITS",
+          "size": 83,
+          "flags": "A"
+        },
+        ".note.ABI-tag": {
+          "type": "NOTE",
+          "size": 32,
+          "flags": "A"
+        },
+        ".dynsym": {
+          "type": "DYNSYM",
+          "size": 1920,
+          "flags": "A"
+        },
+        ".gnu.version": {
+          "type": "VERSYM",
+          "size": 160,
+          "flags": "A"
+        },
+        ".gnu.version_r": {
+          "type": "VERNEED",
+          "size": 384,
+          "flags": "A"
+        },
+        ".gnu.hash": {
+          "type": "GNU_HASH",
+          "size": 28,
+          "flags": "A"
+        },
+        ".dynstr": {
+          "type": "STRTAB",
+          "size": 1187,
+          "flags": "A"
+        },
+        ".rela.dyn": {
+          "type": "RELA",
+          "size": 184296,
+          "flags": "A"
+        },
+        ".rela.plt": {
+          "type": "RELA",
+          "size": 48,
+          "flags": "AI"
+        },
+        ".gcc_except_table": {
+          "type": "PROGBITS",
+          "size": 48488,
+          "flags": "A"
+        },
+        ".rodata": {
+          "type": "PROGBITS",
+          "size": 6485568,
+          "flags": "AMS"
+        },
+        ".eh_frame_hdr": {
+          "type": "PROGBITS",
+          "size": 28796,
+          "flags": "A"
+        },
+        ".eh_frame": {
+          "type": "PROGBITS",
+          "size": 188144,
+          "flags": "A"
+        },
+        ".text": {
+          "type": "PROGBITS",
+          "size": 2585815,
+          "flags": "AX"
+        },
+        ".init": {
+          "type": "PROGBITS",
+          "size": 27,
+          "flags": "AX"
+        },
+        ".fini": {
+          "type": "PROGBITS",
+          "size": 13,
+          "flags": "AX"
+        },
+        ".plt": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "AX"
+        },
+        ".tdata": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "WAT"
+        },
+        ".tbss": {
+          "type": "NOBITS",
+          "size": 3176,
+          "flags": "WAT"
+        },
+        ".fini_array": {
+          "type": "FINI_ARRAY",
+          "size": 8,
+          "flags": "WA"
+        },
+        ".init_array": {
+          "type": "INIT_ARRAY",
+          "size": 16,
+          "flags": "WAo"
+        },
+        ".data.rel.ro": {
+          "type": "PROGBITS",
+          "size": 135816,
+          "flags": "WA"
+        },
+        ".dynamic": {
+          "type": "DYNAMIC",
+          "size": 480,
+          "flags": "WA"
+        },
+        ".got": {
+          "type": "PROGBITS",
+          "size": 12376,
+          "flags": "WA"
+        },
+        ".got.plt": {
+          "type": "PROGBITS",
+          "size": 40,
+          "flags": "WA"
+        },
+        ".relro_padding": {
+          "type": "NOBITS",
+          "size": 160,
+          "flags": "WA"
+        },
+        ".tm_clone_table": {
+          "type": "PROGBITS",
+          "size": 0,
+          "flags": "WA"
+        },
+        ".data": {
+          "type": "PROGBITS",
+          "size": 5792,
+          "flags": "WA"
+        },
+        ".bss": {
+          "type": "NOBITS",
+          "size": 275,
+          "flags": "WA"
+        },
+        ".comment": {
+          "type": "PROGBITS",
+          "size": 166,
+          "flags": "MS"
+        },
+        ".symtab": {
+          "type": "SYMTAB",
+          "size": 162048,
+          "flags": "33"
+        },
+        ".shstrtab": {
+          "type": "STRTAB",
+          "size": 320,
+          "flags": "0"
+        },
+        ".strtab": {
+          "type": "STRTAB",
+          "size": 647392,
+          "flags": "0"
+        }
+      }
+    },
+    "candidate": {
+      "file_bytes": 9089560,
+      "allocated_section_bytes": 8282384,
+      "rodata_bytes": 5082632,
+      "text_bytes": 2585815,
+      "sha256": "6af5c75d00829e72b1cede3f5273a7f4845f6205bae45036df0ba5f8734497f5",
+      "sections": {
+        "NULL": {
+          "type": "0000000000000000",
+          "size": 0,
+          "flags": "0"
+        },
+        ".interp": {
+          "type": "PROGBITS",
+          "size": 83,
+          "flags": "A"
+        },
+        ".note.ABI-tag": {
+          "type": "NOTE",
+          "size": 32,
+          "flags": "A"
+        },
+        ".dynsym": {
+          "type": "DYNSYM",
+          "size": 1920,
+          "flags": "A"
+        },
+        ".gnu.version": {
+          "type": "VERSYM",
+          "size": 160,
+          "flags": "A"
+        },
+        ".gnu.version_r": {
+          "type": "VERNEED",
+          "size": 384,
+          "flags": "A"
+        },
+        ".gnu.hash": {
+          "type": "GNU_HASH",
+          "size": 28,
+          "flags": "A"
+        },
+        ".dynstr": {
+          "type": "STRTAB",
+          "size": 1187,
+          "flags": "A"
+        },
+        ".rela.dyn": {
+          "type": "RELA",
+          "size": 184296,
+          "flags": "A"
+        },
+        ".rela.plt": {
+          "type": "RELA",
+          "size": 48,
+          "flags": "AI"
+        },
+        ".gcc_except_table": {
+          "type": "PROGBITS",
+          "size": 48488,
+          "flags": "A"
+        },
+        ".rodata": {
+          "type": "PROGBITS",
+          "size": 5082632,
+          "flags": "AMS"
+        },
+        ".eh_frame_hdr": {
+          "type": "PROGBITS",
+          "size": 28796,
+          "flags": "A"
+        },
+        ".eh_frame": {
+          "type": "PROGBITS",
+          "size": 188144,
+          "flags": "A"
+        },
+        ".text": {
+          "type": "PROGBITS",
+          "size": 2585815,
+          "flags": "AX"
+        },
+        ".init": {
+          "type": "PROGBITS",
+          "size": 27,
+          "flags": "AX"
+        },
+        ".fini": {
+          "type": "PROGBITS",
+          "size": 13,
+          "flags": "AX"
+        },
+        ".plt": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "AX"
+        },
+        ".tdata": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "WAT"
+        },
+        ".tbss": {
+          "type": "NOBITS",
+          "size": 3176,
+          "flags": "WAT"
+        },
+        ".fini_array": {
+          "type": "FINI_ARRAY",
+          "size": 8,
+          "flags": "WA"
+        },
+        ".init_array": {
+          "type": "INIT_ARRAY",
+          "size": 16,
+          "flags": "WAo"
+        },
+        ".data.rel.ro": {
+          "type": "PROGBITS",
+          "size": 135816,
+          "flags": "WA"
+        },
+        ".dynamic": {
+          "type": "DYNAMIC",
+          "size": 480,
+          "flags": "WA"
+        },
+        ".got": {
+          "type": "PROGBITS",
+          "size": 12376,
+          "flags": "WA"
+        },
+        ".got.plt": {
+          "type": "PROGBITS",
+          "size": 40,
+          "flags": "WA"
+        },
+        ".relro_padding": {
+          "type": "NOBITS",
+          "size": 2256,
+          "flags": "WA"
+        },
+        ".tm_clone_table": {
+          "type": "PROGBITS",
+          "size": 0,
+          "flags": "WA"
+        },
+        ".data": {
+          "type": "PROGBITS",
+          "size": 5792,
+          "flags": "WA"
+        },
+        ".bss": {
+          "type": "NOBITS",
+          "size": 275,
+          "flags": "WA"
+        },
+        ".comment": {
+          "type": "PROGBITS",
+          "size": 166,
+          "flags": "MS"
+        },
+        ".symtab": {
+          "type": "SYMTAB",
+          "size": 162048,
+          "flags": "33"
+        },
+        ".shstrtab": {
+          "type": "STRTAB",
+          "size": 320,
+          "flags": "0"
+        },
+        ".strtab": {
+          "type": "STRTAB",
+          "size": 647392,
+          "flags": "0"
+        }
+      }
+    },
+    "delta": {
+      "file_bytes": -1402928,
+      "allocated_section_bytes": -1400840,
+      "rodata_bytes": -1402936,
+      "text_bytes": 0
+    }
+  },
+  "normal_binary_size": {
+    "baseline": {
+      "file_bytes": 10539016,
+      "allocated_section_bytes": 9725132,
+      "rodata_bytes": 6487856,
+      "text_bytes": 2620311,
+      "sha256": "2cc0a2804d24619af01f264ba0ea180a3bf94c96f6deb98c30f3344097abe509",
+      "sections": {
+        "NULL": {
+          "type": "0000000000000000",
+          "size": 0,
+          "flags": "0"
+        },
+        ".interp": {
+          "type": "PROGBITS",
+          "size": 83,
+          "flags": "A"
+        },
+        ".note.ABI-tag": {
+          "type": "NOTE",
+          "size": 32,
+          "flags": "A"
+        },
+        ".dynsym": {
+          "type": "DYNSYM",
+          "size": 1968,
+          "flags": "A"
+        },
+        ".gnu.version": {
+          "type": "VERSYM",
+          "size": 164,
+          "flags": "A"
+        },
+        ".gnu.version_r": {
+          "type": "VERNEED",
+          "size": 400,
+          "flags": "A"
+        },
+        ".gnu.hash": {
+          "type": "GNU_HASH",
+          "size": 28,
+          "flags": "A"
+        },
+        ".dynstr": {
+          "type": "STRTAB",
+          "size": 1219,
+          "flags": "A"
+        },
+        ".rela.dyn": {
+          "type": "RELA",
+          "size": 185952,
+          "flags": "A"
+        },
+        ".rela.plt": {
+          "type": "RELA",
+          "size": 48,
+          "flags": "AI"
+        },
+        ".gcc_except_table": {
+          "type": "PROGBITS",
+          "size": 48408,
+          "flags": "A"
+        },
+        ".rodata": {
+          "type": "PROGBITS",
+          "size": 6487856,
+          "flags": "AMS"
+        },
+        ".eh_frame_hdr": {
+          "type": "PROGBITS",
+          "size": 29188,
+          "flags": "A"
+        },
+        ".eh_frame": {
+          "type": "PROGBITS",
+          "size": 190480,
+          "flags": "A"
+        },
+        ".text": {
+          "type": "PROGBITS",
+          "size": 2620311,
+          "flags": "AX"
+        },
+        ".init": {
+          "type": "PROGBITS",
+          "size": 27,
+          "flags": "AX"
+        },
+        ".fini": {
+          "type": "PROGBITS",
+          "size": 13,
+          "flags": "AX"
+        },
+        ".plt": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "AX"
+        },
+        ".tdata": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "WAT"
+        },
+        ".tbss": {
+          "type": "NOBITS",
+          "size": 56,
+          "flags": "WAT"
+        },
+        ".fini_array": {
+          "type": "FINI_ARRAY",
+          "size": 8,
+          "flags": "WA"
+        },
+        ".init_array": {
+          "type": "INIT_ARRAY",
+          "size": 16,
+          "flags": "WAo"
+        },
+        ".data.rel.ro": {
+          "type": "PROGBITS",
+          "size": 136952,
+          "flags": "WA"
+        },
+        ".dynamic": {
+          "type": "DYNAMIC",
+          "size": 480,
+          "flags": "WA"
+        },
+        ".got": {
+          "type": "PROGBITS",
+          "size": 12536,
+          "flags": "WA"
+        },
+        ".got.plt": {
+          "type": "PROGBITS",
+          "size": 40,
+          "flags": "WA"
+        },
+        ".relro_padding": {
+          "type": "NOBITS",
+          "size": 2704,
+          "flags": "WA"
+        },
+        ".tm_clone_table": {
+          "type": "PROGBITS",
+          "size": 0,
+          "flags": "WA"
+        },
+        ".data": {
+          "type": "PROGBITS",
+          "size": 5792,
+          "flags": "WA"
+        },
+        ".bss": {
+          "type": "NOBITS",
+          "size": 275,
+          "flags": "WA"
+        },
+        ".comment": {
+          "type": "PROGBITS",
+          "size": 166,
+          "flags": "MS"
+        },
+        ".symtab": {
+          "type": "SYMTAB",
+          "size": 163152,
+          "flags": "33"
+        },
+        ".shstrtab": {
+          "type": "STRTAB",
+          "size": 320,
+          "flags": "0"
+        },
+        ".strtab": {
+          "type": "STRTAB",
+          "size": 650298,
+          "flags": "0"
+        }
+      }
+    },
+    "candidate": {
+      "file_bytes": 9136064,
+      "allocated_section_bytes": 8320212,
+      "rodata_bytes": 5084920,
+      "text_bytes": 2620311,
+      "sha256": "e267cf82646eb74fa0e09ead2b5793604161f3e1bfbd37105b3923c047a2ba3b",
+      "sections": {
+        "NULL": {
+          "type": "0000000000000000",
+          "size": 0,
+          "flags": "0"
+        },
+        ".interp": {
+          "type": "PROGBITS",
+          "size": 83,
+          "flags": "A"
+        },
+        ".note.ABI-tag": {
+          "type": "NOTE",
+          "size": 32,
+          "flags": "A"
+        },
+        ".dynsym": {
+          "type": "DYNSYM",
+          "size": 1968,
+          "flags": "A"
+        },
+        ".gnu.version": {
+          "type": "VERSYM",
+          "size": 164,
+          "flags": "A"
+        },
+        ".gnu.version_r": {
+          "type": "VERNEED",
+          "size": 400,
+          "flags": "A"
+        },
+        ".gnu.hash": {
+          "type": "GNU_HASH",
+          "size": 28,
+          "flags": "A"
+        },
+        ".dynstr": {
+          "type": "STRTAB",
+          "size": 1219,
+          "flags": "A"
+        },
+        ".rela.dyn": {
+          "type": "RELA",
+          "size": 185952,
+          "flags": "A"
+        },
+        ".rela.plt": {
+          "type": "RELA",
+          "size": 48,
+          "flags": "AI"
+        },
+        ".gcc_except_table": {
+          "type": "PROGBITS",
+          "size": 48408,
+          "flags": "A"
+        },
+        ".rodata": {
+          "type": "PROGBITS",
+          "size": 5084920,
+          "flags": "AMS"
+        },
+        ".eh_frame_hdr": {
+          "type": "PROGBITS",
+          "size": 29188,
+          "flags": "A"
+        },
+        ".eh_frame": {
+          "type": "PROGBITS",
+          "size": 190480,
+          "flags": "A"
+        },
+        ".text": {
+          "type": "PROGBITS",
+          "size": 2620311,
+          "flags": "AX"
+        },
+        ".init": {
+          "type": "PROGBITS",
+          "size": 27,
+          "flags": "AX"
+        },
+        ".fini": {
+          "type": "PROGBITS",
+          "size": 13,
+          "flags": "AX"
+        },
+        ".plt": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "AX"
+        },
+        ".tdata": {
+          "type": "PROGBITS",
+          "size": 48,
+          "flags": "WAT"
+        },
+        ".tbss": {
+          "type": "NOBITS",
+          "size": 56,
+          "flags": "WAT"
+        },
+        ".fini_array": {
+          "type": "FINI_ARRAY",
+          "size": 8,
+          "flags": "WA"
+        },
+        ".init_array": {
+          "type": "INIT_ARRAY",
+          "size": 16,
+          "flags": "WAo"
+        },
+        ".data.rel.ro": {
+          "type": "PROGBITS",
+          "size": 136952,
+          "flags": "WA"
+        },
+        ".dynamic": {
+          "type": "DYNAMIC",
+          "size": 480,
+          "flags": "WA"
+        },
+        ".got": {
+          "type": "PROGBITS",
+          "size": 12536,
+          "flags": "WA"
+        },
+        ".got.plt": {
+          "type": "PROGBITS",
+          "size": 40,
+          "flags": "WA"
+        },
+        ".relro_padding": {
+          "type": "NOBITS",
+          "size": 720,
+          "flags": "WA"
+        },
+        ".tm_clone_table": {
+          "type": "PROGBITS",
+          "size": 0,
+          "flags": "WA"
+        },
+        ".data": {
+          "type": "PROGBITS",
+          "size": 5792,
+          "flags": "WA"
+        },
+        ".bss": {
+          "type": "NOBITS",
+          "size": 275,
+          "flags": "WA"
+        },
+        ".comment": {
+          "type": "PROGBITS",
+          "size": 166,
+          "flags": "MS"
+        },
+        ".symtab": {
+          "type": "SYMTAB",
+          "size": 163152,
+          "flags": "33"
+        },
+        ".shstrtab": {
+          "type": "STRTAB",
+          "size": 320,
+          "flags": "0"
+        },
+        ".strtab": {
+          "type": "STRTAB",
+          "size": 650292,
+          "flags": "0"
+        }
+      }
+    },
+    "delta": {
+      "file_bytes": -1402952,
+      "allocated_section_bytes": -1404920,
+      "rodata_bytes": -1402936,
+      "text_bytes": 0
+    }
+  },
+  "normal_dependency_tree_sha256": "45336e51a08270817c36c8a2d1cd8022b452c8cbaabd927e0e1116aebbe8ff05",
+  "normal_dependency_tree_equal": true,
+  "normal_compile_work": {
+    "baseline_incremental_rustc_invocations": 2,
+    "note": "Candidate normal-example build reused the target populated by the external fixture under a different existing lockfile; 34 packages were compiled under the main workspace lock, so this was not an entirely cold build. Baseline incremental build invoked rustc twice. No compile latency or equal-cold-state work reduction claim.",
+    "candidate_compiling_package_lines": 34
+  }
+}

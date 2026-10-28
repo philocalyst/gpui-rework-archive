@@ -1,0 +1,18 @@
+
+running 1 test
+test native::accessibility::text::canonical_stream_tests::public_owner_and_native_projection_resource_control ... {"headers":true,"geometry":80,"layout":56,"grapheme":56,"run":40,"native_input":56,"cohort":40}
+{"case":"empty","phase":"cold_public_owner_c","calls":256,"requested":119244,"retained":7520,"peak":55044,"retained_allocations":36}
+{"case":"empty","phase":"ack","calls":0,"requested":0,"retained":0,"peak":0,"retained_allocations":0}
+{"case":"empty","phase":"native_cohort","calls":1,"requested":56,"retained":56,"peak":56,"retained_allocations":1}
+{"case":"empty","stage":"p_with_native_lease","map_strong":3,"graphemes_iterator":48,"runs_iterator":144}
+{"case":"empty","phase":"reference_unplaced","calls":2,"requested":672,"retained":672,"peak":672,"retained_allocations":2}
+{"case":"empty","phase":"current_unplaced","calls":2,"requested":672,"retained":672,"peak":672,"retained_allocations":2}
+{"case":"empty","phase":"reference_placed","calls":3,"requested":992,"retained":832,"peak":832,"retained_allocations":2}
+{"case":"empty","phase":"current_placed","calls":3,"requested":992,"retained":832,"peak":832,"retained_allocations":2}
+{"case":"empty","phase":"old_p_new_c","calls":249,"requested":116746,"retained":3874,"peak":51478,"retained_allocations":23}
+{"case":"empty","phase":"old_p_eligible_c_failed_l","calls":21,"requested":5326,"retained":21,"peak":4401,"retained_allocations":0}
+{"case":"empty","phase":"eligible_ack_after_failure","calls":0,"requested":0,"retained":-364,"peak":0,"retained_allocations":-5}
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 236 filtered out; finished in 0.00s
+

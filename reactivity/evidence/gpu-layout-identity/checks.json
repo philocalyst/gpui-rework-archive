@@ -1,0 +1,56 @@
+{
+  "numeric_source": "f0d8d8f2188413531541feddafcfeaad757937ec",
+  "lease_source": "15c30db1a91c343f69cd0642b36095807d3e16cb",
+  "old_numeric_evidence": "a30a175fb6",
+  "tests": {
+    "gpu_units": 8,
+    "presentation": 4,
+    "actual_vulkan": 44,
+    "native_header_ledger": 1,
+    "strict_gpu_all_targets_clippy": "pass",
+    "strict_fixture_all_targets_clippy": "pass",
+    "apple_all_targets_desktop_parallel": "pass",
+    "msvc_all_targets_desktop_parallel": "pass",
+    "targeted_fmt": "pass"
+  },
+  "source_clean_status": [
+    "?? reactivity/evidence/gpu-layout-identity/"
+  ],
+  "headers": {
+    "numeric": {
+      "Renderer": 896,
+      "Context": 56,
+      "State": 840,
+      "SharedOwner": 80,
+      "Candidate": 1008,
+      "process_static": 8
+    },
+    "lease": {
+      "Renderer": 888,
+      "Context": 48,
+      "State": 840,
+      "SharedOwner": 72,
+      "Candidate": 1000,
+      "process_static": 0
+    }
+  },
+  "context_first_drop_extra_retained": {
+    "rust_bytes": 1924,
+    "rust_allocations": 10,
+    "native_bind_group_layouts": 1,
+    "render_pipelines": 0,
+    "shader_modules": 0
+  },
+  "commands_from_repository_root": [
+    "source /tmp/gpui-native-env.sh; CARGO_BUILD_JOBS=2 (all commands)",
+    "CARGO_TARGET_DIR=/tmp/gpui-layout-identity-sol-target cargo build --release --offline --locked --manifest-path reactivity/benchmarks/gpu-owner/Cargo.toml --bins",
+    "CARGO_TARGET_DIR=/tmp/gpui-layout-identity-counts-target cargo build --release --offline --locked --manifest-path reactivity/benchmarks/gpu-owner/Cargo.toml --bin layout-lifetime --features counts",
+    "CARGO_TARGET_DIR=/tmp/gpui-layout-identity-sol-target cargo test --release --offline --locked --manifest-path reactivity/Cargo.toml -p gpui_gpu --all-targets --features vulkan-tests -- --nocapture",
+    "CARGO_TARGET_DIR=/tmp/gpui-layout-identity-sol-target cargo clippy --release --offline --locked --manifest-path reactivity/Cargo.toml -p gpui_gpu --all-targets --features vulkan-tests -- -D warnings",
+    "CARGO_TARGET_DIR=/tmp/gpui-layout-identity-sol-target cargo clippy --release --offline --locked --manifest-path reactivity/benchmarks/gpu-owner/Cargo.toml --all-targets -- -D warnings",
+    "RUSTC_BOOTSTRAP=1 CARGO_TARGET_DIR=/tmp/gpui-shared-gpu-sol-target cargo check --offline --locked --manifest-path reactivity/Cargo.toml -p gpui --features desktop,gpui_canvas/parallel --all-targets --target aarch64-apple-darwin -Zbuild-std=std,panic_abort",
+    "RUSTC_BOOTSTRAP=1 CARGO_TARGET_DIR=/tmp/gpui-shared-gpu-sol-target cargo check --offline --locked --manifest-path reactivity/Cargo.toml -p gpui --features desktop,gpui_canvas/parallel --all-targets --target x86_64-pc-windows-msvc -Zbuild-std=std,panic_abort",
+    "RUSTC_BOOTSTRAP=1 CARGO_TARGET_DIR=/tmp/gpui-shared-gpu-sol-target cargo test --offline --locked --manifest-path reactivity/Cargo.toml -p gpui --features x11 --lib initialization_cohort_ledger -- --nocapture"
+  ],
+  "limits": "Current-thread Rust allocation requests/net/peak; complete owner included, inputs/Instance/Adapter excluded equally. Native Core measured. No timing/RSS/driver heap/complete GPU-memory claim; no native multiwindow claim. Native admission unchanged; old native gates preserved, not rerun as new evidence."
+}

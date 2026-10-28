@@ -1,0 +1,117 @@
+{
+  "source_commit": "418a3b9a288cb2508e225887b1004ff622133fe1",
+  "original_commit": "8a157b3b47",
+  "sources": {
+    "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/Cargo.toml": "d296f9cdb9a22b00f5fcc39a53891ebb064f82a3a1bed80219271912ac763278",
+    "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/build.rs": "76ea0e291b499d3f62e3837b528dc60e65645863b8b32a581c260246c7ff4635",
+    "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/src/renderer.rs": "89140fde17e2c09db27567e8104e25f557ebe06b58c422d15066cf6eca721502",
+    "/root/gpui-wgsl-buildtime/reactivity/crates/gpu/src/shader.rs": "44fbfbe6a5e61f60d77b1f3a5ffdbea071aa00e1bde820e25a7c681d1e8f2ecd",
+    "/root/gpui-wgsl-buildtime/reactivity/Cargo.lock": "a85f4cf2cce30540f11e6482afa45296444f29b89c8551679167b6ac315ef453",
+    "/tmp/gpui-wgsl-control/src/bin/ordinary.rs": "d6e1b63cdce71d8bed5bdde0e00ec30aca8a13902bbc642c77c290ff0c913c8d"
+  },
+  "frozen": {
+    "baseline": {
+      "executable": "/tmp/gpui-wgsl-captures/frozen/baseline-ordinary",
+      "executable_sha256": "4cdc1c74227d58326352693b46e181157efbcb11c08c4e2361847b3909f7eea9",
+      "library": "/tmp/gpui-wgsl-captures/frozen/baseline-gpui_gpu.rlib",
+      "library_sha256": "504b14b1be2758f2e3828b48c910db7ce7b8cb84d4adfaab05942016c3f5f9a8",
+      "library_bytes": 1680838
+    },
+    "artifact": {
+      "executable": "/tmp/gpui-wgsl-captures/frozen/artifact-ordinary",
+      "executable_sha256": "18d15728d4c704730135f93443e414c1f4b9e22ec3f9e4342dcb1e6b874ed97f",
+      "library": "/tmp/gpui-wgsl-captures/frozen/artifact-gpui_gpu.rlib",
+      "library_sha256": "31c10d5e02fc37fbe887e57fab66107ddbbe60f6a4d14ee8736d7f315ef0119f",
+      "library_bytes": 1709790
+    }
+  },
+  "linked": {
+    "baseline": {
+      "file_bytes": 7693424,
+      "sections": {
+        ".interp": 83,
+        ".note.ABI-tag": 32,
+        ".dynsym": 2664,
+        ".gnu.version": 222,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1372,
+        ".rela.dyn": 239688,
+        ".rela.plt": 48,
+        ".rodata": 507120,
+        ".gcc_except_table": 285376,
+        ".eh_frame_hdr": 62036,
+        ".eh_frame": 438100,
+        ".text": 4183223,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 32,
+        ".tbss": 3240,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 182936,
+        ".dynamic": 480,
+        ".got": 13176,
+        ".got.plt": 40,
+        ".relro_padding": 688,
+        ".tm_clone_table": 0,
+        ".data": 2728,
+        ".bss": 356,
+        ".comment": 157
+      }
+    },
+    "artifact": {
+      "file_bytes": 6773632,
+      "sections": {
+        ".interp": 83,
+        ".note.ABI-tag": 32,
+        ".dynsym": 2664,
+        ".gnu.version": 222,
+        ".gnu.version_r": 384,
+        ".gnu.hash": 28,
+        ".dynstr": 1372,
+        ".rela.dyn": 230976,
+        ".rela.plt": 48,
+        ".rodata": 509552,
+        ".gcc_except_table": 247260,
+        ".eh_frame_hdr": 58852,
+        ".eh_frame": 405756,
+        ".text": 3435303,
+        ".init": 27,
+        ".fini": 13,
+        ".plt": 48,
+        ".tdata": 32,
+        ".tbss": 3240,
+        ".fini_array": 8,
+        ".init_array": 16,
+        ".data.rel.ro": 177736,
+        ".dynamic": 480,
+        ".got": 12896,
+        ".got.plt": 40,
+        ".relro_padding": 2520,
+        ".tm_clone_table": 0,
+        ".data": 2728,
+        ".bss": 356,
+        ".comment": 157
+      }
+    }
+  },
+  "host_buildscript": [
+    {
+      "file": "/tmp/gpui-wgsl-artifact-target/release/build/gpui_gpu-8b2f70d380f5a1fe/build-script-build",
+      "file_bytes": 8249856,
+      "sha256": "5d2e2ae4e74574573ef73c90c1f65ab66d4fa46d15173930e590bf5d6b2168c8"
+    },
+    {
+      "file": "/tmp/gpui-wgsl-artifact-target/release/build/gpui_gpu-b0a1610dc0292da7/build-script-build",
+      "file_bytes": 8249712,
+      "sha256": "2a43ffbfc876c89959aa6db9fda2e0ff1d0bdc8c332a8ee2416e09f5743f1de6"
+    },
+    {
+      "file": "/tmp/gpui-wgsl-artifact-target/release/build/gpui_gpu-e589afeb72e2ceda/build-script-build",
+      "file_bytes": 8249728,
+      "sha256": "b043dbbc1d1a91a639be60aa41ae7e925d8a942f55625f867aac0eddbd3800e3"
+    }
+  ]
+}

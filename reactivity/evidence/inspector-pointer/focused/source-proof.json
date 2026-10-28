@@ -1,0 +1,25 @@
+{
+  "base": "6021d0009db4069e5c7f96400890baa75630f047",
+  "source": "a2e03de3a0fd831f5c9e8404d6d8ebc1815465b8",
+  "changed_files": [
+    "reactivity/crates/gpui/src/runtime.rs",
+    "reactivity/crates/gpui/src/runtime/geometry.rs",
+    "reactivity/crates/gpui/src/runtime/input.rs",
+    "reactivity/crates/gpui/src/runtime/inspector.rs",
+    "reactivity/crates/gpui/src/runtime/query.rs",
+    "reactivity/crates/gpui/tests/pointer_focus.rs"
+  ],
+  "hashes": {
+    "reactivity/crates/gpui/src/runtime.rs": "6891dd2a7eabcb52a971a0031012d5e9103fa96840aca5519cdab316c3ade9ab",
+    "reactivity/crates/gpui/src/runtime/geometry.rs": "e807e38bb113a879f28b85f9e7ab2b5bf62e6229559ef4fea29ddb9b99f59ec6",
+    "reactivity/crates/gpui/src/runtime/input.rs": "d362f3b52988569e9b6715fbc3f0842645e41c575ca752a7893cd2b9eff67577",
+    "reactivity/crates/gpui/src/runtime/inspector.rs": "c5f95e9091a43ed8f1618f76dd12071066be5486911415f3a5538e583b6e0eaa",
+    "reactivity/crates/gpui/src/runtime/query.rs": "fbb0c0eaf79cc5e39163c63b043d27f7a9ebe1630622a658ca4a1bca8f22e3ad",
+    "reactivity/crates/gpui/tests/pointer_focus.rs": "a6a64532d50876244be88eac7a543831dcc464361a0dfaae7933c0705a79edd2",
+    ".cargo/config.toml": "46b48c4505d0c06d229d14f1a819ea294ce2e81ed2c870aefae812dd9e36d295",
+    "reactivity/Cargo.toml": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4",
+    "reactivity/Cargo.lock": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22"
+  },
+  "clean_at_freeze": true,
+  "focused_gates": "Committed bytes match the unchanged tested v3 working tree; no native/strict/cross/codegen qualification is claimed."
+}

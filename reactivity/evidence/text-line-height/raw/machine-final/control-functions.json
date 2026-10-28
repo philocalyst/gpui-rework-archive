@@ -1,0 +1,47 @@
+[
+  {
+    "symbol": "<gpui_canvas::text::TextShaper>::measure",
+    "address": "00000000011732b0",
+    "bytes": 120,
+    "local_sub_rsp_prologue": [
+      24
+    ],
+    "assembly": "\n/home/user/gpui-native-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000011732b0 <_RNvMs7_NtCsjaFUUaeVXI8_11gpui_canvas4textNtB5_10TextShaper7measure>:\n 11732b0:\tpush   rbp\n 11732b1:\tpush   r15\n 11732b3:\tpush   r14\n 11732b5:\tpush   rbx\n 11732b6:\tsub    rsp,0x18\n 11732ba:\tmov    ebp,r8d\n 11732bd:\tmov    r14,rcx\n 11732c0:\tmov    r15,rdx\n 11732c3:\tmov    rbx,rdi\n 11732c6:\tlea    rdi,[rsp+0x8]\n 11732cb:\tmov    rdx,rcx\n 11732ce:\tmovss  DWORD PTR [rsp],xmm0\n 11732d3:\tmov    ecx,r8d\n 11732d6:\tmovss  DWORD PTR [rsp+0x4],xmm1\n 11732dc:\tcall   1173330 <_RNvMs7_NtCsjaFUUaeVXI8_11gpui_canvas4textNtB5_10TextShaper7planner>\n 11732e1:\tcmp    DWORD PTR [rsp+0x8],0x1\n 11732e6:\tjne    11732f9 <_RNvMs7_NtCsjaFUUaeVXI8_11gpui_canvas4textNtB5_10TextShaper7measure+0x49>\n 11732e8:\tmov    rax,QWORD PTR [rsp+0xc]\n 11732ed:\tmov    QWORD PTR [rbx+0x4],rax\n 11732f1:\tmov    DWORD PTR [rbx],0x1\n 11732f7:\tjmp    117331a <_RNvMs7_NtCsjaFUUaeVXI8_11gpui_canvas4textNtB5_10TextShaper7measure+0x6a>\n 11732f9:\tmov    rsi,QWORD PTR [rsp+0x10]\n 11732fe:\tmov    rdi,rbx\n 1173301:\tmov    rdx,r15\n 1173304:\tmov    rcx,r14\n 1173307:\tmovss  xmm0,DWORD PTR [rsp]\n 117330c:\tmov    r8d,ebp\n 117330f:\tmovss  xmm1,DWORD PTR [rsp+0x4]\n 1173315:\tcall   1179850 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner7measure>\n 117331a:\tmov    rax,rbx\n 117331d:\tadd    rsp,0x18\n 1173321:\tpop    rbx\n 1173322:\tpop    r14\n 1173324:\tpop    r15\n 1173326:\tpop    rbp\n 1173327:\tret\n"
+  },
+  {
+    "symbol": "<gpui::runtime::TextSite>::shape_text",
+    "address": "0000000000a10d40",
+    "bytes": 573,
+    "local_sub_rsp_prologue": [
+      120
+    ],
+    "assembly": "\n/home/user/gpui-native-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000a10d40 <_RNvMsi_NtCs4Hhyf6K4hkP_4gpui7runtimeNtB5_8TextSite10shape_text>:\n  a10d40:\tpush   rbp\n  a10d41:\tpush   r15\n  a10d43:\tpush   r14\n  a10d45:\tpush   r13\n  a10d47:\tpush   r12\n  a10d49:\tpush   rbx\n  a10d4a:\tsub    rsp,0x78\n  a10d4e:\tmov    ebp,ecx\n  a10d50:\tmov    rbx,rsi\n  a10d53:\tmaxss  xmm1,DWORD PTR [rip+0xffffffffff73da5d]        # 14e7b8 <anon.9e1870d4a4e2ffce1973a5d62f071879.280.llvm.13353404325187366010+0x18>\n  a10d5b:\tmov    r14,rdi\n  a10d5e:\tmovd   ecx,xmm1\n  a10d62:\tmov    eax,DWORD PTR [rsi]\n  a10d64:\tcmp    eax,0x2\n  a10d67:\tjne    a10e93 <_RNvMsi_NtCs4Hhyf6K4hkP_4gpui7runtimeNtB5_8TextSite10shape_text+0x153>\n  a10d6d:\tmov    DWORD PTR [rsp+0xc],ecx\n  a10d71:\tmov    rax,QWORD PTR [rbx+0x40]\n  a10d75:\tmov    rcx,QWORD PTR [rax]\n  a10d78:\tshr    rcx,1\n  a10d7b:\tadd    rax,0x10\n  a10d7f:\ttest   r8,r8\n  a10d82:\tcmovne rax,r8\n  a10d86:\tcmove  r9,rcx\n  a10d8a:\tlea    rdi,[rsp+0x40]\n  a10d8f:\tmov    rsi,rdx\n  a10d92:\tmov    rdx,rax\n  a10d95:\tmov    rcx,r9\n  a10d98:\tmov    r8d,ebp\n  a10d9b:\tcall   QWORD PTR [rip+0x9f7ab7]        # 1408858 <_DYNAMIC+0x1b50>\n  a10da1:\tmov    r15,QWORD PTR [rsp+0x40]\n  a10da6:\tmov    r13d,DWORD PTR [rsp+0x48]\n  a10dab:\tmov    r12d,DWORD PTR [rsp+0x4c]\n  a10db0:\ttest   r15,r15\n  a10db3:\tje     a10eb1 <_RNvMsi_NtCs4Hhyf6K4hkP_4gpui7runtimeNtB5_8TextSite10shape_text+0x171>\n  a10db9:\tmov    rax,QWORD PTR [rsp+0x70]\n  a10dbe:\trex.W\n  a10dbf:\t.byte 0x89\n"
+  },
+  {
+    "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+    "address": "00000000008e2200",
+    "bytes": 2110,
+    "local_sub_rsp_prologue": [
+      344
+    ],
+    "assembly": "\n/home/user/gpui-native-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000008e2200 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_>:\n  8e2200:\tpush   rbp\n  8e2201:\tpush   r15\n  8e2203:\tpush   r14\n  8e2205:\tpush   r13\n  8e2207:\tpush   r12\n  8e2209:\tpush   rbx\n  8e220a:\tsub    rsp,0x158\n  8e2211:\tmov    rax,QWORD PTR [rsi+0x6e8]\n  8e2218:\ttest   rax,rax\n  8e221b:\tje     8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e2221:\ttest   BYTE PTR [rax],0x1\n  8e2224:\tje     8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e222a:\tmov    rcx,QWORD PTR [rax+0x8]\n  8e222e:\tcmp    rcx,QWORD PTR [rsi+0x6a0]\n  8e2235:\tjne    8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e223b:\tcmp    QWORD PTR [rsi+0x5c0],0xffffffffffffffff\n  8e2243:\tjne    8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e2249:\tcmp    BYTE PTR [rsi+0x76c],0x0\n  8e2250:\tje     8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e2256:\tcmp    QWORD PTR [rsi+0x650],0x0\n  8e225e:\tjne    8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e2264:\tcmp    QWORD PTR [rsi+0x600],0x0\n  8e226c:\tjne    8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n  8e2272:\tcmp    QWORD PTR [rsi+0x668],0x0\n  8e227a:\tjne    8e2349 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x149>\n"
+  },
+  {
+    "symbol": "<gpui_canvas::text::planner::Planner>::measure",
+    "address": "0000000001179850",
+    "bytes": 6356,
+    "local_sub_rsp_prologue": [
+      2472
+    ],
+    "assembly": "\n/home/user/gpui-native-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000001179850 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner7measure>:\n 1179850:\tpush   rbp\n 1179851:\tpush   r15\n 1179853:\tpush   r14\n 1179855:\tpush   r13\n 1179857:\tpush   r12\n 1179859:\tpush   rbx\n 117985a:\tsub    rsp,0x9a8\n 1179861:\tmovss  DWORD PTR [rsp+0x3c],xmm1\n 1179867:\tmov    DWORD PTR [rsp+0x38],r8d\n 117986c:\tmovss  DWORD PTR [rsp+0x9c],xmm0\n 1179875:\tmov    r13,rcx\n 1179878:\tmov    rbx,rsi\n 117987b:\tmov    r12,rdi\n 117987e:\tmov    rdi,rsi\n 1179881:\tmov    QWORD PTR [rsp+0x30],rdx\n 1179886:\tmov    rsi,rdx\n 1179889:\tmov    rdx,rcx\n 117988c:\tcall   117b660 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner8coverage>\n 1179891:\tcmp    eax,0xffffffff\n 1179894:\tjne    1179931 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner7measure+0xe1>\n 117989a:\tmov    rcx,rax\n 117989d:\tshr    rcx,0x20\n 11798a1:\tmov    QWORD PTR [rsp+0x1b8],0xffffffffffffffff\n 11798ad:\tlea    rdx,[rip+0xffffffffff22d810]        # 3a70c4 <anon.b3eb9ad75ff6a298872ede09debc4ccd.15.llvm.1808819024133795642+0x2b3>\n 11798b4:\tmov    QWORD PTR [rsp+0x1c0],rdx\n 11798bc:\tmov    QWORD PTR [rsp+0x1c8],0xc\n 11798c8:\trex.W\n 11798c9:\t.byte 0xc7\n 11798ca:\ttest   BYTE PTR [rax+rdx*8],ah\n 11798cd:\tadd    DWORD PTR [rax],eax\n\t...\n"
+  },
+  {
+    "symbol": "<gpui_canvas::text::planner::Planner>::shape",
+    "address": "00000000011778e0",
+    "bytes": 8041,
+    "local_sub_rsp_prologue": [
+      2520
+    ],
+    "assembly": "\n/home/user/gpui-native-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000011778e0 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner5shape>:\n 11778e0:\tpush   rbp\n 11778e1:\tpush   r15\n 11778e3:\tpush   r14\n 11778e5:\tpush   r13\n 11778e7:\tpush   r12\n 11778e9:\tpush   rbx\n 11778ea:\tsub    rsp,0x9d8\n 11778f1:\tmov    ebp,r9d\n 11778f4:\tmovss  DWORD PTR [rsp+0x14],xmm1\n 11778fa:\tmov    DWORD PTR [rsp+0x5c],r8d\n 11778ff:\tmovss  DWORD PTR [rsp+0x30],xmm0\n 1177905:\tmov    rbx,rsi\n 1177908:\tmov    r13,rdi\n 117790b:\tmov    rdi,rsi\n 117790e:\tmov    QWORD PTR [rsp+0x100],rdx\n 1177916:\tmov    rsi,rdx\n 1177919:\tmov    QWORD PTR [rsp+0x20],rcx\n 117791e:\tmov    rdx,rcx\n 1177921:\tcall   117b660 <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner8coverage>\n 1177926:\tcmp    eax,0xffffffff\n 1177929:\tjne    11779cd <_RNvMs0_NtNtCsjaFUUaeVXI8_11gpui_canvas4text7plannerNtB5_7Planner5shape+0xed>\n 117792f:\tmov    rcx,rax\n 1177932:\tshr    rcx,0x20\n 1177936:\tmov    QWORD PTR [rsp+0x208],0xffffffffffffffff\n 1177942:\tlea    rdx,[rip+0xffffffffff22f77b]        # 3a70c4 <anon.b3eb9ad75ff6a298872ede09debc4ccd.15.llvm.1808819024133795642+0x2b3>\n 1177949:\tmov    QWORD PTR [rsp+0x210],rdx\n 1177951:\tmov    QWORD PTR [rsp+0x218],0xc\n 117795d:\trex.W\n 117795e:\t.byte 0xc7\n 117795f:\t.byte 0x84\n"
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "name": "accesskit_atspi_common",
+    "version": "0.21.0",
+    "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common#0.21.0",
+    "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      },
+      {
+        "name": "accesskit_consumer",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_consumer#0.39.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer/Cargo.toml",
+        "targets": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "accesskit_consumer",
+    "version": "0.39.1",
+    "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_consumer#0.39.1",
+    "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "accesskit_macos",
+    "version": "0.27.1",
+    "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_macos#0.27.1",
+    "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_macos/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      },
+      {
+        "name": "accesskit_consumer",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_consumer#0.39.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer/Cargo.toml",
+        "targets": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "accesskit_unix",
+    "version": "0.24.0",
+    "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_unix#0.24.0",
+    "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_unix/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      },
+      {
+        "name": "accesskit_atspi_common",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common#0.21.0",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common/Cargo.toml",
+        "targets": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "accesskit_windows",
+    "version": "0.35.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#accesskit_windows@0.35.1",
+    "manifest": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      },
+      {
+        "name": "accesskit_consumer",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_consumer#0.39.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer/Cargo.toml",
+        "targets": [
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "accesskit_winit",
+    "version": "0.34.1",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#accesskit_winit@0.34.1",
+    "manifest": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_winit-0.34.1/Cargo.toml",
+    "dependencies": [
+      {
+        "name": "accesskit",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit#0.25.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit/Cargo.toml",
+        "targets": [
+          null
+        ]
+      },
+      {
+        "name": "accesskit_ios",
+        "id": "registry+https://github.com/rust-lang/crates.io-index#accesskit_ios@0.2.1",
+        "manifest": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_ios-0.2.1/Cargo.toml",
+        "targets": [
+          "cfg(target_os = \"ios\")"
+        ]
+      },
+      {
+        "name": "accesskit_macos",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_macos#0.27.1",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_macos/Cargo.toml",
+        "targets": [
+          "cfg(target_os = \"macos\")"
+        ]
+      },
+      {
+        "name": "accesskit_unix",
+        "id": "path+file:///root/gpui-clips-sol/reactivity/vendor/accesskit_unix#0.24.0",
+        "manifest": "/root/gpui-clips-sol/reactivity/vendor/accesskit_unix/Cargo.toml",
+        "targets": [
+          "cfg(any(target_os = \"linux\", target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\"))"
+        ]
+      },
+      {
+        "name": "accesskit_windows",
+        "id": "registry+https://github.com/rust-lang/crates.io-index#accesskit_windows@0.35.1",
+        "manifest": "/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/Cargo.toml",
+        "targets": [
+          "cfg(target_os = \"windows\")"
+        ]
+      }
+    ]
+  }
+]

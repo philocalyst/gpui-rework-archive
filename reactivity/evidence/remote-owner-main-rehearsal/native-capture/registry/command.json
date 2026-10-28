@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/tmp/gpui-remote-owner-main-qualification/native-capture/registry/gpui-tests",
+    "native::accessibility::linux_tests::failure::native_atspi_failed_source_keeps_old_p_and_public_action_repairs",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "display": ":1",
+  "scope": "actual native AT-SPI Registry client; functional only"
+}

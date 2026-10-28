@@ -1,0 +1,161 @@
+    Blocking waiting for file lock on build directory
+   Compiling proc-macro2 v1.0.107
+   Compiling once_cell v1.21.4
+   Compiling stable_deref_trait v1.2.1
+   Compiling bitflags v2.13.2
+   Compiling smallvec v1.16.3
+   Compiling hashbrown v0.17.1
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling bytemuck_derive v1.12.1
+   Compiling yoke v0.8.3
+   Compiling thiserror-impl v2.0.21
+   Compiling bytemuck v1.25.2
+   Compiling zerovec-derive v0.11.6
+   Compiling thiserror v2.0.21
+   Compiling zerovec v0.11.8
+   Compiling zerocopy-derive v0.8.63
+   Compiling displaydoc v0.2.7
+   Compiling writeable v0.6.4
+   Compiling arrayvec v0.7.8
+   Compiling tinystr v0.8.4
+   Compiling zerocopy v0.8.63
+   Compiling font-types v0.12.7
+   Compiling litemap v0.8.3
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling half v2.7.1
+   Compiling indexmap v2.14.2
+   Compiling icu_provider v2.3.1
+   Compiling naga-types v30.0.1
+   Compiling naga v30.0.1
+   Compiling utf8_iter v1.0.4
+   Compiling icu_collections v2.3.0
+   Compiling read-fonts v0.41.0
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling heck v0.5.0
+   Compiling icu_locale_fallback_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling pkg-config v0.3.34
+   Compiling wayland-sys v0.31.11
+   Compiling snafu-derive v0.8.9
+   Compiling icu_segmenter_data v2.3.0
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+   Compiling icu_normalizer_data v2.3.0
+   Compiling khronos-egl v6.0.0
+   Compiling either v1.19.0
+   Compiling itertools v0.14.0
+   Compiling wgpu-types v30.0.1
+   Compiling snafu v0.8.9
+   Compiling parking_lot_core v0.9.12
+   Compiling dlib v0.5.3
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-hal)
+   Compiling wgsl-rs-ir v0.1.0-beta.6
+   Compiling gpu-allocator v0.28.0
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling parking_lot v0.12.5
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling read-fonts v0.46.0
+   Compiling memmap2 v0.9.12
+   Compiling linebender_resource_handle v0.1.1
+   Compiling glow v0.17.0
+   Compiling glam v0.30.10
+   Compiling parlance v0.1.1
+   Compiling fontique v0.12.0
+   Compiling skrifa v0.49.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-core)
+   Compiling parley_emoji v0.12.0
+   Compiling parley_engine v0.12.0 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/parley_engine)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling skrifa v0.44.0
+   Compiling wgpu v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu)
+   Compiling zeno v0.3.3
+   Compiling yazi v0.2.1
+   Compiling swash v0.2.10
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-lazy-indirect-sol/reactivity/crates/gpu)
+   Compiling parley v0.12.0 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/parley)
+   Compiling fearless_simd_macros v0.1.0
+   Compiling ttf-parser v0.25.1
+   Compiling fearless_simd v1.1.0
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-lazy-indirect-sol/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-lazy-indirect-sol/reactivity/crates/canvas)
+   Compiling pollster v1.0.1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 46s
+     Running unittests src/lib.rs (/tmp/gpui-lazy-indirect-sol-target/debug/deps/gpui_gpu-5336ce84b3f90877)
+
+running 9 tests
+test renderer::tests::packet_storage_ledger ... ok
+test renderer::tests::precision_admission_rejects_finite_but_overflowing_intermediates ... ok
+test renderer::tests::word_writers_preserve_float_and_metadata_bits ... ok
+test renderer::tests::storage_records_match_shader_stride_and_offsets ... ok
+test shader::tests::generated_shader_validates ... ok
+test shader::ui::__validate_wgsl ... ok
+test renderer::tests::certificates_imply_sample_membership_in_both_numeric_domains ... ok
+test renderer::paint::tests::optional_map_and_guards_have_explicit_storage ... ok
+test renderer::tests::packet_reference_cap_and_atlas_last_row_admission ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/render.rs (/tmp/gpui-lazy-indirect-sol-target/debug/deps/render-9131bdbfb832968c)
+
+running 45 tests
+test float_target_rejects_sdr_scene_metadata_before_submission ... ok
+test layout_equality_names_the_instance_and_preserves_clone_order_hash ... ok
+test maximum_admitted_tone_mapping_is_finite_and_bright ... ok
+test linear_float_target_retains_hdr_and_premultiplied_alpha ... ok
+test hdr_and_wide_gamut_packets_redraw_exactly_without_reencoding_or_uploads ... ok
+test narrowed_inverse_preserves_the_adversarial_half_open_edge ... ok
+test images_reach_linear_hdr_and_display_p3_output_without_a_linear_gpu_mirror ... ok
+test mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent ... ok
+test clip_extent_sum_preserves_half_open_sample_membership ... ok
+test inverse_lattice_clips_preserve_actual_vulkan_pixels ... ok
+test failed_preparation_after_image_upload_discards_the_previous_packet ... ok
+test explicit_packet_redraw_submits_complete_pixels_to_fresh_targets_after_scene_drop ... ok
+test all_authored_color_layouts_reach_real_sdr_and_hdr_targets ... ok
+test opaque_proof_changes_do_not_discard_background_records ... ok
+test opaque_tile_proofs_skip_overlap_and_preserve_later_edges ... ok
+test paint_validation_is_atomic_and_hdr_proof_changes_require_full_rebuild ... ok
+test paint_modes_foreign_ordinals_and_attempted_full_failures_revoke_mapping ... ok
+test real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks ... ok
+test queued_redraw_keeps_its_packet_before_later_uploads_and_buffer_replacement ... ok
+test physical_glyph_masks_map_back_to_logical_rectangles ... ok
+test bank_patch_rejects_exceptional_opaque_proof_colors_then_full_render_recovers ... ok
+test real_vulkan_pixels_match_cpu_sampling_and_preserve_correlated_edges ... ok
+test packed_images_profiles_alpha_filters_and_cache_match_cpu ... ok
+test grouped_and_inline_packets_match_every_pixel_in_mixed_scenes ... ok
+test rounded_image_material_decodes_exact_hdr_coverage ... ok
+test rounded_images_share_pixels_and_fixed_packet_strides_preserve_queued_order ... ok
+test unsupported_context_format_does_not_request_a_device ... ok
+test literal_cow_and_equal_source_rows_preserve_queued_positional_and_slot_submissions ... ok
+test redraw_rejects_wrong_targets_without_discarding_the_valid_packet ... ok
+test paint_packets_queue_a_patch_b_patch_c_before_readback_and_match_full_rebuilds ... ok
+test text_free_reset_releases_keys_without_invalidating_in_flight_text ... ok
+test uniform_float_tiles_preserve_reference_output_bits ... ok
+test unkeyed_calls_revalidate_mutable_headers_and_distinct_scenes_and_modes ... ok
+test rounded_circle_pythagorean_sites_neighbor_radii_and_origin_cancellation ... ok
+test viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges ... ok
+test zero_coverage_hdr_preserves_numeric_zero_across_cpu_and_gpu ... ok
+test tile_certificates_fall_back_for_clip_alpha_shear_and_ambiguous_edges ... ok
+test zero_coverage_draw_preserves_threshold_clear_and_hdr_bits ... ok
+test unicode_paragraphs_fallback_and_fractional_density_match_cpu ... ok
+test grouped_error_envelopes_match_inline_across_fractional_glyph_samples ... ok
+test shared_context_drop_and_real_destroy_never_rebind_old_state ... ok
+test shared_bank_queues_a_patch_b_patch_c_without_poll_and_matches_full_literal_packets ... ok
+test shared_context_keeps_packets_atlases_images_and_slots_independent ... ok
+test separate_identical_color_calls_keep_independent_positional_groups ... ok
+test analytic_rounded_rectangles_match_cpu_and_never_use_rect_certificates ... ok
+
+test result: ok. 45 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.61s
+

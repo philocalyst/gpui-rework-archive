@@ -1,0 +1,13 @@
+   Compiling zbus_macros v5.19.0
+    Checking mio v1.2.4
+    Checking socket2 v0.6.5
+   Compiling tokio-macros v2.7.2
+    Checking tokio v1.54.0
+    Checking zbus v5.19.0
+    Checking tokio-stream v0.1.19
+    Checking atspi-common v0.13.0
+    Checking atspi-proxies v0.13.0
+    Checking accesskit_atspi_common v0.21.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_atspi_common)
+    Checking atspi v0.29.0
+    Checking accesskit_unix v0.24.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_unix)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.93s

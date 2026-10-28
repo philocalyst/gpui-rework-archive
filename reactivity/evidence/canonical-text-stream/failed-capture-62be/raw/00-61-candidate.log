@@ -1,0 +1,10 @@
+NATIVE_CONTROL discovery ready
+NATIVE_CONTROL first ACK
+NATIVE_CONTROL real provider discovered
+NATIVE_CONTROL geometry checked
+
+thread '<unnamed>' (2896105) panicked at src/native.rs:400:22:
+called `Result::unwrap()` on an `Err` value: TimedOut
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+NATIVE_CONTROL client failed: native client panicked
+Error: "native client panicked"

@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/74d72ec24f0fd494/out/paint-74d72ec24f0fd494",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/018-paint/test",
+  "sha256": "59c9e3f434a0761d26f7ee57133f6392b481166e84bac4239770e9cc15ad8419",
+  "bytes": 123334832,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "paint",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/paint.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

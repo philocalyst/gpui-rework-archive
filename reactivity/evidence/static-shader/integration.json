@@ -1,0 +1,408 @@
+{
+  "main_before_consumers": "25d365263e",
+  "producer_source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+  "prior_optional_source": "2dc03c126a81426336724174e8f5d695b6416bc7",
+  "pristine_core_import": "c27929d1531b1b24731bcc7ce211f8448a4039aa",
+  "verified_published_core_files": 86,
+  "verified_archive_files": {
+    "reactivity/evidence/offline-shader": 149,
+    "reactivity/evidence/static-shader": 151
+  },
+  "exact_shipping_and_manifest_matches": [
+    {
+      "path": "reactivity/crates/gpu/Cargo.toml",
+      "sha256": "42bcaea566c9fbaf5a3e413e7e266f87681012fa1bc45d9bcfd99c39dd790222"
+    },
+    {
+      "path": "reactivity/crates/gpu/build.rs",
+      "sha256": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/lib.rs",
+      "sha256": "22090139c1e8df7319e07a463b01adfdf554e9f2df757cbcb6e342052e056b74"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer.rs",
+      "sha256": "a5903d52cdc625cc37f71b231b038f3946ae1cf84df0e8f97c62189b634db95d"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/renderer/artifact.rs",
+      "sha256": "d290f70cafd37e2cc750ce352a2a5d0cd1c778283aaf82286aff50c7cc204a2b"
+    },
+    {
+      "path": "reactivity/crates/gpu/src/shader_build.rs",
+      "sha256": "3fbbcd5627a1f2f8415fecaf153814a70c83dbfd1ed6e10fb3f39bee2cca3d1d"
+    },
+    {
+      "path": "reactivity/crates/gpu/tests/render.rs",
+      "sha256": "18273a92e96c788006ba5837054fc852661829b7dc35e1077304216cf34bb8dd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/Cargo.toml",
+      "sha256": "c218342b95ef3b727a0e32a74597e0e19275c8d64d214b210fdb171caf4b15bd"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/build.rs",
+      "sha256": "f3d39c06752630257f6bf5efe76a61e54b32b354704f7c16c76c8e2128fa6b34"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/as_hal.rs",
+      "sha256": "e5823b9c0fac61359d56a2b19af9d9c807a6c89aa73d07022be5a1166e43e2f2"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/binding_model.rs",
+      "sha256": "07e72628b4aa645ce7e7c35c9e427760d1862916a8fc5ecdb4dfe40d4ab7c93f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/allocator.rs",
+      "sha256": "386cb6e60bd332a881dbbe57ff66a0fa83f35e3ee924559f1689418ac6c7273a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/bind.rs",
+      "sha256": "188d8507f2399db23c5614151a0c3489fd9edd73ca94d4a539a4fd36d823e832"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/bundle.rs",
+      "sha256": "acab3fd887277316f974fe60469268a639b0e8b098d863ef4372c62731b94153"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/clear.rs",
+      "sha256": "a2391466574538b1a0c41564ad75e55baee3816a280cdf46a67dea2c248e1489"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/compute.rs",
+      "sha256": "2423a0cd75e1751ae42ab5e73644808cb0a0aeae79f98d5fdc7f54473012b897"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/compute_command.rs",
+      "sha256": "7cb0b83584f40606966d272d22981a94a5ede5ca50778a25dd6481ee3ef39978"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/draw.rs",
+      "sha256": "2ad390cbc668bb38a653ad156c3fc81e34115f6fc240b2a4b8fb3ad6ba260abc"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/encoder.rs",
+      "sha256": "b13ca12960f39925f0f36500b8107fb6c5a21da05a433ac8e8a5d6d9b3200691"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/encoder_command.rs",
+      "sha256": "2f9417c9c6c0cb52db561ed7d8a777fc29b59ade95a98ffaf91e4bb84f3b8cda"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/ffi.rs",
+      "sha256": "4924adbb42a670b5e9827c0f2175939981e8fc78a36b2fe370426e8c550a4ce7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/memory_init.rs",
+      "sha256": "ec50657786a476a6be717cef872b644b841dbbe2ba4cf67a0e46839377122135"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/mod.rs",
+      "sha256": "63cac4e60b20f672ff9ce8460c9d745156793239baa03561b6a8e523d7a793db"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/pass.rs",
+      "sha256": "17ab893b63b99f1a99a79690ebd15bfaa6c99f4a7702ae2c7d139669b2745dbb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/query.rs",
+      "sha256": "e2392dfc4285b4d2d5c8eee398124440d81ae7f452d812cb14b3b7912d652a16"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/ray_tracing.rs",
+      "sha256": "7a5c080cd4f8a899058c21924089297318678535aa2139193541a468771e7fdb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/render.rs",
+      "sha256": "c8bf51592f841c0d246e9f477ee340942e3ebd32344762fb8c6956230aa767a4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/render_command.rs",
+      "sha256": "99c1e1b143a015e55bdb2076e35c1be8db58df79ed2b80c05fd070d1a830bb6b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/timestamp_writes.rs",
+      "sha256": "da06fb07b8d0917be3e7fb9212d0ffc6b16526e1c1df617213ef354c3e1fb446"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/transfer.rs",
+      "sha256": "3ad39433f5b4704d3465a6bf76984ff04a554926dd2a463cc5b36daaf44c43f6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/command/transition_resources.rs",
+      "sha256": "f3574fc30d5bf0b3913424e0d2527029ec205a9522df2dc1699222ea803c52c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/conv.rs",
+      "sha256": "c71246db2914a48a6b651d38c25b348095cbb7bd6a3f7c3706ec9bda095fbeba"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/bgl.rs",
+      "sha256": "b081fe1393f1dd917151efc3a10ee0269fecd3920eac3b45411c1197a98c5a06"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/global.rs",
+      "sha256": "bdb01659c1ee814ba9671795c8e0a030181c905682b81f3414937887e16ad296"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/life.rs",
+      "sha256": "1c11985bb4a11fd0513a926cd28774fd96c075eea48bf45c89a392974d313157"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/mod.rs",
+      "sha256": "0fa10a8106a4f3cdd11e9f09a5b4141faa0945e2cd0f6325193c6df87a47b499"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/queue.rs",
+      "sha256": "ec1e845d9f4ec1a149e31bc28697caf41543c89b0e35116427602ff86395b125"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/ray_tracing.rs",
+      "sha256": "99313b88c4c6ea0d2e5765a8d19ed15c0bd60a6bead479e8ea585b4f2020c78e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/resource.rs",
+      "sha256": "0e30e20e2a1c0c5d714ad4504e0a427d4cb825a830ccb0e73d0670fcd5caf437"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/surface_config.rs",
+      "sha256": "d44273674bc13e410a18a5bd3a260be6388d287a995a25d883edb9452d7de48e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace.rs",
+      "sha256": "8d9f2a948a84ad9cb04655eabe1fd857cc42f6d1f94da83a4cacc57a00c76da3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace/record.rs",
+      "sha256": "c0149f524bf3513c618d9b679dabaf85ba0a593b650f1efea7eff27d16894894"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/device/trace/replay.rs",
+      "sha256": "24cd8e175810071114855793a1219de0ed01c33daa7d1329195a64df5f11c626"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/error.rs",
+      "sha256": "4f07a0b09b30b2d6cbc855d0091d724000f492018af3b41e80befbeccf2a6f4e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/global.rs",
+      "sha256": "b29b96777103398ed337ceae8d866c4606c5cdc5ace2db6555bacf66766306af"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/hub.rs",
+      "sha256": "a6c654e019926fa9881a5cbb395c1477a9efcf40c2431e0846d14871e7f3c5e0"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/id.rs",
+      "sha256": "529303b55ca4f159ee224540c798ebc4421e93256d49ef16a4ad775624c427e6"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/identity.rs",
+      "sha256": "712ccda267eb602655c53672a94346aa4c9f88c0044ae6edcd658a814c9a50cf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/dispatch.rs",
+      "sha256": "feb39fceceb2748286642d9e7177b5844474e2645f6be3a9b801dd889388fb76"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/draw.rs",
+      "sha256": "fd75e1fac9ba1e7e442b9a455fdff4deaec60216a4eab4cb9f5a697ab3313e19"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/mod.rs",
+      "sha256": "57531928a29f7b0c8e3a17cf3cc21ae1562c4951d5e9703b0e8a883180bcb47c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/indirect_validation/utils.rs",
+      "sha256": "a7fc3c2d81b6f4ce3facbc9b007012c5bd8d5e89d78b41bb8ba154e08cb94cb8"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/buffer.rs",
+      "sha256": "6167a400ab271ba857f1c507e60a46fbd318c185aff87eecf7eb05f7f09b6963"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/mod.rs",
+      "sha256": "38773a6e51c165d8e54f1ab56f2a0c20c3a126ac3cb19733ea8b423fc305e214"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/init_tracker/texture.rs",
+      "sha256": "384c224ce90df97062d4828107c17500434488c9b7dd6ea83649f9e710995324"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/instance.rs",
+      "sha256": "3605199dc2f4e4344ae908b496b316f871e66d7174ca1f2b91357411843b70bb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lib.rs",
+      "sha256": "bbcce7beb46b9f4f1a6a3fd09f99b7a8072e3e3d789aa65e6df362d9ca7ccdaf"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/limits.rs",
+      "sha256": "edce18a96fbc13e4c992c5fe95972f8895218fd881a54d10bd808e9229395990"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/mod.rs",
+      "sha256": "8d3ae3f8d004d7f7d8a3aefe9f30b35669cb8e2409f5fba27b1fcb116b2429c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/observing.rs",
+      "sha256": "d848f19cfc7ce092a964b68ab02a399a13f29af9cb686d4dfc2a2b59bbdaff81"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/rank.rs",
+      "sha256": "3a240acfc0ff78b7a41a29244ff5ee38263426a12b45668b9bb0faf1888b7663"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/ranked.rs",
+      "sha256": "b47b8f7275d6eb8088fc41bc476bf1af37fc01491be52adf7148f7d96055b879"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/lock/vanilla.rs",
+      "sha256": "0ab88039841ac0e4983364fe1692a6f0a838d6162687f50e8d24f4a95eb00136"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pipeline.rs",
+      "sha256": "e35c6269edb20f5f89f8cd2862712e0fe7bab711d56ebc8c85b029094e69001c"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pipeline_cache.rs",
+      "sha256": "2e15a195b1e7a25fa2d21aa922acf07cf78c1fe09002db67915e0a6ac2e76c23"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/pool.rs",
+      "sha256": "e11bfdc73a66321d26715465fa74657dcd26a9b856b80b8369b4aac2132a4295"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/present.rs",
+      "sha256": "cb53160d93ee210025cf4a483ce700b713d56c16daba87cad6b9934cc803f47b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/ray_tracing.rs",
+      "sha256": "da0f5c4bfdf1718c26c51014c8ad6be86678bc8ad4b86fbd62243ed26596f6f7"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/registry.rs",
+      "sha256": "02980feeb366f26e627ec8a04aaea49363fd10dea18a74b18a7952b548a98a1f"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/resource.rs",
+      "sha256": "72d8815e912b102a4308f4c71f5b1c14758812a7d66f97837f441a1822f9e641"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/scratch.rs",
+      "sha256": "ea5c40e4d18a12f09cc1038f2dcdddb69b13e99275ac987d826658229a39b326"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/snatch.rs",
+      "sha256": "c2dad4e5086ddd021bad68479686f2e61f9889a9e00381a55f1222aa0f4c22a3"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/storage.rs",
+      "sha256": "a778ea826ffef4c9c345b499d4ca5f7a7f32a447de7e572b806900cb661bc2a5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/timestamp_normalization/mod.rs",
+      "sha256": "64f00f6aedd84ed53d45fe895d0f498d8df28df904cb2430ab118329c0535c5b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/blas.rs",
+      "sha256": "18c7b5b89a60ab49bbc0f4f8b85a24502c1d968714ef4c586095e119848d902a"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/buffer.rs",
+      "sha256": "b5c1ba69545186d1771ce7062d6c2f097f6a66dcec0453df4ccf7e1098a17d12"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/metadata.rs",
+      "sha256": "b3140163ef3ac1682ed11183d16a19562f11ffe081d9aa7b128bff1ec4db2fdb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/mod.rs",
+      "sha256": "cce8080f69372c915f11568a0e9ef289de1498a4ee161cb56ea3a380c9e717c1"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/query_set.rs",
+      "sha256": "52f73250082af6a9e8d6e574e2c370f1da4d47d8a1d22bd3c60df60b4358c4a5"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/range.rs",
+      "sha256": "de885c3a7f4cb1c2bf86e2203831bc1905348b8312bc4bd016f7da3f233b774e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/stateless.rs",
+      "sha256": "3db699f5f48a319fa07fb16cdf51e1623d6ecac7a476467ee366e014ea665b89"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/track/texture.rs",
+      "sha256": "f7fd7dfb776d8f524c5f5c53c6ce09bc4de254f9e1a277f9f1c66fd6b3ffb6fa"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/validation.rs",
+      "sha256": "4437697bcabf198358e7198c2d9c4f738000f3afe0ed670cf2ab1b26261e58c9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/validation/shader_io_deductions.rs",
+      "sha256": "b690145ca7286a7f356b9df68ce49421a30bdc242e38e1c07a6568d23587410d"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-core/src/weak_vec.rs",
+      "sha256": "a4193add5912b91226a3155cc613365b7fafdf2e7929d21d68bc19d149696e85"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/Cargo.toml",
+      "sha256": "120c5e78708fe77156a23e9d7b1ddb1f5cb14040fca6f7de358849a50de03b3e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/dx12/device.rs",
+      "sha256": "b428f4d101a257c99a340355746ab5a185596cecd178de063a11dbc3ba5d8afb"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/gles/device.rs",
+      "sha256": "4da3fb4ee9145870270f52bbac95f42789f73bfaf0011c46e21883a3d28696e9"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/lib.rs",
+      "sha256": "8790870ab477ce10a05f75e670dd5f1d3d1db25adc8c8beae886f50acd12901e"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/metal/device.rs",
+      "sha256": "1803b3ba5a88e4891c1d9c1632884f7ececadb14c7f7b630d7d55802879eb0ac"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/noop/mod.rs",
+      "sha256": "8c3ad9284398dd6aaa7da0b82bc3943dcf251073b935e5e138f7356f3f572b48"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/device.rs",
+      "sha256": "accf1be799da8f1b4282d2893377113f00169e966dda7f179f6b5e9f1223017b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu-hal/src/vulkan/mod.rs",
+      "sha256": "73cdd286fe1bdcca51aad33f521999f469eb1a8acbe6f28c230685144e0b0d04"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/Cargo.toml",
+      "sha256": "f630292115a79f237447bdf561eccb93eca1b4f7c4b1446868af7faaa7ddae09"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/backend/wgpu_core.rs",
+      "sha256": "6f1a9288924385fa383f70ea5e48226b48869f07186c9c79d62470ed9e1fc68b"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/lib.rs",
+      "sha256": "9da12f5d242324bf24109438e76904da830d8008f78a3f12210bdd6160ccd3c4"
+    },
+    {
+      "path": "reactivity/vendor/wgpu/src/shader_artifact.rs",
+      "sha256": "906852414b0a597f6b3aa2c40d05cad382ba40dd7b62043efea7edbd1761ef9f"
+    }
+  ],
+  "preserved_root_changes": [
+    "Future gpui pin-project-lite lock edge",
+    "root Vulkan stage ownership repair; producer imported exact same delta",
+    "current text/query/Hummingbird/Auto code"
+  ],
+  "consumer_graph": "Root workspace and three active standalone consumers select vendored Core. Borrowed-search driver also selects vendored WGPU; only registry source/checksum removals changed in consumer locks. Published vendor/test-copy/historical archived locks remain unchanged.",
+  "qualification": "Frozen producer gates remain pinned a871. Combined main qualification follows separately; no foreign-runtime/hardware/startup claim."
+}

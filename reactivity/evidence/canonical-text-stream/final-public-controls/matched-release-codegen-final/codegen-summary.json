@@ -1,0 +1,2470 @@
+{
+  "baseline": {
+    "canonical-text-public-control": {
+      "binary": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/baseline-codegen-canonical-text-public-control",
+      "bytes": 17354176,
+      "sha256": "c2aa136a0bc21b926cb228371b618f333c10f67b14b00718f35c8ba7acedef45",
+      "sections": {
+        ".rodata": 6533440,
+        ".eh_frame": 223208,
+        ".text": 3519479,
+        ".data.rel.ro": 132432,
+        ".stack_sizes": 33503
+      },
+      "selected_frames": [
+        {
+          "address": 7591040,
+          "code_bytes": 105,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtCslbxve4rcJus_4gpui7runtime8geometry6RecordEE7or_elseNCNvMsu_B1i_INtB1i_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersE_0EB2E_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::runtime::geometry::Record>>>::or_else::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#42}>",
+          "normalized_name": "<core::option::Option<alloc::vec::Vec<gpui::runtime::geometry::Record>>>::or_else::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#42}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7592528,
+          "code_bytes": 974,
+          "mangled": "_RINvMNtNtCslbxve4rcJus_4gpui7runtime4turnINtB5_10RuntimeMutNtCs9C2G9YFESsD_29canonical_text_public_control6EditoruE22operation_with_editingNCNvMs2_NtB5_7editingBD_13replace_inputs0_0EBX_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::operation_with_editing::<<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::replace_input::{closure#2}>",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::operation_with_editing::<<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::replace_input::{closure#2}>",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7599632,
+          "code_bytes": 1753,
+          "mangled": "_RINvMs1_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtBa_10TextLayout15selection_rectsNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB1I_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerss_0EB2s_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::TextLayout>::selection_rects::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#30}>",
+          "normalized_name": "<gpui_canvas::text::TextLayout>::selection_rects::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#30}>",
+          "stack_bytes": 424
+        },
+        {
+          "address": 7601488,
+          "code_bytes": 1391,
+          "mangled": "_RINvMs3_NtNtCslbxve4rcJus_4gpui7runtime6scrollNtB6_13ViewportBuild6freezeNCNvMsu_B8_INtB8_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersG_0EB1A_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::scroll::ViewportBuild>::freeze::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#44}>",
+          "normalized_name": "<gpui::runtime::scroll::ViewportBuild>::freeze::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#44}>",
+          "stack_bytes": 120
+        },
+        {
+          "address": 7665043,
+          "code_bytes": 50,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextPositionBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition>",
+          "normalized_name": "core::panicking::assert_failed::<gpui_canvas::text::layout::TextPosition, gpui_canvas::text::layout::TextPosition>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7665093,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection>",
+          "normalized_name": "core::panicking::assert_failed::<gpui_canvas::text::layout::TextSelection, gpui_canvas::text::layout::TextSelection>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7665270,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedTNtNtCscdodAO9FK5_5alloc6string6StringNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionPNtB1q_12TextGeometryyEBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<(alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64), (alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64)>",
+          "normalized_name": "core::panicking::assert_failed::<(alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64), (alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64)>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7665326,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedTPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryyEBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<(*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64), (*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64)>",
+          "normalized_name": "core::panicking::assert_failed::<(*const gpui_canvas::text::layout::TextGeometry, u64), (*const gpui_canvas::text::layout::TextGeometry, u64)>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7719808,
+          "code_bytes": 800,
+          "mangled": "_RNCNvCs9C2G9YFESsD_29canonical_text_public_control12old_p_oracle0B3_",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::old_p_oracle::{closure#0}",
+          "normalized_name": "canonical_text_public_control::old_p_oracle::{closure#0}",
+          "stack_bytes": 296
+        },
+        {
+          "address": 7722368,
+          "code_bytes": 753,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss_0Cs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#1}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}",
+          "stack_bytes": 104
+        },
+        {
+          "address": 7723136,
+          "code_bytes": 1503,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_inners7_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#9}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#9}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7724640,
+          "code_bytes": 884,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersD_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#41}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#41}",
+          "stack_bytes": 136
+        },
+        {
+          "address": 7725536,
+          "code_bytes": 415,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersG_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#44}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#44}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7725952,
+          "code_bytes": 130,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersd_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#15}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#15}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7726096,
+          "code_bytes": 143,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersn_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#25}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#25}",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7726240,
+          "code_bytes": 61,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerso_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#26}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#26}",
+          "stack_bytes": 72
+        },
+        {
+          "address": 7729104,
+          "code_bytes": 57,
+          "mangled": "_RNSNvYNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtBc_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_inners7_0INtNtNtCs4NRVxsYgnAr_4core3ops8function6FnOnceTNtNtCscO85OU7Wpt0_20gpui_reactivity_core4tree6NodeIdNtNtNtCs2M7EwM6HstD_6cephal4tree6traits12MeasureInputEE9call_once6vtableBV_",
+          "name": "<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#9} as core[37f591cfbe66b0b1]::ops::function::FnOnce<(gpui_reactivity_core[95306e9e9eec3a0c]::tree::NodeId, cephal[2056001f9b60b8a7]::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "normalized_name": "<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#9} as core::ops::function::FnOnce<(gpui_reactivity_core::tree::NodeId, cephal::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 7729168,
+          "code_bytes": 1426,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control10owner_drag",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_drag",
+          "normalized_name": "canonical_text_public_control::owner_drag",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7730608,
+          "code_bytes": 1422,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control11owner_arrow",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_arrow",
+          "normalized_name": "canonical_text_public_control::owner_arrow",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7732032,
+          "code_bytes": 142,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control12query_visual",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_visual",
+          "normalized_name": "canonical_text_public_control::query_visual",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7732176,
+          "code_bytes": 1380,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control13owner_prepare",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_prepare",
+          "normalized_name": "canonical_text_public_control::owner_prepare",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7733568,
+          "code_bytes": 340,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control13owner_reshape",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_reshape",
+          "normalized_name": "canonical_text_public_control::owner_reshape",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7733920,
+          "code_bytes": 880,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control14map_transcript",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::map_transcript",
+          "normalized_name": "canonical_text_public_control::map_transcript",
+          "stack_bytes": 312
+        },
+        {
+          "address": 7734800,
+          "code_bytes": 1484,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control15query_selection",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_selection",
+          "normalized_name": "canonical_text_public_control::query_selection",
+          "stack_bytes": 312
+        },
+        {
+          "address": 7736288,
+          "code_bytes": 358,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control3ack",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::ack",
+          "normalized_name": "canonical_text_public_control::ack",
+          "stack_bytes": 136
+        },
+        {
+          "address": 7736656,
+          "code_bytes": 10487,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control3run",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::run",
+          "normalized_name": "canonical_text_public_control::run",
+          "stack_bytes": 936
+        },
+        {
+          "address": 7747152,
+          "code_bytes": 9055,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control4main",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::main",
+          "normalized_name": "canonical_text_public_control::main",
+          "stack_bytes": 776
+        },
+        {
+          "address": 7756208,
+          "code_bytes": 2801,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control5mount",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::mount",
+          "normalized_name": "canonical_text_public_control::mount",
+          "stack_bytes": 3384
+        },
+        {
+          "address": 7759024,
+          "code_bytes": 2078,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control6source",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::source",
+          "normalized_name": "canonical_text_public_control::source",
+          "stack_bytes": 88
+        },
+        {
+          "address": 7761104,
+          "code_bytes": 416,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control9owner_hit",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_hit",
+          "normalized_name": "canonical_text_public_control::owner_hit",
+          "stack_bytes": 264
+        },
+        {
+          "address": 7761520,
+          "code_bytes": 181,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control9query_hit",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_hit",
+          "normalized_name": "canonical_text_public_control::query_hit",
+          "stack_bytes": 88
+        },
+        {
+          "address": 7781936,
+          "code_bytes": 1471,
+          "mangled": "_RNvMs0_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE18interaction_layoutBY_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::interaction_layout",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::interaction_layout",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7789232,
+          "code_bytes": 3204,
+          "mangled": "_RNvMs1_NtNtCslbxve4rcJus_4gpui7runtime5inputINtB7_3WinNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13pointer_eventBS_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Win<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::pointer_event",
+          "normalized_name": "<gpui::runtime::Win<canonical_text_public_control::Editor>>::pointer_event",
+          "stack_bytes": 296
+        },
+        {
+          "address": 7798528,
+          "code_bytes": 1615,
+          "mangled": "_RNvMs2_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_10RuntimeMutNtCs9C2G9YFESsD_29canonical_text_public_control6EditoruE13replace_inputB12_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::replace_input",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::replace_input",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7846848,
+          "code_bytes": 1581,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE11acknowledgeBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::acknowledge",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::acknowledge",
+          "stack_bytes": 200
+        },
+        {
+          "address": 7848432,
+          "code_bytes": 22621,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner",
+          "stack_bytes": 3768
+        },
+        {
+          "address": 7957120,
+          "code_bytes": 99,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextPositionNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::TextPosition as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7957232,
+          "code_bytes": 46,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13CaretAffinityNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::CaretAffinity as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::CaretAffinity as core::fmt::Debug>::fmt",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7957280,
+          "code_bytes": 99,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::TextSelection as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7957392,
+          "code_bytes": 12,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&*const gpui_canvas::text::layout::TextGeometry as core::fmt::Debug>::fmt",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7957472,
+          "code_bytes": 156,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRTNtNtCscdodAO9FK5_5alloc6string6StringNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionPNtB1a_12TextGeometryyENtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&(alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64) as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&(alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64) as core::fmt::Debug>::fmt",
+          "stack_bytes": 72
+        },
+        {
+          "address": 7957632,
+          "code_bytes": 102,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRTPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryyENtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&(*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64) as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&(*const gpui_canvas::text::layout::TextGeometry, u64) as core::fmt::Debug>::fmt",
+          "stack_bytes": 56
+        },
+        {
+          "address": 7958416,
+          "code_bytes": 41,
+          "mangled": "_RNvXs7_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_10TextOffsetNtNtCs4NRVxsYgnAr_4core3fmt5Debug3fmt",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextOffset as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<gpui_canvas::text::layout::TextOffset as core::fmt::Debug>::fmt",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7964384,
+          "code_bytes": 289,
+          "mangled": "_RNvXs_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3zipINtB4_3ZipINtNtNtBa_5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtB1q_11interactionNtB1q_12TextGeometry9intervals0EINtNtB6_4skip4SkipBV_EENtNtNtB8_6traits8iterator8Iterator4nextCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<core[37f591cfbe66b0b1]::iter::adapters::zip::Zip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>, core[37f591cfbe66b0b1]::iter::adapters::skip::Skip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>>> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::next",
+          "normalized_name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::next",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7965440,
+          "code_bytes": 99,
+          "mangled": "_RNvXsn_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextPositionNtNtCs4NRVxsYgnAr_4core3fmt5Debug3fmt",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<gpui_canvas::text::layout::TextPosition as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7968416,
+          "code_bytes": 232,
+          "mangled": "_RNvYINtNtNtCs4NRVxsYgnAr_4core5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtBN_11interactionNtBN_12TextGeometry9intervals0ENtNtNtNtB9_4iter6traits8iterator8Iterator3nthCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::nth",
+          "normalized_name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7987936,
+          "code_bytes": 336,
+          "mangled": "_RNvMNtNtCslbxve4rcJus_4gpui7runtime13text_geometryNtB2_13TextResources11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::text_geometry::TextResources>::acknowledge",
+          "normalized_name": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+          "stack_bytes": 104
+        },
+        {
+          "address": 8021616,
+          "code_bytes": 76,
+          "mangled": "_RNvMs4_NtNtCslbxve4rcJus_4gpui7runtime8geometryNtB5_8Geometry11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::geometry::Geometry>::acknowledge",
+          "normalized_name": "<gpui::runtime::geometry::Geometry>::acknowledge",
+          "stack_bytes": 24
+        },
+        {
+          "address": 8031104,
+          "code_bytes": 463,
+          "mangled": "_RNvMsi_NtCslbxve4rcJus_4gpui7runtimeNtB5_8TextSite9shape_for",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::TextSite>::shape_for",
+          "normalized_name": "<gpui::runtime::TextSite>::shape_for",
+          "stack_bytes": 168
+        },
+        {
+          "address": 8040944,
+          "code_bytes": 157,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui7runtime5image11acknowledge",
+          "name": "gpui[f6c49cfa67184ae6]::runtime::image::acknowledge",
+          "normalized_name": "gpui::runtime::image::acknowledge",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8109616,
+          "code_bytes": 108,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB13_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::option::Option<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<core::option::Option<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8113008,
+          "code_bytes": 103,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc4sync8ArcInnerNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB1j_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::sync::ArcInner<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::sync::ArcInner<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8165568,
+          "code_bytes": 791,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss_0Bc_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#1}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 8214976,
+          "code_bytes": 850,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11grapheme_at",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::grapheme_at",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::grapheme_at",
+          "stack_bytes": 376
+        },
+        {
+          "address": 8215840,
+          "code_bytes": 1691,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11move_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::move_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::move_visual",
+          "stack_bytes": 328
+        },
+        {
+          "address": 8217536,
+          "code_bytes": 10,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11next_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::next_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::next_visual",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8217552,
+          "code_bytes": 151,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11position_at",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_at",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_at",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8217712,
+          "code_bytes": 7,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry15previous_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::previous_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::previous_visual",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8217728,
+          "code_bytes": 2185,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry16position_on_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_on_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line",
+          "stack_bytes": 360
+        },
+        {
+          "address": 8219920,
+          "code_bytes": 78,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry9graphemes",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::graphemes",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::graphemes",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8229328,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout3RunE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Run>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Run>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8229328,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4LineE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Line>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Line>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8229440,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Stop>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8230416,
+          "code_bytes": 461,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry12caret_bounds",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_bounds",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_bounds",
+          "stack_bytes": 24
+        },
+        {
+          "address": 8230880,
+          "code_bytes": 290,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry19validates_selection",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::validates_selection",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8245520,
+          "code_bytes": 183,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry11source_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::source_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::source_line",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8245712,
+          "code_bytes": 213,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry5stops",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::stops",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::stops",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8245936,
+          "code_bytes": 43,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry9intervals",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8267872,
+          "code_bytes": 135,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui_canvas::text::layout::TextGeometry>>::drop_slow",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8291024,
+          "code_bytes": 289,
+          "mangled": "_RNvXs_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3zipINtB4_3ZipINtNtNtBa_5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtB1q_11interactionNtB1q_12TextGeometry9intervals0EINtNtB6_4skip4SkipBV_EENtNtNtB8_6traits8iterator8Iterator4nextB1u_",
+          "name": "<core[37f591cfbe66b0b1]::iter::adapters::zip::Zip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>, core[37f591cfbe66b0b1]::iter::adapters::skip::Skip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>>> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::next",
+          "normalized_name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::next",
+          "stack_bytes": 24
+        },
+        {
+          "address": 8293632,
+          "code_bytes": 232,
+          "mangled": "_RNvYINtNtNtCs4NRVxsYgnAr_4core5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtBN_11interactionNtBN_12TextGeometry9intervals0ENtNtNtNtB9_4iter6traits8iterator8Iterator3nthBR_",
+          "name": "<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::nth",
+          "normalized_name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+          "stack_bytes": 8
+        }
+      ],
+      "metadata_functions": 3808,
+      "limits": "Compiler stack-size metadata for control and all dependency crates; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings.",
+      "selected_unique_code_bytes": 82356,
+      "selected_unique_bodies": 70
+    },
+    "canonical-text-native-control": {
+      "binary": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/baseline-codegen-canonical-text-native-control",
+      "bytes": 30447216,
+      "sha256": "fb0b4a9b83c8ed3ed6708b46d9c48ff6f03e56095176e4abd9cdeee2b0aa470d",
+      "sections": {
+        ".rodata": 7211432,
+        ".eh_frame": 988472,
+        ".text": 11664279,
+        ".data.rel.ro": 399160,
+        ".stack_sizes": 154608
+      },
+      "selected_frames": [
+        {
+          "address": 9659056,
+          "code_bytes": 105,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtCslbxve4rcJus_4gpui7runtime8geometry6RecordEE7or_elseNCNvMsu_B1i_INtB1i_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersE_0EB2E_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::runtime::geometry::Record>>>::or_else::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#42}>",
+          "normalized_name": "<core::option::Option<alloc::vec::Vec<gpui::runtime::geometry::Record>>>::or_else::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#42}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 9660016,
+          "code_bytes": 127,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCslbxve4rcJus_4gpui8identity6TargetE6filterNCNvMs1_NtNtBM_7runtime5inputINtB1D_3WinNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBM_6remote4LaneNtB29_7CommandNCNvB29_4mains1_0uEE3keys0_0EB29_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<gpui[f6c49cfa67184ae6]::identity::Target>>::filter::<<gpui[f6c49cfa67184ae6]::runtime::Win<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::key::{closure#2}>",
+          "normalized_name": "<core::option::Option<gpui::identity::Target>>::filter::<<gpui::runtime::Win<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::key::{closure#2}>",
+          "stack_bytes": 72
+        },
+        {
+          "address": 9669664,
+          "code_bytes": 974,
+          "mangled": "_RINvMNtNtCslbxve4rcJus_4gpui7runtime4turnINtB5_10RuntimeMutNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB7_6remote4LaneNtBX_7CommandNCNvBX_4mains1_0uEE22operation_with_editingNCNvMs2_NtB5_7editingBD_13replace_inputs0_0EBX_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::operation_with_editing::<<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::replace_input::{closure#2}>",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::operation_with_editing::<<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::replace_input::{closure#2}>",
+          "stack_bytes": 280
+        },
+        {
+          "address": 9748320,
+          "code_bytes": 539,
+          "mangled": "_RINvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB6_6Cohort11replacementNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1n_7CommandNCNvB1n_4mains1_0uEEB1n_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::replacement::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::replacement::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 248
+        },
+        {
+          "address": 9748864,
+          "code_bytes": 1725,
+          "mangled": "_RINvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB6_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1i_7CommandNCNvB1i_4mains1_0uEEB1i_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::refresh::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 520
+        },
+        {
+          "address": 9758384,
+          "code_bytes": 2035,
+          "mangled": "_RINvMs1_NtCsaMeumrDXo7O_14accesskit_unix7adapterNtB6_7Adapter16update_if_activeNCINvMs6_NtNtCslbxve4rcJus_4gpui6native13accessibilityNtB1o_6Bridge4syncNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1s_6remote4LaneNtB2r_7CommandNCNvB2r_4mains1_0uEEs1_0EB2r_",
+          "name": "<accesskit_unix[7d89a03a0ddf28fe]::adapter::Adapter>::update_if_active::<<gpui[f6c49cfa67184ae6]::native::accessibility::Bridge>::sync<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>",
+          "normalized_name": "<accesskit_unix::adapter::Adapter>::update_if_active::<<gpui::native::accessibility::Bridge>::sync<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>",
+          "stack_bytes": 1080
+        },
+        {
+          "address": 9760976,
+          "code_bytes": 1105,
+          "mangled": "_RINvMs1_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtBa_10TextLayout15selection_rectsNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB1I_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerss_0EB2s_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::TextLayout>::selection_rects::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#30}>",
+          "normalized_name": "<gpui_canvas::text::TextLayout>::selection_rects::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#30}>",
+          "stack_bytes": 344
+        },
+        {
+          "address": 9777904,
+          "code_bytes": 1391,
+          "mangled": "_RINvMs3_NtNtCslbxve4rcJus_4gpui7runtime6scrollNtB6_13ViewportBuild6freezeNCNvMsu_B8_INtB8_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersG_0EB1A_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::scroll::ViewportBuild>::freeze::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#44}>",
+          "normalized_name": "<gpui::runtime::scroll::ViewportBuild>::freeze::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#44}>",
+          "stack_bytes": 120
+        },
+        {
+          "address": 9853456,
+          "code_bytes": 286,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputEECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::native::accessibility::text::Input>>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 9873696,
+          "code_bytes": 2194,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync4mpsc8ReceiverNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpsc::Receiver<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpsc::Receiver<gpui::native::accessibility::Queued>>",
+          "stack_bytes": 88
+        },
+        {
+          "address": 9959920,
+          "code_bytes": 120,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>",
+          "normalized_name": "core::ptr::drop_glue::<gpui::native::accessibility::text::Input>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 9988432,
+          "code_bytes": 244,
+          "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable7ipnsortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB6_SBT_20sort_unstable_by_keyyNCINvMs0_BV_NtBV_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB11_6remote4LaneNtB2Z_7CommandNCNvB2Z_4mains1_0uEEs1_0E0EB2Z_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::ipnsort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::ipnsort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 9989024,
+          "code_bytes": 260,
+          "mangled": "_RINvNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text15qualified_fieldNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB8_6remote4LaneNtB1b_7CommandNCNvB1b_4mains1_0uEEB1b_",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::text::qualified_field::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "gpui::native::accessibility::text::qualified_field::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 88
+        },
+        {
+          "address": 9999376,
+          "code_bytes": 173,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB14_20sort_unstable_by_keyyNCINvMs0_B16_NtB16_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1c_6remote4LaneNtB3d_7CommandNCNvB3d_4mains1_0uEEs1_0E0EB3d_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::pivot::median3_rec::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::pivot::median3_rec::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 10008336,
+          "code_bytes": 1664,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort18small_sort_generalNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB1f_20sort_unstable_by_keyyNCINvMs0_B1h_NtB1h_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1n_6remote4LaneNtB3o_7CommandNCNvB3o_4mains1_0uEEs1_0E0EB3o_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::smallsort::small_sort_general::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::smallsort::small_sort_general::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 2728
+        },
+        {
+          "address": 10010336,
+          "code_bytes": 222,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB1m_20sort_unstable_by_keyyNCINvMs0_B1o_NtB1o_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1u_6remote4LaneNtB3v_7CommandNCNvB3v_4mains1_0uEEs1_0E0EB3v_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::smallsort::insertion_sort_shift_left::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 10024896,
+          "code_bytes": 364,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable8heapsort8heapsortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB15_20sort_unstable_by_keyyNCINvMs0_B17_NtB17_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1d_6remote4LaneNtB3e_7CommandNCNvB3e_4mains1_0uEEs1_0E0EB3e_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::heapsort::heapsort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::heapsort::heapsort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 16
+        },
+        {
+          "address": 10036128,
+          "code_bytes": 1427,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable9quicksort9quicksortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB17_20sort_unstable_by_keyyNCINvMs0_B19_NtB19_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1f_6remote4LaneNtB3g_7CommandNCNvB3g_4mains1_0uEEs1_0E0EB3g_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::quicksort::quicksort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::quicksort::quicksort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 104
+        },
+        {
+          "address": 10092880,
+          "code_bytes": 722,
+          "mangled": "_RINvYINtNtNtNtCs4NRVxsYgnAr_4core4iter7sources7from_fn6FromFnNCNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB17_12TextGeometry4runss0_0ENtNtNtBa_6traits8iterator8Iterator4foldjNCNvYB3_B2v_5count0ECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "<core[37f591cfbe66b0b1]::iter::sources::from_fn::FromFn<<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::fold::<usize, <core[37f591cfbe66b0b1]::iter::sources::from_fn::FromFn<<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::count::{closure#0}>",
+          "normalized_name": "<core::iter::sources::from_fn::FromFn<<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}> as core::iter::traits::iterator::Iterator>::fold::<usize, <core::iter::sources::from_fn::FromFn<<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}> as core::iter::traits::iterator::Iterator>::count::{closure#0}>",
+          "stack_bytes": 200
+        },
+        {
+          "address": 10095200,
+          "code_bytes": 1089,
+          "mangled": "_RINvYINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters3zip3ZipINtNtNtBc_5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtB1m_11interactionNtB1m_12TextGeometry9intervals0EINtNtB8_4skip4SkipBR_EENtNtNtBa_6traits8iterator8Iterator8try_folduNCINvNvB3r_8find_map5checkTRSB1k_B4A_ENtB2f_12TextGraphemeQNCB2a_s_0E0INtNtNtBc_3ops12control_flow11ControlFlowB4L_EECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "<core[37f591cfbe66b0b1]::iter::adapters::zip::Zip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>, core[37f591cfbe66b0b1]::iter::adapters::skip::Skip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>>> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::try_fold::<(), core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator::find_map::check<(&[gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop], &[gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop]), gpui_canvas[bdbd4139a55d3b41]::text::layout::interaction::TextGrapheme, &mut <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#1}>::{closure#0}, core[37f591cfbe66b0b1]::ops::control_flow::ControlFlow<gpui_canvas[bdbd4139a55d3b41]::text::layout::interaction::TextGrapheme>>",
+          "normalized_name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::find_map::check<(&[gpui_canvas::text::layout::Stop], &[gpui_canvas::text::layout::Stop]), gpui_canvas::text::layout::interaction::TextGrapheme, &mut <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}>::{closure#0}, core::ops::control_flow::ControlFlow<gpui_canvas::text::layout::interaction::TextGrapheme>>",
+          "stack_bytes": 104
+        },
+        {
+          "address": 10150096,
+          "code_bytes": 282,
+          "mangled": "_RNCINvMs6_NtNtCslbxve4rcJus_4gpui6native13accessibilityNtB8_6Bridge4syncNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1a_7CommandNCNvB1a_4mains1_0uEEs0_0B1a_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::Bridge>::sync::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#2}",
+          "normalized_name": "<gpui::native::accessibility::Bridge>::sync::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#2}",
+          "stack_bytes": 120
+        },
+        {
+          "address": 10166976,
+          "code_bytes": 1469,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control11frame_after0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::frame_after::{closure#0}",
+          "normalized_name": "canonical_text_native_control::frame_after::{closure#0}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10168448,
+          "code_bytes": 1079,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control4mains0_0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main::{closure#2}",
+          "normalized_name": "canonical_text_native_control::main::{closure#2}",
+          "stack_bytes": 168
+        },
+        {
+          "address": 10169536,
+          "code_bytes": 628,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control4mains_0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main::{closure#1}",
+          "normalized_name": "canonical_text_native_control::main::{closure#1}",
+          "stack_bytes": 120
+        },
+        {
+          "address": 10170176,
+          "code_bytes": 284,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control5proxy0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::proxy::{closure#0}",
+          "normalized_name": "canonical_text_native_control::proxy::{closure#0}",
+          "stack_bytes": 40
+        },
+        {
+          "address": 10170464,
+          "code_bytes": 59919,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control8exercise0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::exercise::{closure#0}",
+          "normalized_name": "canonical_text_native_control::exercise::{closure#0}",
+          "stack_bytes": 5480
+        },
+        {
+          "address": 10307440,
+          "code_bytes": 1503,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_inners7_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#9}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#9}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10308944,
+          "code_bytes": 884,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersD_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#41}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#41}",
+          "stack_bytes": 136
+        },
+        {
+          "address": 10309840,
+          "code_bytes": 415,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersG_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#44}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#44}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 10310256,
+          "code_bytes": 130,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersd_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#15}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#15}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 10310400,
+          "code_bytes": 143,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersn_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#25}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#25}",
+          "stack_bytes": 24
+        },
+        {
+          "address": 10310544,
+          "code_bytes": 61,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerso_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#26}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#26}",
+          "stack_bytes": 72
+        },
+        {
+          "address": 10345952,
+          "code_bytes": 57,
+          "mangled": "_RNSNvYNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtBc_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_inners7_0INtNtNtCs4NRVxsYgnAr_4core3ops8function6FnOnceTNtNtCscO85OU7Wpt0_20gpui_reactivity_core4tree6NodeIdNtNtNtCs2M7EwM6HstD_6cephal4tree6traits12MeasureInputEE9call_once6vtableBV_",
+          "name": "<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#9} as core[37f591cfbe66b0b1]::ops::function::FnOnce<(gpui_reactivity_core[95306e9e9eec3a0c]::tree::NodeId, cephal[2056001f9b60b8a7]::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "normalized_name": "<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#9} as core::ops::function::FnOnce<(gpui_reactivity_core::tree::NodeId, cephal::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 10346032,
+          "code_bytes": 3605,
+          "mangled": "_RNvCsc2TX5wMu9vI_29canonical_text_native_control12close_window",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::close_window",
+          "normalized_name": "canonical_text_native_control::close_window",
+          "stack_bytes": 1272
+        },
+        {
+          "address": 10349648,
+          "code_bytes": 14114,
+          "mangled": "_RNvCsc2TX5wMu9vI_29canonical_text_native_control4main",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main",
+          "normalized_name": "canonical_text_native_control::main",
+          "stack_bytes": 4472
+        },
+        {
+          "address": 10390368,
+          "code_bytes": 1471,
+          "mangled": "_RNvMs0_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE18interaction_layoutBY_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::interaction_layout",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::interaction_layout",
+          "stack_bytes": 280
+        },
+        {
+          "address": 10426864,
+          "code_bytes": 1615,
+          "mangled": "_RNvMs2_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_10RuntimeMutNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB9_6remote4LaneNtB12_7CommandNCNvB12_4mains1_0uEE13replace_inputB12_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::replace_input",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::replace_input",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10569648,
+          "code_bytes": 1581,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE11acknowledgeBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::acknowledge",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::acknowledge",
+          "stack_bytes": 200
+        },
+        {
+          "address": 10571232,
+          "code_bytes": 22621,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner",
+          "stack_bytes": 3768
+        },
+        {
+          "address": 10793776,
+          "code_bytes": 232,
+          "mangled": "_RNvYINtNtNtCs4NRVxsYgnAr_4core5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtBN_11interactionNtBN_12TextGeometry9intervals0ENtNtNtNtB9_4iter6traits8iterator8Iterator3nthCsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::nth",
+          "normalized_name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+          "stack_bytes": 8
+        },
+        {
+          "address": 11574816,
+          "code_bytes": 268,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc5boxed3BoxINtNtNtNtCs2AWtUsOyxgP_3std4sync4mpmc7counter7CounterINtNtB1e_4list7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEEEB2s_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::boxed::Box<std[1e3c4ec04c5261a9]::sync::mpmc::counter::Counter<std[1e3c4ec04c5261a9]::sync::mpmc::list::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::boxed::Box<std::sync::mpmc::counter::Counter<std::sync::mpmc::list::Channel<gpui::native::accessibility::Queued>>>>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 11576432,
+          "code_bytes": 1332,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync4mpsc8ReceiverNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEB1p_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpsc::Receiver<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpsc::Receiver<gpui::native::accessibility::Queued>>",
+          "stack_bytes": 72
+        },
+        {
+          "address": 11580624,
+          "code_bytes": 180,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtNtCs2AWtUsOyxgP_3std4sync4mpmc7counter7CounterINtNtBG_5array7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEEB1U_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpmc::counter::Counter<std[1e3c4ec04c5261a9]::sync::mpmc::array::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpmc::counter::Counter<std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11593488,
+          "code_bytes": 120,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputEBJ_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>",
+          "normalized_name": "core::ptr::drop_glue::<gpui::native::accessibility::text::Input>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11610640,
+          "code_bytes": 1089,
+          "mangled": "_RINvYINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters3zip3ZipINtNtNtBc_5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtB1m_11interactionNtB1m_12TextGeometry9intervals0EINtNtB8_4skip4SkipBR_EENtNtNtBa_6traits8iterator8Iterator8try_folduNCINvNvB3r_8find_map5checkTRSB1k_B4A_ENtB2f_12TextGraphemeQNCB2a_s_0E0INtNtNtBc_3ops12control_flow11ControlFlowB4L_EECslbxve4rcJus_4gpui",
+          "name": "<core[37f591cfbe66b0b1]::iter::adapters::zip::Zip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>, core[37f591cfbe66b0b1]::iter::adapters::skip::Skip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>>> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::try_fold::<(), core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator::find_map::check<(&[gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop], &[gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop]), gpui_canvas[bdbd4139a55d3b41]::text::layout::interaction::TextGrapheme, &mut <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#1}>::{closure#0}, core[37f591cfbe66b0b1]::ops::control_flow::ControlFlow<gpui_canvas[bdbd4139a55d3b41]::text::layout::interaction::TextGrapheme>>",
+          "normalized_name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::find_map::check<(&[gpui_canvas::text::layout::Stop], &[gpui_canvas::text::layout::Stop]), gpui_canvas::text::layout::interaction::TextGrapheme, &mut <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}>::{closure#0}, core::ops::control_flow::ControlFlow<gpui_canvas::text::layout::interaction::TextGrapheme>>",
+          "stack_bytes": 104
+        },
+        {
+          "address": 11612080,
+          "code_bytes": 1090,
+          "mangled": "_RNCNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB9_12TextGeometry4runss0_0Cslbxve4rcJus_4gpui",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}",
+          "stack_bytes": 296
+        },
+        {
+          "address": 11619536,
+          "code_bytes": 336,
+          "mangled": "_RNvMNtNtCslbxve4rcJus_4gpui7runtime13text_geometryNtB2_13TextResources11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::text_geometry::TextResources>::acknowledge",
+          "normalized_name": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+          "stack_bytes": 104
+        },
+        {
+          "address": 11631184,
+          "code_bytes": 301,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort14text_count_for",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::text_count_for",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::text_count_for",
+          "stack_bytes": 40
+        },
+        {
+          "address": 11631488,
+          "code_bytes": 309,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort5clear",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::clear",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::clear",
+          "stack_bytes": 56
+        },
+        {
+          "address": 11631808,
+          "code_bytes": 84,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort5input",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::input",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::input",
+          "stack_bytes": 0
+        },
+        {
+          "address": 11631904,
+          "code_bytes": 7299,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort6append",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::append",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::append",
+          "stack_bytes": 1320
+        },
+        {
+          "address": 11639216,
+          "code_bytes": 56,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort9qualified",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::qualified",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::qualified",
+          "stack_bytes": 0
+        },
+        {
+          "address": 11651968,
+          "code_bytes": 544,
+          "mangled": "_RNvMs1_NtNtNtCs2AWtUsOyxgP_3std4sync4mpmc4zeroINtB5_7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedE10disconnectB12_",
+          "name": "<std[1e3c4ec04c5261a9]::sync::mpmc::zero::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>::disconnect",
+          "normalized_name": "<std::sync::mpmc::zero::Channel<gpui::native::accessibility::Queued>>::disconnect",
+          "stack_bytes": 72
+        },
+        {
+          "address": 11652512,
+          "code_bytes": 1290,
+          "mangled": "_RNvMs1_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_5Input15native_position",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>::native_position",
+          "normalized_name": "<gpui::native::accessibility::text::Input>::native_position",
+          "stack_bytes": 488
+        },
+        {
+          "address": 11653808,
+          "code_bytes": 731,
+          "mangled": "_RNvMs1_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_5Input8position",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>::position",
+          "normalized_name": "<gpui::native::accessibility::text::Input>::position",
+          "stack_bytes": 312
+        },
+        {
+          "address": 11674448,
+          "code_bytes": 76,
+          "mangled": "_RNvMs4_NtNtCslbxve4rcJus_4gpui7runtime8geometryNtB5_8Geometry11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::geometry::Geometry>::acknowledge",
+          "normalized_name": "<gpui::runtime::geometry::Geometry>::acknowledge",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11689024,
+          "code_bytes": 463,
+          "mangled": "_RNvMsi_NtCslbxve4rcJus_4gpui7runtimeNtB5_8TextSite9shape_for",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::TextSite>::shape_for",
+          "normalized_name": "<gpui::runtime::TextSite>::shape_for",
+          "stack_bytes": 168
+        },
+        {
+          "address": 11692416,
+          "code_bytes": 106,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCslbxve4rcJus_4gpui6native13accessibility6SharedE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui[f6c49cfa67184ae6]::native::accessibility::Shared>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui::native::accessibility::Shared>>::drop_slow",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11696256,
+          "code_bytes": 2133,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility14project_sparse",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::project_sparse",
+          "normalized_name": "gpui::native::accessibility::project_sparse",
+          "stack_bytes": 520
+        },
+        {
+          "address": 11698400,
+          "code_bytes": 2926,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility14projected_node",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::projected_node",
+          "normalized_name": "gpui::native::accessibility::projected_node",
+          "stack_bytes": 392
+        },
+        {
+          "address": 11701328,
+          "code_bytes": 2506,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility7project",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::project",
+          "normalized_name": "gpui::native::accessibility::project",
+          "stack_bytes": 616
+        },
+        {
+          "address": 11711904,
+          "code_bytes": 157,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui7runtime5image11acknowledge",
+          "name": "gpui[f6c49cfa67184ae6]::runtime::image::acknowledge",
+          "normalized_name": "gpui::runtime::image::acknowledge",
+          "stack_bytes": 40
+        },
+        {
+          "address": 11754528,
+          "code_bytes": 232,
+          "mangled": "_RNvYINtNtNtCs4NRVxsYgnAr_4core5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtBN_11interactionNtBN_12TextGeometry9intervals0ENtNtNtNtB9_4iter6traits8iterator8Iterator3nthCslbxve4rcJus_4gpui",
+          "name": "<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::nth",
+          "normalized_name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18177296,
+          "code_bytes": 108,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB13_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::option::Option<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<core::option::Option<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18180688,
+          "code_bytes": 103,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc4sync8ArcInnerNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB1j_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::sync::ArcInner<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::sync::ArcInner<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18272016,
+          "code_bytes": 791,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss_0Bc_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#1}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 18332640,
+          "code_bytes": 1691,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11move_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::move_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::move_visual",
+          "stack_bytes": 328
+        },
+        {
+          "address": 18334336,
+          "code_bytes": 351,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry12graphemes_in",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::graphemes_in",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::graphemes_in",
+          "stack_bytes": 24
+        },
+        {
+          "address": 18334688,
+          "code_bytes": 2185,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry16position_on_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_on_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line",
+          "stack_bytes": 360
+        },
+        {
+          "address": 18336880,
+          "code_bytes": 333,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry4runs",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::runs",
+          "stack_bytes": 88
+        },
+        {
+          "address": 18346544,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout3RunE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Run>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Run>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18346544,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4LineE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Line>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Line>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18346656,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Stop>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18350896,
+          "code_bytes": 365,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry10caret_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_line",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18351264,
+          "code_bytes": 461,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry12caret_bounds",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_bounds",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_bounds",
+          "stack_bytes": 24
+        },
+        {
+          "address": 18351728,
+          "code_bytes": 290,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry19validates_selection",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::validates_selection",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18368928,
+          "code_bytes": 183,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry11source_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::source_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::source_line",
+          "stack_bytes": 0
+        },
+        {
+          "address": 18369120,
+          "code_bytes": 213,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry5stops",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::stops",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::stops",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18369344,
+          "code_bytes": 43,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry9intervals",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals",
+          "stack_bytes": 0
+        },
+        {
+          "address": 18395344,
+          "code_bytes": 135,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui_canvas::text::layout::TextGeometry>>::drop_slow",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18424128,
+          "code_bytes": 289,
+          "mangled": "_RNvXs_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3zipINtB4_3ZipINtNtNtBa_5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtB1q_11interactionNtB1q_12TextGeometry9intervals0EINtNtB6_4skip4SkipBV_EENtNtNtB8_6traits8iterator8Iterator4nextB1u_",
+          "name": "<core[37f591cfbe66b0b1]::iter::adapters::zip::Zip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>, core[37f591cfbe66b0b1]::iter::adapters::skip::Skip<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}>>> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::next",
+          "normalized_name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::next",
+          "stack_bytes": 24
+        },
+        {
+          "address": 18426736,
+          "code_bytes": 232,
+          "mangled": "_RNvYINtNtNtCs4NRVxsYgnAr_4core5slice4iter7ChunkByNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopNCNvMs_NtBN_11interactionNtBN_12TextGeometry9intervals0ENtNtNtNtB9_4iter6traits8iterator8Iterator3nthBR_",
+          "name": "<core[37f591cfbe66b0b1]::slice::iter::ChunkBy<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop, <gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#0}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::nth",
+          "normalized_name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+          "stack_bytes": 8
+        }
+      ],
+      "metadata_functions": 17487,
+      "limits": "Compiler stack-size metadata for control and all dependency crates; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings.",
+      "selected_unique_code_bytes": 160460,
+      "selected_unique_bodies": 81
+    }
+  },
+  "candidate": {
+    "canonical-text-public-control": {
+      "binary": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/candidate-codegen-canonical-text-public-control",
+      "bytes": 17347848,
+      "sha256": "946a0648ec526e33e5f0252a6182983ae9ca246ac2adc30ca86050a7820f5ff6",
+      "sections": {
+        ".rodata": 6533440,
+        ".eh_frame": 222956,
+        ".text": 3515015,
+        ".data.rel.ro": 132432,
+        ".stack_sizes": 33458
+      },
+      "selected_frames": [
+        {
+          "address": 7590624,
+          "code_bytes": 105,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtCslbxve4rcJus_4gpui7runtime8geometry6RecordEE7or_elseNCNvMsu_B1i_INtB1i_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersE_0EB2E_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::runtime::geometry::Record>>>::or_else::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#42}>",
+          "normalized_name": "<core::option::Option<alloc::vec::Vec<gpui::runtime::geometry::Record>>>::or_else::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#42}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7592112,
+          "code_bytes": 974,
+          "mangled": "_RINvMNtNtCslbxve4rcJus_4gpui7runtime4turnINtB5_10RuntimeMutNtCs9C2G9YFESsD_29canonical_text_public_control6EditoruE22operation_with_editingNCNvMs2_NtB5_7editingBD_13replace_inputs0_0EBX_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::operation_with_editing::<<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::replace_input::{closure#2}>",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::operation_with_editing::<<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::replace_input::{closure#2}>",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7599216,
+          "code_bytes": 1513,
+          "mangled": "_RINvMs1_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtBa_10TextLayout15selection_rectsNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB1I_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerss_0EB2s_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::TextLayout>::selection_rects::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#30}>",
+          "normalized_name": "<gpui_canvas::text::TextLayout>::selection_rects::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#30}>",
+          "stack_bytes": 328
+        },
+        {
+          "address": 7600832,
+          "code_bytes": 1391,
+          "mangled": "_RINvMs3_NtNtCslbxve4rcJus_4gpui7runtime6scrollNtB6_13ViewportBuild6freezeNCNvMsu_B8_INtB8_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersG_0EB1A_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::scroll::ViewportBuild>::freeze::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#44}>",
+          "normalized_name": "<gpui::runtime::scroll::ViewportBuild>::freeze::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#44}>",
+          "stack_bytes": 120
+        },
+        {
+          "address": 7664387,
+          "code_bytes": 50,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextPositionBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition>",
+          "normalized_name": "core::panicking::assert_failed::<gpui_canvas::text::layout::TextPosition, gpui_canvas::text::layout::TextPosition>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7664437,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection>",
+          "normalized_name": "core::panicking::assert_failed::<gpui_canvas::text::layout::TextSelection, gpui_canvas::text::layout::TextSelection>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7664614,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedTNtNtCscdodAO9FK5_5alloc6string6StringNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionPNtB1q_12TextGeometryyEBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<(alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64), (alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64)>",
+          "normalized_name": "core::panicking::assert_failed::<(alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64), (alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64)>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7664670,
+          "code_bytes": 56,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core9panicking13assert_failedTPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryyEBM_ECs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "core[37f591cfbe66b0b1]::panicking::assert_failed::<(*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64), (*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64)>",
+          "normalized_name": "core::panicking::assert_failed::<(*const gpui_canvas::text::layout::TextGeometry, u64), (*const gpui_canvas::text::layout::TextGeometry, u64)>",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7719152,
+          "code_bytes": 800,
+          "mangled": "_RNCNvCs9C2G9YFESsD_29canonical_text_public_control12old_p_oracle0B3_",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::old_p_oracle::{closure#0}",
+          "normalized_name": "canonical_text_public_control::old_p_oracle::{closure#0}",
+          "stack_bytes": 296
+        },
+        {
+          "address": 7721712,
+          "code_bytes": 649,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss1_0Cs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#3}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 7722368,
+          "code_bytes": 1503,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_inners7_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#9}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#9}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7723872,
+          "code_bytes": 884,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersD_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#41}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#41}",
+          "stack_bytes": 136
+        },
+        {
+          "address": 7724768,
+          "code_bytes": 415,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersG_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#44}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#44}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7725184,
+          "code_bytes": 130,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersd_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#15}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#15}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7725328,
+          "code_bytes": 143,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innersn_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#25}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#25}",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7725472,
+          "code_bytes": 61,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerso_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#26}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#26}",
+          "stack_bytes": 72
+        },
+        {
+          "address": 7728336,
+          "code_bytes": 57,
+          "mangled": "_RNSNvYNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtBc_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_inners7_0INtNtNtCs4NRVxsYgnAr_4core3ops8function6FnOnceTNtNtCscO85OU7Wpt0_20gpui_reactivity_core4tree6NodeIdNtNtNtCs2M7EwM6HstD_6cephal4tree6traits12MeasureInputEE9call_once6vtableBV_",
+          "name": "<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner::{closure#9} as core[37f591cfbe66b0b1]::ops::function::FnOnce<(gpui_reactivity_core[95306e9e9eec3a0c]::tree::NodeId, cephal[2056001f9b60b8a7]::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "normalized_name": "<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#9} as core::ops::function::FnOnce<(gpui_reactivity_core::tree::NodeId, cephal::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 7728400,
+          "code_bytes": 1426,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control10owner_drag",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_drag",
+          "normalized_name": "canonical_text_public_control::owner_drag",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7729840,
+          "code_bytes": 1422,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control11owner_arrow",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_arrow",
+          "normalized_name": "canonical_text_public_control::owner_arrow",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7731264,
+          "code_bytes": 142,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control12query_visual",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_visual",
+          "normalized_name": "canonical_text_public_control::query_visual",
+          "stack_bytes": 40
+        },
+        {
+          "address": 7731408,
+          "code_bytes": 1380,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control13owner_prepare",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_prepare",
+          "normalized_name": "canonical_text_public_control::owner_prepare",
+          "stack_bytes": 280
+        },
+        {
+          "address": 7732800,
+          "code_bytes": 340,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control13owner_reshape",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_reshape",
+          "normalized_name": "canonical_text_public_control::owner_reshape",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7733152,
+          "code_bytes": 303,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control14map_transcript",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::map_transcript",
+          "normalized_name": "canonical_text_public_control::map_transcript",
+          "stack_bytes": 136
+        },
+        {
+          "address": 7733456,
+          "code_bytes": 1157,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control15query_selection",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_selection",
+          "normalized_name": "canonical_text_public_control::query_selection",
+          "stack_bytes": 200
+        },
+        {
+          "address": 7734624,
+          "code_bytes": 358,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control3ack",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::ack",
+          "normalized_name": "canonical_text_public_control::ack",
+          "stack_bytes": 136
+        },
+        {
+          "address": 7734992,
+          "code_bytes": 9049,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control3run",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::run",
+          "normalized_name": "canonical_text_public_control::run",
+          "stack_bytes": 888
+        },
+        {
+          "address": 7744048,
+          "code_bytes": 9055,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control4main",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::main",
+          "normalized_name": "canonical_text_public_control::main",
+          "stack_bytes": 776
+        },
+        {
+          "address": 7753104,
+          "code_bytes": 2801,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control5mount",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::mount",
+          "normalized_name": "canonical_text_public_control::mount",
+          "stack_bytes": 3384
+        },
+        {
+          "address": 7755920,
+          "code_bytes": 2078,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control6source",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::source",
+          "normalized_name": "canonical_text_public_control::source",
+          "stack_bytes": 88
+        },
+        {
+          "address": 7758000,
+          "code_bytes": 416,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control9owner_hit",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::owner_hit",
+          "normalized_name": "canonical_text_public_control::owner_hit",
+          "stack_bytes": 264
+        },
+        {
+          "address": 7758416,
+          "code_bytes": 181,
+          "mangled": "_RNvCs9C2G9YFESsD_29canonical_text_public_control9query_hit",
+          "name": "canonical_text_public_control[6ff9bda7ef5382d9]::query_hit",
+          "normalized_name": "canonical_text_public_control::query_hit",
+          "stack_bytes": 88
+        },
+        {
+          "address": 7778832,
+          "code_bytes": 1226,
+          "mangled": "_RNvMs0_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE18interaction_layoutBY_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::interaction_layout",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::interaction_layout",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7785888,
+          "code_bytes": 3204,
+          "mangled": "_RNvMs1_NtNtCslbxve4rcJus_4gpui7runtime5inputINtB7_3WinNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13pointer_eventBS_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Win<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::pointer_event",
+          "normalized_name": "<gpui::runtime::Win<canonical_text_public_control::Editor>>::pointer_event",
+          "stack_bytes": 296
+        },
+        {
+          "address": 7795184,
+          "code_bytes": 1615,
+          "mangled": "_RNvMs2_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_10RuntimeMutNtCs9C2G9YFESsD_29canonical_text_public_control6EditoruE13replace_inputB12_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_public_control[6ff9bda7ef5382d9]::Editor, ()>>::replace_input",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_public_control::Editor, ()>>::replace_input",
+          "stack_bytes": 248
+        },
+        {
+          "address": 7843504,
+          "code_bytes": 1581,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE11acknowledgeBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::acknowledge",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::acknowledge",
+          "stack_bytes": 200
+        },
+        {
+          "address": 7845088,
+          "code_bytes": 22621,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCs9C2G9YFESsD_29canonical_text_public_control6EditorE13present_innerBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_public_control[6ff9bda7ef5382d9]::Editor>>::present_inner",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner",
+          "stack_bytes": 3768
+        },
+        {
+          "address": 7953776,
+          "code_bytes": 99,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextPositionNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::TextPosition as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7953888,
+          "code_bytes": 46,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13CaretAffinityNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::CaretAffinity as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::CaretAffinity as core::fmt::Debug>::fmt",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7953936,
+          "code_bytes": 99,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&gpui_canvas::text::layout::TextSelection as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7954048,
+          "code_bytes": 12,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryNtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&*const gpui_canvas::text::layout::TextGeometry as core::fmt::Debug>::fmt",
+          "stack_bytes": 0
+        },
+        {
+          "address": 7954128,
+          "code_bytes": 156,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRTNtNtCscdodAO9FK5_5alloc6string6StringNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout13TextSelectionPNtB1a_12TextGeometryyENtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&(alloc[24b8200b0946867]::string::String, gpui_canvas[bdbd4139a55d3b41]::text::layout::TextSelection, *const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64) as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&(alloc::string::String, gpui_canvas::text::layout::TextSelection, *const gpui_canvas::text::layout::TextGeometry, u64) as core::fmt::Debug>::fmt",
+          "stack_bytes": 72
+        },
+        {
+          "address": 7954288,
+          "code_bytes": 102,
+          "mangled": "_RNvXs1g_NtCs4NRVxsYgnAr_4core3fmtRTPNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryyENtB6_5Debug3fmtCs9C2G9YFESsD_29canonical_text_public_control",
+          "name": "<&(*const gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry, u64) as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<&(*const gpui_canvas::text::layout::TextGeometry, u64) as core::fmt::Debug>::fmt",
+          "stack_bytes": 56
+        },
+        {
+          "address": 7955072,
+          "code_bytes": 41,
+          "mangled": "_RNvXs7_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_10TextOffsetNtNtCs4NRVxsYgnAr_4core3fmt5Debug3fmt",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextOffset as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<gpui_canvas::text::layout::TextOffset as core::fmt::Debug>::fmt",
+          "stack_bytes": 8
+        },
+        {
+          "address": 7961792,
+          "code_bytes": 99,
+          "mangled": "_RNvXsn_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextPositionNtNtCs4NRVxsYgnAr_4core3fmt5Debug3fmt",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextPosition as core[37f591cfbe66b0b1]::fmt::Debug>::fmt",
+          "normalized_name": "<gpui_canvas::text::layout::TextPosition as core::fmt::Debug>::fmt",
+          "stack_bytes": 24
+        },
+        {
+          "address": 7984048,
+          "code_bytes": 336,
+          "mangled": "_RNvMNtNtCslbxve4rcJus_4gpui7runtime13text_geometryNtB2_13TextResources11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::text_geometry::TextResources>::acknowledge",
+          "normalized_name": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+          "stack_bytes": 104
+        },
+        {
+          "address": 8017728,
+          "code_bytes": 76,
+          "mangled": "_RNvMs4_NtNtCslbxve4rcJus_4gpui7runtime8geometryNtB5_8Geometry11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::geometry::Geometry>::acknowledge",
+          "normalized_name": "<gpui::runtime::geometry::Geometry>::acknowledge",
+          "stack_bytes": 24
+        },
+        {
+          "address": 8027216,
+          "code_bytes": 402,
+          "mangled": "_RNvMsi_NtCslbxve4rcJus_4gpui7runtimeNtB5_8TextSite9shape_for",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::TextSite>::shape_for",
+          "normalized_name": "<gpui::runtime::TextSite>::shape_for",
+          "stack_bytes": 168
+        },
+        {
+          "address": 8037008,
+          "code_bytes": 157,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui7runtime5image11acknowledge",
+          "name": "gpui[f6c49cfa67184ae6]::runtime::image::acknowledge",
+          "normalized_name": "gpui::runtime::image::acknowledge",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8106032,
+          "code_bytes": 108,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB13_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::option::Option<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<core::option::Option<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8109424,
+          "code_bytes": 103,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc4sync8ArcInnerNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB1j_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::sync::ArcInner<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::sync::ArcInner<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8161984,
+          "code_bytes": 687,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss1_0Bc_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#3}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 8211536,
+          "code_bytes": 850,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11grapheme_at",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::grapheme_at",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::grapheme_at",
+          "stack_bytes": 264
+        },
+        {
+          "address": 8212400,
+          "code_bytes": 1175,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11move_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::move_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::move_visual",
+          "stack_bytes": 216
+        },
+        {
+          "address": 8213584,
+          "code_bytes": 10,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11next_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::next_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::next_visual",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8213600,
+          "code_bytes": 151,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11position_at",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_at",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_at",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8213760,
+          "code_bytes": 7,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry15previous_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::previous_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::previous_visual",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8213776,
+          "code_bytes": 1664,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry16position_on_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_on_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line",
+          "stack_bytes": 232
+        },
+        {
+          "address": 8215440,
+          "code_bytes": 178,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry9graphemes",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::graphemes",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::graphemes",
+          "stack_bytes": 16
+        },
+        {
+          "address": 8224960,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout3RunE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Run>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Run>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8224960,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4LineE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Line>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Line>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8225072,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Stop>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 8226048,
+          "code_bytes": 429,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry12caret_bounds",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_bounds",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_bounds",
+          "stack_bytes": 24
+        },
+        {
+          "address": 8226480,
+          "code_bytes": 287,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry19validates_selection",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::validates_selection",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection",
+          "stack_bytes": 8
+        },
+        {
+          "address": 8241104,
+          "code_bytes": 183,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry11source_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::source_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::source_line",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8241296,
+          "code_bytes": 190,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry5stops",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::stops",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::stops",
+          "stack_bytes": 0
+        },
+        {
+          "address": 8241488,
+          "code_bytes": 154,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry9intervals",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals",
+          "stack_bytes": 16
+        },
+        {
+          "address": 8263536,
+          "code_bytes": 135,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui_canvas::text::layout::TextGeometry>>::drop_slow",
+          "stack_bytes": 8
+        }
+      ],
+      "metadata_functions": 3803,
+      "limits": "Compiler stack-size metadata for control and all dependency crates; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings.",
+      "selected_unique_code_bytes": 77334,
+      "selected_unique_bodies": 66
+    },
+    "canonical-text-native-control": {
+      "binary": "/tmp/gpui-text-selection-foundation-evidence/matched-release-codegen-final/candidate-codegen-canonical-text-native-control",
+      "bytes": 30441592,
+      "sha256": "e7d58ba2947d92ed70897bcb42a6ca7e945d6de8fa5d6e3d785cb86315e5954d",
+      "sections": {
+        ".rodata": 7211304,
+        ".eh_frame": 988172,
+        ".text": 11661175,
+        ".data.rel.ro": 399152,
+        ".stack_sizes": 154562
+      },
+      "selected_frames": [
+        {
+          "address": 9658464,
+          "code_bytes": 105,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtCslbxve4rcJus_4gpui7runtime8geometry6RecordEE7or_elseNCNvMsu_B1i_INtB1i_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersE_0EB2E_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::runtime::geometry::Record>>>::or_else::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#42}>",
+          "normalized_name": "<core::option::Option<alloc::vec::Vec<gpui::runtime::geometry::Record>>>::or_else::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#42}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 9659424,
+          "code_bytes": 127,
+          "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCslbxve4rcJus_4gpui8identity6TargetE6filterNCNvMs1_NtNtBM_7runtime5inputINtB1D_3WinNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBM_6remote4LaneNtB29_7CommandNCNvB29_4mains1_0uEE3keys0_0EB29_",
+          "name": "<core[37f591cfbe66b0b1]::option::Option<gpui[f6c49cfa67184ae6]::identity::Target>>::filter::<<gpui[f6c49cfa67184ae6]::runtime::Win<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::key::{closure#2}>",
+          "normalized_name": "<core::option::Option<gpui::identity::Target>>::filter::<<gpui::runtime::Win<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::key::{closure#2}>",
+          "stack_bytes": 72
+        },
+        {
+          "address": 9669072,
+          "code_bytes": 974,
+          "mangled": "_RINvMNtNtCslbxve4rcJus_4gpui7runtime4turnINtB5_10RuntimeMutNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB7_6remote4LaneNtBX_7CommandNCNvBX_4mains1_0uEE22operation_with_editingNCNvMs2_NtB5_7editingBD_13replace_inputs0_0EBX_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::operation_with_editing::<<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::replace_input::{closure#2}>",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::operation_with_editing::<<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::replace_input::{closure#2}>",
+          "stack_bytes": 280
+        },
+        {
+          "address": 9747728,
+          "code_bytes": 536,
+          "mangled": "_RINvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB6_6Cohort11replacementNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1n_7CommandNCNvB1n_4mains1_0uEEB1n_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::replacement::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::replacement::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 216
+        },
+        {
+          "address": 9748272,
+          "code_bytes": 1725,
+          "mangled": "_RINvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB6_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1i_7CommandNCNvB1i_4mains1_0uEEB1i_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::refresh::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 488
+        },
+        {
+          "address": 9757792,
+          "code_bytes": 2035,
+          "mangled": "_RINvMs1_NtCsaMeumrDXo7O_14accesskit_unix7adapterNtB6_7Adapter16update_if_activeNCINvMs6_NtNtCslbxve4rcJus_4gpui6native13accessibilityNtB1o_6Bridge4syncNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1s_6remote4LaneNtB2r_7CommandNCNvB2r_4mains1_0uEEs1_0EB2r_",
+          "name": "<accesskit_unix[7d89a03a0ddf28fe]::adapter::Adapter>::update_if_active::<<gpui[f6c49cfa67184ae6]::native::accessibility::Bridge>::sync<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>",
+          "normalized_name": "<accesskit_unix::adapter::Adapter>::update_if_active::<<gpui::native::accessibility::Bridge>::sync<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>",
+          "stack_bytes": 1080
+        },
+        {
+          "address": 9760384,
+          "code_bytes": 1513,
+          "mangled": "_RINvMs1_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtBa_10TextLayout15selection_rectsNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB1I_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerss_0EB2s_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::TextLayout>::selection_rects::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#30}>",
+          "normalized_name": "<gpui_canvas::text::TextLayout>::selection_rects::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#30}>",
+          "stack_bytes": 328
+        },
+        {
+          "address": 9777712,
+          "code_bytes": 1391,
+          "mangled": "_RINvMs3_NtNtCslbxve4rcJus_4gpui7runtime6scrollNtB6_13ViewportBuild6freezeNCNvMsu_B8_INtB8_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersG_0EB1A_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::scroll::ViewportBuild>::freeze::<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#44}>",
+          "normalized_name": "<gpui::runtime::scroll::ViewportBuild>::freeze::<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#44}>",
+          "stack_bytes": 120
+        },
+        {
+          "address": 9853264,
+          "code_bytes": 286,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc3vec3VecNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputEECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::vec::Vec<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::native::accessibility::text::Input>>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 9873504,
+          "code_bytes": 2194,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync4mpsc8ReceiverNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpsc::Receiver<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpsc::Receiver<gpui::native::accessibility::Queued>>",
+          "stack_bytes": 88
+        },
+        {
+          "address": 9959728,
+          "code_bytes": 120,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>",
+          "normalized_name": "core::ptr::drop_glue::<gpui::native::accessibility::text::Input>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 9988240,
+          "code_bytes": 244,
+          "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable7ipnsortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB6_SBT_20sort_unstable_by_keyyNCINvMs0_BV_NtBV_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB11_6remote4LaneNtB2Z_7CommandNCNvB2Z_4mains1_0uEEs1_0E0EB2Z_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::ipnsort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::ipnsort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 9988832,
+          "code_bytes": 260,
+          "mangled": "_RINvNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text15qualified_fieldNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB8_6remote4LaneNtB1b_7CommandNCNvB1b_4mains1_0uEEB1b_",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::text::qualified_field::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>",
+          "normalized_name": "gpui::native::accessibility::text::qualified_field::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>",
+          "stack_bytes": 88
+        },
+        {
+          "address": 9999184,
+          "code_bytes": 173,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB14_20sort_unstable_by_keyyNCINvMs0_B16_NtB16_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1c_6remote4LaneNtB3d_7CommandNCNvB3d_4mains1_0uEEs1_0E0EB3d_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::pivot::median3_rec::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::pivot::median3_rec::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 10008144,
+          "code_bytes": 1664,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort18small_sort_generalNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB1f_20sort_unstable_by_keyyNCINvMs0_B1h_NtB1h_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1n_6remote4LaneNtB3o_7CommandNCNvB3o_4mains1_0uEEs1_0E0EB3o_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::smallsort::small_sort_general::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::smallsort::small_sort_general::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 2728
+        },
+        {
+          "address": 10010144,
+          "code_bytes": 222,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB1m_20sort_unstable_by_keyyNCINvMs0_B1o_NtB1o_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1u_6remote4LaneNtB3v_7CommandNCNvB3v_4mains1_0uEEs1_0E0EB3v_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::shared::smallsort::insertion_sort_shift_left::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 0
+        },
+        {
+          "address": 10024704,
+          "code_bytes": 364,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable8heapsort8heapsortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB15_20sort_unstable_by_keyyNCINvMs0_B17_NtB17_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1d_6remote4LaneNtB3e_7CommandNCNvB3e_4mains1_0uEEs1_0E0EB3e_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::heapsort::heapsort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::heapsort::heapsort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 16
+        },
+        {
+          "address": 10035936,
+          "code_bytes": 1427,
+          "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable9quicksort9quicksortNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputNCINvMB8_SB17_20sort_unstable_by_keyyNCINvMs0_B19_NtB19_6Cohort7refreshNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB1f_6remote4LaneNtB3g_7CommandNCNvB3g_4mains1_0uEEs1_0E0EB3g_",
+          "name": "core[37f591cfbe66b0b1]::slice::sort::unstable::quicksort::quicksort::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input, <[gpui[f6c49cfa67184ae6]::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::refresh<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "normalized_name": "core::slice::sort::unstable::quicksort::quicksort::<gpui::native::accessibility::text::Input, <[gpui::native::accessibility::text::Input]>::sort_unstable_by_key<u64, <gpui::native::accessibility::text::Cohort>::refresh<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#3}>::{closure#0}>",
+          "stack_bytes": 104
+        },
+        {
+          "address": 10092688,
+          "code_bytes": 737,
+          "mangled": "_RINvYINtNtNtNtCs4NRVxsYgnAr_4core4iter7sources7from_fn6FromFnNCNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB17_12TextGeometry4runss0_0ENtNtNtBa_6traits8iterator8Iterator4foldjNCNvYB3_B2v_5count0ECsc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "<core[37f591cfbe66b0b1]::iter::sources::from_fn::FromFn<<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::fold::<usize, <core[37f591cfbe66b0b1]::iter::sources::from_fn::FromFn<<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}> as core[37f591cfbe66b0b1]::iter::traits::iterator::Iterator>::count::{closure#0}>",
+          "normalized_name": "<core::iter::sources::from_fn::FromFn<<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}> as core::iter::traits::iterator::Iterator>::fold::<usize, <core::iter::sources::from_fn::FromFn<<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}> as core::iter::traits::iterator::Iterator>::count::{closure#0}>",
+          "stack_bytes": 120
+        },
+        {
+          "address": 10148816,
+          "code_bytes": 282,
+          "mangled": "_RNCINvMs6_NtNtCslbxve4rcJus_4gpui6native13accessibilityNtB8_6Bridge4syncNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtBc_6remote4LaneNtB1a_7CommandNCNvB1a_4mains1_0uEEs0_0B1a_",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::Bridge>::sync::<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>::{closure#2}",
+          "normalized_name": "<gpui::native::accessibility::Bridge>::sync::<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>::{closure#2}",
+          "stack_bytes": 120
+        },
+        {
+          "address": 10165696,
+          "code_bytes": 1469,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control11frame_after0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::frame_after::{closure#0}",
+          "normalized_name": "canonical_text_native_control::frame_after::{closure#0}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10167168,
+          "code_bytes": 1079,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control4mains0_0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main::{closure#2}",
+          "normalized_name": "canonical_text_native_control::main::{closure#2}",
+          "stack_bytes": 168
+        },
+        {
+          "address": 10168256,
+          "code_bytes": 628,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control4mains_0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main::{closure#1}",
+          "normalized_name": "canonical_text_native_control::main::{closure#1}",
+          "stack_bytes": 120
+        },
+        {
+          "address": 10168896,
+          "code_bytes": 284,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control5proxy0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::proxy::{closure#0}",
+          "normalized_name": "canonical_text_native_control::proxy::{closure#0}",
+          "stack_bytes": 40
+        },
+        {
+          "address": 10169184,
+          "code_bytes": 59919,
+          "mangled": "_RNCNvCsc2TX5wMu9vI_29canonical_text_native_control8exercise0B3_",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::exercise::{closure#0}",
+          "normalized_name": "canonical_text_native_control::exercise::{closure#0}",
+          "stack_bytes": 5480
+        },
+        {
+          "address": 10306160,
+          "code_bytes": 649,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss1_0Csc2TX5wMu9vI_29canonical_text_native_control",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#3}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 10306816,
+          "code_bytes": 1503,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_inners7_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#9}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#9}",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10308320,
+          "code_bytes": 884,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersD_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#41}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#41}",
+          "stack_bytes": 136
+        },
+        {
+          "address": 10309216,
+          "code_bytes": 415,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersG_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#44}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#44}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 10309632,
+          "code_bytes": 130,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersd_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#15}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#15}",
+          "stack_bytes": 8
+        },
+        {
+          "address": 10309776,
+          "code_bytes": 143,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innersn_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#25}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#25}",
+          "stack_bytes": 24
+        },
+        {
+          "address": 10309920,
+          "code_bytes": 61,
+          "mangled": "_RNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerso_0BQ_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#26}",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#26}",
+          "stack_bytes": 72
+        },
+        {
+          "address": 10345328,
+          "code_bytes": 57,
+          "mangled": "_RNSNvYNCNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtBc_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_inners7_0INtNtNtCs4NRVxsYgnAr_4core3ops8function6FnOnceTNtNtCscO85OU7Wpt0_20gpui_reactivity_core4tree6NodeIdNtNtNtCs2M7EwM6HstD_6cephal4tree6traits12MeasureInputEE9call_once6vtableBV_",
+          "name": "<<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner::{closure#9} as core[37f591cfbe66b0b1]::ops::function::FnOnce<(gpui_reactivity_core[95306e9e9eec3a0c]::tree::NodeId, cephal[2056001f9b60b8a7]::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "normalized_name": "<<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner::{closure#9} as core::ops::function::FnOnce<(gpui_reactivity_core::tree::NodeId, cephal::tree::traits::MeasureInput)>>::call_once::{shim:vtable#0}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 10345408,
+          "code_bytes": 3605,
+          "mangled": "_RNvCsc2TX5wMu9vI_29canonical_text_native_control12close_window",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::close_window",
+          "normalized_name": "canonical_text_native_control::close_window",
+          "stack_bytes": 1272
+        },
+        {
+          "address": 10349024,
+          "code_bytes": 14114,
+          "mangled": "_RNvCsc2TX5wMu9vI_29canonical_text_native_control4main",
+          "name": "canonical_text_native_control[8c5112d84bae4da4]::main",
+          "normalized_name": "canonical_text_native_control::main",
+          "stack_bytes": 4472
+        },
+        {
+          "address": 10389744,
+          "code_bytes": 1226,
+          "mangled": "_RNvMs0_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE18interaction_layoutBY_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::interaction_layout",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::interaction_layout",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10426000,
+          "code_bytes": 1615,
+          "mangled": "_RNvMs2_NtNtCslbxve4rcJus_4gpui7runtime7editingINtB7_10RuntimeMutNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentINtNtB9_6remote4LaneNtB12_7CommandNCNvB12_4mains1_0uEE13replace_inputB12_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::RuntimeMut<canonical_text_native_control[8c5112d84bae4da4]::Document, gpui[f6c49cfa67184ae6]::remote::Lane<canonical_text_native_control[8c5112d84bae4da4]::Command, canonical_text_native_control[8c5112d84bae4da4]::main::{closure#3}, ()>>>::replace_input",
+          "normalized_name": "<gpui::runtime::RuntimeMut<canonical_text_native_control::Document, gpui::remote::Lane<canonical_text_native_control::Command, canonical_text_native_control::main::{closure#3}, ()>>>::replace_input",
+          "stack_bytes": 248
+        },
+        {
+          "address": 10568784,
+          "code_bytes": 1581,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE11acknowledgeBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::acknowledge",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::acknowledge",
+          "stack_bytes": 200
+        },
+        {
+          "address": 10570368,
+          "code_bytes": 22621,
+          "mangled": "_RNvMsu_NtCslbxve4rcJus_4gpui7runtimeINtB5_7RuntimeNtCsc2TX5wMu9vI_29canonical_text_native_control8DocumentE13present_innerBO_",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::Runtime<canonical_text_native_control[8c5112d84bae4da4]::Document>>::present_inner",
+          "normalized_name": "<gpui::runtime::Runtime<canonical_text_native_control::Document>>::present_inner",
+          "stack_bytes": 3768
+        },
+        {
+          "address": 11573696,
+          "code_bytes": 268,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc5boxed3BoxINtNtNtNtCs2AWtUsOyxgP_3std4sync4mpmc7counter7CounterINtNtB1e_4list7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEEEB2s_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::boxed::Box<std[1e3c4ec04c5261a9]::sync::mpmc::counter::Counter<std[1e3c4ec04c5261a9]::sync::mpmc::list::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::boxed::Box<std::sync::mpmc::counter::Counter<std::sync::mpmc::list::Channel<gpui::native::accessibility::Queued>>>>",
+          "stack_bytes": 56
+        },
+        {
+          "address": 11575312,
+          "code_bytes": 1332,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync4mpsc8ReceiverNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEB1p_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpsc::Receiver<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpsc::Receiver<gpui::native::accessibility::Queued>>",
+          "stack_bytes": 72
+        },
+        {
+          "address": 11579504,
+          "code_bytes": 180,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtNtCs2AWtUsOyxgP_3std4sync4mpmc7counter7CounterINtNtBG_5array7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedEEEB1U_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::mpmc::counter::Counter<std[1e3c4ec04c5261a9]::sync::mpmc::array::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>>",
+          "normalized_name": "core::ptr::drop_glue::<std::sync::mpmc::counter::Counter<std::sync::mpmc::array::Channel<gpui::native::accessibility::Queued>>>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11592368,
+          "code_bytes": 120,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtNtCslbxve4rcJus_4gpui6native13accessibility4text5InputEBJ_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>",
+          "normalized_name": "core::ptr::drop_glue::<gpui::native::accessibility::text::Input>",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11609856,
+          "code_bytes": 856,
+          "mangled": "_RNCNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB9_12TextGeometry4runss0_0Cslbxve4rcJus_4gpui",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs::{closure#2}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::runs::{closure#2}",
+          "stack_bytes": 184
+        },
+        {
+          "address": 11614976,
+          "code_bytes": 649,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss1_0Cslbxve4rcJus_4gpui",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#3}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 11617728,
+          "code_bytes": 336,
+          "mangled": "_RNvMNtNtCslbxve4rcJus_4gpui7runtime13text_geometryNtB2_13TextResources11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::text_geometry::TextResources>::acknowledge",
+          "normalized_name": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+          "stack_bytes": 104
+        },
+        {
+          "address": 11629376,
+          "code_bytes": 301,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort14text_count_for",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::text_count_for",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::text_count_for",
+          "stack_bytes": 40
+        },
+        {
+          "address": 11629680,
+          "code_bytes": 309,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort5clear",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::clear",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::clear",
+          "stack_bytes": 56
+        },
+        {
+          "address": 11630000,
+          "code_bytes": 84,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort5input",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::input",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::input",
+          "stack_bytes": 0
+        },
+        {
+          "address": 11630096,
+          "code_bytes": 6961,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort6append",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::append",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::append",
+          "stack_bytes": 1032
+        },
+        {
+          "address": 11637072,
+          "code_bytes": 56,
+          "mangled": "_RNvMs0_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_6Cohort9qualified",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Cohort>::qualified",
+          "normalized_name": "<gpui::native::accessibility::text::Cohort>::qualified",
+          "stack_bytes": 0
+        },
+        {
+          "address": 11649824,
+          "code_bytes": 544,
+          "mangled": "_RNvMs1_NtNtNtCs2AWtUsOyxgP_3std4sync4mpmc4zeroINtB5_7ChannelNtNtNtCslbxve4rcJus_4gpui6native13accessibility6QueuedE10disconnectB12_",
+          "name": "<std[1e3c4ec04c5261a9]::sync::mpmc::zero::Channel<gpui[f6c49cfa67184ae6]::native::accessibility::Queued>>::disconnect",
+          "normalized_name": "<std::sync::mpmc::zero::Channel<gpui::native::accessibility::Queued>>::disconnect",
+          "stack_bytes": 72
+        },
+        {
+          "address": 11650368,
+          "code_bytes": 1039,
+          "mangled": "_RNvMs1_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_5Input15native_position",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>::native_position",
+          "normalized_name": "<gpui::native::accessibility::text::Input>::native_position",
+          "stack_bytes": 360
+        },
+        {
+          "address": 11651408,
+          "code_bytes": 523,
+          "mangled": "_RNvMs1_NtNtNtCslbxve4rcJus_4gpui6native13accessibility4textNtB5_5Input8position",
+          "name": "<gpui[f6c49cfa67184ae6]::native::accessibility::text::Input>::position",
+          "normalized_name": "<gpui::native::accessibility::text::Input>::position",
+          "stack_bytes": 280
+        },
+        {
+          "address": 11671840,
+          "code_bytes": 76,
+          "mangled": "_RNvMs4_NtNtCslbxve4rcJus_4gpui7runtime8geometryNtB5_8Geometry11acknowledge",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::geometry::Geometry>::acknowledge",
+          "normalized_name": "<gpui::runtime::geometry::Geometry>::acknowledge",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11686416,
+          "code_bytes": 402,
+          "mangled": "_RNvMsi_NtCslbxve4rcJus_4gpui7runtimeNtB5_8TextSite9shape_for",
+          "name": "<gpui[f6c49cfa67184ae6]::runtime::TextSite>::shape_for",
+          "normalized_name": "<gpui::runtime::TextSite>::shape_for",
+          "stack_bytes": 168
+        },
+        {
+          "address": 11689760,
+          "code_bytes": 106,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCslbxve4rcJus_4gpui6native13accessibility6SharedE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui[f6c49cfa67184ae6]::native::accessibility::Shared>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui::native::accessibility::Shared>>::drop_slow",
+          "stack_bytes": 24
+        },
+        {
+          "address": 11693600,
+          "code_bytes": 2133,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility14project_sparse",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::project_sparse",
+          "normalized_name": "gpui::native::accessibility::project_sparse",
+          "stack_bytes": 520
+        },
+        {
+          "address": 11695744,
+          "code_bytes": 2926,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility14projected_node",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::projected_node",
+          "normalized_name": "gpui::native::accessibility::projected_node",
+          "stack_bytes": 392
+        },
+        {
+          "address": 11698672,
+          "code_bytes": 2506,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui6native13accessibility7project",
+          "name": "gpui[f6c49cfa67184ae6]::native::accessibility::project",
+          "normalized_name": "gpui::native::accessibility::project",
+          "stack_bytes": 616
+        },
+        {
+          "address": 11709248,
+          "code_bytes": 157,
+          "mangled": "_RNvNtNtCslbxve4rcJus_4gpui7runtime5image11acknowledge",
+          "name": "gpui[f6c49cfa67184ae6]::runtime::image::acknowledge",
+          "normalized_name": "gpui::runtime::image::acknowledge",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18174752,
+          "code_bytes": 108,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6option6OptionNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB13_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::option::Option<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<core::option::Option<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18178144,
+          "code_bytes": 103,
+          "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCscdodAO9FK5_5alloc4sync8ArcInnerNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryEEB1j_",
+          "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<alloc[24b8200b0946867]::sync::ArcInner<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>",
+          "normalized_name": "core::ptr::drop_glue::<alloc::sync::ArcInner<gpui_canvas::text::layout::TextGeometry>>",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18269472,
+          "code_bytes": 687,
+          "mangled": "_RNCNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB8_12TextGeometry9intervalss1_0Bc_",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals::{closure#3}",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+          "stack_bytes": 56
+        },
+        {
+          "address": 18330240,
+          "code_bytes": 1175,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry11move_visual",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::move_visual",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::move_visual",
+          "stack_bytes": 216
+        },
+        {
+          "address": 18331424,
+          "code_bytes": 356,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry12graphemes_in",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::graphemes_in",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::graphemes_in",
+          "stack_bytes": 16
+        },
+        {
+          "address": 18331792,
+          "code_bytes": 190,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry13boundaries_in",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::boundaries_in",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::boundaries_in",
+          "stack_bytes": 0
+        },
+        {
+          "address": 18331984,
+          "code_bytes": 1664,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry16position_on_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::position_on_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line",
+          "stack_bytes": 232
+        },
+        {
+          "address": 18333648,
+          "code_bytes": 401,
+          "mangled": "_RNvMs0_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB7_12TextGeometry4runs",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::runs",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::runs",
+          "stack_bytes": 88
+        },
+        {
+          "address": 18343392,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout3RunE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Run>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Run>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18343392,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4LineE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Line>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Line>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18343504,
+          "code_bytes": 100,
+          "mangled": "_RNvMs3_NtCscdodAO9FK5_5alloc7raw_vecINtB5_6RawVecNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout4StopE8grow_oneBR_",
+          "name": "<alloc[24b8200b0946867]::raw_vec::RawVec<gpui_canvas[bdbd4139a55d3b41]::text::layout::Stop>>::grow_one",
+          "normalized_name": "<alloc::raw_vec::RawVec<gpui_canvas::text::layout::Stop>>::grow_one",
+          "stack_bytes": 40
+        },
+        {
+          "address": 18347744,
+          "code_bytes": 333,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry10caret_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_line",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18348080,
+          "code_bytes": 429,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry12caret_bounds",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::caret_bounds",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::caret_bounds",
+          "stack_bytes": 24
+        },
+        {
+          "address": 18348512,
+          "code_bytes": 287,
+          "mangled": "_RNvMs3_NtNtCsghYClfd3M9V_11gpui_canvas4text6layoutNtB5_12TextGeometry19validates_selection",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::validates_selection",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection",
+          "stack_bytes": 8
+        },
+        {
+          "address": 18365696,
+          "code_bytes": 183,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry11source_line",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::source_line",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::source_line",
+          "stack_bytes": 0
+        },
+        {
+          "address": 18365888,
+          "code_bytes": 190,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry5stops",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::stops",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::stops",
+          "stack_bytes": 0
+        },
+        {
+          "address": 18366080,
+          "code_bytes": 154,
+          "mangled": "_RNvMs_NtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout11interactionNtB6_12TextGeometry9intervals",
+          "name": "<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>::intervals",
+          "normalized_name": "<gpui_canvas::text::layout::TextGeometry>::intervals",
+          "stack_bytes": 16
+        },
+        {
+          "address": 18392192,
+          "code_bytes": 135,
+          "mangled": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtNtCsghYClfd3M9V_11gpui_canvas4text6layout12TextGeometryE9drop_slowBL_",
+          "name": "<alloc[24b8200b0946867]::sync::Arc<gpui_canvas[bdbd4139a55d3b41]::text::layout::TextGeometry>>::drop_slow",
+          "normalized_name": "<alloc::sync::Arc<gpui_canvas::text::layout::TextGeometry>>::drop_slow",
+          "stack_bytes": 8
+        }
+      ],
+      "metadata_functions": 17482,
+      "limits": "Compiler stack-size metadata for control and all dependency crates; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings.",
+      "selected_unique_code_bytes": 156821,
+      "selected_unique_bodies": 78
+    }
+  }
+}

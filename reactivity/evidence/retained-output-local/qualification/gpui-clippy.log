@@ -1,0 +1,12 @@
+    Checking async-io v2.6.0
+    Checking async-signal v0.2.14
+    Checking async-process v2.5.0
+    Checking zbus v5.19.0
+    Checking atspi-common v0.13.0
+    Checking atspi-proxies v0.13.0
+    Checking accesskit_atspi_common v0.21.0 (/home/user/gpui-architecture-local/reactivity/vendor/accesskit_atspi_common)
+    Checking atspi v0.29.0
+    Checking accesskit_unix v0.24.0 (/home/user/gpui-architecture-local/reactivity/vendor/accesskit_unix)
+    Checking accesskit_winit v0.34.1
+    Checking gpui v0.1.0 (/home/user/gpui-architecture-local/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 12.17s

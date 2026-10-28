@@ -1,0 +1,15 @@
+    Finished `release` profile [optimized] target(s) in 0.15s
+     Running tests/question_mailbox.rs (reactivity/target/release/deps/question_mailbox-d585ae37b4f4b9a4)
+
+running 9 tests
+test a_late_old_notification_cannot_overwrite_a_reused_physical_lease ... ok
+test a_worker_lease_defers_reclamation_after_close_but_cannot_admit_it ... ok
+test abandonment_releases_credit_without_a_payload_and_stays_bounded ... ok
+test notification_and_payload_drop_run_outside_the_mutex ... ok
+test callback_close_discards_a_staged_response_without_taking_it ... ok
+test staged_readiness_keeps_the_payload_sealed_across_owner_refresh ... ok
+test close_never_waits_for_a_descheduled_producer_holding_the_response_mutex ... ok
+test close_racing_publication_releases_exactly_one_owned_payload ... ok
+test a_single_wake_after_terminal_cannot_strand_a_published_response ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

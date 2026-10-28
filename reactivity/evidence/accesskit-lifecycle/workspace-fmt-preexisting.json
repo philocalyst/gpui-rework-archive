@@ -1,0 +1,15 @@
+{
+  "command": "cargo fmt --all -- --check",
+  "exit": 1,
+  "unformatted_files": 200,
+  "subtrees": {
+    "reactivity/vendor/cephal": 70,
+    "reactivity/vendor/winit": 130
+  },
+  "representative_unchanged_source": {
+    "file": "reactivity/vendor/cephal/src/tree/traits.rs",
+    "base_sha256": "f873e3ba0b78a070599623c79e0a3724403b81442b401259faa5adb7b8de8b5b",
+    "candidate_sha256": "f873e3ba0b78a070599623c79e0a3724403b81442b401259faa5adb7b8de8b5b"
+  },
+  "all_reported_vendor_trees_unchanged_from_base": true
+}

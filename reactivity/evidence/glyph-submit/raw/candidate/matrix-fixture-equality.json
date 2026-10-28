@@ -1,0 +1,18 @@
+{
+  "control": {
+    "reactivity/crates/gpui/src/native/text_cost.rs": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+    "reactivity/crates/gpui/src/native/scroll_bench.rs": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138"
+  },
+  "bounds": {
+    "reactivity/crates/gpui/src/native/text_cost.rs": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+    "reactivity/crates/gpui/src/native/scroll_bench.rs": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138"
+  },
+  "predecessor": {
+    "reactivity/crates/gpui/src/native/text_cost.rs": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+    "reactivity/crates/gpui/src/native/scroll_bench.rs": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138"
+  },
+  "candidate": {
+    "reactivity/crates/gpui/src/native/text_cost.rs": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+    "reactivity/crates/gpui/src/native/scroll_bench.rs": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138"
+  }
+}

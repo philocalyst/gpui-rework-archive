@@ -1,0 +1,235 @@
+{
+  "binary": "/tmp/gpui-property-editor-outline-frozen",
+  "binary_sha256": "30acedfdc86973ddcc1dfcebcf7f701349c0945b04f8942bf502297b42efe9b6",
+  "method": "Unmodified public Window::document example; real private Registry/AT-SPI actions and EditableText; no host/model seeding or timing claim.",
+  "events": [
+    {
+      "action": "Inspect application",
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/332041393326771929088"
+      ]
+    },
+    {
+      "action": "Library button",
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/73786976294838206464"
+      ]
+    },
+    {
+      "draft": "120",
+      "bounds": [
+        132,
+        0,
+        280,
+        32
+      ],
+      "character0": [
+        132,
+        0,
+        9,
+        21
+      ],
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/170141183460469232008388464821527379968"
+      ]
+    },
+    {
+      "draft": "193.25",
+      "bounds": [
+        132,
+        0,
+        280,
+        32
+      ],
+      "character0": [
+        132,
+        0,
+        9,
+        21
+      ],
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/170141183460469232100622185190075138048"
+      ]
+    },
+    {
+      "action": "Apply",
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/184467440737095516160"
+      ]
+    },
+    {
+      "draft": "193.25",
+      "bounds": [
+        205,
+        0,
+        280,
+        32
+      ],
+      "character0": [
+        205,
+        0,
+        9,
+        21
+      ],
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/170141183460469232100622185190075138048"
+      ]
+    },
+    {
+      "application_before": [
+        0,
+        0,
+        120,
+        32
+      ],
+      "application_after_apply": [
+        0,
+        0,
+        193,
+        32
+      ]
+    },
+    {
+      "action": "Inherit",
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/221360928884514619392"
+      ]
+    },
+    {
+      "draft": "120",
+      "bounds": [
+        132,
+        0,
+        280,
+        32
+      ],
+      "character0": [
+        132,
+        0,
+        9,
+        21
+      ],
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/170141183460469232266642881853461102592"
+      ]
+    },
+    {
+      "action": "Refresh selection",
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/258254417031933722624"
+      ]
+    },
+    {
+      "draft": "120",
+      "bounds": [
+        132,
+        0,
+        280,
+        32
+      ],
+      "character0": [
+        132,
+        0,
+        9,
+        21
+      ],
+      "address": [
+        ":1.1",
+        "/org/a11y/atspi/accessible/0/170141183460469232266642881853461102592"
+      ]
+    }
+  ],
+  "final_tree": [
+    [
+      "main",
+      "org.a11y.atspi.Registry",
+      "/org/a11y/atspi/accessible/root"
+    ],
+    [
+      "gpui-property-editor-outline-frozen",
+      ":1.1",
+      "/org/a11y/atspi/accessible/root"
+    ],
+    [
+      "Contained property editor",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/0"
+    ],
+    [
+      "Library button",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/73786976294838206464"
+    ],
+    [
+      "Property draft",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469232266642881853461102592"
+    ],
+    [
+      "Apply",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/184467440737095516160"
+    ],
+    [
+      "Inherit",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/221360928884514619392"
+    ],
+    [
+      "Refresh selection",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/258254417031933722624"
+    ],
+    [
+      "Property result",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/295147905179352825856"
+    ],
+    [
+      "Inspect application",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/332041393326771929088"
+    ],
+    [
+      "Library button",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469232229749393706041999360"
+    ],
+    [
+      "Apply",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469231823921024084431863808"
+    ],
+    [
+      "Inherit",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469231860814512231850967040"
+    ],
+    [
+      "Refresh selection",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469231897708000379270070272"
+    ],
+    [
+      "",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469232321983114074589757440"
+    ],
+    [
+      "Inspect application",
+      ":1.1",
+      "/org/a11y/atspi/accessible/0/170141183460469231971494976674108276736"
+    ]
+  ],
+  "passed": true,
+  "native_log": "The XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\ndbus-daemon[1727431]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=0 pid=1727439 comm=\"busctl --json=short --timeout=2 --address=unix:pat\")\nThe XKEYBOARD keymap compiler (xkbcomp) reports:\n> Warning:          Multiple symbols for level 1/group 1 on key <FK23>\n>                   Using F23, ignoring XF86TouchpadOff\n> Warning:          Symbol map for key <FK23> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Symbol map for key <FK24> redefined\n>                   Using last definition for conflicting fields\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOn\n> Warning:          Could not resolve keysym XF86ElectronicPrivacyScreenOff\n> Warning:          Could not resolve keysym XF86ActionOnSelection\n> Warning:          Could not resolve keysym XF86ContextualInsert\n> Warning:          Could not resolve keysym XF86ContextualQuery\nErrors from xkbcomp are not fatal to the X server\ndbus-daemon[1727431]: Successfully activated service 'org.a11y.atspi.Registry'\nSpiRegistry daemon is running with well-known name - org.a11y.atspi.Registry\nX connection to :166 broken (explicit kill or server shutdown).\n"
+}

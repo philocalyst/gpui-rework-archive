@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/zortax/cephal",
+  "branch": "perf/cold-layout",
+  "commit": "20c4c494179078ddfde7e8532ffc93f28cf5b531",
+  "archive": "https://codeload.github.com/zortax/cephal/tar.gz/20c4c494179078ddfde7e8532ffc93f28cf5b531",
+  "archive_sha256": "1ff2c62c3deee1e9aaec7db3b65eada7d8a8474ea3874da88ef6097c79e9574c",
+  "patches": [
+    {
+      "path": "src/tree/cache/mod.rs",
+      "description": "Add readonly NodeCache::allocated_bytes payload accounting and its cold/inner/spill/reset regression; cache equations and policy unchanged."
+    },
+    {
+      "path": "src/tree/traits.rs",
+      "description": "Add default CacheAccess hidden-layout proof hooks delegating to existing NodeCache behavior, allowing an adapter to use its existing flag storage under the same invalidation contract."
+    },
+    {
+      "path": "src/compute/mod.rs",
+      "description": "Route hidden subtree proof reads/writes through CacheAccess hooks; traversal, nonempty-container and non-speculative marking policy unchanged."
+    },
+    {
+      "path": "tests/observe.rs",
+      "description": "Verify default host cache marker allocation, invalidation, leaf and speculative behavior remain unchanged."
+    }
+  ],
+  "note": "Complete git source archive replaces published0.1.1; package version unchanged. No upstream performance result is asserted for the GPUI adapter."
+}

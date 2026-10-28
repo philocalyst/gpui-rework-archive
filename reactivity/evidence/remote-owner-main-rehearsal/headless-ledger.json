@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/tmp/gpui-hummingbird-audio-target/debug/deps/gpui-1369131ef757ea8e",
+    "remote::ledger::requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "binary_sha256": "9c40725567701e94c9b4c7e158f3ae0b878b3b29d5803295021c64324c77c425",
+  "exit": 0,
+  "source_commit": "d198075bbc604a06ac75c1f84261f9601687c90b"
+}

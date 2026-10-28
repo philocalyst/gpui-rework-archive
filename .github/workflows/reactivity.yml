@@ -1,0 +1,74 @@
+name: Cleanroom native platforms
+
+on:
+  push:
+    branches: [main, "codex/**"]
+    paths: ["reactivity/**", ".github/workflows/reactivity.yml"]
+  pull_request:
+    paths: ["reactivity/**", ".github/workflows/reactivity.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            features: x11,wayland
+          - os: macos-latest
+            features: desktop
+          - os: windows-latest
+            features: desktop
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: reactivity
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: reactivity
+      - name: Linux display libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev
+      - name: Portable runtime, layout, software pixels and shader validation
+        run: cargo test --locked --workspace
+      - name: Parallel software renderer
+        run: cargo test --locked -p gpui_canvas --features parallel
+      - name: Native platform compilation and lint
+        run: cargo clippy --locked -p gpui --features ${{ matrix.features }} --all-targets -- -D warnings
+      - name: Native accessibility schema and action protocol
+        run: cargo test --locked -p gpui --features ${{ matrix.features }} --lib native::accessibility::tests
+      - name: Build native application ports
+        run: cargo build --locked --release -p gpui --features ${{ matrix.features }} --examples
+      - name: Present actual native content through software and Auto
+        run: |
+          runner=()
+          suffix=""
+          if [ "$RUNNER_OS" = "Linux" ]; then runner=(xvfb-run -a); fi
+          if [ "$RUNNER_OS" = "Windows" ]; then suffix=".exe"; fi
+          for policy in cpu auto; do
+            "${runner[@]}" python tools/native_startup.py --renderer "$policy" --runs 3 \
+              "target/release/examples/empty${suffix}" \
+              "target/release/examples/workbench${suffix}" \
+              "target/release/examples/graphics${suffix}" \
+              "target/release/examples/workspace${suffix}" > "native-${policy}.csv"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-first-present-${{ matrix.os }}
+          path: reactivity/native-*.csv

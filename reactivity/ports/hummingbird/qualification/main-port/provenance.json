@@ -1,0 +1,216 @@
+{
+  "base": "2d14c15acafa64e776e818252b8c7aead927419c",
+  "import": "260277e24f537035b04eb2bb059c18fbd3ca5ba0",
+  "production_and_fixture": "b73fa7a340ac6db138fc75455c6e7a8274204a05",
+  "native_test_suite": "b73fa7a340ac6db138fc75455c6e7a8274204a05",
+  "bounded_native_capture": "b73fa7a340ac6db138fc75455c6e7a8274204a05",
+  "production_native_prepare": "b73fa7a340ac6db138fc75455c6e7a8274204a05",
+  "native_semantics_note": "b73 changes helper cfg cpal-output to native, excluding dead code only in non-native builds; native body and all application runtime tokens remain unchanged from d943. Strict CPAL/native checks pass after that change.",
+  "commands_environment": "source /tmp/gpui-hummingbird-audio-env.sh; jobs1 exclusive target; no native CPU flags; offline locked Rust1.97.1",
+  "lock_added_packages": [
+    [
+      "alsa",
+      "0.11.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "alsa-sys",
+      "0.4.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audio-codec-algorithms",
+      "0.8.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter",
+      "5.0.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter-buffers",
+      "5.2.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "audioadapter-sample",
+      "5.2.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "coreaudio-rs",
+      "0.14.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "cpal",
+      "0.18.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "dasp_sample",
+      "0.11.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "extended",
+      "0.1.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "lazy_static",
+      "1.5.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "mach2",
+      "0.6.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-complex",
+      "0.4.6",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-derive",
+      "0.4.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "num-integer",
+      "0.1.47",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-audio-toolbox",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-avf-audio",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-core-audio",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "objc2-core-audio-types",
+      "0.3.2",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "primal-check",
+      "0.3.4",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "realfft",
+      "3.5.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "regex-lite",
+      "0.1.9",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rtrb",
+      "0.4.0",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rubato",
+      "5.0.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "rustfft",
+      "6.4.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "strength_reduce",
+      "0.2.4",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-bundle-flac",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-bundle-mp3",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-codec-pcm",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-common",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-core",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-format-riff",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "symphonia-metadata",
+      "0.6.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "transpose",
+      "0.2.3",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "visibility",
+      "0.1.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ],
+    [
+      "windowfunctions",
+      "0.1.1",
+      "registry+https://github.com/rust-lang/crates.io-index"
+    ]
+  ],
+  "lock_added_count": 37,
+  "core_diff": "",
+  "native_watchdogs": {
+    "client_seconds": 150,
+    "outer_seconds": 180,
+    "kill_grace_seconds": 5,
+    "production_prepare_client_seconds": 40,
+    "production_prepare_outer_seconds": 65
+  },
+  "original_native_failure": "3e199 fixture before Window: unique location constraint; client deadline failed. Complete before/after/event/console retained. Frozen first binary remains external /tmp/gpui-hummingbird-main-port-qualification/native-service-first/fixture-binary.",
+  "first_binary_sha256": "dc080bf5f4b0b4b2dfa7ab532cc8b7459fbe4fb81a40b2c8eb3aff8ea1b3841f",
+  "scope": "Functional rehearsal. All historical DSP unfavorable reports and raw v1 panic/constructor samples retained; no timing/hardware/full-port/no-regression/adoption claim.",
+  "earlier_native_test_suite": "3e199e42b98145311206740d71503913374bbdda",
+  "earlier_bounded_native_capture": "d9431e0855c924ca5026d17bc437e97938430891",
+  "all_native_children_exited": true,
+  "default_cpal_note": "42 default and92 CPAL tests at d943; b73 only removes the unused system_output helper from non-native CPAL. Strict CPAL checks pass at b73; all92 native-feature tests and both actual native runs pass at b73.",
+  "core_lines": 30987,
+  "port_lines": 5358,
+  "port_lines_without_new_native_constructor": 5324
+}

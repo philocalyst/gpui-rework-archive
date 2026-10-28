@@ -1,0 +1,32 @@
+{
+  "default-gpui-f6156e8727b03b8d.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/final-frozen-elfs/default-gpui-f6156e8727b03b8d.elf",
+    "sha256": "aa34a288faca8201db073a82cf0aa8d6a427c276413571efe93db604e32262a9",
+    "bytes": 277792920,
+    "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c"
+  },
+  "default-mapped_properties-34c7c10b886bf78e.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/final-frozen-elfs/default-mapped_properties-34c7c10b886bf78e.elf",
+    "sha256": "5355e277a783930df786e5c5bbdb3692a697841466d2731f2dd1e2504380e4fd",
+    "bytes": 160417040,
+    "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c"
+  },
+  "native-gpui-a1498bbf48237c25.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/final-frozen-elfs/native-gpui-a1498bbf48237c25.elf",
+    "sha256": "5170aafd057f21af5051662ba7d7777ccbb9c96fd76dbeb1d8c3a8a19999b73e",
+    "bytes": 695199408,
+    "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c"
+  },
+  "native-mapped_properties-ddc2a91f59e184d3.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/final-frozen-elfs/native-mapped_properties-ddc2a91f59e184d3.elf",
+    "sha256": "142551d209a7fccc6b2cc44dc3da834713d4cb0af1d1dc5c9b41942460ea247a",
+    "bytes": 345089072,
+    "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c"
+  },
+  "native-application.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/final-frozen-elfs/native-application.elf",
+    "sha256": "b9c39f477ceca235cb56bf9a7f205f12cf018fa6a218cb40535d52af2025e6c5",
+    "bytes": 383131240,
+    "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c"
+  }
+}

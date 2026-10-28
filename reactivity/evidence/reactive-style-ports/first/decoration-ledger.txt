@@ -1,0 +1,23 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (/tmp/gpui-style-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 2 tests
+test semantic::decoration_tests::binding_accumulator_costs_are_cold_and_literal_overwrites_release_it ... style_decorations,ports=0,requests=0,requested=0,retained=0,peak=0
+style_decorations,ports=1,requests=2,requested=80,retained=80,peak=80
+style_decorations,ports=2,requests=3,requested=128,retained=104,peak=128
+style_decorations,ports=8,requests=5,requested=416,retained=248,peak=344
+ok
+test semantic::decoration_tests::cold_headers_and_alternating_builders_have_one_nonrecursive_decoration ... style_decorations,alternating,requests=3,requested=128,retained=128,peak=128
+ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 99 filtered out; finished in 0.00s
+

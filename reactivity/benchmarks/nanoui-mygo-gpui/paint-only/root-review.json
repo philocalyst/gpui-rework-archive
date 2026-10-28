@@ -1,0 +1,24 @@
+{
+  "implementation_source": "5f4db5f2886e6d72aefd585d21dd6543774f1393",
+  "reviewed_packet": "81bdb53c03b23a0d208ce78cff1f421a4c285c99",
+  "verified_manifests": {
+    "paint-only/results/paint-only-5f4-peer-16cell-20261022/sha256.txt": 21,
+    "paint-only/preflights/paint-only-5f4-private109-20261022/evidence.sha256": 32,
+    "paint-only/preflights/paint-only-5f4-private109-20261022/sha256.txt": 38,
+    "native-peer-current/sha256.txt": 15
+  },
+  "independent_raw_validation": {
+    "cells": 16,
+    "starts_per_cell": 100,
+    "clicks_per_cell": 1000,
+    "idle_per_cell": 5,
+    "unique_start_and_click_ids": true,
+    "quantiles": "order statistic floor((n-1)*p+0.5); even-n p50 is upper central sample",
+    "p50_p95_p99_exact_against_raw": true,
+    "idle_memory_extrema_exact_against_raw": true,
+    "frozen_executable_sha256s": 4,
+    "gpui_control_direct_ppm_pairs_byte_identical": 4
+  },
+  "visual_review": "GPUI-direct eager10000, MyGo eager10000, NanoUI virtual250000; lossless PPM->PNG copies viewed. Correct dimensions/marker/control/rows; styling/font differences preserved. All16 preflight logs and markers validated by observer.",
+  "scope": "Native X11 software task, source5f4; current main differs. No native blank-window, active AT, hardware GPU, compositor or scanout improvement established."
+}

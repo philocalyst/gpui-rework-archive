@@ -1,0 +1,406 @@
+{
+  "control_runtime": "9145411365adfe850b58cb6dafcfb64d1cc73221",
+  "candidate_runtime": "9f83f23288bbb364142ff2a82d059b6d99670a7e",
+  "control": [
+    {
+      "model": 560,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 100600,
+      "spawn": {
+        "count_total": 10,
+        "count_current": 9,
+        "count_max": 9,
+        "bytes_total": 3487,
+        "bytes_current": 3468,
+        "bytes_max": 3468
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1824,
+        "count_current": 369,
+        "count_max": 522,
+        "bytes_total": 416675,
+        "bytes_current": 96284,
+        "bytes_max": 154206
+      }
+    },
+    {
+      "model": 560,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96280,
+      "spawn": {
+        "count_total": 10,
+        "count_current": 9,
+        "count_max": 9,
+        "bytes_total": 3487,
+        "bytes_current": 3468,
+        "bytes_max": 3468
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410959,
+        "bytes_current": 91964,
+        "bytes_max": 149886
+      }
+    },
+    {
+      "model": 560,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96280,
+      "spawn": {
+        "count_total": 10,
+        "count_current": 9,
+        "count_max": 9,
+        "bytes_total": 3487,
+        "bytes_current": 3468,
+        "bytes_max": 3468
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410959,
+        "bytes_current": 91964,
+        "bytes_max": 149886
+      }
+    },
+    {
+      "model": 560,
+      "questions": 600,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 664,
+      "ui_current_plus_inline": 96280,
+      "spawn": {
+        "count_total": 10,
+        "count_current": 9,
+        "count_max": 9,
+        "bytes_total": 3487,
+        "bytes_current": 3468,
+        "bytes_max": 3468
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410959,
+        "bytes_current": 91964,
+        "bytes_max": 149886
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "model": 552,
+      "questions": 592,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 656,
+      "ui_current_plus_inline": 100648,
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1824,
+        "count_current": 369,
+        "count_max": 522,
+        "bytes_total": 416667,
+        "bytes_current": 96276,
+        "bytes_max": 154198
+      }
+    },
+    {
+      "model": 552,
+      "questions": 592,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 656,
+      "ui_current_plus_inline": 96328,
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410951,
+        "bytes_current": 91956,
+        "bytes_max": 149878
+      }
+    },
+    {
+      "model": 552,
+      "questions": 592,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 656,
+      "ui_current_plus_inline": 96328,
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410951,
+        "bytes_current": 91956,
+        "bytes_max": 149878
+      }
+    },
+    {
+      "model": 552,
+      "questions": 592,
+      "event": 96,
+      "selection": 32,
+      "error": 64,
+      "win": 656,
+      "ui_current_plus_inline": 96328,
+      "spawn": {
+        "count_total": 11,
+        "count_current": 10,
+        "count_max": 10,
+        "bytes_total": 3551,
+        "bytes_current": 3532,
+        "bytes_max": 3532
+      },
+      "connected": {
+        "count_total": 2,
+        "count_current": 2,
+        "count_max": 2,
+        "bytes_total": 184,
+        "bytes_current": 184,
+        "bytes_max": 184
+      },
+      "mounted": {
+        "count_total": 1810,
+        "count_current": 360,
+        "count_max": 513,
+        "bytes_total": 410951,
+        "bytes_current": 91956,
+        "bytes_max": 149878
+      }
+    }
+  ],
+  "candidate_minus_control": [
+    {
+      "model": -8,
+      "questions": -8,
+      "event": 0,
+      "selection": 0,
+      "error": 0,
+      "win": -8,
+      "ui_current_plus_inline": 48,
+      "spawn": {
+        "count_total": 1,
+        "count_current": 1,
+        "count_max": 1,
+        "bytes_total": 64,
+        "bytes_current": 64,
+        "bytes_max": 64
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": -8,
+        "bytes_current": -8,
+        "bytes_max": -8
+      }
+    },
+    {
+      "model": -8,
+      "questions": -8,
+      "event": 0,
+      "selection": 0,
+      "error": 0,
+      "win": -8,
+      "ui_current_plus_inline": 48,
+      "spawn": {
+        "count_total": 1,
+        "count_current": 1,
+        "count_max": 1,
+        "bytes_total": 64,
+        "bytes_current": 64,
+        "bytes_max": 64
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": -8,
+        "bytes_current": -8,
+        "bytes_max": -8
+      }
+    },
+    {
+      "model": -8,
+      "questions": -8,
+      "event": 0,
+      "selection": 0,
+      "error": 0,
+      "win": -8,
+      "ui_current_plus_inline": 48,
+      "spawn": {
+        "count_total": 1,
+        "count_current": 1,
+        "count_max": 1,
+        "bytes_total": 64,
+        "bytes_current": 64,
+        "bytes_max": 64
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": -8,
+        "bytes_current": -8,
+        "bytes_max": -8
+      }
+    },
+    {
+      "model": -8,
+      "questions": -8,
+      "event": 0,
+      "selection": 0,
+      "error": 0,
+      "win": -8,
+      "ui_current_plus_inline": 48,
+      "spawn": {
+        "count_total": 1,
+        "count_current": 1,
+        "count_max": 1,
+        "bytes_total": 64,
+        "bytes_current": 64,
+        "bytes_max": 64
+      },
+      "connected": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": 0,
+        "bytes_current": 0,
+        "bytes_max": 0
+      },
+      "mounted": {
+        "count_total": 0,
+        "count_current": 0,
+        "count_max": 0,
+        "bytes_total": -8,
+        "bytes_current": -8,
+        "bytes_max": -8
+      }
+    }
+  ]
+}

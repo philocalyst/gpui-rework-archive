@@ -1,0 +1,682 @@
+{
+  "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+  "shipping_identical_to": "c210a5e8342cb38940c697e65aa209c1d9f56edf",
+  "predecessor_full_default_source": "bcbee2b1a1d37e3c89ffe6253c8c161a53f52f54",
+  "scope": "Reader one-shot handoff/admission only; no graphics, Remote, component or IME adoption",
+  "core_lines": {
+    "base": 34852,
+    "adopted": 34902,
+    "delta": 50,
+    "library_build_scripts": 18,
+    "excludes": "tests, comments, blanks, documentation examples, labs, application examples, benchmarks, tools, evidence, vendors"
+  },
+  "unsafe_production_module_sha256": "13950903642a887857a9f363188c8ca8031261f137dc207165887324b3d2b736",
+  "gates": {
+    "candidate-default": {
+      "source": "bcbee2b1a1d37e3c89ffe6253c8c161a53f52f54",
+      "exit": 0,
+      "guards": 2061,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 675,
+      "failed": 0,
+      "ignored": 10,
+      "harnesses": 72,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "candidate-clippy": {
+      "source": "bcbee2b1a1d37e3c89ffe6253c8c161a53f52f54",
+      "exit": 0,
+      "guards": 2061,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "mutant-ticket-equality": {
+      "source": "c6b13d5185915a12beca8bc5a5bc79de8895afca",
+      "exit": 101,
+      "guards": 2061,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "mutant-retired": {
+      "source": "79aaf3041b79936b8e773932d694434b497faeef",
+      "exit": 101,
+      "guards": 2061,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "adopted-build": {
+      "source": "c210a5e8342cb38940c697e65aa209c1d9f56edf",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "adopted-execution": {
+      "source": "c210a5e8342cb38940c697e65aa209c1d9f56edf",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "proof-build": {
+      "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "proof-execution": {
+      "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "strict-failure": {
+      "source": "c210a5e8342cb38940c697e65aa209c1d9f56edf",
+      "exit": 101,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "strict-success": {
+      "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "miri-stacked": {
+      "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "miri-tree": {
+      "source": "7410240e39d6130a4447ba3445f50c17cfb59298",
+      "exit": 0,
+      "guards": 2062,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "adopted-executables": {
+      "harnesses": 2,
+      "passed": 204,
+      "failed": 0,
+      "ignored": 5,
+      "all_exit_zero": true,
+      "results": [
+        {
+          "target": "questions",
+          "exit": 0,
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "sha256_after_matches": true
+        },
+        {
+          "target": "gpui",
+          "exit": 0,
+          "passed": 183,
+          "failed": 0,
+          "ignored": 5,
+          "sha256_after_matches": true
+        }
+      ],
+      "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+    },
+    "proof-executables": {
+      "harnesses": 2,
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0,
+      "all_exit_zero": true,
+      "results": [
+        {
+          "target": "native_question_mailbox",
+          "exit": 0,
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "sha256_after_matches": true
+        },
+        {
+          "target": "question_mailbox",
+          "exit": 0,
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "sha256_after_matches": true
+        }
+      ],
+      "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+    }
+  },
+  "external_linux_executables": [
+    {
+      "original": "/tmp/gpui-transport-root-target-20261024/debug/build/gpui/46213122ec29b700/out/gpui-46213122ec29b700",
+      "frozen": "/tmp/gpui-reader-main-unwind-executables-root/001-gpui/test",
+      "sha256": "c62fd42e0472cc09ae95a4ab9fa60c7df259a5c5430ddb474ef361064cac910b",
+      "bytes": 67341376,
+      "fresh": false,
+      "package_id": "path+file:///root/gpui-ce3/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/root/gpui-ce3/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-transport-root-target-20261024/debug/build/gpui/26ffb0a8afa67bdb/out/questions-26ffb0a8afa67bdb",
+      "frozen": "/tmp/gpui-reader-main-unwind-executables-root/000-questions/test",
+      "sha256": "51b99372ad632b15a8063819e189a799dcc8c74adc21b08bdfc3cd8aaae2dc91",
+      "bytes": 28850744,
+      "fresh": false,
+      "package_id": "path+file:///root/gpui-ce3/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "questions",
+        "src_path": "/root/gpui-ce3/reactivity/crates/gpui/tests/questions.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-transport-root-target-20261024/debug/build/gpui_reactivity_ownership_lab/67f1ed0a806f8351/out/native_question_mailbox-67f1ed0a806f8351",
+      "frozen": "/tmp/gpui-mailbox-main-proof-executables-root/000-native_question_mailbox/test",
+      "sha256": "3bfcf66d227d409c3621be375084030bae333ed1eb3a650305027471168d5ea4",
+      "bytes": 1369336,
+      "fresh": false,
+      "package_id": "path+file:///root/gpui-ce3/reactivity/crates/ownership-lab#gpui_reactivity_ownership_lab@0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_question_mailbox",
+        "src_path": "/root/gpui-ce3/reactivity/crates/ownership-lab/tests/native_question_mailbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "loom"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-transport-root-target-20261024/debug/build/gpui_reactivity_ownership_lab/5277f208d06d6482/out/question_mailbox-5277f208d06d6482",
+      "frozen": "/tmp/gpui-mailbox-main-proof-executables-root/001-question_mailbox/test",
+      "sha256": "b757c1e0f1674dd3a0eb29c956c6ef390d3a23cafc309141bb52581f1f9de325",
+      "bytes": 6660832,
+      "fresh": false,
+      "package_id": "path+file:///root/gpui-ce3/reactivity/crates/ownership-lab#gpui_reactivity_ownership_lab@0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_mailbox",
+        "src_path": "/root/gpui-ce3/reactivity/crates/ownership-lab/tests/question_mailbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "loom"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    }
+  ],
+  "log_archive": {
+    "file": "logs.tar.gz",
+    "bytes": 2908468,
+    "sha256": "d40d63d73eb467c4e576895a365a436f842d9c1b6ebeb44ab911f0b3e7a2a844",
+    "members": 143,
+    "member_sha256": {
+      "adopted-build/after.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "adopted-build/before.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "adopted-build/command.json": "86598e1cab6c91753bc41acc6868fcbfbc44bb18469380eb7306e5fb8bc06d2e",
+      "adopted-build/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "adopted-build/result.json": "3863f8758ea0728e3366a7a6f27ee345a74041cbac0206ec17fb43f534610419",
+      "adopted-build/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "adopted-build/stderr.log": "915123d6dbdb23ec06113a6e49929883fb6498b82a203543cdc81ec952720e33",
+      "adopted-build/stdout.log": "250aa50c4599ee8edf7d2c7d93ee9acf774dca64f4f1fed6208a32f8814b0e9c",
+      "adopted-executables/000-questions/binary.json": "0e34bffdbbf53400ecde8863dcd6d117b465372fe9e862a795853b6a85e4024c",
+      "adopted-executables/000-questions/result.json": "8dc479ac6753418d6a668af01cca7351413e1ad7f329b0d75da628cfd09d56e9",
+      "adopted-executables/000-questions/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "adopted-executables/000-questions/stdout.log": "e5c4e14448fdbde9c3d33e188d1f9c3ed841b5f9bb0c4bf1691ca042679c31b5",
+      "adopted-executables/001-gpui/binary.json": "13504adc8ace400e6b9c41b5fd6f4ff64d01f2816aa361d4a46fc2c9d1c67236",
+      "adopted-executables/001-gpui/result.json": "1257ac25147d81b30a55d004efafb45abb7f25baf618a099c2bbee55b076f10d",
+      "adopted-executables/001-gpui/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "adopted-executables/001-gpui/stdout.log": "68ca6dca0a960b2db9f07aede46653d9d125da350afe8576823b14b5faa75bae",
+      "adopted-executables/result.json": "3d623875858eaefe977ae847781a75655fd14920cb922cc9c8aa3acea0452ee8",
+      "adopted-execution/after.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "adopted-execution/before.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "adopted-execution/command.json": "18dcef86b1ee10af93500337a1a6dbf7c1eea61d3e8be18e8a0d6fdc4a5a259e",
+      "adopted-execution/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "adopted-execution/result.json": "3863f8758ea0728e3366a7a6f27ee345a74041cbac0206ec17fb43f534610419",
+      "adopted-execution/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "adopted-execution/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "adopted-execution/stdout.log": "f3b24d633af5daa29079d5dfb9bd590768dd4f38ff772fdb11241cae6595c639",
+      "adoption-equivalence.json": "41e840c6a737f7b68e976da4c7ab9b273848218f99413e7ef3d86ffe34216bf1",
+      "baseline-completion-wrapper-assembly.json": "6fe9c25e53f638730927c1269321c04cf7a01e7b1d8c62da7b722d9cb1928415",
+      "candidate-clippy/after.json": "f12d0cadd985e22842fce19b880c0e0935ac11be5b9d14a2a6c2eea5f1fe673b",
+      "candidate-clippy/before.json": "f12d0cadd985e22842fce19b880c0e0935ac11be5b9d14a2a6c2eea5f1fe673b",
+      "candidate-clippy/command.json": "edf66aa2a9490080bb716ee5cbc66d7af2ac73e97ec5934a5eaab3b8e3765eed",
+      "candidate-clippy/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "candidate-clippy/result.json": "0fe2cb75542ae14c7db70c79fba584215167abfb76168fc4808a12e09177a104",
+      "candidate-clippy/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "candidate-clippy/stderr.log": "a139befa8eb85b388a27d813b4564a9e25d62e4d90dc25b9eac3c893b52e6550",
+      "candidate-clippy/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidate-default/after.json": "f12d0cadd985e22842fce19b880c0e0935ac11be5b9d14a2a6c2eea5f1fe673b",
+      "candidate-default/before.json": "f12d0cadd985e22842fce19b880c0e0935ac11be5b9d14a2a6c2eea5f1fe673b",
+      "candidate-default/command.json": "2e32428cd28a921c21a0cf3121e8e46ef24b1acfe8bf5b1f10f47dc2da142575",
+      "candidate-default/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "candidate-default/result.json": "4eeeea97f2be0d39ea792c8a79cfb3de32546f98554255cbaaf3e8d46bea42d0",
+      "candidate-default/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "candidate-default/stderr.log": "f67668c5533ceb005cc701dd5fa330d3422358724a5466c34c014741c1a65336",
+      "candidate-default/stdout.log": "bd8e4dddb2a4f22231309b33930e9c310afb7e0500eb6fae3e3acba89798f143",
+      "candidate-manifest.json": "5d19ce73fa34278f7220c69fedbbb85485fe898ebb8c7bb8e45a0558c738d4a7",
+      "core-lines.json": "0ed5370802f5a168cd6a2dfc4e5c8ba2a0b567c6adddd4ef8b64ac3510c358e3",
+      "helpers/gpui-mac-fetch-current-root.py": "6f03ae18e70780d00154c1cb293633279c6d2bc4ec352e33a7bcee478d6b9176",
+      "helpers/gpui-mac-question-ticket-cost-root.py": "2a28b147a200753f43d575cdfccf20c0c8db89926a57d463b6b7209b74e6c78d",
+      "helpers/gpui-run-cargo-test-artifacts-root.py": "271b3e8449c402ff5dd3c925dc145bbca4591964b84956221ecb6f37034b46c2",
+      "helpers/gpui-run-frozen-gate-root.py": "ff38b55ebf8eb466a7204ce601861efb940f8cc45bc5d783cb6fb320b4dc470b",
+      "helpers/gpui-stage-reader-ticket-mac-root.py": "906cb5fd1cbbfed4ebbfd691f6ff1a92eddd31b73ab4bc04fec5265adff6c58e",
+      "helpers/gpui-stage-reader-unwind-mac-retry1-root.py": "aa3f0f4febb8458919c72c094db0e853e6337f101ac3f93abbbce89d49a27401",
+      "mac-question-cost/logs.tar.gz": "d5121630619d40569c9134cbc654c6c5127a43c40543082ad1f28f5f8d1b9998",
+      "mac-question-cost/receipt.json": "1750b1a155a2baa3c58b4638d29f032a268313ab8c4958c7d09c28c7ddfcc3eb",
+      "mac-question-ticket/logs.tar.gz": "0d9ca8474be4cc5a7bed7a1bfac6d845d92edbb5d79f3b758b7316ae5f9db4b5",
+      "mac-question-ticket/receipt.json": "d7bed1d7d86b8290e17b1b50064fab8bfa6f21e01759445c0d00d37adb9f2a5e",
+      "mac-reader-ticket/logs.tar.gz": "2daeb88cf9f81563d902e633b17027cba0c48dd4404c7485feb36421263bc312",
+      "mac-reader-ticket/receipt.json": "2e99692148c10391f35c05cf732421c2230ae3e9f8b05be5812f6aa7d1cefdc8",
+      "mac-reader-unwind/logs.tar.gz": "e52e22fcd4ca45a8e0e08ed2093b683d58a19423ab7bac010df1d3015fee0375",
+      "mac-reader-unwind/receipt.json": "27c23e9fd9ce922a10937cf68a89e29677ede5001ea9b8ca02ef52ff602581e6",
+      "mac-typed-transport/logs.tar.gz": "9f506eb91ff30bdfa3ae2ab4dc9fc3c7e93ec210d538a3d887e04f1276d0fb0f",
+      "mac-typed-transport/receipt.json": "9f3cc026ad9e5f288c09c963e68907e05e7c97b27c900a1a819c8c997da4149c",
+      "miri-stacked/after.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "miri-stacked/before.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "miri-stacked/command.json": "99d6672331d7d02f6f3b2b87f470e28af0713ba236073a5f8fe62c3ed676bcd8",
+      "miri-stacked/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "miri-stacked/result.json": "6d86b58b9d6a56ffc6bf304fd5348f62c600502626395cb2c9994edae6c06006",
+      "miri-stacked/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "miri-stacked/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "miri-stacked/stdout.log": "c49635a9f809db699c3e05e7a81aded69e8532af9377234932d43c32f34d2d37",
+      "miri-tree/after.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "miri-tree/before.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "miri-tree/command.json": "bd5a63edac9fbb29bc9ab8e8f4d80e09136d328c6517e629991fc33fde2138c6",
+      "miri-tree/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "miri-tree/result.json": "6d86b58b9d6a56ffc6bf304fd5348f62c600502626395cb2c9994edae6c06006",
+      "miri-tree/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "miri-tree/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "miri-tree/stdout.log": "c49635a9f809db699c3e05e7a81aded69e8532af9377234932d43c32f34d2d37",
+      "mutant-retired/after.json": "696712efc132d8e2f4608e32ce6464592c7a50c6d0e35f5ac89acaaf40163824",
+      "mutant-retired/before.json": "696712efc132d8e2f4608e32ce6464592c7a50c6d0e35f5ac89acaaf40163824",
+      "mutant-retired/command.json": "7a473ee0a2c4a3ff14a2eb676eb3e0175df588d79bbf86332d3591203b513db9",
+      "mutant-retired/exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "mutant-retired/result.json": "ea740152fbad423ce08c7f0daf0076ef6f6e2dd5f589ea80cb7f6172dd78f7e6",
+      "mutant-retired/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "mutant-retired/stderr.log": "a7f3d0d98b4ccac377ef81e0328a5d632fc5fa6b5a0b795eacbbb578fd2370e2",
+      "mutant-retired/stdout.log": "f4787c60cb23d24a98009c2fb1422df2870f569352f5b640019468b2c1d3c55f",
+      "mutant-ticket-equality/after.json": "cae2ffdfa7531873bd83077426f087afeb2f206afa39d2eeca577268acfea8fc",
+      "mutant-ticket-equality/before.json": "cae2ffdfa7531873bd83077426f087afeb2f206afa39d2eeca577268acfea8fc",
+      "mutant-ticket-equality/command.json": "9da9b55c3cb0b699fd87f51ca79f5f7cda4b731e3cb13b7c7dfaa3a7c29a5023",
+      "mutant-ticket-equality/exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "mutant-ticket-equality/result.json": "b0b1196d037d0cf3f1ea9268acae862bdf91c5a9fc0e0e3e61ef4dcd3e713614",
+      "mutant-ticket-equality/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "mutant-ticket-equality/stderr.log": "5b7dfa445a4099185ee543ea2b13eca3876cc93dadad773de3522528c9680021",
+      "mutant-ticket-equality/stdout.log": "68357d8790f6d2fe7c0bc2ad502398f1caf8c00949820946fae58cb4ac143f3a",
+      "proof-build/after.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "proof-build/before.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "proof-build/command.json": "8bebe994deba18ac94ca39ea12125903a806f3b458ad851499a5997813123b59",
+      "proof-build/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "proof-build/result.json": "ed22c66812232360f376d9a5c41a92429aed5d46735ec1b16115a73c540d7976",
+      "proof-build/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "proof-build/stderr.log": "b6b9572ae16efb6e59ef049614dd0b1fe03d82258b37d9e0fab0a0e1667e6d2c",
+      "proof-build/stdout.log": "7c7eecb3809da70edb7c405660e5670f4b537e61d9029427b427fe5e2c6186f9",
+      "proof-executables/000-native_question_mailbox/binary.json": "fbac0d4c30232453dc0c51e09b1c46ba89e366c4a59b3e038a4322667df4fdf7",
+      "proof-executables/000-native_question_mailbox/result.json": "eb67f021286bfe07e71aaeb271dd866223f4b2723e5bd9facaa2b36b16b0f98e",
+      "proof-executables/000-native_question_mailbox/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "proof-executables/000-native_question_mailbox/stdout.log": "23bc6397f6da7a79a31684dfcca2cede7e85312bafd41ec4c34ce9ef6b57d766",
+      "proof-executables/001-question_mailbox/binary.json": "316a97a125b86816cc17c58c17dada6fee348c0db797507c8ab0cf6806d5bfc8",
+      "proof-executables/001-question_mailbox/result.json": "43b69a64e9f4a36b50fc3c97dd26fa45e9b25cbe16d08a880297ce9cce23599f",
+      "proof-executables/001-question_mailbox/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "proof-executables/001-question_mailbox/stdout.log": "905537f62c8406ad3d58990dc71c56c6ba7aca6930099c1c1dac56027e3efe05",
+      "proof-executables/result.json": "585446c382c7eaa8f40dc76aac30f3b4c23c569a339e0eaccc06701d53f79a7e",
+      "proof-execution/after.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "proof-execution/before.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "proof-execution/command.json": "766644c2d7d3807cac6b356e763ce861ec5182a8168b7c6233b5723db7a1bb24",
+      "proof-execution/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "proof-execution/result.json": "ed22c66812232360f376d9a5c41a92429aed5d46735ec1b16115a73c540d7976",
+      "proof-execution/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "proof-execution/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "proof-execution/stdout.log": "a069127035873fe4dfb1764851b1646db98f8e42934c98703b274973e1b0c825",
+      "question-ticket-assembly.json": "411beb42a83a19ef90e726f793f635d3123b4bde8b1b8baaca110b90f4b82d7d",
+      "question-ticket-summary.json": "39d064a7ba24fe24dd7efd3f2812ed4b32fe0ad7a62b67a7bf8a9e2e7ef35014",
+      "source-transfer-proof.md": "b47868fe9ae1c78c05303243d72b7616b6717002a31d6b975b76a02500b3063c",
+      "strict-failure/after.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "strict-failure/before.json": "c9bdb627be9d76bb7be38d1ce553fc4cd42a37015a54087d60bdc974a47a3ca8",
+      "strict-failure/command.json": "76ae022c1caaea7ba8a885e32233990785edec77aedf149926674179fd444434",
+      "strict-failure/exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "strict-failure/result.json": "de44437b30afe7b0b806733dcb558e0e223276ca1dd67e3c704aaacbb41cd49f",
+      "strict-failure/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "strict-failure/stderr.log": "67c4b836f1cc1e5582407cdc776ea1ff285eb6290ee5a8678e69d3b767e330fb",
+      "strict-failure/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "strict-success/after.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "strict-success/before.json": "db6c8f2ab368e5cc91e06c867214c05a49f24fbc7ffeb41506b7cfa815d4e97b",
+      "strict-success/command.json": "ab40fccc4adf14bebd70eeaee11051e3133764a2778ee5eec4edb05a14810d81",
+      "strict-success/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "strict-success/result.json": "ed22c66812232360f376d9a5c41a92429aed5d46735ec1b16115a73c540d7976",
+      "strict-success/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "strict-success/stderr.log": "156aa6a86ac7ebc72af0f3487e014ce0f1d8505722decd4df2ec8c9011aa7cf3",
+      "strict-success/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "unwind-certificate-failure/command.json": "40bc67bd9a533bcafad0c0edec7041d4b848ab9402abc1e0ed8cfdd67d5fd7ed",
+      "unwind-certificate-failure/exit": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "unwind-certificate-failure/gpui-reader-unwind-root.long-type-6403422769717215879.txt": "014e506dbb133eebf29a286d767a5f87e8c4cabd8af6f8ee425836ef9e499d76",
+      "unwind-certificate-failure/probe.rs": "09655a5df26e3e938cb5199de2fbf66cbef7268e90da4980758ec4a82af564f7",
+      "unwind-certificate-failure/stderr.log": "d4963711cb8afcf9013db58ca7137ef4899f6dd6ac49ee919b102d27270e820e",
+      "unwind-certificate-failure/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "default_costs": {
+    "typed_mailbox_before": {
+      "cold_allocations": 2,
+      "cold_requested_bytes": 112,
+      "completion_bytes": 40,
+      "future_wrapper_bytes": 56,
+      "one_source_plan_bytes": 328
+    },
+    "adopted": {
+      "cold_allocations": 1,
+      "cold_requested_bytes": 48,
+      "completion_bytes": 16,
+      "future_wrapper_bytes": 32,
+      "one_source_plan_bytes": 224
+    }
+  },
+  "native_darwin_costs": {
+    "typed_mailbox_before": {
+      "cold_allocations": 2,
+      "cold_requested_bytes": 152,
+      "controller_bytes": 96
+    },
+    "adopted": {
+      "cold_allocations": 1,
+      "cold_requested_bytes": 88,
+      "controller_bytes": 72,
+      "first_future_poll_allocations": 0
+    }
+  },
+  "cpu_diagnostic": {
+    "rows": [
+      {
+        "typed_remote_median_ns": 59400,
+        "typed_question_median_ns": 82398,
+        "ticket_remote_median_ns": 59309,
+        "ticket_question_median_ns": 82155,
+        "repeat": 0,
+        "question_ratio": 0.9970508992936722,
+        "control_ratio": 0.9984680134680135
+      },
+      {
+        "typed_remote_median_ns": 59180,
+        "typed_question_median_ns": 81675,
+        "ticket_remote_median_ns": 59818,
+        "ticket_question_median_ns": 82712,
+        "repeat": 1,
+        "question_ratio": 1.0126966636057546,
+        "control_ratio": 1.0107806691449814
+      },
+      {
+        "typed_remote_median_ns": 58717,
+        "typed_question_median_ns": 81474,
+        "ticket_remote_median_ns": 59554,
+        "ticket_question_median_ns": 82306,
+        "repeat": 2,
+        "question_ratio": 1.0102118467241084,
+        "control_ratio": 1.0142548154708177
+      },
+      {
+        "typed_remote_median_ns": 57961,
+        "typed_question_median_ns": 79603,
+        "ticket_remote_median_ns": 58011,
+        "ticket_question_median_ns": 80044,
+        "repeat": 3,
+        "question_ratio": 1.0055399922113488,
+        "control_ratio": 1.0008626490226187
+      },
+      {
+        "typed_remote_median_ns": 57657,
+        "typed_question_median_ns": 79453,
+        "ticket_remote_median_ns": 58113,
+        "ticket_question_median_ns": 80025,
+        "repeat": 4,
+        "question_ratio": 1.0071992246988786,
+        "control_ratio": 1.0079088402102085
+      }
+    ],
+    "median_question_ratio": 1.0071992246988786,
+    "median_control_ratio": 1.0079088402102085,
+    "scope": "M3 Pro host CPU diagnostic only. Five counterbalanced pairs, seven rounds each, 200 turns per kind. No startup, pixels or peer comparison."
+  },
+  "limits": [
+    "Full 675-test default gate is predecessor coverage; after unwind-marker correction, fresh adopted 204 affected GPUI tests plus exact-source ownership proofs and strict checks ran.",
+    "Miri covers aliasing/reclamation, not weak memory. Loom uses try_unwrap emulation for std Arc::into_inner and does not establish its destructor-thread guarantee.",
+    "The private current token, not diagnostic ticket equality, authorizes admission. Exhaustion remains sticky. Public standalone state gates/scopes/stamps are unchanged.",
+    "Two actual compiled causal mutants fail. The additional public unwind diagnostic uses existing hashed metadata without an independently certified source pin; final public positive certificate is part of actual Linux/Darwin tests.",
+    "Paired CPU fixture observes no distinct improvement versus unchanged control. Release ARM64 frame observation is local function storage, not whole-window stack or frame latency.",
+    "CPU/assembly measurements are on the ticket predecessor before the transparent unwind-marker correction; no performance claim for the correction.",
+    "No GPU, startup, pixels, scanout, framework-comparison, physical IME or VoiceOver claim. Two remaining Darwin Remote lazy-lock allocation failures are a separate unadopted work item.",
+    "Some predecessor Cargo-only functional gate executables were not separately frozen; their source/commands/logs remain. Current adopted Linux and Mac actual executable identities are recorded and preserved externally."
+  ]
+}

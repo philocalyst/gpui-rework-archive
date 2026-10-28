@@ -1,0 +1,47 @@
+[
+  {
+    "label": "parent",
+    "worktree": "/root/gpui-hit-parent",
+    "source": "de18f040c98dbfc32d33bd1e51515bbf11bce53b",
+    "binary": "/tmp/gpui-core-controls-artifacts/hit_cost-parent-ce9b21c14b0bbc766c9d988abfe6d9d8a7be85715d27c9a90c3c5d1183790180",
+    "binary_sha256": "ce9b21c14b0bbc766c9d988abfe6d9d8a7be85715d27c9a90c3c5d1183790180",
+    "fixture_sha256": "53d5a550c14297f3257468611f8329d81e5ca1c64dc828d9dac10fe65ed90c2d",
+    "features": [
+      "default"
+    ],
+    "profile": "release"
+  },
+  {
+    "label": "runs",
+    "worktree": "/root/gpui-hit-runs",
+    "source": "966a13ff7d9dc3e04e41aabf9223dd71826951fd",
+    "binary": "/tmp/gpui-core-controls-artifacts/hit_cost-runs-449a529c40cb99ec07a18896755207752898bdf6a7315ca8c2174b0942e6809f",
+    "binary_sha256": "449a529c40cb99ec07a18896755207752898bdf6a7315ca8c2174b0942e6809f",
+    "fixture_sha256": "53d5a550c14297f3257468611f8329d81e5ca1c64dc828d9dac10fe65ed90c2d",
+    "features": [
+      "default"
+    ],
+    "profile": "release"
+  },
+  {
+    "label": "links",
+    "worktree": "/root/gpui-hit-links",
+    "source": "50a082654d4ff97a5588676b6aff4f4cddfaf4f8",
+    "binary": "/tmp/gpui-core-controls-artifacts/hit_cost-links-7768406cd14b0a536f3ac2d658e7be6914eb7c9dd6695353cb689182ce3e2738",
+    "binary_sha256": "7768406cd14b0a536f3ac2d658e7be6914eb7c9dd6695353cb689182ce3e2738",
+    "fixture_sha256": "53d5a550c14297f3257468611f8329d81e5ca1c64dc828d9dac10fe65ed90c2d",
+    "features": [
+      "default"
+    ],
+    "profile": "release",
+    "build_json": "/tmp/gpui-hit-links-cost-fresh-build.jsonl",
+    "build_json_sha256": "3c8920451b12e1b01c74a75b23ecddfa6b8ce74409f3902701fc1274aca621c6",
+    "root_library": {
+      "fresh": false,
+      "files": {
+        "/tmp/gpui-hit-links-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "bcc0b60c9777fea4891215cdabac4f6ddf371246914185fd30f8eeef4254e06d",
+        "/tmp/gpui-hit-links-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "dfd1796fccfedf4cbed2e239a63b11d41507d6f134922aa7c78ebf50c9f52c2d"
+      }
+    }
+  }
+]

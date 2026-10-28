@@ -1,0 +1,30 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/d22b352c5b5e8073/out/default_font-d22b352c5b5e8073",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/scalar-execute/023-default_font/test",
+  "sha256": "fbba0777ad7eccc56e066ad8e3ab2f126d368ef0cd143656c8095039b9167181",
+  "bytes": 119235792,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "default_font",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/default_font.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

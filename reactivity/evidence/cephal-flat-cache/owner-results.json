@@ -1,0 +1,1538 @@
+{
+  "original_source_commit": "36921e2c42",
+  "original_source_provenance": "Parent attestation: clean tracked source369; exact build command provided, not an independently captured prebuild status file. Parley12 and other integrations started only after original build/capture completed.",
+  "original_command": "source /tmp/gpui-native-env.sh; CARGO_BUILD_JOBS=2 cargo build --release --offline --locked -p gpui --example unicode_text_measure",
+  "original_features": "default SIMD, headless; no explicit feature/RUSTFLAGS/target override in command",
+  "candidate_source_sha256": {
+    "reactivity/crates/core/src/layout.rs": "23fe22caa9a956f70bb3b115103c196ad3a7109b4580e4c2db581ad32e7862f3",
+    "reactivity/vendor/cephal/src/tree/cache/mod.rs": "3b1034d5a7e42cebfcbb9b5a82a43f52b4fe0fe421a9de732df423f67b7396f8",
+    "reactivity/vendor/cephal/GPUI-PROVENANCE.json": "64a4ef459b8695dff84e60718cbeb18c5c8bb09811c88e37d5ee67b9ba595d39",
+    "reactivity/crates/gpui/examples/unicode_text_measure.rs": "d3d53f6d3f0ddc6048a34f9d05e0a0d4478c994d5af8246c739cb87b6299e602",
+    "reactivity/Cargo.lock": "58dfb285d0842abfa40b1a234db8f2305d23840a64f40eb1ab32cc3ab3cc9b07"
+  },
+  "executable_sha256": {
+    "boxed": "7968cb6755c6431ff4596566f2bf54fadf89b1626b0de1ea26807f20c765672e",
+    "flat": "21da2595ee6323fdcacc987597067f7f73ff823fe2ef6061de78b6fe7b29cd26"
+  },
+  "rows": [
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 118242,
+      "retained_delta": 5748,
+      "total_requested": 6976,
+      "peak_new_bytes": 5908,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 356177,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 4080,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 87181,
+      "retained_delta": 5740,
+      "total_requested": 6968,
+      "peak_new_bytes": 5900,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 1417161,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 13350,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 573952,
+      "retained_delta": 14598,
+      "total_requested": 130026,
+      "peak_new_bytes": 60208,
+      "allocations": 297,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 557402,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 180234,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 356007,
+      "retained_delta": 14574,
+      "total_requested": 130002,
+      "peak_new_bytes": 60184,
+      "allocations": 295,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 472841,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 99252,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 15907298,
+      "retained_delta": 1197300,
+      "total_requested": 5404020,
+      "peak_new_bytes": 1324476,
+      "allocations": 15701,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 2379902,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 0,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 15475618,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 12908562,
+      "retained_delta": 1189284,
+      "total_requested": 5396004,
+      "peak_new_bytes": 1316460,
+      "allocations": 14700,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 1943412,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 0,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 15661082,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 74321,
+      "retained_delta": 5740,
+      "total_requested": 6968,
+      "peak_new_bytes": 5900,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 356808,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 7360,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 126943,
+      "retained_delta": 5748,
+      "total_requested": 6976,
+      "peak_new_bytes": 5908,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 428550,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 9610,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 361428,
+      "retained_delta": 14574,
+      "total_requested": 130002,
+      "peak_new_bytes": 60184,
+      "allocations": 295,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 462160,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 92892,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 518001,
+      "retained_delta": 14598,
+      "total_requested": 130026,
+      "peak_new_bytes": 60208,
+      "allocations": 297,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 465351,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 96632,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 19262841,
+      "retained_delta": 1189284,
+      "total_requested": 5396004,
+      "peak_new_bytes": 1316460,
+      "allocations": 14700,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 2385032,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 15305225,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 15964719,
+      "retained_delta": 1197300,
+      "total_requested": 5404020,
+      "peak_new_bytes": 1324476,
+      "allocations": 15701,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 1925822,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 1,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 12486483,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 115662,
+      "retained_delta": 5748,
+      "total_requested": 6976,
+      "peak_new_bytes": 5908,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 374798,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 5940,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 0,
+      "stage": "mount",
+      "nanoseconds": 74821,
+      "retained_delta": 5740,
+      "total_requested": 6968,
+      "peak_new_bytes": 5900,
+      "allocations": 34,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 0,
+      "stage": "render",
+      "nanoseconds": 354458,
+      "retained_delta": 4860,
+      "total_requested": 4860,
+      "peak_new_bytes": 4860,
+      "allocations": 2,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 0,
+      "stage": "edit",
+      "nanoseconds": 4320,
+      "retained_delta": 0,
+      "total_requested": 1660,
+      "peak_new_bytes": 1436,
+      "allocations": 12,
+      "nodes": 1,
+      "draws": 0,
+      "measure_calls": 0
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 508041,
+      "retained_delta": 14598,
+      "total_requested": 130026,
+      "peak_new_bytes": 60208,
+      "allocations": 297,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 480920,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 94252,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1,
+      "stage": "mount",
+      "nanoseconds": 369158,
+      "retained_delta": 14574,
+      "total_requested": 130002,
+      "peak_new_bytes": 60184,
+      "allocations": 295,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1,
+      "stage": "render",
+      "nanoseconds": 457650,
+      "retained_delta": 5252,
+      "total_requested": 5252,
+      "peak_new_bytes": 5252,
+      "allocations": 3,
+      "nodes": 2,
+      "draws": 9,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1,
+      "stage": "edit",
+      "nanoseconds": 87672,
+      "retained_delta": 708,
+      "total_requested": 116796,
+      "peak_new_bytes": 47737,
+      "allocations": 243,
+      "nodes": 2,
+      "draws": 10,
+      "measure_calls": 2
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 15963978,
+      "retained_delta": 1197300,
+      "total_requested": 5404020,
+      "peak_new_bytes": 1324476,
+      "allocations": 15701,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 2389942,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "boxed",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 15233323,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "mount",
+      "nanoseconds": 14756793,
+      "retained_delta": 1189284,
+      "total_requested": 5396004,
+      "peak_new_bytes": 1316460,
+      "allocations": 14700,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "render",
+      "nanoseconds": 1907242,
+      "retained_delta": 12020,
+      "total_requested": 12020,
+      "peak_new_bytes": 12020,
+      "allocations": 3,
+      "nodes": 1001,
+      "draws": 211,
+      "measure_calls": 2000
+    },
+    {
+      "rep": 2,
+      "variant": "flat",
+      "count": 1000,
+      "stage": "edit",
+      "nanoseconds": 12722118,
+      "retained_delta": 138867,
+      "total_requested": 4841366,
+      "peak_new_bytes": 469722,
+      "allocations": 15043,
+      "nodes": 1001,
+      "draws": 231,
+      "measure_calls": 2000
+    }
+  ],
+  "pixels": [
+    {
+      "rep": 0,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-0-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 0,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-0-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 0,
+      "count": 0,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-0-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 0,
+      "count": 0,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-0-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 0,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 0,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 0,
+      "count": 1,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 0,
+      "count": 1,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 0,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1000-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 0,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1000-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    },
+    {
+      "rep": 0,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1000-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 0,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/0-1000-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    },
+    {
+      "rep": 1,
+      "count": 0,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-0-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 1,
+      "count": 0,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-0-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 1,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-0-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 1,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-0-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 1,
+      "count": 1,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 1,
+      "count": 1,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 1,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 1,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 1,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1000-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 1,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1000-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    },
+    {
+      "rep": 1,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1000-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 1,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/1-1000-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    },
+    {
+      "rep": 2,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-0-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 2,
+      "count": 0,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-0-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 2,
+      "count": 0,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-0-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 2,
+      "count": 0,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-0-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "3748a84ea2dce581f552b41f08b75c3bd611e96237538208ab7a706690156150"
+    },
+    {
+      "rep": 2,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 2,
+      "count": 1,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 2,
+      "count": 1,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "cdc145d74592fd8478f5b614beeff963b08463fa18cb6c195d38018959c5bf4e"
+    },
+    {
+      "rep": 2,
+      "count": 1,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "ae91b432f3781f69088609e7ad8759bb27cc27bea8b67f55db795f478c461844"
+    },
+    {
+      "rep": 2,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1000-boxed.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 2,
+      "count": 1000,
+      "variant": "boxed",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1000-boxed.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    },
+    {
+      "rep": 2,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "initial",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1000-flat.initial.bgrx",
+      "bytes": 1228800,
+      "sha256": "037ca5f471bdadef0101b1eca271f98160860ab10a5314b1aba1563c01c4eb0d"
+    },
+    {
+      "rep": 2,
+      "count": 1000,
+      "variant": "flat",
+      "stage": "edited",
+      "path": "/tmp/gpui-cephal-flat-captures/2-1000-flat.edited.bgrx",
+      "bytes": 1228800,
+      "sha256": "b05f53bf9cde7acd3e109d4f4eb955f09f3212b80b52b851ea4bd500e34b64ae"
+    }
+  ],
+  "summary": {
+    "0-mount": {
+      "boxed": {
+        "retained_delta": [
+          5748
+        ],
+        "total_requested": [
+          6976
+        ],
+        "peak_new_bytes": [
+          5908
+        ],
+        "allocations": [
+          34
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          5740
+        ],
+        "total_requested": [
+          6968
+        ],
+        "peak_new_bytes": [
+          5900
+        ],
+        "allocations": [
+          34
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      }
+    },
+    "0-render": {
+      "boxed": {
+        "retained_delta": [
+          4860
+        ],
+        "total_requested": [
+          4860
+        ],
+        "peak_new_bytes": [
+          4860
+        ],
+        "allocations": [
+          2
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          4860
+        ],
+        "total_requested": [
+          4860
+        ],
+        "peak_new_bytes": [
+          4860
+        ],
+        "allocations": [
+          2
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      }
+    },
+    "0-edit": {
+      "boxed": {
+        "retained_delta": [
+          0
+        ],
+        "total_requested": [
+          1660
+        ],
+        "peak_new_bytes": [
+          1436
+        ],
+        "allocations": [
+          12
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          0
+        ],
+        "total_requested": [
+          1660
+        ],
+        "peak_new_bytes": [
+          1436
+        ],
+        "allocations": [
+          12
+        ],
+        "nodes": [
+          1
+        ],
+        "draws": [
+          0
+        ],
+        "measure_calls": [
+          0
+        ]
+      }
+    },
+    "1-mount": {
+      "boxed": {
+        "retained_delta": [
+          14598
+        ],
+        "total_requested": [
+          130026
+        ],
+        "peak_new_bytes": [
+          60208
+        ],
+        "allocations": [
+          297
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          9
+        ],
+        "measure_calls": [
+          2
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          14574
+        ],
+        "total_requested": [
+          130002
+        ],
+        "peak_new_bytes": [
+          60184
+        ],
+        "allocations": [
+          295
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          9
+        ],
+        "measure_calls": [
+          2
+        ]
+      }
+    },
+    "1-render": {
+      "boxed": {
+        "retained_delta": [
+          5252
+        ],
+        "total_requested": [
+          5252
+        ],
+        "peak_new_bytes": [
+          5252
+        ],
+        "allocations": [
+          3
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          9
+        ],
+        "measure_calls": [
+          2
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          5252
+        ],
+        "total_requested": [
+          5252
+        ],
+        "peak_new_bytes": [
+          5252
+        ],
+        "allocations": [
+          3
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          9
+        ],
+        "measure_calls": [
+          2
+        ]
+      }
+    },
+    "1-edit": {
+      "boxed": {
+        "retained_delta": [
+          708
+        ],
+        "total_requested": [
+          116796
+        ],
+        "peak_new_bytes": [
+          47737
+        ],
+        "allocations": [
+          243
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          10
+        ],
+        "measure_calls": [
+          2
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          708
+        ],
+        "total_requested": [
+          116796
+        ],
+        "peak_new_bytes": [
+          47737
+        ],
+        "allocations": [
+          243
+        ],
+        "nodes": [
+          2
+        ],
+        "draws": [
+          10
+        ],
+        "measure_calls": [
+          2
+        ]
+      }
+    },
+    "1000-mount": {
+      "boxed": {
+        "retained_delta": [
+          1197300
+        ],
+        "total_requested": [
+          5404020
+        ],
+        "peak_new_bytes": [
+          1324476
+        ],
+        "allocations": [
+          15701
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          211
+        ],
+        "measure_calls": [
+          2000
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          1189284
+        ],
+        "total_requested": [
+          5396004
+        ],
+        "peak_new_bytes": [
+          1316460
+        ],
+        "allocations": [
+          14700
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          211
+        ],
+        "measure_calls": [
+          2000
+        ]
+      }
+    },
+    "1000-render": {
+      "boxed": {
+        "retained_delta": [
+          12020
+        ],
+        "total_requested": [
+          12020
+        ],
+        "peak_new_bytes": [
+          12020
+        ],
+        "allocations": [
+          3
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          211
+        ],
+        "measure_calls": [
+          2000
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          12020
+        ],
+        "total_requested": [
+          12020
+        ],
+        "peak_new_bytes": [
+          12020
+        ],
+        "allocations": [
+          3
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          211
+        ],
+        "measure_calls": [
+          2000
+        ]
+      }
+    },
+    "1000-edit": {
+      "boxed": {
+        "retained_delta": [
+          138867
+        ],
+        "total_requested": [
+          4841366
+        ],
+        "peak_new_bytes": [
+          469722
+        ],
+        "allocations": [
+          15043
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          231
+        ],
+        "measure_calls": [
+          2000
+        ]
+      },
+      "flat": {
+        "retained_delta": [
+          138867
+        ],
+        "total_requested": [
+          4841366
+        ],
+        "peak_new_bytes": [
+          469722
+        ],
+        "allocations": [
+          15043
+        ],
+        "nodes": [
+          1001
+        ],
+        "draws": [
+          231
+        ],
+        "measure_calls": [
+          2000
+        ]
+      }
+    }
+  },
+  "all_source_and_executable_guards_passed": true,
+  "all_paired_pixel_hashes_identical": true,
+  "limits": "Three fresh processes per variant/count. Allocation and exact pixel comparison only; raw nanoseconds retained but no timing claims. Rust allocation payloads are not allocator overhead, RSS, or GPU residency."
+}

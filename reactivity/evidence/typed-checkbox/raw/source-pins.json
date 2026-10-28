@@ -1,0 +1,25 @@
+{
+  "source_commit": "ddb0649e94e46a61690a9f1863558d776c7bcf31",
+  "base": "f9feff848210e37b87caf8e6729476335e457af3",
+  "files": {
+    "reactivity/crates/gpui/examples/inspector.rs": "ddae1319ee4160920258dd6aff11948feb63ab2b70a9729c68478f479fed959b",
+    "reactivity/crates/gpui/src/element.rs": "85a4defa114087e1d4f21f61c006c8248514f504c3afe1d94f3fde92cb67b75b",
+    "reactivity/crates/gpui/src/lib.rs": "c60b2128cbce6c8f9d412c407d2221f116177c4dd1aaaedc6081d748e58ca7a1",
+    "reactivity/crates/gpui/src/native/accessibility.rs": "fff35d2a7eeee9483b6dbed4ec0968a8aa5d99495fc862ff5668bc7462c4ad54",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs": "33124bee6d9ec431d749e64e16705a4354ce00674344d510cfba046dc4028c59",
+    "reactivity/crates/gpui/src/native/accessibility/linux_tests/checkbox.rs": "e3c83ee4b900c1b9bf86631d411d23929096dda1309c6b7938ac2b22f55b276b",
+    "reactivity/crates/gpui/src/native/accessibility/tests.rs": "ce41cd25c92b649317ecc434b8907ab4ba5d90eed0b355b2b1c6d0b328639816",
+    "reactivity/crates/gpui/src/native/accessibility/transitions.rs": "395059c1fa7bd57fd85ad3be8d4dd39e38ca8ff44ff22470cfaaa6b0f6a6998d",
+    "reactivity/crates/gpui/src/runtime.rs": "f2eb28690c55d9a77dca192d4389b614df31633405164347dfe849e9d06240ca",
+    "reactivity/crates/gpui/src/runtime/query.rs": "2d11d2e7efab98480c3fb5fee93554153b451a46e7f012f58fec7924bba3c9ad",
+    "reactivity/crates/gpui/src/runtime/query/serialize.rs": "6ea4642ad59b5c04bb0f5544b0fa63e56f752e88d9f1431753d7b5f6c815cd23",
+    "reactivity/crates/gpui/tests/checkbox.rs": "149abab2d06e043e794513e6a4ff8f278ad8e749f43da72732cffe6f668a6f24",
+    "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+    "reactivity/Cargo.lock": "8100b5e0fb2911b7dc6f1207c90f4d56d8670c2fce90c5e71d879b9d6a066e82",
+    "reactivity/crates/gpui/Cargo.toml": "d38b762ff72b2903f87f3c4b95315e790bbdc6fa7707f19014eccbbd0dee661a",
+    "reactivity/tools/core_lines.py": "20bdec60f793b8da41974073f7b5eab5d7f03eff2e84ceee868e41c90e0438ca",
+    "reactivity/tools/inventory.py": "d5b2a0b4afddc0eda26f3ce7b199f48200606080a496f96a4696cd9c411ab81c"
+  },
+  "baseline_binary": "e737c90046ced00f550496d4fde05322379c92a8012104f16d94c79f08064d1e  /tmp/gpui-checkbox-target/debug/deps/gpui-08eabea4b8bd987d",
+  "baseline_worktree": "/tmp/gpui-checkbox-baseline-sol (test-only patch archived; exact shipping source is base f9feff)"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "apple",
+  "command": [
+    "cargo",
+    "check",
+    "--offline",
+    "--locked",
+    "-p",
+    "gpui",
+    "--all-targets",
+    "--features",
+    "desktop,gpui_canvas/parallel,gpui_gpu/offline-shader",
+    "--target",
+    "aarch64-apple-darwin",
+    "-Zbuild-std=std,panic_abort"
+  ],
+  "environment_shell": "export RUSTC_BOOTSTRAP=1\n",
+  "exit": 0,
+  "log_sha256": "52045cbf3a1c3c3ea44e8ea49f27b9be1ba3324fe96de994487ef3822d5164c1"
+}

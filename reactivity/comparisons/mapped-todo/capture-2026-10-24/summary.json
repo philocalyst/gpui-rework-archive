@@ -1,0 +1,688 @@
+{
+  "schema": 1,
+  "core_pin": "0062bf589829c4f28807ad0fde3e13285379294c",
+  "raw_results_sha256": "1c2e97430487186bc4f734830067d564b42141ece55d4feea7422c306e709605",
+  "all_captured": 21,
+  "all_qualified": 19,
+  "groups": [
+    {
+      "policy": "auto",
+      "variant": "gpui-control",
+      "mode": "animation",
+      "captured": 3,
+      "qualified": 1,
+      "failed_repeats": [
+        1,
+        3
+      ],
+      "process_cpu_percent_one_core_100": {
+        "median": 42.06639396706113,
+        "min": 42.06639396706113,
+        "max": 42.06639396706113,
+        "values": [
+          42.06639396706113
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 24389,
+        "min": 24389,
+        "max": 24389,
+        "values": [
+          24389
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 25992,
+        "min": 25992,
+        "max": 25992,
+        "values": [
+          25992
+        ]
+      },
+      "private_kb_peak": {
+        "median": 23568,
+        "min": 23568,
+        "max": 23568,
+        "values": [
+          23568
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 1799,
+        "min": 1799,
+        "max": 1799,
+        "values": [
+          1799
+        ]
+      },
+      "present_interval_p95_us": {
+        "median": 17384,
+        "min": 17384,
+        "max": 17384,
+        "values": [
+          17384
+        ]
+      },
+      "cadence_warning_repeats": [
+        1,
+        2,
+        3
+      ],
+      "maximum_host_gap_ns": {
+        "median": 37790132,
+        "min": 37790132,
+        "max": 37790132,
+        "values": [
+          37790132
+        ]
+      }
+    },
+    {
+      "policy": "auto",
+      "variant": "gpui-control",
+      "mode": "busy",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": {
+        "median": 4.399986649560508,
+        "min": 4.1333122931204365,
+        "max": 4.466630309933708,
+        "values": [
+          4.399986649560508,
+          4.466630309933708,
+          4.1333122931204365
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 15953,
+        "min": 15941,
+        "max": 16103,
+        "values": [
+          15941,
+          16103,
+          15953
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 17568,
+        "min": 17556,
+        "max": 17724,
+        "values": [
+          17556,
+          17724,
+          17568
+        ]
+      },
+      "private_kb_peak": {
+        "median": 15132,
+        "min": 15120,
+        "max": 15280,
+        "values": [
+          15120,
+          15280,
+          15132
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 191,
+        "min": 191,
+        "max": 202,
+        "values": [
+          191,
+          191,
+          202
+        ]
+      },
+      "present_interval_p95_us": {
+        "median": 271624,
+        "min": 271083,
+        "max": 274108,
+        "values": [
+          271083,
+          274108,
+          271624
+        ]
+      },
+      "cadence_warning_repeats": [],
+      "maximum_host_gap_ns": null
+    },
+    {
+      "policy": "auto",
+      "variant": "gpui-mapped",
+      "mode": "animation",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": {
+        "median": 42.73276274126998,
+        "min": 41.49964655996014,
+        "max": 42.76645878176163,
+        "values": [
+          42.73276274126998,
+          42.76645878176163,
+          41.49964655996014
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 22563,
+        "min": 22493,
+        "max": 22607,
+        "values": [
+          22563,
+          22493,
+          22607
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 24180,
+        "min": 24108,
+        "max": 24224,
+        "values": [
+          24180,
+          24108,
+          24224
+        ]
+      },
+      "private_kb_peak": {
+        "median": 21740,
+        "min": 21672,
+        "max": 21784,
+        "values": [
+          21740,
+          21672,
+          21784
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 1800,
+        "min": 1800,
+        "max": 1800,
+        "values": [
+          1800,
+          1800,
+          1800
+        ]
+      },
+      "present_interval_p95_us": {
+        "median": 17931,
+        "min": 17755,
+        "max": 17983,
+        "values": [
+          17755,
+          17931,
+          17983
+        ]
+      },
+      "cadence_warning_repeats": [
+        2,
+        3
+      ],
+      "maximum_host_gap_ns": {
+        "median": 33355459,
+        "min": 33154881,
+        "max": 34045004,
+        "values": [
+          33154881,
+          33355459,
+          34045004
+        ]
+      }
+    },
+    {
+      "policy": "auto",
+      "variant": "gpui-mapped",
+      "mode": "busy",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": {
+        "median": 4.499986018243442,
+        "min": 4.333088176448231,
+        "max": 4.63328797313519,
+        "values": [
+          4.499986018243442,
+          4.63328797313519,
+          4.333088176448231
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 16109,
+        "min": 16005,
+        "max": 16115,
+        "values": [
+          16115,
+          16005,
+          16109
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 17724,
+        "min": 17620,
+        "max": 17724,
+        "values": [
+          17724,
+          17620,
+          17724
+        ]
+      },
+      "private_kb_peak": {
+        "median": 15288,
+        "min": 15184,
+        "max": 15296,
+        "values": [
+          15296,
+          15184,
+          15288
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 192,
+        "min": 186,
+        "max": 193,
+        "values": [
+          186,
+          192,
+          193
+        ]
+      },
+      "present_interval_p95_us": {
+        "median": 274227,
+        "min": 271855,
+        "max": 278694,
+        "values": [
+          274227,
+          271855,
+          278694
+        ]
+      },
+      "cadence_warning_repeats": [],
+      "maximum_host_gap_ns": null
+    },
+    {
+      "policy": "gpu",
+      "variant": "gpui-mapped",
+      "mode": "busy",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": {
+        "median": 86.86119765403251,
+        "min": 82.04045504646136,
+        "max": 91.66027890765973,
+        "values": [
+          86.86119765403251,
+          82.04045504646136,
+          91.66027890765973
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 134117,
+        "min": 134097,
+        "max": 134141,
+        "values": [
+          134097,
+          134117,
+          134141
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 137676,
+        "min": 137660,
+        "max": 137748,
+        "values": [
+          137676,
+          137660,
+          137748
+        ]
+      },
+      "private_kb_peak": {
+        "median": 133564,
+        "min": 133564,
+        "max": 133588,
+        "values": [
+          133564,
+          133564,
+          133588
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 150,
+        "min": 150,
+        "max": 150,
+        "values": [
+          150,
+          150,
+          150
+        ]
+      },
+      "present_interval_p95_us": {
+        "median": 292647,
+        "min": 287913,
+        "max": 303021,
+        "values": [
+          292647,
+          287913,
+          303021
+        ]
+      },
+      "cadence_warning_repeats": [],
+      "maximum_host_gap_ns": null
+    },
+    {
+      "policy": "gpu",
+      "variant": "gpui-mapped",
+      "mode": "idle",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "pss_kb_peak": {
+        "median": 131029,
+        "min": 130998,
+        "max": 131261,
+        "values": [
+          131261,
+          130998,
+          131029
+        ]
+      },
+      "rss_kb_peak": {
+        "median": 134620,
+        "min": 134580,
+        "max": 134876,
+        "values": [
+          134876,
+          134580,
+          134620
+        ]
+      },
+      "private_kb_peak": {
+        "median": 130488,
+        "min": 130484,
+        "max": 130708,
+        "values": [
+          130708,
+          130484,
+          130488
+        ]
+      },
+      "warm_page_cache_exec_to_first_present_s": null,
+      "present_frame_count": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "present_interval_p95_us": null,
+      "cadence_warning_repeats": [],
+      "maximum_host_gap_ns": null
+    },
+    {
+      "policy": "gpu",
+      "variant": "gpui-mapped",
+      "mode": "startup",
+      "captured": 3,
+      "qualified": 3,
+      "failed_repeats": [],
+      "process_cpu_percent_one_core_100": null,
+      "pss_kb_peak": null,
+      "rss_kb_peak": null,
+      "private_kb_peak": null,
+      "warm_page_cache_exec_to_first_present_s": {
+        "median": 0.164331967,
+        "min": 0.158289164,
+        "max": 0.164475937,
+        "values": [
+          0.158289164,
+          0.164331967,
+          0.164475937
+        ]
+      },
+      "present_frame_count": null,
+      "present_interval_p95_us": null,
+      "cadence_warning_repeats": [],
+      "maximum_host_gap_ns": null
+    }
+  ],
+  "failed_rows": [
+    {
+      "variant": "gpui-control",
+      "policy": "auto",
+      "mode": "animation",
+      "repeat": 1,
+      "error": null,
+      "gates": {
+        "original_runner_accepted": true,
+        "full_model_matched": true,
+        "ordered_callbacks_matched": true,
+        "drawable_work_acknowledged": true,
+        "graceful_close": true,
+        "interactive_work_matched": null,
+        "animation_work_matched": true,
+        "animation_delivery_matches": true,
+        "animation_count_matches_lifetime": true,
+        "animation_skipped": 0,
+        "host_audit": {
+          "status": "fail",
+          "eligible": false,
+          "errors": [
+            "too few host receipts for the scheduled animation"
+          ],
+          "scheduled_frames": 1800,
+          "minimum_host_receipts": 1798,
+          "observed_host_receipts": 1796,
+          "receipt_count_ratio": 0.9977777777777778,
+          "extra_receipts": 0,
+          "maximum_internal_gap_ns": 43648005,
+          "gaps_longer_than_two_periods": 21,
+          "long_gap_ns": [
+            35223483,
+            37084903,
+            34836029,
+            35395940,
+            35185704,
+            34928938,
+            37979230,
+            38641030,
+            36127408,
+            35804037,
+            35462220,
+            43648005,
+            35695462,
+            34616506,
+            36237254,
+            37449081,
+            36617545,
+            34581920,
+            35623783,
+            34018719,
+            34210429
+          ],
+          "leading_edge_gap_ns": 9713835,
+          "trailing_edge_gap_ns": 5391135,
+          "cadence_warning": true,
+          "every_tick_visible": "not-established",
+          "physical_display_smoothness": "unsupported"
+        },
+        "mapped_description_gate": true,
+        "final_chrome_anchor": true
+      },
+      "animation_ticks": 2102,
+      "animation_expected_ticks_from_lifetime": 2101,
+      "present_frame_count": 1796
+    },
+    {
+      "variant": "gpui-control",
+      "policy": "auto",
+      "mode": "animation",
+      "repeat": 3,
+      "error": null,
+      "gates": {
+        "original_runner_accepted": true,
+        "full_model_matched": true,
+        "ordered_callbacks_matched": true,
+        "drawable_work_acknowledged": true,
+        "graceful_close": true,
+        "interactive_work_matched": null,
+        "animation_work_matched": true,
+        "animation_delivery_matches": true,
+        "animation_count_matches_lifetime": true,
+        "animation_skipped": 0,
+        "host_audit": {
+          "status": "fail",
+          "eligible": false,
+          "errors": [
+            "too few host receipts for the scheduled animation"
+          ],
+          "scheduled_frames": 1800,
+          "minimum_host_receipts": 1798,
+          "observed_host_receipts": 1791,
+          "receipt_count_ratio": 0.995,
+          "extra_receipts": 0,
+          "maximum_internal_gap_ns": 38952412,
+          "gaps_longer_than_two_periods": 27,
+          "long_gap_ns": [
+            37813467,
+            34825876,
+            38885652,
+            37256381,
+            34320915,
+            36865717,
+            36640583,
+            37573275,
+            36501995,
+            38646780,
+            34458782,
+            38952412,
+            35154742,
+            35206839,
+            34992829,
+            34924444,
+            37182742,
+            36469596,
+            35338281,
+            38494748,
+            37184792,
+            34901244,
+            35876386,
+            36231069,
+            34907190,
+            36355726,
+            38749630
+          ],
+          "leading_edge_gap_ns": 7662785,
+          "trailing_edge_gap_ns": 7742940,
+          "cadence_warning": true,
+          "every_tick_visible": "not-established",
+          "physical_display_smoothness": "unsupported"
+        },
+        "mapped_description_gate": true,
+        "final_chrome_anchor": true
+      },
+      "animation_ticks": 2102,
+      "animation_expected_ticks_from_lifetime": 2102,
+      "present_frame_count": 1791
+    }
+  ],
+  "auto_same_core_pairs": [
+    {
+      "mode": "busy",
+      "repeat": 1,
+      "qualified": true,
+      "process_cpu_percent_one_core_100": {
+        "mapped": 4.499986018243442,
+        "control": 4.399986649560508,
+        "mapped_minus_control": 0.09999936868293435,
+        "mapped_percent_of_control": 102.2727198204777
+      },
+      "pss_kb_peak": {
+        "mapped": 16115,
+        "control": 15941,
+        "mapped_minus_control": 174,
+        "mapped_percent_of_control": 101.09152499843172
+      }
+    },
+    {
+      "mode": "busy",
+      "repeat": 2,
+      "qualified": true,
+      "process_cpu_percent_one_core_100": {
+        "mapped": 4.63328797313519,
+        "control": 4.466630309933708,
+        "mapped_minus_control": 0.166657663201482,
+        "mapped_percent_of_control": 103.73117208359147
+      },
+      "pss_kb_peak": {
+        "mapped": 16005,
+        "control": 16103,
+        "mapped_minus_control": -98,
+        "mapped_percent_of_control": 99.39141774824567
+      }
+    },
+    {
+      "mode": "busy",
+      "repeat": 3,
+      "qualified": true,
+      "process_cpu_percent_one_core_100": {
+        "mapped": 4.333088176448231,
+        "control": 4.1333122931204365,
+        "mapped_minus_control": 0.19977588332779472,
+        "mapped_percent_of_control": 104.8333121032327
+      },
+      "pss_kb_peak": {
+        "mapped": 16109,
+        "control": 15953,
+        "mapped_minus_control": 156,
+        "mapped_percent_of_control": 100.97787250047013
+      }
+    },
+    {
+      "mode": "animation",
+      "repeat": 1,
+      "qualified": false
+    },
+    {
+      "mode": "animation",
+      "repeat": 2,
+      "qualified": true,
+      "process_cpu_percent_one_core_100": {
+        "mapped": 42.76645878176163,
+        "control": 42.06639396706113,
+        "mapped_minus_control": 0.7000648147004966,
+        "mapped_percent_of_control": 101.6641902209366
+      },
+      "pss_kb_peak": {
+        "mapped": 22493,
+        "control": 24389,
+        "mapped_minus_control": -1896,
+        "mapped_percent_of_control": 92.22600352617984
+      }
+    },
+    {
+      "mode": "animation",
+      "repeat": 3,
+      "qualified": false
+    }
+  ],
+  "policies_pooled": false,
+  "failed_rows_excluded_from_performance": true
+}

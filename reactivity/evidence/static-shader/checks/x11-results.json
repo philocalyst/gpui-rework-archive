@@ -1,0 +1,55 @@
+{
+  "source": "a871fc6fa924f31bf08fe2a51248930025582da1",
+  "build": [
+    "cargo",
+    "test",
+    "--offline",
+    "--locked",
+    "-p",
+    "gpui",
+    "--features",
+    "x11,gpui_gpu/offline-shader",
+    "--lib",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "cargo_artifact": "/tmp/gpui-static-shader-sol-target/debug/deps/gpui-c56d0b2015d773c0",
+  "binary": "/tmp/gpui-static-frozen-bins/gpui-x11",
+  "sha256": "a7c3f2b965a111b4ed19e15b97786db2c20b2a5872a670b349057ff68cdff389",
+  "xvfb_sha256": "53c47599949ccf0d4228cc7583bb60c93d8572062b84d1883e46639c03998e26",
+  "xdotool_sha256": "7e0fce9c31e72f2863235e37d16bae40eb883afffc70e4b46561dd4aed37064e",
+  "display": ":156",
+  "cases": [
+    {
+      "test": "native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window",
+      "command": [
+        "dbus-run-session",
+        "--",
+        "/tmp/gpui-static-frozen-bins/gpui-x11",
+        "--exact",
+        "native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "b4b56b23c41183b62a169b57cf52692b2df56c3c3ea53bcb53956f504724b95a"
+    },
+    {
+      "test": "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+      "command": [
+        "dbus-run-session",
+        "--",
+        "/tmp/gpui-static-frozen-bins/gpui-x11",
+        "--exact",
+        "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "f80bc64597168b4c85d4ad7e3e17132b91dd74fc81565f56a7b1eccdacac6ae9"
+    }
+  ],
+  "display_and_runtime_retired": true
+}

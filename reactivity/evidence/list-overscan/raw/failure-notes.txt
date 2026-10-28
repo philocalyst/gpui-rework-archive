@@ -1,0 +1,5 @@
+focused-first 840252bc5a:21/23; conservative outward viewport envelopes publish buffered rows touching exact boundary.
+focused-diagnostic76db549c39:same2failures; full public snapshots retained, showed8.58e-6/2.10e-5 spurious semantic slivers.
+focused-clippingefe11b9df4:all23pass after logical buffered-slot empty clip; no epsilon/tolerance geometry change.
+full-first2918548ac0:unit and preceding public suites pass, rounded allocation ledger expected56/104 despite charged64/112 cold-header growth. Correct exact ledger; no production change.
+negative5263081eb5 image-only eager oracle PASSES: wrong key/row association can retain identical pixels. Preserved as inadequate standalone negative. Same immutable executable fails both existing public keyed authority/visibility and keyed bounds-vs-fresh tests; negative-authority records both. No mutant or production changes used to select a failure.

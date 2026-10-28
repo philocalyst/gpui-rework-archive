@@ -1,0 +1,7 @@
+
+running 2 tests
+test style::recipe_tests::dynamic_recipe_stores_only_thin_references_and_lowers_without_recipe_allocation ... ok
+test style::recipe_tests::stable_const_recipes_store_raw_values_with_the_original_literal_floor ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 101 filtered out; finished in 0.00s
+

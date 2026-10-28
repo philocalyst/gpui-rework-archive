@@ -1,0 +1,48 @@
+{
+  "default": {
+    "argv": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--all-targets",
+      "--message-format=json",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "timeout_seconds": 300,
+    "cwd": "/tmp/gpui-source-value-nightly-root",
+    "source": "d6883d6d6ad2cee0ba3d3458ac9ef7fac5dea78e",
+    "bootstrap": false,
+    "target": "/tmp/gpui-source-value-nightly-target"
+  },
+  "native": {
+    "argv": [
+      "cargo",
+      "clippy",
+      "--manifest-path",
+      "reactivity/Cargo.toml",
+      "--offline",
+      "--locked",
+      "-p",
+      "gpui",
+      "--all-targets",
+      "--features",
+      "x11",
+      "--message-format=json",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "timeout_seconds": 300,
+    "cwd": "/tmp/gpui-source-value-nightly-root",
+    "source": "d6883d6d6ad2cee0ba3d3458ac9ef7fac5dea78e",
+    "bootstrap": false,
+    "target": "/tmp/gpui-source-value-nightly-target"
+  }
+}

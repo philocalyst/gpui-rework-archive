@@ -1,0 +1,88 @@
+{
+  "binary": "/tmp/gpui-inspector-pointer-codegen-local/candidate-frozen",
+  "bytes": 15379392,
+  "sha256": "4eafc7fdff5481c070cc78307aa9f7f77b721979ff76fd5bc1dbcaa93b59c2d3",
+  "sections": {
+    ".rodata": 6510760,
+    ".eh_frame": 215552,
+    ".text": 3439719,
+    ".data.rel.ro": 128968,
+    ".stack_sizes": 32237
+  },
+  "selected_frames": [
+    {
+      "address": 7144256,
+      "code_bytes": 879,
+      "mangled": "_RNvCs4gijoeCAvqI_25inspector_pointer_control10click_only",
+      "name": "inspector_pointer_control[31a6dc5fa82379f6]::click_only",
+      "normalized_name": "inspector_pointer_control::click_only",
+      "stack_bytes": 152
+    },
+    {
+      "address": 7145136,
+      "code_bytes": 241,
+      "mangled": "_RNvCs4gijoeCAvqI_25inspector_pointer_control3ack",
+      "name": "inspector_pointer_control[31a6dc5fa82379f6]::ack",
+      "normalized_name": "inspector_pointer_control::ack",
+      "stack_bytes": 136
+    },
+    {
+      "address": 7145392,
+      "code_bytes": 7119,
+      "mangled": "_RNvCs4gijoeCAvqI_25inspector_pointer_control4main",
+      "name": "inspector_pointer_control[31a6dc5fa82379f6]::main",
+      "normalized_name": "inspector_pointer_control::main",
+      "stack_bytes": 3368
+    },
+    {
+      "address": 7152512,
+      "code_bytes": 3204,
+      "mangled": "_RNvCs4gijoeCAvqI_25inspector_pointer_control8dispatch",
+      "name": "inspector_pointer_control[31a6dc5fa82379f6]::dispatch",
+      "normalized_name": "inspector_pointer_control::dispatch",
+      "stack_bytes": 248
+    },
+    {
+      "address": 7155728,
+      "code_bytes": 204,
+      "mangled": "_RNvCs4gijoeCAvqI_25inspector_pointer_control8hit_only",
+      "name": "inspector_pointer_control[31a6dc5fa82379f6]::hit_only",
+      "normalized_name": "inspector_pointer_control::hit_only",
+      "stack_bytes": 24
+    },
+    {
+      "address": 7188192,
+      "code_bytes": 266,
+      "mangled": "_RNvMs2_NtNtCs6ZNK6sH19NW_4gpui7runtime5inputINtB7_7RuntimeNtCs4gijoeCAvqI_25inspector_pointer_control5ModelE11pointer_hitBW_",
+      "name": "<gpui[517f066c3d2486e6]::runtime::Runtime<inspector_pointer_control[31a6dc5fa82379f6]::Model>>::pointer_hit",
+      "normalized_name": "<gpui::runtime::Runtime<inspector_pointer_control::Model>>::pointer_hit",
+      "stack_bytes": 120
+    },
+    {
+      "address": 7188672,
+      "code_bytes": 1160,
+      "mangled": "_RNvMs2_NtNtCs6ZNK6sH19NW_4gpui7runtime5inputINtB7_7RuntimeNtCs4gijoeCAvqI_25inspector_pointer_control5ModelE19inspector_focus_hitBW_",
+      "name": "<gpui[517f066c3d2486e6]::runtime::Runtime<inspector_pointer_control[31a6dc5fa82379f6]::Model>>::inspector_focus_hit",
+      "normalized_name": "<gpui::runtime::Runtime<inspector_pointer_control::Model>>::inspector_focus_hit",
+      "stack_bytes": 168
+    },
+    {
+      "address": 7198240,
+      "code_bytes": 529,
+      "mangled": "_RNvMs2_NtNtCs6ZNK6sH19NW_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4gijoeCAvqI_25inspector_pointer_control5ModelE23inspector_pick_in_sheetB10_",
+      "name": "<gpui[517f066c3d2486e6]::runtime::Runtime<inspector_pointer_control[31a6dc5fa82379f6]::Model>>::inspector_pick_in_sheet",
+      "normalized_name": "<gpui::runtime::Runtime<inspector_pointer_control::Model>>::inspector_pick_in_sheet",
+      "stack_bytes": 152
+    },
+    {
+      "address": 7309296,
+      "code_bytes": 874,
+      "mangled": "_RNvMst_NtCs6ZNK6sH19NW_4gpui7runtimeINtB5_7RuntimeNtCs4gijoeCAvqI_25inspector_pointer_control5ModelE3hitBO_",
+      "name": "<gpui[517f066c3d2486e6]::runtime::Runtime<inspector_pointer_control[31a6dc5fa82379f6]::Model>>::hit",
+      "normalized_name": "<gpui::runtime::Runtime<inspector_pointer_control::Model>>::hit",
+      "stack_bytes": 120
+    }
+  ],
+  "metadata_functions": 3668,
+  "limits": "Compiler stack-size metadata for control and all dependency crates; not summed call depth, dynamic stack or dependency frames. Selected linked functions/sections, no timings."
+}

@@ -1,0 +1,143 @@
+diff --git a/reactivity/crates/gpui/Cargo.toml b/reactivity/crates/gpui/Cargo.toml
+index 70c799edeb..8115600052 100644
+--- a/reactivity/crates/gpui/Cargo.toml
++++ b/reactivity/crates/gpui/Cargo.toml
+@@ -95,3 +95,7 @@ required-features = ["native-core"]
+ [[example]]
+ name = "todo_comparison"
+ required-features = ["native-core"]
++
++[[example]]
++name = "component_sources"
++required-features = ["native-core"]
+diff --git a/reactivity/crates/gpui/examples/component_sources.rs b/reactivity/crates/gpui/examples/component_sources.rs
+new file mode 100644
+index 0000000000..fb0d16d23d
+--- /dev/null
++++ b/reactivity/crates/gpui/examples/component_sources.rs
+@@ -0,0 +1,125 @@
++//! One reusable counter schema, nested twice. Parent actions and questions use
++//! the child's declarations directly; there are no duplicate root Signals/IDs.
++use gpui::{Application, Completion, NativeError, Questions, StartError, Window, prelude::*};
++use std::convert::Infallible;
++#[path = "support/renderer.rs"]
++mod renderer;
++
++struct Counter {
++    label: &'static str,
++    count: Signal<u32>,
++}
++impl Counter {
++    const COUNT: Source<Self, u32> =
++        Source::new(FieldId::new(1), "count", |m| &m.count, |m| &mut m.count);
++}
++impl View for Counter {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::COUNT)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text(self.label).font_size(18),
++            text(&self.count).font_size(30),
++            button("Increase")
++                .p(10)
++                .on_click(Self::COUNT.update(|count| *count += 1)),
++        ))
++        .gap(10)
++        .p(18)
++        .w(190)
++        .bg(rgb(0xe8eef7))
++    }
++}
++struct Pane {
++    counter: Counter,
++}
++impl Pane {
++    const COUNTER: Component<Self, Counter> = Component::new(
++        FieldId::new(1),
++        "counter",
++        |m| &m.counter,
++        |m| &mut m.counter,
++    );
++}
++impl View for Pane {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct_component(Self::COUNTER)
++    }
++    fn view(&self) -> El<'_> {
++        Self::COUNTER.view(self)
++    }
++}
++struct Page {
++    left: Pane,
++    right: Pane,
++    doubled: gpui::Reader<u32>,
++}
++impl Page {
++    const LEFT: Component<Self, Pane> =
++        Component::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
++    const RIGHT: Component<Self, Pane> =
++        Component::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .direct_component(Self::LEFT)
++            .direct_component(Self::RIGHT)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text("One component. Two independent scopes.").font_size(24),
++            row((Self::LEFT.view(self), Self::RIGHT.view(self))).gap(16),
++            button("Increase left from parent").p(10).on_click(
++                Self::LEFT
++                    .source(Pane::COUNTER.source(&Counter::COUNT))
++                    .update(|count| *count += 1),
++            ),
++            self.doubled
++                .project(|value| text(format!("Twice the left count: {value}")))
++                .loading(|| text("Reading left count…")),
++        ))
++        .gap(18)
++        .p(24)
++        .fg(rgb(0x19263b))
++    }
++}
++fn main() -> Result<(), NativeError> {
++    // Borrow a static nested declaration. The Question owns one pointer, and
++    // resolves the mounted component scopes before reading or filtering edits.
++    let input = &const { Page::LEFT.source(Pane::COUNTER.source(&Counter::COUNT)) };
++    let (questions, doubled) = Questions::new()
++        .question(
++            input,
++            |count| *count,
++            |count, completion: Completion<u32, Infallible>| {
++                let _ = completion.complete(Ok(count * 2));
++                Ok::<(), StartError>(())
++            },
++        )
++        .expect("one valid question declaration");
++    let page = Page {
++        left: Pane {
++            counter: Counter {
++                label: "Left",
++                count: Signal::new(0),
++            },
++        },
++        right: Pane {
++            counter: Counter {
++                label: "Right",
++                count: Signal::new(0),
++            },
++        },
++        doubled,
++    };
++    Application::run_window(
++        renderer::configure(
++            Window::document(page)
++                .title("Reusable component sources")
++                .size(520, 400),
++        )
++        .questions(questions),
++    )
++}

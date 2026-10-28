@@ -1,0 +1,25 @@
+commit 0d37e157b65d78bc8e1310ef496b936dca001b68
+Author:     Codex <codex@openai.com>
+AuthorDate: Fri Oct 23 07:50:16 2026 -0400
+Commit:     Codex <codex@openai.com>
+CommitDate: Fri Oct 23 07:50:16 2026 -0400
+
+    Partially evaluate certified constant-coverage tile ranges
+    
+    Separate solid coverage from opaque prefix-discard authority. A spare bit
+    in the existing CSR count/end preserves whether every retained draw covers
+    all lattice samples; partial draws revoke it, and only a safe opaque cover
+    can retire the earlier sampled prefix. Keep the original ordered references.
+    
+    The shader blends a certified range once per pixel instead of sixteen
+    times. It adds no texture, pass, retained lane, buffer or owner field. The
+    existing diagnostic work counts explicitly charge one color/source
+    evaluation per pixel in this mode rather than claiming zero shader work.
+    
+    The existing HDR signed-zero regression caught an incorrect arithmetic
+    identity: shader optimization retained negative zero where the full
+    reduction normalizes it. Normalize only exact negative-zero integer bits;
+    preserve every other component. The original failure is retained. Its real
+    readback control now passes, as does a new ordered translucent-stack control
+    covering SDR/HDR, sRGB/P3, partial edge fallback and opaque reset. Broader
+    functional/codegen/performance qualification remains required; unadopted.

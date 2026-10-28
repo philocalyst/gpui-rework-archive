@@ -1,0 +1,34 @@
+{
+  "harnesses": 3,
+  "passed": 735,
+  "failed": 0,
+  "ignored": 5,
+  "all_exit_zero": true,
+  "results": [
+    {
+      "target": "accesskit_consumer",
+      "exit": 0,
+      "passed": 210,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "accesskit",
+      "exit": 0,
+      "passed": 362,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "gpui",
+      "exit": 0,
+      "passed": 163,
+      "failed": 0,
+      "ignored": 5,
+      "sha256_after_matches": true
+    }
+  ],
+  "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+}

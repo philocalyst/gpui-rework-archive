@@ -1,0 +1,35 @@
+{
+  "reason": "compiler-artifact",
+  "package_id": "path+file:///root/gpui-ce3/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+  "manifest_path": "/root/gpui-ce3/reactivity/ports/hummingbird/Cargo.toml",
+  "target": {
+    "kind": [
+      "bin"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "hummingbird-gpui-port",
+    "src_path": "/root/gpui-ce3/reactivity/ports/hummingbird/src/main.rs",
+    "edition": "2024",
+    "doc": true,
+    "doctest": false,
+    "test": true
+  },
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "features": [
+    "default",
+    "native"
+  ],
+  "filenames": [
+    "/root/gpui-ce3/reactivity/ports/hummingbird/target/debug/hummingbird-gpui-port"
+  ],
+  "executable": "/root/gpui-ce3/reactivity/ports/hummingbird/target/debug/hummingbird-gpui-port",
+  "fresh": false
+}

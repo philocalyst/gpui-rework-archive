@@ -1,0 +1,28 @@
+[
+  {
+    "symbol": "gpui::runtime::list::row_style",
+    "address": "00000000009dbdc0",
+    "bytes": 284,
+    "local_sub_rsp_prologue": [],
+    "assembly": "\n/home/user/gpui-list-overscan-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000009dbdc0 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style>:\n  9dbdc0:\tpush   rbp\n  9dbdc1:\tpush   r15\n  9dbdc3:\tpush   r14\n  9dbdc5:\tpush   r12\n  9dbdc7:\tpush   rbx\n  9dbdc8:\tmov    r14,r8\n  9dbdcb:\tmov    ebp,ecx\n  9dbdcd:\tmov    r15,rdx\n  9dbdd0:\tmov    r12d,esi\n  9dbdd3:\tmov    rbx,rdi\n  9dbdd6:\tmov    rsi,rdx\n  9dbdd9:\tcall   a064d0 <_RNvNtCs4Hhyf6K4hkP_4gpui7runtime12layout_style>\n  9dbdde:\tsub    r12b,0x2\n  9dbde2:\tmovzx  ecx,r12b\n  9dbde6:\tmov    eax,0x8\n  9dbdeb:\tcmovae eax,ecx\n  9dbdee:\tcmp    al,0x7\n  9dbdf0:\tje     9dbe05 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0x45>\n  9dbdf2:\tmovzx  ecx,al\n  9dbdf5:\tcmp    ecx,0x4\n  9dbdf8:\tjne    9dbe8e <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0xce>\n  9dbdfe:\tmov    BYTE PTR [rbx+0x11d],0x1\n  9dbe05:\tcmp    DWORD PTR [r15],0x0\n  9dbe09:\tjne    9dbe42 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0x82>\n  9dbe0b:\tcmp    bpl,0x2\n  9dbe0f:\tje     9dbe2f <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0x6f>\n  9dbe11:\tmovzx  ecx,bpl\n  9dbe15:\ttest   ecx,ecx\n  9dbe17:\tjne    9dbe42 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0x82>\n  9dbe19:\tmov    DWORD PTR [rbx+0xfc],0x3f800000\n  9dbe23:\tmov    ecx,0x1\n  9dbe28:\tmov    edx,0xe8\n  9dbe2d:\tjmp    9dbe3e <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list9row_style+0x7e>\n  9dbe2f:\tmovabs rcx,0x3f80000000000002\n  9dbe39:\tmov    edx,0x28\n  9dbe3e:\trex.W\n  9dbe3f:\t.byte 0x89\n"
+  },
+  {
+    "symbol": "gpui::runtime::list::plan",
+    "address": "00000000009db530",
+    "bytes": 2178,
+    "local_sub_rsp_prologue": [
+      280
+    ],
+    "assembly": "\n/home/user/gpui-list-overscan-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000009db530 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list4plan>:\n  9db530:\tpush   rbp\n  9db531:\tpush   r15\n  9db533:\tpush   r14\n  9db535:\tpush   r13\n  9db537:\tpush   r12\n  9db539:\tpush   rbx\n  9db53a:\tsub    rsp,0x118\n  9db541:\tmov    rbx,rdi\n  9db544:\tcmp    DWORD PTR [rdx+0x8],0x1\n  9db548:\tjne    9db5bc <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list4plan+0x8c>\n  9db54a:\tmovq   rax,xmm0\n  9db54f:\tshr    rax,0x34\n  9db553:\tand    eax,0x7ff\n  9db558:\tcmp    eax,0x7fe\n  9db55d:\tja     9db5b2 <_RNvNtNtCs4Hhyf6K4hkP_4gpui7runtime4list4plan+0x82>\n  9db55f:\tmovss  xmm1,DWORD PTR [rdx+0xc]\n  9db564:\tcvtss2sd xmm4,xmm1\n  9db568:\tmovsd  xmm2,QWORD PTR [rip+0xffffffffff773b88]        # 14f0f8 <anon.9e1870d4a4e2ffce1973a5d62f071879.9.llvm.13353404325187366010+0x8>\n  9db570:\tcmpnlesd xmm2,xmm0\n  9db575:\tmovapd xmm3,xmm0\n  9db579:\tcmpnltsd xmm3,QWORD PTR [rip+0xffffffffff773fd6]        # 14f558 <anon.636271874d7b241f9b9ef60f0ea30595.104.llvm.337625522156044439+0x28>\n  9db582:\torpd   xmm3,xmm2\n  9db586:\tmovd   eax,xmm3\n  9db58a:\tmovsd  QWORD PTR [rsp+0x68],xmm4\n  9db590:\tmovq   rdi,xmm4\n  9db595:\tshr    rdi,0x34\n  9db599:\tand    edi,0x7ff\n  9db59f:\tcmp    edi,0x7ff\n  9db5a5:\tsetae  dil\n  9db5a9:\tor     dil,al\n  9db5ac:\ttest   dil,0x1\n"
+  },
+  {
+    "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+    "address": "0000000000901910",
+    "bytes": 25792,
+    "local_sub_rsp_prologue": [
+      4096,
+      216
+    ],
+    "assembly": "\n/home/user/gpui-list-overscan-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000901910 <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_>:\n  901910:\tpush   rbp\n  901911:\tpush   r15\n  901913:\tpush   r14\n  901915:\tpush   r13\n  901917:\tpush   r12\n  901919:\tpush   rbx\n  90191a:\tsub    rsp,0x1000\n  901921:\tmov    QWORD PTR [rsp],0x0\n  901929:\tsub    rsp,0xd8\n  901930:\tmov    QWORD PTR [rsp+0x30],rdi\n  901935:\tmov    BYTE PTR [rsp+0x47],dl\n  901939:\tmov    QWORD PTR [rsp+0x28],rsi\n  90193e:\tmov    r15,QWORD PTR [rsi+0x5f0]\n  901945:\tmov    QWORD PTR [rsp+0x2b0],r15\n  90194d:\tinc    r15\n  901950:\tje     906f1a <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_+0x560a>\n  901956:\tmov    ebp,ecx\n  901958:\tmov    QWORD PTR [rsp+0x70],r8\n  90195d:\tmov    rcx,QWORD PTR [rsp+0x28]\n  901962:\tmov    r13,QWORD PTR [rcx+0x5e8]\n  901969:\tmov    rsi,QWORD PTR [rcx+0x6c8]\n  901970:\tmov    rdx,rsi\n  901973:\tshr    rdx,0x20\n  901977:\tmovss  xmm0,DWORD PTR [rcx+0x760]\n  90197f:\tmovaps XMMWORD PTR [rsp+0x5d0],xmm0\n  901987:\tmov    eax,DWORD PTR [rcx+0x190]\n  90198d:\trex.W\n  90198e:\t.byte 0x8b\n  90198f:\t.byte 0x89\n"
+  }
+]

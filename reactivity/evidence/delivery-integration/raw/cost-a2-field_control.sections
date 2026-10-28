@@ -1,0 +1,35 @@
+/tmp/gpui-delivery-integration-captures/cost-a2-field_control.elf  :
+section                 size       addr
+.interp                   83        736
+.note.ABI-tag             32        820
+.dynsym                 1944        856
+.gnu.version             162       2800
+.gnu.version_r           384       2964
+.gnu.hash                 28       3352
+.dynstr                 1199       3380
+.rela.dyn             213288       4584
+.rela.plt                 48     217872
+.gcc_except_table      83040     217920
+.rodata              6512512     300960
+.eh_frame_hdr          40764    6813472
+.eh_frame             275164    6854240
+.text                3697959    7133504
+.init                     27   10831464
+.fini                     13   10831492
+.plt                      48   10831520
+.tdata                   936   10835664
+.tbss                   3176   10836600
+.fini_array                8   10836600
+.init_array               16   10836608
+.data.rel.ro          154760   10836624
+.dynamic                 480   10991384
+.got                   14832   10991864
+.got.plt                  40   11006696
+.relro_padding          3312   11006736
+.tm_clone_table            0   11010832
+.data                   2744   11010832
+.bss                     283   11013576
+.comment                 166          0
+Total               11007448
+
+

@@ -1,0 +1,14 @@
+{
+  "summary_byte_identical": true,
+  "scripts_sha256": {
+    "analyze.py": "807d24512ebf1c1fa3376d1c760c365a92d9c4bc9d5890eb7d4bf1080f9108fa",
+    "archive.py": "ece06d877c55869b9401ccbd89870ee7b4ba4cfc2d8ba69bcc7544ed83a40354",
+    "capture.py": "273b193736bd802d26e6da658be62e8e993c758a3e94b75979a4fc283c8384a5",
+    "export_profiles.py": "a2f0667526b128a7c2617feea1736b81dd773fa0ec81e2d7768c58cca3fe4a96",
+    "remote_build.py": "4ab3664b9a6075368906381edb7e5ff7e3fd0d2052680e0a1d6ab55f6811afbd",
+    "static_cost.py": "6a6d702ffc883beb9cbf2f5ed8581b5b047fa8dafdf0230ffdbe36b2d5f7a4da",
+    "verify_builds.py": "83be2433b6595d1ab27fc527866b1db7a030a6ad186426b5a82237a476e9a490"
+  },
+  "format": "Black26.10.1; sealed source/ELFs untouched",
+  "scope": "Deterministic postcapture analyzer check, no runtime measurement"
+}

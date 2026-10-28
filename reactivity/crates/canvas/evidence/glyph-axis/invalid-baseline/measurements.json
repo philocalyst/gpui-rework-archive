@@ -1,0 +1,430 @@
+{
+  "baseline_source": "62f68419395bc501ffc8e781f306dd74c7d9cbda",
+  "candidate_source": "0a16952cf3",
+  "binary_sha256": {
+    "output_cache": "64474ec5181f72b3fc81c348c8927ffba782f4456cb90bf03b851ecb70820682",
+    "glyph_axis": "82c181f621d86cffdcb1bed1d74133e9dd65e5cbcbd2b14d139257989c9274fe"
+  },
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "duration_seconds": 11.583174467086792,
+  "rows": 500,
+  "summary": [
+    {
+      "profile": "hdr",
+      "scene": "boundary",
+      "workers": 0,
+      "output_cache": 13.905,
+      "glyph_axis": 14.142,
+      "change_percent": 1.7044228694714114
+    },
+    {
+      "profile": "hdr",
+      "scene": "boundary",
+      "workers": 1,
+      "output_cache": 19.879,
+      "glyph_axis": 20.477,
+      "change_percent": 3.0081996076261275
+    },
+    {
+      "profile": "hdr",
+      "scene": "boundary",
+      "workers": 2,
+      "output_cache": 16.804,
+      "glyph_axis": 16.687,
+      "change_percent": -0.6962627945726996
+    },
+    {
+      "profile": "hdr",
+      "scene": "boundary",
+      "workers": 4,
+      "output_cache": 18.937,
+      "glyph_axis": 19.508,
+      "change_percent": 3.0152611290066966
+    },
+    {
+      "profile": "hdr",
+      "scene": "boundary",
+      "workers": 8,
+      "output_cache": 22.545,
+      "glyph_axis": 22.055,
+      "change_percent": -2.1734309159458953
+    },
+    {
+      "profile": "hdr",
+      "scene": "flat",
+      "workers": 0,
+      "output_cache": 161.072,
+      "glyph_axis": 162.407,
+      "change_percent": 0.8288218933147906
+    },
+    {
+      "profile": "hdr",
+      "scene": "flat",
+      "workers": 1,
+      "output_cache": 171.146,
+      "glyph_axis": 170.511,
+      "change_percent": -0.3710282448903257
+    },
+    {
+      "profile": "hdr",
+      "scene": "flat",
+      "workers": 2,
+      "output_cache": 106.435,
+      "glyph_axis": 111.029,
+      "change_percent": 4.316249354065849
+    },
+    {
+      "profile": "hdr",
+      "scene": "flat",
+      "workers": 4,
+      "output_cache": 69.162,
+      "glyph_axis": 77.687,
+      "change_percent": 12.326132847517401
+    },
+    {
+      "profile": "hdr",
+      "scene": "flat",
+      "workers": 8,
+      "output_cache": 69.45,
+      "glyph_axis": 65.593,
+      "change_percent": -5.5536357091432675
+    },
+    {
+      "profile": "hdr",
+      "scene": "labels",
+      "workers": 0,
+      "output_cache": 6649.187,
+      "glyph_axis": 6726.159,
+      "change_percent": 1.1576152091977487
+    },
+    {
+      "profile": "hdr",
+      "scene": "labels",
+      "workers": 1,
+      "output_cache": 6694.108,
+      "glyph_axis": 6708.239,
+      "change_percent": 0.2110960862895972
+    },
+    {
+      "profile": "hdr",
+      "scene": "labels",
+      "workers": 2,
+      "output_cache": 3507.207,
+      "glyph_axis": 3478.608,
+      "change_percent": -0.8154351881710875
+    },
+    {
+      "profile": "hdr",
+      "scene": "labels",
+      "workers": 4,
+      "output_cache": 1904.222,
+      "glyph_axis": 1911.662,
+      "change_percent": 0.3907107469612203
+    },
+    {
+      "profile": "hdr",
+      "scene": "labels",
+      "workers": 8,
+      "output_cache": 1220.657,
+      "glyph_axis": 1291.869,
+      "change_percent": 5.833907477694389
+    },
+    {
+      "profile": "hdr",
+      "scene": "large_flat",
+      "workers": 0,
+      "output_cache": 1497.417,
+      "glyph_axis": 1526.897,
+      "change_percent": 1.9687234751575522
+    },
+    {
+      "profile": "hdr",
+      "scene": "large_flat",
+      "workers": 1,
+      "output_cache": 1592.712,
+      "glyph_axis": 1464.349,
+      "change_percent": -8.059398058154898
+    },
+    {
+      "profile": "hdr",
+      "scene": "large_flat",
+      "workers": 2,
+      "output_cache": 755.183,
+      "glyph_axis": 779.444,
+      "change_percent": 3.2125988005556216
+    },
+    {
+      "profile": "hdr",
+      "scene": "large_flat",
+      "workers": 4,
+      "output_cache": 452.0,
+      "glyph_axis": 462.82,
+      "change_percent": 2.39380530973452
+    },
+    {
+      "profile": "hdr",
+      "scene": "large_flat",
+      "workers": 8,
+      "output_cache": 389.482,
+      "glyph_axis": 413.499,
+      "change_percent": 6.166395366152999
+    },
+    {
+      "profile": "hdr",
+      "scene": "shear",
+      "workers": 0,
+      "output_cache": 1967.81,
+      "glyph_axis": 1997.778,
+      "change_percent": 1.522911256676207
+    },
+    {
+      "profile": "hdr",
+      "scene": "shear",
+      "workers": 1,
+      "output_cache": 2024.401,
+      "glyph_axis": 2029.125,
+      "change_percent": 0.23335297700406432
+    },
+    {
+      "profile": "hdr",
+      "scene": "shear",
+      "workers": 2,
+      "output_cache": 1007.632,
+      "glyph_axis": 1047.213,
+      "change_percent": 3.9281205837051747
+    },
+    {
+      "profile": "hdr",
+      "scene": "shear",
+      "workers": 4,
+      "output_cache": 626.407,
+      "glyph_axis": 659.521,
+      "change_percent": 5.286339392758999
+    },
+    {
+      "profile": "hdr",
+      "scene": "shear",
+      "workers": 8,
+      "output_cache": 452.113,
+      "glyph_axis": 473.097,
+      "change_percent": 4.641317546719503
+    },
+    {
+      "profile": "sdr",
+      "scene": "boundary",
+      "workers": 0,
+      "output_cache": 13.219,
+      "glyph_axis": 13.239,
+      "change_percent": 0.1512973749905555
+    },
+    {
+      "profile": "sdr",
+      "scene": "boundary",
+      "workers": 1,
+      "output_cache": 19.994,
+      "glyph_axis": 19.833,
+      "change_percent": -0.8052415724717488
+    },
+    {
+      "profile": "sdr",
+      "scene": "boundary",
+      "workers": 2,
+      "output_cache": 17.194,
+      "glyph_axis": 15.219,
+      "change_percent": -11.486565080842148
+    },
+    {
+      "profile": "sdr",
+      "scene": "boundary",
+      "workers": 4,
+      "output_cache": 18.65,
+      "glyph_axis": 18.326,
+      "change_percent": -1.7372654155495826
+    },
+    {
+      "profile": "sdr",
+      "scene": "boundary",
+      "workers": 8,
+      "output_cache": 22.176,
+      "glyph_axis": 21.64,
+      "change_percent": -2.4170274170274064
+    },
+    {
+      "profile": "sdr",
+      "scene": "flat",
+      "workers": 0,
+      "output_cache": 189.594,
+      "glyph_axis": 190.724,
+      "change_percent": 0.5960104222707541
+    },
+    {
+      "profile": "sdr",
+      "scene": "flat",
+      "workers": 1,
+      "output_cache": 199.075,
+      "glyph_axis": 198.236,
+      "change_percent": -0.42144920256185214
+    },
+    {
+      "profile": "sdr",
+      "scene": "flat",
+      "workers": 2,
+      "output_cache": 118.021,
+      "glyph_axis": 117.644,
+      "change_percent": -0.3194346768795375
+    },
+    {
+      "profile": "sdr",
+      "scene": "flat",
+      "workers": 4,
+      "output_cache": 74.836,
+      "glyph_axis": 74.627,
+      "change_percent": -0.27927735314554614
+    },
+    {
+      "profile": "sdr",
+      "scene": "flat",
+      "workers": 8,
+      "output_cache": 62.584,
+      "glyph_axis": 64.323,
+      "change_percent": 2.778665473603459
+    },
+    {
+      "profile": "sdr",
+      "scene": "labels",
+      "workers": 0,
+      "output_cache": 5792.218,
+      "glyph_axis": 5813.268,
+      "change_percent": 0.3634186420469643
+    },
+    {
+      "profile": "sdr",
+      "scene": "labels",
+      "workers": 1,
+      "output_cache": 5780.739,
+      "glyph_axis": 5949.612,
+      "change_percent": 2.921304698240146
+    },
+    {
+      "profile": "sdr",
+      "scene": "labels",
+      "workers": 2,
+      "output_cache": 2966.316,
+      "glyph_axis": 3145.58,
+      "change_percent": 6.0433210757046885
+    },
+    {
+      "profile": "sdr",
+      "scene": "labels",
+      "workers": 4,
+      "output_cache": 1644.667,
+      "glyph_axis": 1645.777,
+      "change_percent": 0.06749086593214049
+    },
+    {
+      "profile": "sdr",
+      "scene": "labels",
+      "workers": 8,
+      "output_cache": 1202.006,
+      "glyph_axis": 1090.845,
+      "change_percent": -9.24795716493928
+    },
+    {
+      "profile": "sdr",
+      "scene": "large_flat",
+      "workers": 0,
+      "output_cache": 1622.849,
+      "glyph_axis": 1660.623,
+      "change_percent": 2.3276349185907153
+    },
+    {
+      "profile": "sdr",
+      "scene": "large_flat",
+      "workers": 1,
+      "output_cache": 1634.279,
+      "glyph_axis": 1675.284,
+      "change_percent": 2.509057510988022
+    },
+    {
+      "profile": "sdr",
+      "scene": "large_flat",
+      "workers": 2,
+      "output_cache": 854.552,
+      "glyph_axis": 870.943,
+      "change_percent": 1.918081052996179
+    },
+    {
+      "profile": "sdr",
+      "scene": "large_flat",
+      "workers": 4,
+      "output_cache": 498.508,
+      "glyph_axis": 506.278,
+      "change_percent": 1.5586510146276655
+    },
+    {
+      "profile": "sdr",
+      "scene": "large_flat",
+      "workers": 8,
+      "output_cache": 363.798,
+      "glyph_axis": 390.812,
+      "change_percent": 7.425549343316895
+    },
+    {
+      "profile": "sdr",
+      "scene": "shear",
+      "workers": 0,
+      "output_cache": 1945.24,
+      "glyph_axis": 1912.979,
+      "change_percent": -1.6584585963685727
+    },
+    {
+      "profile": "sdr",
+      "scene": "shear",
+      "workers": 1,
+      "output_cache": 1965.48,
+      "glyph_axis": 1956.81,
+      "change_percent": -0.4411136211001976
+    },
+    {
+      "profile": "sdr",
+      "scene": "shear",
+      "workers": 2,
+      "output_cache": 999.992,
+      "glyph_axis": 993.069,
+      "change_percent": -0.6923055384443044
+    },
+    {
+      "profile": "sdr",
+      "scene": "shear",
+      "workers": 4,
+      "output_cache": 610.484,
+      "glyph_axis": 633.551,
+      "change_percent": 3.7784774048132297
+    },
+    {
+      "profile": "sdr",
+      "scene": "shear",
+      "workers": 8,
+      "output_cache": 453.95,
+      "glyph_axis": 449.033,
+      "change_percent": -1.08315893820905
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+
+thread 'warm_many_label_rebuild_has_no_submission_allocations' (1455880) panicked at crates/canvas/tests/text_transaction.rs:37:5:
+assertion `left == right` failed
+  left: 54
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

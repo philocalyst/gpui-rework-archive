@@ -1,0 +1,53 @@
+{
+  "base": "f102ef111c7214c7ace900f76a74c9d3e7ca14e2",
+  "source": "d198075bbc604a06ac75c1f84261f9601687c90b",
+  "scope": "Core transport integration rehearsal only. Hummingbird patch is inventory-only; no application integration. No timing or foreign runtime claim.",
+  "gates": {
+    "default": {
+      "exit": 0,
+      "passed": 566,
+      "ignored": 10
+    },
+    "native": {
+      "exit": 0,
+      "passed": 631,
+      "ignored": 34
+    },
+    "clippy": {
+      "exit": 0
+    },
+    "aarch64-apple-darwin": {
+      "exit": 0
+    },
+    "x86_64-pc-windows-msvc": {
+      "exit": 0
+    },
+    "capture-native": {
+      "exit": 0
+    }
+  },
+  "actual_native": {
+    "terminal": 0,
+    "ordinary": 0,
+    "question": 0,
+    "future": 0,
+    "action-poll": 0,
+    "registry": 0,
+    "source_binary_unchanged": true
+  },
+  "core_lines": [
+    30696,
+    30805
+  ],
+  "prior_bill_scope": "Sealed old controls, not a new combined whole-app codegen comparison: native onepair+8B, core+109, optimized callertext+99B, headless object byte identity.",
+  "large_external_artifacts": {
+    "/tmp/gpui-remote-owner-main-qualification/native-capture/candidate-tests": {
+      "bytes": 702710512,
+      "sha256": "39a39619768fea5e3083030fdab9f699f8d46a814bedb4bd3553e13dcb19cc94"
+    },
+    "/tmp/gpui-remote-owner-main-qualification/native-capture/registry/gpui-tests": {
+      "bytes": 702710512,
+      "sha256": "39a39619768fea5e3083030fdab9f699f8d46a814bedb4bd3553e13dcb19cc94"
+    }
+  }
+}

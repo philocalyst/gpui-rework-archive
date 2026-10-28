@@ -1,0 +1,4 @@
+TODO_BENCH_CONFIG mode=idle rows=0 animation=false tick_hz=60
+TODO_RENDERER,AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: false }
+TODO_FIRST_PRESENT,52954234
+TODO_MODEL,{"animation_skipped":0,"animation_ticks":0,"callbacks":0,"deleted":null,"done":0,"draft":"","filter":"all","first_task":null,"framework":"zgui","last_task":null,"next_id":0,"rows":0}

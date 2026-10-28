@@ -1,0 +1,78 @@
+warning: patch `wgpu-hal v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-hal)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling compiler_builtins v0.1.160 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/core)
+   Compiling libc v0.2.185
+   Compiling object v0.37.3
+   Compiling std v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/std)
+   Compiling syn v2.0.118
+   Compiling objc2 v0.6.4
+   Compiling thiserror v2.0.18
+   Compiling libm v0.2.16
+   Compiling thiserror-impl v2.0.18
+   Compiling zerocopy v0.8.52
+   Compiling num-traits v0.2.19
+   Compiling zerocopy-derive v0.8.52
+   Compiling libc v0.2.186
+   Compiling naga v30.0.1
+   Compiling bytemuck_derive v1.10.2
+   Compiling parking_lot_core v0.9.12
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-hal)
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-core)
+   Compiling rustc-std-workspace-core v1.99.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/alloc)
+   Compiling unwind v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/unwind)
+   Compiling memchr v2.7.6
+   Compiling rustc-std-workspace-alloc v1.99.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling gimli v0.32.3
+   Compiling adler2 v2.0.1
+   Compiling miniz_oxide v0.8.9
+   Compiling addr2line v0.25.1
+   Compiling std_detect v0.1.5 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/std_detect)
+   Compiling hashbrown v0.17.1
+   Compiling panic_unwind v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling cfg-if v1.0.4
+   Compiling panic_abort v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/panic_abort)
+   Compiling rustc-demangle v0.1.27
+   Compiling rustc-literal-escaper v0.0.7
+   Compiling proc_macro v0.0.0 (/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/lib/rustlib/src/rust/library/proc_macro)
+    Checking bitflags v2.13.0
+    Checking objc2-encode v4.1.0
+    Checking foldhash v0.2.0
+    Checking equivalent v1.0.2
+    Checking indexmap v2.14.0
+    Checking rustc-hash v1.1.0
+    Checking naga-types v30.0.1
+    Checking log v0.4.32
+    Checking objc2-core-foundation v0.3.2
+    Checking block2 v0.6.2
+    Checking bit-vec v0.9.1
+    Checking unicode-width v0.2.2
+    Checking codespan-reporting v0.13.1
+    Checking bit-set v0.10.0
+    Checking half v2.7.1
+    Checking arrayvec v0.7.6
+    Checking unicode-ident v1.0.24
+    Checking scopeguard v1.2.0
+    Checking once_cell v1.21.4
+    Checking raw-window-handle v0.6.2
+    Checking objc2-foundation v0.3.2
+    Checking objc2-core-graphics v0.3.2
+    Checking smallvec v1.15.2
+    Checking static_assertions v1.1.0
+    Checking bytemuck v1.25.0
+    Checking wgpu-types v30.0.1
+    Checking lock_api v0.4.14
+    Checking parking_lot v0.12.5
+    Checking wgpu-naga-bridge v30.0.1
+    Checking libloading v0.8.9
+    Checking dispatch2 v0.3.1
+    Checking objc2-metal v0.3.2
+    Checking profiling v1.0.18
+    Checking objc2-quartz-core v0.3.2
+    Checking raw-window-metal v1.1.0
+    Checking wgpu-core-deps-apple v30.0.1
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4m 07s

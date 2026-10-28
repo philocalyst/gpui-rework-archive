@@ -1,0 +1,26 @@
+   Compiling gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas)
+warning: unused variable: `line`
+   --> crates/canvas/src/text/layout/interaction.rs:207:19
+    |
+207 |             .map(|line| TextRun {
+    |                   ^^^^ help: if this is intentional, prefix it with an underscore: `_line`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+   Compiling gpui_gpu v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpu)
+warning: `gpui_canvas` (lib) generated 1 warning (run `cargo fix --lib -p gpui_canvas` to apply 1 suggestion)
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+error[E0425]: cannot find value `child` in this scope
+   --> crates/gpui/src/native/accessibility/tests.rs:675:36
+    |
+675 |             .node_by_tree_local_id(child, TreeId::ROOT)
+    |                                    ^^^^^ not found in this scope
+
+error[E0425]: cannot find value `child` in this scope
+   --> crates/gpui/src/native/accessibility/tests.rs:680:57
+    |
+680 |     ingress.do_action(request(accesskit::Action::Click, child, None));
+    |                                                         ^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `gpui` (lib test) due to 2 previous errors

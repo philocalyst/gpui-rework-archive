@@ -1,0 +1,11 @@
+{
+  "source": "023e584a0504c05e7db33c887de980671f096257",
+  "exit": 0,
+  "guards": 2215,
+  "guards_match": true,
+  "passed": 0,
+  "failed": 0,
+  "ignored": 0,
+  "harnesses": 0,
+  "scope": "Functional/source-identity gate; no timing inference."
+}

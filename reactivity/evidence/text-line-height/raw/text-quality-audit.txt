@@ -1,0 +1,18 @@
+Pinned reference a3678578980ef239058c557338ef9c544d356b0c, read-only:
+crates/zgx-gpu/src/lib.rs:69 FORMAT Bgra8Unorm.
+lib.rs:9780 rgba() maps author byte channels directly to f32/255.
+draw.wgsl basic(): sampled glyph alpha multiplies that encoded color, then
+normal premultiplied-alpha fixed-function blend into the retained target.
+blit.wgsl decodes for an sRGB drawable so presentation transfer preserves those
+encoded retained values. Thus this retained blend uses encoded color values.
+GPUI: canvas/src/color.rs to_linear_srgb/linear_rgb decode author colors;
+gpu/src/shader.rs explicitly composites ordered sample records in linear light.
+
+Observed old native GPUI text edges look heavier than unchanged ZGX at the same
+font and size. Different blend spaces can contribute; no claim that this is the
+only cause (different rasterizers/hinting must also be audited). Explicit line
+pitch resolves geometry spacing only. Do not change GPUI's established linear
+compositing or exact image contracts to force a screenshot match. Cross-framework
+quality must be evaluated separately from within-GPUI exact fresh-image gates.
+Reference idle snapshot190 captured with matched DejaVu FNVce252980ec1255ff;
+its build profiles remain unmatched and it is not a timing result.

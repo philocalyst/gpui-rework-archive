@@ -1,0 +1,26 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index faaa465cb7..5f2e8225e0 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -4345,3 +4345,6 @@ mod style_port_tests {
+         assert_eq!(size_of::<Destination>(), 4);
+     }
+ }
++
++#[cfg(test)]
++mod basis_layout_probe;
+diff --git a/reactivity/crates/gpui/src/runtime/geometry.rs b/reactivity/crates/gpui/src/runtime/geometry.rs
+index 3c8e86b11d..2301adf330 100644
+--- a/reactivity/crates/gpui/src/runtime/geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/geometry.rs
+@@ -11,6 +11,10 @@ pub(super) struct Geometry {
+     candidate: Option<Vec<(u64, GeometryStyle)>>,
+ }
+ impl Geometry {
++    #[cfg(test)]
++    pub(super) fn record_storage(&self) -> (usize, usize) {
++        (self.presented.len(), self.presented.capacity())
++    }
+     pub(super) fn contribution(
+         &self,
+         identity: u64,

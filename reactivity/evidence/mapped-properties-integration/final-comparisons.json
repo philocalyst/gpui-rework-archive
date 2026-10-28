@@ -1,0 +1,1603 @@
+{
+  "pins": {
+    "baseline7df": "7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2",
+    "original0062": "0062bf589829c4f28807ad0fde3e13285379294c",
+    "successor_a89": "a89fc0241aa32cbf7db9bcd62983bb943f186028",
+    "final4b44": "4b44b21a187c5029a83357eb03034cdad5aec141"
+  },
+  "all_artifacts": {
+    "base0062-baseline-counter": {
+      "file_bytes": 23829320,
+      "elf_sha256": "cec9f193f90fd9e7bef8d0a8f0881a7136c8d70dc3d1bf38292233f2254ddf60",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19007539\t 441608\t   7720\t19456867\t128e363\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/base0062-baseline-counter.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4296,
+        ".dynstr": 2378,
+        ".gnu.version": 358,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541080,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10890432,
+        ".fini": 13,
+        ".rodata": 5852992,
+        ".eh_frame_hdr": 161588,
+        ".eh_frame": 1139676,
+        ".gcc_except_table": 413948,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 395856,
+        ".dynamic": 560,
+        ".got": 33016,
+        ".data": 11144,
+        ".bss": 7448,
+        ".comment": 71,
+        ".symtab": 851376,
+        ".strtab": 3520603,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1022384,
+          "size": 8002,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+          "max_static_cfa": 1104,
+          "end": 1030386,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1031456,
+          "size": 505,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::describe_with_changed",
+          "max_static_cfa": 208,
+          "end": 1031961,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1781024,
+          "size": 1200,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 240,
+          "end": 1782224,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1755312,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1755338,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1462000,
+          "size": 295,
+          "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1462295,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1109296,
+          "size": 30998,
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "max_static_cfa": 2320,
+          "end": 1140294,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/2a21f7606c5f250a/out/libgpui-2a21f7606c5f250a.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/2a21f7606c5f250a/out/libgpui-2a21f7606c5f250a.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "counter",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/counter.rs",
+            "edition": "2024",
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter",
+          "fresh": false
+        }
+      ]
+    },
+    "original0062-counter": {
+      "file_bytes": 23851320,
+      "elf_sha256": "66351c723c18c23d0e9cab1f18314a3b0435d1db146a398748a227f14298a8fe",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19027127\t 441792\t   7720\t19476639\t129309f\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/original0062-counter.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4296,
+        ".dynstr": 2378,
+        ".gnu.version": 358,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541368,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10906512,
+        ".fini": 13,
+        ".rodata": 5853248,
+        ".eh_frame_hdr": 161852,
+        ".eh_frame": 1141580,
+        ".gcc_except_table": 414744,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 395936,
+        ".dynamic": 560,
+        ".got": 33120,
+        ".data": 11144,
+        ".bss": 7448,
+        ".comment": 71,
+        ".symtab": 852120,
+        ".strtab": 3521380,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1021056,
+          "size": 10213,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+          "max_static_cfa": 1728,
+          "end": 1031269,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1032336,
+          "size": 505,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::describe_with_changed",
+          "max_static_cfa": 208,
+          "end": 1032841,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1843200,
+          "size": 2137,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 576,
+          "end": 1845337,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1732208,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1732234,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1831280,
+          "size": 510,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 144,
+          "end": 1831790,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1308800,
+          "size": 295,
+          "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1309095,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1109968,
+          "size": 33837,
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "max_static_cfa": 2480,
+          "end": 1143805,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "counter",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/counter.rs",
+            "edition": "2024",
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter",
+          "fresh": false
+        }
+      ]
+    },
+    "successor-counter": {
+      "file_bytes": 23840400,
+      "elf_sha256": "ae7374942107785393384ded64d47d0776b95b6775501c0155f1c2f4dc5475fd",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19014007\t 441880\t   7720\t19463607\t128fdb7\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/successor-counter.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4296,
+        ".dynstr": 2378,
+        ".gnu.version": 358,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541728,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10903968,
+        ".fini": 13,
+        ".rodata": 5843136,
+        ".eh_frame_hdr": 161788,
+        ".eh_frame": 1141180,
+        ".gcc_except_table": 414384,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 396016,
+        ".dynamic": 560,
+        ".got": 33128,
+        ".data": 11144,
+        ".bss": 7448,
+        ".comment": 71,
+        ".symtab": 852336,
+        ".strtab": 3522534,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1020368,
+          "size": 9862,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+          "max_static_cfa": 1216,
+          "end": 1030230,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1031296,
+          "size": 505,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::describe_with_changed",
+          "max_static_cfa": 208,
+          "end": 1031801,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1713040,
+          "size": 1738,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 288,
+          "end": 1714778,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1755424,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1755450,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1820944,
+          "size": 313,
+          "name": "<gpui::runtime::MappedFanout>::publish_colors",
+          "max_static_cfa": 144,
+          "end": 1821257,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1821344,
+          "size": 1488,
+          "name": "<gpui::runtime::Fanout>::finish_description",
+          "max_static_cfa": 176,
+          "end": 1822832,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1822832,
+          "size": 836,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 288,
+          "end": 1823668,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1823680,
+          "size": 1533,
+          "name": "<gpui::runtime::Fanout>::freeze",
+          "max_static_cfa": 320,
+          "end": 1825213,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1307632,
+          "size": 295,
+          "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1307927,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1108976,
+          "size": 31853,
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "max_static_cfa": 2336,
+          "end": 1140829,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "counter",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/counter.rs",
+            "edition": "2024",
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter",
+          "fresh": false
+        }
+      ]
+    },
+    "base0062-baseline-representation-v2": {
+      "file_bytes": 23865456,
+      "elf_sha256": "ef75887ac827480e6f6e61f5d7a3048a8b7c200b13a3fca6f606c2398424f17a",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19018525\t 441512\t   7736\t19467773\t1290dfd\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/base0062-baseline-representation-v2.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4320,
+        ".dynstr": 2378,
+        ".gnu.version": 360,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 540912,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10899632,
+        ".fini": 13,
+        ".rodata": 5853120,
+        ".eh_frame_hdr": 161644,
+        ".eh_frame": 1140180,
+        ".gcc_except_table": 415188,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 395768,
+        ".dynamic": 560,
+        ".got": 33008,
+        ".data": 11144,
+        ".bss": 7464,
+        ".comment": 71,
+        ".symtab": 852000,
+        ".strtab": 3539734,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1023920,
+          "size": 505,
+          "name": "<gpui::runtime::RuntimeMut<mapped_properties::Panel, gpui::remote::Lane<mapped_properties::Frame, mapped_properties::main::{closure#0}, ()>>>::describe_with_changed",
+          "max_static_cfa": 208,
+          "end": 1024425,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1790288,
+          "size": 1200,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 240,
+          "end": 1791488,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1765200,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1765226,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1575024,
+          "size": 295,
+          "name": "<gpui::source::Sources<mapped_properties::Panel>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1575319,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1114224,
+          "size": 30998,
+          "name": "<gpui::runtime::Runtime<mapped_properties::Panel>>::describe_inner",
+          "max_static_cfa": 2320,
+          "end": 1145222,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/2a21f7606c5f250a/out/libgpui-2a21f7606c5f250a.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/2a21f7606c5f250a/out/libgpui-2a21f7606c5f250a.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "mapped_properties",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/mapped_properties.rs",
+            "edition": "2024",
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties",
+          "fresh": false
+        }
+      ]
+    },
+    "original0062-mapped": {
+      "file_bytes": 23898832,
+      "elf_sha256": "c985f1b7748f578a197cf6f5a5a8675c4f5638873e209a98ced060e809c6a816",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19041385\t 441968\t   7736\t19491089\t1296911\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/original0062-mapped.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4320,
+        ".dynstr": 2378,
+        ".gnu.version": 360,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541680,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10917552,
+        ".fini": 13,
+        ".rodata": 5853376,
+        ".eh_frame_hdr": 161988,
+        ".eh_frame": 1142988,
+        ".gcc_except_table": 415952,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 396112,
+        ".dynamic": 560,
+        ".got": 33120,
+        ".data": 11144,
+        ".bss": 7464,
+        ".comment": 71,
+        ".symtab": 853464,
+        ".strtab": 3551163,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1022912,
+          "size": 634,
+          "name": "<gpui::runtime::RuntimeMut<mapped_properties::Panel, gpui::remote::Lane<mapped_properties::Frame, gpui::source::FieldAction<mapped_properties::Panel, mapped_properties::Frame, mapped_properties::main::{closure#0}>, ()>>>::describe_with_changed",
+          "max_static_cfa": 256,
+          "end": 1023546,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1853344,
+          "size": 2137,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 576,
+          "end": 1855481,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1742976,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1743002,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1841424,
+          "size": 510,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 144,
+          "end": 1841934,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1536880,
+          "size": 295,
+          "name": "<gpui::source::Sources<mapped_properties::Panel>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1537175,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1115440,
+          "size": 33837,
+          "name": "<gpui::runtime::Runtime<mapped_properties::Panel>>::describe_inner",
+          "max_static_cfa": 2480,
+          "end": 1149277,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "mapped_properties",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/mapped_properties.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties",
+          "fresh": false
+        }
+      ]
+    },
+    "successor-mapped": {
+      "file_bytes": 23893760,
+      "elf_sha256": "d4927146ee021ebbf3189d6e6317e9d59bf7ef5c10ef042d88f2e10f6853e982",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19035245\t 442016\t   7736\t19484997\t1295145\t/tmp/gpui-mapped-cost-sol-successor-653-evidence/successor-mapped.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4320,
+        ".dynstr": 2378,
+        ".gnu.version": 360,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541776,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10921296,
+        ".fini": 13,
+        ".rodata": 5843392,
+        ".eh_frame_hdr": 162020,
+        ".eh_frame": 1143196,
+        ".gcc_except_table": 415716,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 396152,
+        ".dynamic": 560,
+        ".got": 33128,
+        ".data": 11144,
+        ".bss": 7464,
+        ".comment": 71,
+        ".symtab": 853776,
+        ".strtab": 3553971,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1024880,
+          "size": 634,
+          "name": "<gpui::runtime::RuntimeMut<mapped_properties::Panel, gpui::remote::Lane<mapped_properties::Frame, gpui::source::FieldAction<mapped_properties::Panel, mapped_properties::Frame, mapped_properties::main::{closure#0}>, ()>>>::describe_with_changed",
+          "max_static_cfa": 256,
+          "end": 1025514,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1730096,
+          "size": 1738,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 288,
+          "end": 1731834,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1773328,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1773354,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1838224,
+          "size": 313,
+          "name": "<gpui::runtime::MappedFanout>::publish_colors",
+          "max_static_cfa": 144,
+          "end": 1838537,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1838624,
+          "size": 1488,
+          "name": "<gpui::runtime::Fanout>::finish_description",
+          "max_static_cfa": 176,
+          "end": 1840112,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1840112,
+          "size": 836,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 288,
+          "end": 1840948,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1840960,
+          "size": 1533,
+          "name": "<gpui::runtime::Fanout>::freeze",
+          "max_static_cfa": 320,
+          "end": 1842493,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1535680,
+          "size": 295,
+          "name": "<gpui::source::Sources<mapped_properties::Panel>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1535975,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1116880,
+          "size": 31853,
+          "name": "<gpui::runtime::Runtime<mapped_properties::Panel>>::describe_inner",
+          "max_static_cfa": 2336,
+          "end": 1148733,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "mapped_properties",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/mapped_properties.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties",
+          "fresh": false
+        }
+      ]
+    },
+    "final-counter": {
+      "file_bytes": 23849600,
+      "elf_sha256": "2bb29a73a1a095b45da81b564b4f3bb07bcca21e246a1ce680d0bae5bb680685",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19023895\t 442096\t   7720\t19473711\t129252f\t/tmp/gpui-mapped-cost-sol-final-4b44-evidence/final-counter.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4296,
+        ".dynstr": 2378,
+        ".gnu.version": 358,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541872,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10903280,
+        ".fini": 13,
+        ".rodata": 5853504,
+        ".eh_frame_hdr": 161804,
+        ".eh_frame": 1141268,
+        ".gcc_except_table": 414344,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 396232,
+        ".dynamic": 560,
+        ".got": 33128,
+        ".data": 11144,
+        ".bss": 7448,
+        ".comment": 71,
+        ".symtab": 852528,
+        ".strtab": 3523347,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1020352,
+          "size": 9017,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+          "max_static_cfa": 1200,
+          "end": 1029369,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1030432,
+          "size": 505,
+          "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::describe_with_changed",
+          "max_static_cfa": 208,
+          "end": 1030937,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1031856,
+          "size": 496,
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::finish_color_slot",
+          "max_static_cfa": 240,
+          "end": 1032352,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1824400,
+          "size": 1738,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 288,
+          "end": 1826138,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1724880,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1724906,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1708976,
+          "size": 833,
+          "name": "<gpui::runtime::MappedFanout>::publish_colors",
+          "max_static_cfa": 208,
+          "end": 1709809,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1709904,
+          "size": 1488,
+          "name": "<gpui::runtime::Fanout>::finish_description",
+          "max_static_cfa": 176,
+          "end": 1711392,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1711392,
+          "size": 836,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 288,
+          "end": 1712228,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1712240,
+          "size": 1533,
+          "name": "<gpui::runtime::Fanout>::freeze",
+          "max_static_cfa": 320,
+          "end": 1713773,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1307264,
+          "size": 295,
+          "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1307559,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1108608,
+          "size": 31853,
+          "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+          "max_static_cfa": 2336,
+          "end": 1140461,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "counter",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/counter.rs",
+            "edition": "2024",
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/counter",
+          "fresh": false
+        }
+      ]
+    },
+    "final-mapped": {
+      "file_bytes": 23907064,
+      "elf_sha256": "040fb1b0275e8f6d62f0e991918b77568e9fb5a980faf8b711a6db074fda6171",
+      "gnu_size": "text\t   data\t    bss\t    dec\t    hex\tfilename\n19045125\t 442232\t   7736\t19495093\t12978b5\t/tmp/gpui-mapped-cost-sol-final-4b44-evidence/final-mapped.elf",
+      "sections": {
+        ".interp": 83,
+        ".gnu.hash": 36,
+        ".dynsym": 4320,
+        ".dynstr": 2378,
+        ".gnu.version": 360,
+        ".gnu.version_r": 464,
+        ".rela.dyn": 541920,
+        ".rela.plt": 48,
+        ".init": 27,
+        ".plt": 48,
+        ".plt.got": 8,
+        ".text": 10920592,
+        ".fini": 13,
+        ".rodata": 5853760,
+        ".eh_frame_hdr": 162036,
+        ".eh_frame": 1143292,
+        ".gcc_except_table": 415676,
+        ".note.gnu.property": 32,
+        ".note.ABI-tag": 32,
+        ".tdata": 1000,
+        ".tbss": 272,
+        ".init_array": 24,
+        ".fini_array": 8,
+        ".data.rel.ro": 396368,
+        ".dynamic": 560,
+        ".got": 33128,
+        ".data": 11144,
+        ".bss": 7464,
+        ".comment": 71,
+        ".symtab": 853968,
+        ".strtab": 3554794,
+        ".shstrtab": 298
+      },
+      "functions": [
+        {
+          "address": 1024864,
+          "size": 634,
+          "name": "<gpui::runtime::RuntimeMut<mapped_properties::Panel, gpui::remote::Lane<mapped_properties::Frame, gpui::source::FieldAction<mapped_properties::Panel, mapped_properties::Frame, mapped_properties::main::{closure#0}>, ()>>>::describe_with_changed",
+          "max_static_cfa": 256,
+          "end": 1025498,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1025504,
+          "size": 9015,
+          "name": "<gpui::runtime::RuntimeMut<mapped_properties::Panel, gpui::remote::Lane<mapped_properties::Frame, gpui::source::FieldAction<mapped_properties::Panel, mapped_properties::Frame, mapped_properties::main::{closure#0}>, ()>>>::after_admission_changed",
+          "max_static_cfa": 1200,
+          "end": 1034519,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1035440,
+          "size": 468,
+          "name": "<gpui::runtime::Runtime<mapped_properties::Panel>>::finish_color_slot",
+          "max_static_cfa": 240,
+          "end": 1035908,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1840816,
+          "size": 1738,
+          "name": "<gpui::semantic::ElementExtra>::into_parts",
+          "max_static_cfa": 288,
+          "end": 1842554,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1741920,
+          "size": 26,
+          "name": "<gpui::source::SourceCodec>::freeze",
+          "max_static_cfa": 8,
+          "end": 1741946,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1726016,
+          "size": 833,
+          "name": "<gpui::runtime::MappedFanout>::publish_colors",
+          "max_static_cfa": 208,
+          "end": 1726849,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1726944,
+          "size": 1488,
+          "name": "<gpui::runtime::Fanout>::finish_description",
+          "max_static_cfa": 176,
+          "end": 1728432,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1728432,
+          "size": 836,
+          "name": "<gpui::runtime::Fanout>::map",
+          "max_static_cfa": 288,
+          "end": 1729268,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1729280,
+          "size": 1533,
+          "name": "<gpui::runtime::Fanout>::freeze",
+          "max_static_cfa": 320,
+          "end": 1730813,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1535312,
+          "size": 295,
+          "name": "<gpui::source::Sources<mapped_properties::Panel>>::freeze",
+          "max_static_cfa": 112,
+          "end": 1535607,
+          "dynamic_cfa": false
+        },
+        {
+          "address": 1116512,
+          "size": 31853,
+          "name": "<gpui::runtime::Runtime<mapped_properties::Panel>>::describe_inner",
+          "max_static_cfa": 2336,
+          "end": 1148365,
+          "dynamic_cfa": false
+        }
+      ],
+      "gpui_and_example_artifacts": [
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/build/gpui/43ad6dd20c30b52e/out/libgpui-43ad6dd20c30b52e.rmeta"
+          ],
+          "executable": null,
+          "fresh": true
+        },
+        {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "mapped_properties",
+            "src_path": "/home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source/reactivity/crates/gpui/examples/mapped_properties.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties"
+          ],
+          "executable": "/home/miles/gpui-ce3-compute-20261024/targets/mapped-cost-sol/release/examples/mapped_properties",
+          "fresh": false
+        }
+      ]
+    }
+  },
+  "deltas": {
+    "final-counter minus base0062-baseline-counter": {
+      "elf_bytes": 20280,
+      "sections": {
+        ".text": 12848,
+        ".rodata": 512,
+        ".eh_frame": 1592,
+        ".gcc_except_table": 396,
+        ".data.rel.ro": 376
+      }
+    },
+    "final-counter minus original0062-counter": {
+      "elf_bytes": -1720,
+      "sections": {
+        ".text": -3232,
+        ".rodata": 256,
+        ".eh_frame": -312,
+        ".gcc_except_table": -400,
+        ".data.rel.ro": 296
+      }
+    },
+    "final-counter minus successor-counter": {
+      "elf_bytes": 9200,
+      "sections": {
+        ".text": -688,
+        ".rodata": 10368,
+        ".eh_frame": 88,
+        ".gcc_except_table": -40,
+        ".data.rel.ro": 216
+      }
+    },
+    "final-mapped minus base0062-baseline-representation-v2": {
+      "elf_bytes": 41608,
+      "sections": {
+        ".text": 20960,
+        ".rodata": 640,
+        ".eh_frame": 3112,
+        ".gcc_except_table": 488,
+        ".data.rel.ro": 600
+      }
+    },
+    "final-mapped minus original0062-mapped": {
+      "elf_bytes": 8232,
+      "sections": {
+        ".text": 3040,
+        ".rodata": 384,
+        ".eh_frame": 304,
+        ".gcc_except_table": -276,
+        ".data.rel.ro": 256
+      }
+    },
+    "final-mapped minus successor-mapped": {
+      "elf_bytes": 13304,
+      "sections": {
+        ".text": -704,
+        ".rodata": 10368,
+        ".eh_frame": 96,
+        ".gcc_except_table": -40,
+        ".data.rel.ro": 216
+      }
+    }
+  },
+  "exact_source_bill": {
+    "baseline_commit": "7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2",
+    "final_commit": "4b44b21a187c5029a83357eb03034cdad5aec141",
+    "baseline_six_core_lines": 31814,
+    "final_six_core_lines": 32315,
+    "helper_lines": 50,
+    "all_shipping_final": 32365,
+    "all_shipping_delta": 551,
+    "method": "unmodified Syn/Tokei core_lines.py six-library inventory plus exact same-policy new inline-call shipping helper"
+  }
+}

@@ -1,0 +1,12 @@
+    Finished `release` profile [optimized] target(s) in 2.68s
+     Running tests/loom_protocol.rs (reactivity/target/release/deps/loom_protocol-b700cc724465fe9e)
+
+running 6 tests
+test failed_cas_coalescing_does_not_release_the_later_producers_work - should panic ... ok
+test release_only_ack_can_clear_hint_then_observe_stale_empty_queue - should panic ... ok
+test clear_after_drain_has_a_model_checked_lost_wake_counterexample - should panic ... ok
+test waking_before_first_bitmap_publication_has_a_lost_work_schedule - should panic ... ok
+test all_small_schedules_preserve_wake_or_drain_for_every_accepted_message ... ok
+test first_publication_bitmap_precedes_wake_and_partial_scan_rearms ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.89s

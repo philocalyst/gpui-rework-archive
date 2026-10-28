@@ -1,0 +1,1 @@
+xdotool key --window sent key release after WM closed target: BadWindow. App logged normal teardown. Keep failed attempt; retry uses XTest to active private-display window without explicit destroyed-window key target. Source unchanged.

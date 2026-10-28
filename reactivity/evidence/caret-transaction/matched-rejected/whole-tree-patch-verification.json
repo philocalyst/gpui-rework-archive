@@ -1,0 +1,7 @@
+{
+  "verified": true,
+  "method": "temporary independent GIT_INDEX_FILE; read-tree main8c17, apply full build patch cached, write-tree exact b5, apply control patch cached, write-tree exact045; normal index and working files untouched",
+  "candidate_tree_oid": "c41ce862bba05e470a78870ad7f316643f599125",
+  "control_tree_oid": "3fa43385a79a2a9e8fbd2030d46d2237459fe943",
+  "preserved_warning": "git apply reported3104 trailing-whitespace additions in preserved historical disassembly/evidence (3099 squelched); exact reconstructed Git tree IDs match. No source/evidence whitespace was rewritten."
+}

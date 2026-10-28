@@ -1,0 +1,8 @@
+{
+  "name": "native-gpu-paint",
+  "exit": 0,
+  "passed": 1,
+  "failed": 0,
+  "ignored": 0,
+  "binary_sha256_matches": true
+}

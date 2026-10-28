@@ -1,0 +1,27 @@
+{
+  "source": "7ccc65d2673a64499d805f41aaa0e423f15de2ce",
+  "binary_sha256": "db1651e1f2033f6ee5775dae93b26e93b817954fb8525ff60157d3f1448d2b2d",
+  "all_exit_zero": true,
+  "passed": 221,
+  "failed": 0,
+  "ignored": 30,
+  "results": [
+    {
+      "name": "native-library",
+      "exit": 0,
+      "passed": 220,
+      "failed": 0,
+      "ignored": 30,
+      "binary_sha256_matches": true
+    },
+    {
+      "name": "native-gpu-paint",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "binary_sha256_matches": true
+    }
+  ],
+  "scope": "Native library and actual native renderer bridge; positional paint-slot SDR/HDR full-render pixel oracles, token coalescing and alpha fallback on llvmpipe/private X11; no hardware/latency/RSS claim."
+}

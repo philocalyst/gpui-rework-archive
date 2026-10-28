@@ -1,0 +1,325 @@
+{
+  "scope": "Identical public Worker/connect/Win constructor probe; CPAL feature enabled but no AudioService or output opened. UI-thread Rust requests only, excludes worker/SQLiteC/device/OS and global process/RSS. Four cold/warm cohorts, no timing comparison.",
+  "rows": {
+    "control": [
+      {
+        "cohort": 0,
+        "headers": {
+          "model": 552,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 100592
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1824,
+            "count_current": 369,
+            "count_max": 522,
+            "bytes_total": 416667,
+            "bytes_current": 96276,
+            "bytes_max": 154198
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "headers": {
+          "model": 552,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96272
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410951,
+            "bytes_current": 91956,
+            "bytes_max": 149878
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "headers": {
+          "model": 552,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96272
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410951,
+            "bytes_current": 91956,
+            "bytes_max": 149878
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "headers": {
+          "model": 552,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96272
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410951,
+            "bytes_current": 91956,
+            "bytes_max": 149878
+          }
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "cohort": 0,
+        "headers": {
+          "model": 560,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 100600
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1824,
+            "count_current": 369,
+            "count_max": 522,
+            "bytes_total": 416675,
+            "bytes_current": 96284,
+            "bytes_max": 154206
+          }
+        }
+      },
+      {
+        "cohort": 1,
+        "headers": {
+          "model": 560,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96280
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410959,
+            "bytes_current": 91964,
+            "bytes_max": 149886
+          }
+        }
+      },
+      {
+        "cohort": 2,
+        "headers": {
+          "model": 560,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96280
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410959,
+            "bytes_current": 91964,
+            "bytes_max": 149886
+          }
+        }
+      },
+      {
+        "cohort": 3,
+        "headers": {
+          "model": 560,
+          "questions": 600,
+          "event": 96,
+          "selection": 32,
+          "error": 64,
+          "win": 664,
+          "ui_current_plus_inline": 96280
+        },
+        "stages": {
+          "spawn": {
+            "count_total": 10,
+            "count_current": 9,
+            "count_max": 9,
+            "bytes_total": 3487,
+            "bytes_current": 3468,
+            "bytes_max": 3468
+          },
+          "connected": {
+            "count_total": 2,
+            "count_current": 2,
+            "count_max": 2,
+            "bytes_total": 184,
+            "bytes_current": 184,
+            "bytes_max": 184
+          },
+          "mounted": {
+            "count_total": 1810,
+            "count_current": 360,
+            "count_max": 513,
+            "bytes_total": 410959,
+            "bytes_current": 91964,
+            "bytes_max": 149886
+          }
+        }
+      }
+    ]
+  },
+  "deltas": {
+    "Library": 8,
+    "Win": 0,
+    "Questions": 0,
+    "AudioError": 0,
+    "allocation_requests": 0,
+    "each_cohort_retained_requested": 8,
+    "each_cohort_mounted_peak_requested": 8,
+    "each_cohort_mounted_total_requested": 8
+  },
+  "global_static_storage_added": "none; source introduces no global/static data or retained queues/workers",
+  "unbounded_failure_strings": "Existing variable-length error storage remains; constructor peaks are not a universal application memory ceiling."
+}

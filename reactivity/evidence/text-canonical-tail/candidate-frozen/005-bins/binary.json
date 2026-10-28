@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/44631e710d23e4a8/out/bins-44631e710d23e4a8",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/005-bins/test",
+  "sha256": "755d266525518f2af9ea0ba1540d747186e6d631f3adb624e57cbbd3b8605c52",
+  "bytes": 100696016,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "bins",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/bins.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

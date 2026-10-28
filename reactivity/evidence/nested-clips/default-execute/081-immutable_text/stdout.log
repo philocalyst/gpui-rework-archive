@@ -1,0 +1,7 @@
+
+running 2 tests
+test a_failed_unicode_visual_candidate_cannot_rewrite_old_names_and_value ... ok
+test exact_sources_share_promotions_through_empty_short_long_and_unicode_pending_frames ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

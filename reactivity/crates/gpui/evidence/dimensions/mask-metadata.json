@@ -1,0 +1,43 @@
+{
+  "baseline_source": "067eebce12",
+  "candidate_patch_sha256": "ba777a5f7d4bf74a463268bb1feb2f9ab43b93ca78072f1fdbb674a4c7859c52",
+  "cpu_affinity": [
+    7
+  ],
+  "rounds": 11,
+  "order": "alternate AB/BA per round; alternating case order",
+  "platform": [
+    "Linux",
+    "ilo-prod",
+    "6.18.54",
+    "#1-NixOS SMP PREEMPT_DYNAMIC Fri Sep 25 14:35:54 UTC 2026",
+    "x86_64"
+  ],
+  "binaries": {
+    "/tmp/gpui-dimensions-baseline": {
+      "sha256": "e1f39e22b3dfa301552be54c92543dba5d1a8a8af60141dcd121944aef0562c5",
+      "bytes": 6236624
+    },
+    "/tmp/gpui-dimensions-baseline-text": {
+      "sha256": "946c46f3b40c54e14c3dcf2583409a11e7861385cb71e94101cdcc9b713fea8c",
+      "bytes": 6326080
+    },
+    "/tmp/gpui-dimensions-baseline-list": {
+      "sha256": "114f60ae8e7c4bbcbb6756b6207ad45a61bf432705d13110dbe13e53b401ea96",
+      "bytes": 6301528
+    },
+    "/tmp/gpui-dimensions-mask": {
+      "sha256": "3865acdaef7323b028a63a18158a0af1835ffc0078d1c1bcb189739c2019b330",
+      "bytes": 6235296
+    },
+    "/tmp/gpui-dimensions-mask-text": {
+      "sha256": "8ceae5cd54ff7cee9b42e2063052801c73274f6981ff985d4f5dd42ed5f7fe54",
+      "bytes": 6325024
+    },
+    "/tmp/gpui-dimensions-mask-list": {
+      "sha256": "3b683ca0485da185e1b95d8e89ecfb88f4ee450f05f6ddfe13284eaec542762d",
+      "bytes": 6300848
+    }
+  },
+  "elapsed_seconds": 13.638532150012907
+}

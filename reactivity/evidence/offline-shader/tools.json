@@ -1,0 +1,22 @@
+{
+  "rustc": {
+    "path": "/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/bin/rustc",
+    "sha256": "312adc99331d2e50de49ec76bbde65fcc4bc75e5b7ea2370b19594d5b20ced9d",
+    "version": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n"
+  },
+  "cargo": {
+    "path": "/nix/store/lynmg3kdpdz41r84nafwzi2n5nss50pq-rust-1.97.1-with-components-2026-07-16/bin/cargo",
+    "sha256": "9b4ad0ddfc9eac9ec3a496ac3c79066c9a4d57545e84ed62e79731b7ea00f776",
+    "version": "cargo 1.97.1 (c980f4866 2026-06-30)\n"
+  },
+  "spirv-val": {
+    "path": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val",
+    "sha256": "eb4e44965a1d96bb56e5b4e42471ae333324844865ddce2eafbc4a74572ecf6e",
+    "version": "SPIRV-Tools v2026.4 unknown hash, 1980-01-01T00:00:00+00:00\nTargets:\n  SPIR-V 1.0\n  SPIR-V 1.1\n  SPIR-V 1.2\n  SPIR-V 1.3\n  SPIR-V 1.4\n  SPIR-V 1.5\n  SPIR-V 1.6\n  SPIR-V 1.2 (under OpenCL 2.2 Full Profile semantics)\n  SPIR-V 1.0 (under Vulkan 1.0 semantics)\n  SPIR-V 1.3 (under Vulkan 1.1 semantics)\n  SPIR-V 1.4 (under Vulkan 1.1 semantics)\n  SPIR-V 1.5 (under Vulkan 1.2 semantics)\n  SPIR-V 1.6 (under Vulkan 1.3 semantics) SPIR-V 1.6 (under Vulkan 1.4 semantics)\n"
+  },
+  "valgrind": {
+    "path": "/nix/store/px7wv2vfgzjagdqx2709qx5v9167gyj1-valgrind-3.27.1/bin/valgrind",
+    "sha256": "8fb44efcc7a1722dacfc0495fec749b4848b2f86bea7c80c44bf66d890c71f59",
+    "version": "valgrind-3.27.1\n"
+  }
+}

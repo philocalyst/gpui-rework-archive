@@ -1,0 +1,1 @@
+{"case":"wrapped32k","checksum":5624050803456392530,"count":2048,"counters":{"coarse_updates":0,"descriptions":0,"destination_compares":0,"exact_updates":0,"layout_runs":0,"measure_calls":0,"owner_reruns":0,"paint_passes":0,"presentations":0,"source_operations":0,"source_reads":0,"text_bytes_copied":0,"text_promotions":0},"elapsed_ns":306691282,"operation":"selection"}

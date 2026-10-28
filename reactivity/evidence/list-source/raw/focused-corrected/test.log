@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-list-source-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 6.47s
+     Running tests/list_source.rs (/home/user/gpui-list-source-target/release/build/gpui/1e2d2117f6eebdce/out/list_source-1e2d2117f6eebdce)

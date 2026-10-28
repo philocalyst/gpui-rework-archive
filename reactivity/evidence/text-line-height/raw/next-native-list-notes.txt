@@ -1,0 +1,37 @@
+After line-height dossier, qualify actual keyed list parity before native timing.
+Current port manually renders range rows as positional children; changing first
+row can reassign/re-shape every row. Existing uniform_list already preserves
+ItemKey identities and takes lazy ItemSource len/key/index_of/row (no100K vector
+required). It lacks overscan and controlled offset. Do not claim port row-range
+length is actual retained keyed-row count.
+
+Small first slice: optional list overscan, default0 unchanged. ListSpec holds
+bounded requested count; plan validates visible+overscan <=4096 before building.
+Keep visible_range distinct from realized_range, derive anchor from first visible
+key (not overscan first), emit rows from realized.start with offset rebasing,
+keep offscreen semantic/hit/focus rules. Test boundaries, identity across scroll,
+old ACK/pending, source reorder, huge count/overflow, exact fresh images and native
+clipping. No performance claim from fewer descriptions until complete costs.
+
+Controlled offset remains real missing capability. Prefer an additive source
+binding that uses existing typed SourcePath admission, e.g. a list-only method
+accepting Source<M,f64>, not arbitrary mutable read projectors. Initial description
+reads under model shared borrow; wheel dispatch gets exclusive model authority,
+writes clamped offset, publishes one Source change. Existing with_inbox_for can
+then tick exact offset. Need explicit dependency retention/cold binding, target/
+field/root/component revalidation, no stale P source mutation, delta/resize/anchor
+clamps and source+wheel coherence. Existing Sources has a specialized write_text
+codec; do not abuse it to mutate f64 or add unsafe erased casts. An owned typed
+route akin FieldAction may avoid expanding every source codec. This is a proposal,
+not implemented. Generic on_scroll or custom native injection would need the same
+authority proof. Reference wheel line step28 vs GPUI32 must be matched explicitly.
+
+Later optimization hypothesis, only after real keyed list parity: certified integer
+scroll reuse can copy the retained viewport and repaint newly exposed strips.
+Whole list translated14px changes most glyph positions; per-tile glyph equivalence
+alone will repaint~368K pixels. Need overlap/clip/background/alpha/transform/resource
+and predecessor proofs, nonoverlapping copy/scratch lifetime, all damage/upload/
+copy/CPU work charged. Never assume an overlapping image self-copy is legal. This
+is a genuine retained-display-tree candidate with no app API requirement, not a
+per-glyph sampling degradation. Preserve full compositor as exact oracle and a
+missing-old/exposed-strip negative witness. Physical GPU remains required.

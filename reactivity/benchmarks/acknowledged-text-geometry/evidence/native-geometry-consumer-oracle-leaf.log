@@ -1,0 +1,9 @@
+   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+error[E0425]: cannot find function `nonleaf_input` in this scope
+   --> crates/gpui/src/native/accessibility/text.rs:310:31
+    |
+310 |                 + usize::from(nonleaf_input(part))
+    |                               ^^^^^^^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `gpui` (lib test) due to 1 previous error

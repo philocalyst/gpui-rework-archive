@@ -1,0 +1,1 @@
+No allocation_counter symbol; normal Cargo graph also excludes the dependency.

@@ -1,0 +1,14 @@
+{
+  "version": "26.1.4",
+  "archive_url": "https://archive.mesa3d.org/mesa-26.1.4.tar.xz",
+  "archive_sha256": "072705caa9adf4740f1489194b13e278ad959166863b5271fe423a86353c9ab6",
+  "documentation_url": "https://docs.mesa3d.org/drivers/llvmpipe.html#profiling",
+  "extracted_files": {
+    "mesa-26.1.4/src/gallium/auxiliary/gallivm/lp_bld_debug.h": "2af8c709328e3175d34d0ad973e2f8723adbaa4c5411a43b865e2927e96650a4",
+    "mesa-26.1.4/src/gallium/auxiliary/gallivm/lp_bld_debug.cpp": "5b2a77114b84019fecde2c0fea47a652a8632b123b7cee38169cd27d82335bb2",
+    "mesa-26.1.4/src/gallium/auxiliary/gallivm/lp_bld_init.h": "7c3b16a774cd5a59ddab3bf632a50042c44d4f6aac01190e7718febfbdee8de3"
+  },
+  "verified_source_condition": "lp_profile output is inside #if defined(PROFILE); Linux uses PERF_BUILDID_DIR for /tmp/perf-PID.map/.asm; JIT_SYMBOL_MAP_DIR is in the non-Linux branch",
+  "runtime_observation": "Both owned-directory variables enabled for a separate instrumented process; no own-PID maps/asm created. Relevant profiler environment strings absent from installed driver DSOs.",
+  "limit": "Exact installed PROFILE compiler define is not established; no named JIT function or shader-stage attribution follows."
+}

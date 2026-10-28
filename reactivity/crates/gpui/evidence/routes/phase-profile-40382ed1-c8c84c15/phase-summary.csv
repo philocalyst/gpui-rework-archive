@@ -1,0 +1,14 @@
+baseline,describe,flatten,median_ns=826279,min_ns=786848,max_ns=929131
+baseline,describe,preflight,median_ns=80442,min_ns=79852,max_ns=81692
+baseline,describe,reconcile,median_ns=408820,min_ns=396109,max_ns=467810
+baseline,describe,index,median_ns=20301,min_ns=19330,max_ns=86672
+baseline,present,layout_setup,median_ns=746856,min_ns=736387,max_ns=940511
+baseline,present,layout_compute,median_ns=1164946,min_ns=1153776,max_ns=2101886
+baseline,present,paint_commit,median_ns=508421,min_ns=506172,max_ns=710076
+candidate,describe,flatten,median_ns=856689,min_ns=791428,max_ns=913150
+candidate,describe,preflight,median_ns=80371,min_ns=79892,max_ns=81702
+candidate,describe,reconcile,median_ns=443520,min_ns=440590,max_ns=625154
+candidate,describe,index,median_ns=21811,min_ns=21280,max_ns=81362
+candidate,present,layout_setup,median_ns=755337,min_ns=749537,max_ns=1138325
+candidate,present,layout_compute,median_ns=1028733,min_ns=1005323,max_ns=1999455
+candidate,present,paint_commit,median_ns=540922,min_ns=532561,max_ns=743826

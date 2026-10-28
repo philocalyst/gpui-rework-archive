@@ -1,0 +1,21 @@
+{
+  "source": {
+    "baseline": "724ece73cb665a1f6d83e97ae7d431eee11a887a",
+    "candidate": "7be2c331854597eaa4a53753e3b9c9cac86ded5f"
+  },
+  "binary_sha256": {
+    "baseline": "25a8ea798afb772d67d5399ba3fa017985f9f723f3fa0dce83d39596ac3d0c89",
+    "candidate": "6a1e6bede3d9165a94486cb24da475240624c02af82842e6d86cd29b55a160ce"
+  },
+  "example_sha256": "449309d672cdd07784c03b5f412de055d03990bf67d963687153941317b9b6d5",
+  "toolchain": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "production_sha256": {
+    "crates/canvas/src/canvas.rs": "ccdb8dcf70d4c9850699251546f87c5820e948f3a7c71146a76ab226fe51da46",
+    "crates/canvas/src/image.rs": "0581b228219abb296ef6d24bf5566bd30bb700dd86819190103787870540d038",
+    "crates/canvas/src/canvas/image_axis.rs": "58a628d2d45334cc61cef73631e93f3dfa46884160bb0a3150f8c3a486f1d838"
+  },
+  "target_dirs": [
+    "/tmp/gpui-image-axis-baseline-target",
+    "/tmp/gpui-image-axis-candidate-target"
+  ]
+}

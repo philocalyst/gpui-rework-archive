@@ -1,0 +1,24 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-production-scroll/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.95s
+     Running unittests src/lib.rs (/tmp/gpui-scroll-target/debug/deps/gpui-02ebf6535ade1a6d)
+
+running 2 tests
+scroll_sizes,Node=40,Presented=80,Prepared=40,Runtime=2384,El=176,Draft=152,Extra=56,Sheet=96,ListState=112,ViewportKey=16,ViewportState=112,ViewportInfo=96,ViewportEntry=104,ScrollViewport=72,Plan=48
+scroll_alloc,ordinary_recording,count=34,total=6824,retained=5580,peak=5740
+test runtime::scroll::tests::wheel_plan_is_repeatable_without_allocation ... ok
+scroll_alloc,scroll_recording,count=60,total=14975,retained=11020,peak=11403
+scroll_alloc,warm_scroll_0,count=7,total=623,retained=0,peak=623
+scroll_alloc,warm_scroll_1,count=7,total=623,retained=0,peak=623
+scroll_alloc,warm_scroll_2,count=7,total=623,retained=0,peak=623
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.00s

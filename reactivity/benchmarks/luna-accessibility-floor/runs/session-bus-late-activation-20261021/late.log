@@ -1,0 +1,7 @@
+STATUS_ABSENT_BEFORE_ADAPTER mode=late
+ADAPTER_READY mode=late
+STATUS_STILL_ABSENT_AFTER_2S mode=late
+SERVICE_READY unique=Some(OwnedUniqueName(":1.2"))
+STATUS_PRESENT mode=late
+ACTIVATION_MISSED mode=late activated=0 deactivated=0
+PROBE_FAILED mode=late: timed out waiting for activation

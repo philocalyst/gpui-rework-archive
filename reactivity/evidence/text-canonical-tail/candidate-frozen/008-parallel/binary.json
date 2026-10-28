@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/9ad1e50ed9256ce1/out/parallel-9ad1e50ed9256ce1",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/008-parallel/test",
+  "sha256": "924f086cbd6a8387f2044dd40189172675304b79772beeceb29dfcbc830264f4",
+  "bytes": 7282272,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "parallel",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/parallel.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

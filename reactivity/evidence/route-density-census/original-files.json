@@ -1,0 +1,50 @@
+{
+  "report.md": {
+    "source": "/tmp/gpui-route-density-census-luna.md",
+    "original_sha256": "265d2a54f81a512827d353c5a28318c9cbf0f49131d66bf0a3dbd17e6686ee5c"
+  },
+  "probe.patch": {
+    "source": "/tmp/gpui-route-census.patch",
+    "original_sha256": "b260d14feb1aaf6506d08d1b7dc2ce0dedd21a119432dd697086462f5f8a30ce"
+  },
+  "logs/plain.log": {
+    "source": "/tmp/gpui-route-census-logs/plain.log",
+    "original_sha256": "4abca1ad36cd11056bad9072e617508f3213e6d810a932506c1471abb7fc64b1"
+  },
+  "logs/method.log": {
+    "source": "/tmp/gpui-route-census-logs/method.log",
+    "original_sha256": "eac97b1cb7d197d802f1fb928babd0b90618d7764fc8b74ed3b464d9d321ca59"
+  },
+  "logs/captured.log": {
+    "source": "/tmp/gpui-route-census-logs/captured.log",
+    "original_sha256": "7396e88f54eaa87780562a7ac51b425a201139f66645f3b0108b5241ea334b0d"
+  },
+  "logs/companion.log": {
+    "source": "/tmp/gpui-route-census-logs/companion.log",
+    "original_sha256": "d1c1c9577777a844a66379ccca66806d3607d939888297d506efafe87f497413"
+  },
+  "logs/workspace.log": {
+    "source": "/tmp/gpui-route-census-logs/workspace.log",
+    "original_sha256": "2e3feceab9b2b36a3119da3f4d2e076a96979af6c84bf88d15d8f45ffea45e4e"
+  },
+  "overlay/route_census_controls.rs": {
+    "source": "/tmp/gpui-route-census-c717/reactivity/crates/gpui/examples/route_census_controls.rs",
+    "original_sha256": "986a7680f8412f387251e9962e98fc38da12f9109de35a46ecd015f846ea45a8"
+  },
+  "overlay/route_census_workspace.rs": {
+    "source": "/tmp/gpui-route-census-c717/reactivity/crates/gpui/examples/route_census_workspace.rs",
+    "original_sha256": "a010d2cb19a769ad11e09ef9101657b91e567cca480192bc2854afcc7fea376b"
+  },
+  "overlay/element.rs.gz": {
+    "source": "/tmp/gpui-route-census-c717/reactivity/crates/gpui/src/element.rs",
+    "original_sha256": "44ab8d702728b0b6b01fd4d2639eb65263762a9866afb19cdf3701b441b4df72"
+  },
+  "overlay/runtime.rs.gz": {
+    "source": "/tmp/gpui-route-census-c717/reactivity/crates/gpui/src/runtime.rs",
+    "original_sha256": "e3b99491170e381240899761491f623a62d8b062599ca16227bb5f1706a38fd6"
+  },
+  "overlay/contained_owner_spike.rs": {
+    "source": "/tmp/gpui-route-census-c717/reactivity/crates/gpui/examples/contained_owner_spike.rs",
+    "original_sha256": "26fb0f0d8509bebe7758ed1e14d7c0979326b808d5d3619d0ad7559654452973"
+  }
+}

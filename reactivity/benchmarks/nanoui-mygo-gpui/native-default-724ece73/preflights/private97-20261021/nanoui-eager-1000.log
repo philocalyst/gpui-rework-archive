@@ -1,0 +1,14 @@
+X11_VISUAL,33,16711680,65280,255
+X11_SCREEN,1280,800,325,203,24
+STARTUP,0,49524586,4292613150
+WINDOW_GEOMETRY,0,4194306,240,100,800,600,240,100,24
+SCREENSHOT,0,/root/gpui-bench-luna/reactivity/benchmarks/nanoui-mygo-gpui/native-default-724ece73/preflights/private97-20261021/nanoui-eager-1000.ppm
+PREFLIGHT_TEXT,0,button_dark_pixels=563,first_row_dark_pixels=158
+PREFLIGHT_ROWS,0,app=nanoui,mode=eager,requested=1000,visible_ids=0..22,materialized_expected=1000,viewport=784x530,row_height=24
+WINDOW,0,800,600
+STARTUP_P50_NS,1,49524586
+STARTUP_P95_NS,1,49524586
+STARTUP_P99_NS,1,49524586
+CLICK_P50_NS,0,NA
+CLICK_P95_NS,0,NA
+CLICK_P99_NS,0,NA

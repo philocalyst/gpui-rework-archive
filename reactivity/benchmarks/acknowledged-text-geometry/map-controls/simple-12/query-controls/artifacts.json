@@ -1,0 +1,34 @@
+{
+  "24trim": {
+    "source": "32e8ee128494e452927cf12632fb2f866c7171a5",
+    "target": "/tmp/gpui-text-map-capacity-target",
+    "features": "default simd",
+    "profile": "release defaults",
+    "binary": "/tmp/gpui-text-map-query-controls/24trim/selection_queries",
+    "sha256": "8e55981657240c93cd3bc1f25a95771fe235e0ed56de1c0a84a2fd74b1f7179a",
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "47a07d31cfe582f8db7a004567885819da7581106b6dce5c1f11ba9997ea8f5d",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "39cad80b565f5d0b582bb22a0a6f4bfa26b38e03984f0b2ebcd953e2513e83f2",
+      "reactivity/crates/canvas/src/text/planner.rs": "154bb7537db003608e2fcbf67ab73be07d0051a73021aee3d0342a3b995fb2eb",
+      "reactivity/crates/canvas/examples/selection_queries.rs": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    }
+  },
+  "12trim": {
+    "source": "bc0e6b989524529c2cb681054cc479a15936e5a7",
+    "target": "/tmp/gpui-text-map-12-compact-target",
+    "features": "default simd",
+    "profile": "release defaults",
+    "binary": "/tmp/gpui-text-map-query-controls/12trim/selection_queries",
+    "sha256": "3bcaad55338ada96b96842d68348b5e84ac71cf6efad86d12bfc95d9121a087c",
+    "source_files_sha256": {
+      "reactivity/Cargo.toml": "605febddd1e196da015a6232f562028debf3538e264cfd391dc5548a69ea0b6e",
+      "reactivity/Cargo.lock": "4abbb04f9573a2e942f464c221ec02a9194928109a79f0f870dcdb16e9391780",
+      "reactivity/crates/canvas/src/text/layout.rs": "8d2923c03136bdfa27ce610ee4627edb4770893cbf3246ecdcab4852f4cc89a5",
+      "reactivity/crates/canvas/src/text/layout/interaction.rs": "8d6e59f0616ba2a5171739028be76bde0cd54932ba4ade66c71a0d970421537d",
+      "reactivity/crates/canvas/src/text/planner.rs": "0a49d5e31f389ade564ac6df2050b2f08d987c0e7dd017f9da266ce4cf5fe1ea",
+      "reactivity/crates/canvas/examples/selection_queries.rs": "4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "cases": [
+    "scroll",
+    "both",
+    "stream",
+    "stream-owner",
+    "fractional",
+    "flat-tiny",
+    "flat-full",
+    "list-tiny",
+    "list-flat",
+    "exposure",
+    "text-0-1-source",
+    "text-0-1-owner",
+    "text-0-2-source",
+    "text-0-2-owner",
+    "text-0-4-source",
+    "text-0-4-owner",
+    "text-25-1-source",
+    "text-25-1-owner",
+    "text-25-2-source",
+    "text-25-2-owner",
+    "text-25-4-source",
+    "text-25-4-owner",
+    "text-1000-1-source",
+    "text-1000-1-owner",
+    "text-1000-2-source",
+    "text-1000-2-owner",
+    "text-1000-4-source",
+    "text-1000-4-owner"
+  ],
+  "variants": [
+    "control",
+    "predecessor",
+    "bounds",
+    "candidate"
+  ],
+  "pairs": 24,
+  "seed": 20261031,
+  "process_manifest_sha256": "1a9965369e2f16ae49b80e89a37d5a92f752f8a74688c46509ab56bb96911320"
+}

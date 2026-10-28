@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "baseline": {
+      "source": "0eb2eb50027ea347bfa776e622b17109643d0a78",
+      "binary": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/certificate-tests",
+      "sha256": "a2a2b535205dd1f5bec060e82ea767dabf61f6cfaf2d2ddbc4760d27764f2d24",
+      "build": {
+        "source": "0eb2eb50027ea347bfa776e622b17109643d0a78",
+        "exit": 0,
+        "guards": 4,
+        "guards_match": true,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "harnesses": 0,
+        "scope": "Functional/source-identity gate; no timing inference."
+      },
+      "run": {
+        "source": "0eb2eb50027ea347bfa776e622b17109643d0a78",
+        "exit": 0,
+        "guards": 4,
+        "guards_match": true,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "harnesses": 1,
+        "scope": "Functional/source-identity gate; no timing inference."
+      }
+    },
+    "wrong-primary-bit": {
+      "source": "40c80311cd5dd7c4b7042ecf5a31affeeb0715d4",
+      "binary": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/certificate-tests",
+      "sha256": "61a7c3011f8a0d3b08f40ae8b5bd856fefcc1e88e3b58701138cf3df82e74abf",
+      "build": {
+        "source": "40c80311cd5dd7c4b7042ecf5a31affeeb0715d4",
+        "exit": 0,
+        "guards": 4,
+        "guards_match": true,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "harnesses": 0,
+        "scope": "Functional/source-identity gate; no timing inference."
+      },
+      "run": {
+        "source": "40c80311cd5dd7c4b7042ecf5a31affeeb0715d4",
+        "exit": 101,
+        "guards": 4,
+        "guards_match": true,
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "harnesses": 1,
+        "scope": "Functional/source-identity gate; no timing inference."
+      }
+    }
+  },
+  "dependency_artifacts_before_after": {
+    "/tmp/gpui-bundled-coverage-generator-target/release/build/ttf-parser/8e9a0952ebbf403a/out/libttf_parser-8e9a0952ebbf403a.rmeta": "e92d1154f135eac53641787b5ae5bb9a9dd13291bc3eccc6a23bc81bde71ed99",
+    "/tmp/gpui-bundled-coverage-generator-target/release/build/ttf-parser/8e9a0952ebbf403a/out/libttf_parser-8e9a0952ebbf403a.rlib": "a75c3444805ab51814d11860e479f7361a97d1a5ef625b41f4ff03f63e1de557"
+  },
+  "production_source": "023e584a0504c05e7db33c887de980671f096257",
+  "scope": "Actual unchanged production decoder with a local certificate include and exact production fonts; negative changes one data bit only. Not public-library execution or timing."
+}

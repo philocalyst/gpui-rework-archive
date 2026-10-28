@@ -1,0 +1,358 @@
+diff --git a/reactivity/crates/gpu/Cargo.toml b/reactivity/crates/gpu/Cargo.toml
+index 9547004a1f..4269f93b36 100644
+--- a/reactivity/crates/gpu/Cargo.toml
++++ b/reactivity/crates/gpu/Cargo.toml
+@@ -9,16 +9,18 @@ publish = false
+ [features]
+ default = ["simd"]
+ simd = ["gpui_canvas/simd"]
+-vulkan-tests = []
++# Hardware oracle on the native backend; software Vulkan remains explicit.
++gpu-tests = []
++vulkan-tests = ["gpu-tests"]
+ offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
+ 
+ [[test]]
+ name = "render"
+-required-features = ["vulkan-tests"]
++required-features = ["gpu-tests"]
+ 
+ [[example]]
+ name = "tiles"
+-required-features = ["vulkan-tests"]
++required-features = ["gpu-tests"]
+ 
+ [dependencies]
+ gpui_canvas = { path = "../canvas", default-features = false }
+@@ -36,8 +38,8 @@ pollster = "=1.0.1"
+ 
+ [[example]]
+ name = "groups"
+-required-features = ["vulkan-tests"]
++required-features = ["gpu-tests"]
+ 
+ [[example]]
+ name = "images"
+-required-features = ["vulkan-tests"]
++required-features = ["gpu-tests"]
+diff --git a/reactivity/crates/gpu/README.md b/reactivity/crates/gpu/README.md
+index 87e99c2e24..87b94f9abb 100644
+--- a/reactivity/crates/gpu/README.md
++++ b/reactivity/crates/gpu/README.md
+@@ -65,9 +65,26 @@ overlapping alpha edges, physical glyph scales 1/1.25/1.5/2, threshold clear
+ colors and premultiplied float output. They run on Mesa llvmpipe Vulkan here;
+ other backends require their own validation.
+ 
+-Portable `cargo test -p gpui_gpu` validates generated WGSL and CPU packing. Run
+-`cargo test -p gpui_gpu --features vulkan-tests --test render` for actual Vulkan
+-conformance; this command requires an adapter and never silently skips tests.
++Portable `cargo test -p gpui_gpu` validates generated WGSL and CPU packing.
++The same real pixel-oracle suite has two explicit execution profiles:
++
++```sh
++# Physical GPU: Metal on macOS, DX12 on Windows, Vulkan elsewhere.
++cargo test -p gpui_gpu --features gpu-tests --lib --test render -- --nocapture --test-threads=1
++# Existing software-Vulkan profile, retained for deterministic driver checks.
++cargo test -p gpui_gpu --features vulkan-tests --lib --test render -- --nocapture --test-threads=1
++```
++
++Hardware execution rejects CPU, virtual and unknown adapters; it cannot silently
++become a software result. Both profiles print the exact backend/device/driver.
++They share all scene inputs and numerical assertions. `vulkan-tests` implies
++`gpu-tests` and explicitly requests the fallback Vulkan adapter, including when
++both features are enabled. The offline SPIR-V admission/error-injection test is
++Vulkan-specific and additionally requires `vulkan-tests`; ordinary Metal/DX12
++execution exercises the portable WGSL route. Neither a passing build nor a
++missing adapter counts as backend correctness coverage. The `groups`, `tiles`
++and `images` diagnostic examples use the same adapter selection; their times
++remain host submission/completion wall times, not GPU timestamps or scanout.
+ 
+ ## Storage and output
+ 
+diff --git a/reactivity/crates/gpu/examples/groups.rs b/reactivity/crates/gpu/examples/groups.rs
+index 69598727ff..c0c63a7b5b 100644
+--- a/reactivity/crates/gpu/examples/groups.rs
++++ b/reactivity/crates/gpu/examples/groups.rs
+@@ -1,4 +1,6 @@
+-//! Serialized Vulkan wall time, not GPU timestamps. Separate process per schema.
++//! Serialized native-backend wall time, not GPU timestamps. Separate process per schema.
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
+ use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
+ use gpui_gpu::{Renderer, wgpu};
+ use std::time::Instant;
+@@ -71,17 +73,7 @@ fn scene(case: &str) -> Canvas {
+ }
+ async fn run(case: &str, grouped: bool) {
+     let canvas = scene(case);
+-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+-    descriptor.backends = wgpu::Backends::VULKAN;
+-    let instance = wgpu::Instance::new(descriptor);
+-    let adapter = instance
+-        .request_adapter(&wgpu::RequestAdapterOptions {
+-            force_fallback_adapter: true,
+-            ..Default::default()
+-        })
+-        .await
+-        .unwrap();
+-    eprintln!("{:?}", adapter.get_info());
++    let (_, adapter) = test_adapter::request().await;
+     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+         .await
+         .unwrap();
+diff --git a/reactivity/crates/gpu/examples/images.rs b/reactivity/crates/gpu/examples/images.rs
+index e811a3f16d..42d3a5b286 100644
+--- a/reactivity/crates/gpu/examples/images.rs
++++ b/reactivity/crates/gpu/examples/images.rs
+@@ -1,6 +1,8 @@
+-//! Serialized llvmpipe/Vulkan wall time; no discrete-GPU timestamp claim.
++//! Serialized native-backend wall time; no GPU timestamp claim.
+ #[path = "../../canvas/examples/support/images.rs"]
+ mod fixture;
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
+ use gpui_gpu::{Renderer, wgpu};
+ use std::time::Instant;
+ fn main() {
+@@ -9,17 +11,7 @@ fn main() {
+ async fn run() {
+     let case = std::env::args().nth(1).unwrap_or_else(|| "one".into());
+     let canvas = fixture::scene(&case);
+-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+-    descriptor.backends = wgpu::Backends::VULKAN;
+-    let instance = wgpu::Instance::new(descriptor);
+-    let adapter = instance
+-        .request_adapter(&wgpu::RequestAdapterOptions {
+-            force_fallback_adapter: true,
+-            ..Default::default()
+-        })
+-        .await
+-        .expect("Vulkan adapter required");
+-    eprintln!("{:?}", adapter.get_info());
++    let (_, adapter) = test_adapter::request().await;
+     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+         .await
+         .unwrap();
+diff --git a/reactivity/crates/gpu/examples/tiles.rs b/reactivity/crates/gpu/examples/tiles.rs
+index 8250595b61..30af207133 100644
+--- a/reactivity/crates/gpu/examples/tiles.rs
++++ b/reactivity/crates/gpu/examples/tiles.rs
+@@ -1,4 +1,6 @@
+-//! Serialized Vulkan wall time, not a GPU timestamp measurement.
++//! Serialized native-backend wall time, not a GPU timestamp measurement.
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
+ use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
+ use gpui_gpu::{Renderer, wgpu};
+ use std::time::Instant;
+@@ -61,16 +63,7 @@ fn scene(case: &str) -> Canvas {
+ 
+ async fn measure(case: &str, proofs: bool) {
+     let canvas = scene(case);
+-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+-    descriptor.backends = wgpu::Backends::VULKAN;
+-    let instance = wgpu::Instance::new(descriptor);
+-    let adapter = instance
+-        .request_adapter(&wgpu::RequestAdapterOptions {
+-            force_fallback_adapter: true,
+-            ..Default::default()
+-        })
+-        .await
+-        .expect("Vulkan adapter required");
++    let (_, adapter) = test_adapter::request().await;
+     eprintln!("{case}/{proofs}: {:?}", adapter.get_info());
+     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+         .await
+diff --git a/reactivity/crates/gpu/src/lib.rs b/reactivity/crates/gpu/src/lib.rs
+index 07db812e24..10dd6f0a83 100644
+--- a/reactivity/crates/gpu/src/lib.rs
++++ b/reactivity/crates/gpu/src/lib.rs
+@@ -8,3 +8,7 @@ pub use renderer::{
+     PaintError, PaintRenderer, Renderer, RendererState, SlotError, Stats,
+ };
+ pub use wgpu;
++
++#[cfg(all(test, feature = "gpu-tests"))]
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index d9cc78a5da..8e0fe67957 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -1406,21 +1406,12 @@ mod tests {
+     use super::*;
+     use gpui_canvas::Rect;
+ 
+-    #[cfg(feature = "vulkan-tests")]
++    #[cfg(feature = "gpu-tests")]
+     #[test]
+     fn only_lowered_solid_packets_publish_the_sample_certificate() {
+         use gpui_canvas::{Affine, Canvas, Color, PaintColor};
+         pollster::block_on(async {
+-            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+-            desc.backends = wgpu::Backends::VULKAN;
+-            let instance = wgpu::Instance::new(desc);
+-            let adapter = instance
+-                .request_adapter(&wgpu::RequestAdapterOptions {
+-                    force_fallback_adapter: true,
+-                    ..Default::default()
+-                })
+-                .await
+-                .unwrap();
++            let (_, adapter) = crate::test_adapter::request().await;
+             let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+                 .await
+                 .unwrap();
+@@ -1680,20 +1671,11 @@ mod tests {
+         }
+         assert!(accepted > 20, "exercise nontrivial successful certificates");
+     }
+-    #[cfg(feature = "vulkan-tests")]
++    #[cfg(feature = "gpu-tests")]
+     #[test]
+     fn packet_reference_cap_and_atlas_last_row_admission() {
+         pollster::block_on(async {
+-            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+-            desc.backends = wgpu::Backends::VULKAN;
+-            let instance = wgpu::Instance::new(desc);
+-            let adapter = instance
+-                .request_adapter(&wgpu::RequestAdapterOptions {
+-                    force_fallback_adapter: true,
+-                    ..Default::default()
+-                })
+-                .await
+-                .unwrap();
++            let (_, adapter) = crate::test_adapter::request().await;
+             let context = GpuContext::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+                 .await
+                 .unwrap();
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index cf8246815f..43df982804 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -1,3 +1,5 @@
++#[path = "support/adapter.rs"]
++mod test_adapter;
+ use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
+ use gpui_gpu::{Renderer, Stats, wgpu};
+ 
+@@ -214,17 +216,7 @@ fn packed_images_profiles_alpha_filters_and_cache_match_cpu() {
+ }
+ 
+ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
+-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+-    descriptor.backends = wgpu::Backends::VULKAN;
+-    let instance = wgpu::Instance::new(descriptor);
+-    let adapter = instance
+-        .request_adapter(&wgpu::RequestAdapterOptions {
+-            force_fallback_adapter: true,
+-            ..Default::default()
+-        })
+-        .await
+-        .expect("Vulkan test adapter is required");
+-    eprintln!("adapter: {:?}", adapter.get_info());
++    let (_, adapter) = test_adapter::request().await;
+     Renderer::request(&adapter, format).await.unwrap()
+ }
+ 
+@@ -3157,16 +3149,7 @@ fn shared_context_drop_and_real_destroy_never_rebind_old_state() {
+ #[test]
+ fn unsupported_context_format_does_not_request_a_device() {
+     pollster::block_on(async {
+-        let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+-        descriptor.backends = wgpu::Backends::VULKAN;
+-        let instance = wgpu::Instance::new(descriptor);
+-        let adapter = instance
+-            .request_adapter(&wgpu::RequestAdapterOptions {
+-                force_fallback_adapter: true,
+-                ..Default::default()
+-            })
+-            .await
+-            .unwrap();
++        let (instance, adapter) = test_adapter::request().await;
+         let before = instance.generate_report().unwrap();
+         assert!(matches!(
+             gpui_gpu::GpuContext::request(&adapter, wgpu::TextureFormat::Rgba32Float).await,
+@@ -3223,20 +3206,11 @@ fn layout_equality_names_the_instance_and_preserves_clone_order_hash() {
+     });
+ }
+ 
+-#[cfg(feature = "offline-shader")]
++#[cfg(all(feature = "offline-shader", feature = "vulkan-tests"))]
+ #[test]
+ fn artifact_missing_feature_falls_back_and_admitted_pipeline_errors_propagate() {
+     pollster::block_on(async {
+-        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+-        desc.backends = wgpu::Backends::VULKAN;
+-        let instance = wgpu::Instance::new(desc);
+-        let adapter = instance
+-            .request_adapter(&wgpu::RequestAdapterOptions {
+-                force_fallback_adapter: true,
+-                ..Default::default()
+-            })
+-            .await
+-            .unwrap();
++        let (_, adapter) = test_adapter::request().await;
+         let optional = adapter.shader_artifact_features();
+         assert!(optional.contains(wgpu::Features::PASSTHROUGH_SHADERS));
+         for enabled in [false, true] {
+@@ -3284,16 +3258,7 @@ fn artifact_missing_feature_falls_back_and_admitted_pipeline_errors_propagate()
+ #[test]
+ fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
+     pollster::block_on(async {
+-        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+-        desc.backends = wgpu::Backends::VULKAN;
+-        let instance = wgpu::Instance::new(desc);
+-        let adapter = instance
+-            .request_adapter(&wgpu::RequestAdapterOptions {
+-                force_fallback_adapter: true,
+-                ..Default::default()
+-            })
+-            .await
+-            .unwrap();
++        let (_, adapter) = test_adapter::request().await;
+         let (device, queue) = adapter
+             .request_device(&wgpu::DeviceDescriptor {
+                 required_features: adapter.features() & wgpu::Features::PASSTHROUGH_SHADERS,
+diff --git a/reactivity/crates/gpu/tests/support/adapter.rs b/reactivity/crates/gpu/tests/support/adapter.rs
+new file mode 100644
+index 0000000000..5f4b22d1fb
+--- /dev/null
++++ b/reactivity/crates/gpu/tests/support/adapter.rs
+@@ -0,0 +1,36 @@
++// Shared setup for the unchanged pixel oracle and diagnostic examples.
++// The historical vulkan-tests feature explicitly selects a fallback adapter.
++pub async fn request() -> (wgpu::Instance, wgpu::Adapter) {
++    let software = cfg!(feature = "vulkan-tests");
++    let (backends, expected) = if software || !cfg!(any(target_os = "macos", target_os = "windows"))
++    {
++        (wgpu::Backends::VULKAN, wgpu::Backend::Vulkan)
++    } else if cfg!(target_os = "macos") {
++        (wgpu::Backends::METAL, wgpu::Backend::Metal)
++    } else {
++        (wgpu::Backends::DX12, wgpu::Backend::Dx12)
++    };
++    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
++    descriptor.backends = backends;
++    let instance = wgpu::Instance::new(descriptor);
++    let adapter = instance
++        .request_adapter(&wgpu::RequestAdapterOptions {
++            force_fallback_adapter: software,
++            ..Default::default()
++        })
++        .await
++        .expect("requested GPU oracle adapter must exist");
++    let info = adapter.get_info();
++    eprintln!("gpu-oracle,software_requested={software},adapter={info:?}");
++    assert_eq!(info.backend, expected, "requested backend must be used");
++    if !software {
++        assert!(
++            matches!(
++                info.device_type,
++                wgpu::DeviceType::IntegratedGpu | wgpu::DeviceType::DiscreteGpu
++            ),
++            "hardware oracle requires a physical GPU; select vulkan-tests explicitly for software"
++        );
++    }
++    (instance, adapter)
++}

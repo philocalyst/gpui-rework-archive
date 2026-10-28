@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-list-overscan-negative-target/release/build/gpui/1e4c435b4f009ae2/out/lists-1e4c435b4f009ae2", "overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets", "--exact", "--nocapture"], "exit": 101}

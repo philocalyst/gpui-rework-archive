@@ -1,0 +1,26 @@
+{
+  "source": "6158d25e483dea439832399e768ff4fbe1202640",
+  "args": [
+    "cargo",
+    "test",
+    "--release",
+    "--offline",
+    "--locked",
+    "-p",
+    "gpui_gpu",
+    "--features",
+    "vulkan-tests",
+    "--test",
+    "render",
+    "whole_coverage_setup_preserves_partial_edges_and_hdr_order",
+    "--",
+    "--exact",
+    "--nocapture"
+  ],
+  "original_sha256": "7e80c771b75e61e6c1d31bd3f63ff67f49c4fa1f9ae60f8e47479bfe92c0487f",
+  "fault_sha256": "d9fea5f836e51a18906e76cb324f2631a3d9112cb646ce485f3867ad6e60b588",
+  "fault_returncode": 101,
+  "actual_pixel_fault_detected": true,
+  "exact_source_restored": true,
+  "recovery_returncode": 0
+}

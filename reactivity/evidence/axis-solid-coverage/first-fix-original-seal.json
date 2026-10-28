@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-24T04:12:32.449004+00:00",
+  "source": "1ad7fee64b7387c4a708bf276d194f21f1bc7c82",
+  "archive": "/tmp/gpui-half-open-fix-qualified.tar.gz",
+  "archive_sha256": "b091098448dd435f3b20e9f6efb8d9ad3f924198877e196ceb5c7c58b9d2a694",
+  "archive_bytes": 62740310,
+  "payload_manifest_sha256": "838aad0577da7ce5663092c7494c308d1dd9dff6ef9f56cafeaf42c1f60291f2",
+  "external_manifest_sha256": "b0356510cf20bbf7b3fad30804458cf7a5cfb3e498b9825403f51baa3c082459",
+  "payload_files": 2921,
+  "archive_members": 2923,
+  "payload_bytes": 303083612,
+  "external_elfs": 73,
+  "external_elf_bytes": 7950516488,
+  "reopened_all_members": true,
+  "performance_claim": false
+}

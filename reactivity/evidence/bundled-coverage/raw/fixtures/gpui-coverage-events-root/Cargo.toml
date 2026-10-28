@@ -1,0 +1,15 @@
+[package]
+name = "gpui_coverage_events_spike"
+version = "0.0.0"
+edition = "2024"
+
+[workspace]
+
+[features]
+default = ["simd"]
+simd = []
+
+[dependencies]
+fearless_simd = { version = "=1.1.0", features = ["force_support_fallback"] }
+fearless_simd_macros = "=0.1.0"
+

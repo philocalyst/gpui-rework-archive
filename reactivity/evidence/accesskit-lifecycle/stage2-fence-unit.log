@@ -1,0 +1,20 @@
+   Compiling accesskit_unix v0.24.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_unix)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.83s
+     Running unittests src/lib.rs (gpui-a11y-target/debug/deps/accesskit_unix-b3ceddec36dc2842)
+
+running 12 tests
+lifecycle bytes: Message=72 AdapterState=88 Callback=8 AdapterEntry=48
+test context::lifecycle_type_layout ... ok
+test atspi::interfaces::cache::tests::get_items_prepends_application_root ... ok
+test atspi::interfaces::cache::tests::filtered_child_excluded_from_items_and_counts ... ok
+test atspi::interfaces::cache::tests::object_ref_encodes_bus_name_and_node_path ... ok
+test atspi::interfaces::cache::tests::top_window_parent_is_application_root ... ok
+test atspi::interfaces::cache::tests::multi_adapter_windows_have_distinct_indices ... ok
+test context::tests::out_of_order_add_ids_remove_exact_adapter_and_preserve_window_order ... ok
+test context::tests::remove_retires_state_even_when_callers_final_arc_is_delayed ... ok
+test context::tests::fence_drops_real_registration_cache_backlog_and_preserves_fifo_controls ... ok
+test context::tests::in_flight_direct_action_is_not_revoked_by_callback_fence ... ok
+test context::tests::active_update_racing_fence_is_retired_under_state_mutex ... ok
+test context::tests::pending_update_racing_fence_cannot_construct_old_callback_after_fence ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

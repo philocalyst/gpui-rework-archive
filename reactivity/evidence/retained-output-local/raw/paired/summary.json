@@ -1,0 +1,357 @@
+{
+  "flat-sparse": {
+    "processes": [
+      {
+        "repeat": 0,
+        "full_host_us": 35.8835,
+        "full_host_us_p90": 102.559,
+        "retained_host_us": 39.816500000000005,
+        "retained_host_us_p90": 95.444,
+        "full_complete_us": 514.403,
+        "full_complete_us_p90": 728.663,
+        "retained_complete_us": 634.4755,
+        "retained_complete_us_p90": 968.671,
+        "complete_ratio": 1.2334210725831691
+      },
+      {
+        "repeat": 1,
+        "full_host_us": 16.698,
+        "full_host_us_p90": 50.341,
+        "retained_host_us": 22.314999999999998,
+        "retained_host_us_p90": 45.191,
+        "full_complete_us": 332.137,
+        "full_complete_us_p90": 494.163,
+        "retained_complete_us": 381.656,
+        "retained_complete_us_p90": 553.171,
+        "complete_ratio": 1.1490920915164526
+      },
+      {
+        "repeat": 2,
+        "full_host_us": 17.9165,
+        "full_host_us_p90": 39.038,
+        "retained_host_us": 19.118000000000002,
+        "retained_host_us_p90": 48.306,
+        "full_complete_us": 347.6155,
+        "full_complete_us_p90": 410.125,
+        "retained_complete_us": 377.83050000000003,
+        "retained_complete_us_p90": 450.163,
+        "complete_ratio": 1.0869207500816276
+      },
+      {
+        "repeat": 3,
+        "full_host_us": 50.8695,
+        "full_host_us_p90": 244.852,
+        "retained_host_us": 55.083,
+        "retained_host_us_p90": 178.783,
+        "full_complete_us": 551.295,
+        "full_complete_us_p90": 1187.959,
+        "retained_complete_us": 649.2275,
+        "retained_complete_us_p90": 1711.58,
+        "complete_ratio": 1.1776408275061447
+      },
+      {
+        "repeat": 4,
+        "full_host_us": 24.0465,
+        "full_host_us_p90": 61.009,
+        "retained_host_us": 26.2305,
+        "retained_host_us_p90": 57.133,
+        "full_complete_us": 444.6195,
+        "full_complete_us_p90": 653.539,
+        "retained_complete_us": 458.6825,
+        "retained_complete_us_p90": 727.654,
+        "complete_ratio": 1.0316292920126084
+      }
+    ],
+    "median_full_us": 444.6195,
+    "median_retained_us": 458.6825,
+    "median_ratio": 1.1490920915164526,
+    "ratio_range": [
+      1.0316292920126084,
+      1.2334210725831691
+    ]
+  },
+  "text-sparse": {
+    "processes": [
+      {
+        "repeat": 0,
+        "full_host_us": 109.0315,
+        "full_host_us_p90": 252.723,
+        "retained_host_us": 135.2295,
+        "retained_host_us_p90": 364.33,
+        "full_complete_us": 13674.731500000002,
+        "full_complete_us_p90": 18065.693,
+        "retained_complete_us": 794.5855,
+        "retained_complete_us_p90": 2401.186,
+        "complete_ratio": 0.058106113454585925
+      },
+      {
+        "repeat": 1,
+        "full_host_us": 60.1145,
+        "full_host_us_p90": 143.537,
+        "retained_host_us": 100.57650000000001,
+        "retained_host_us_p90": 140.153,
+        "full_complete_us": 12880.4335,
+        "full_complete_us_p90": 13642.273,
+        "retained_complete_us": 610.3240000000001,
+        "retained_complete_us_p90": 792.861,
+        "complete_ratio": 0.04738380893779701
+      },
+      {
+        "repeat": 2,
+        "full_host_us": 54.449,
+        "full_host_us_p90": 169.027,
+        "retained_host_us": 89.082,
+        "retained_host_us_p90": 173.395,
+        "full_complete_us": 12356.208999999999,
+        "full_complete_us_p90": 14240.419,
+        "retained_complete_us": 545.8489999999999,
+        "retained_complete_us_p90": 980.657,
+        "complete_ratio": 0.04417608993179056
+      },
+      {
+        "repeat": 3,
+        "full_host_us": 83.209,
+        "full_host_us_p90": 193.03,
+        "retained_host_us": 108.88900000000001,
+        "retained_host_us_p90": 149.273,
+        "full_complete_us": 12986.9015,
+        "full_complete_us_p90": 13839.196,
+        "retained_complete_us": 721.3945,
+        "retained_complete_us_p90": 1202.146,
+        "complete_ratio": 0.055547853350547086
+      },
+      {
+        "repeat": 4,
+        "full_host_us": 122.8695,
+        "full_host_us_p90": 186.295,
+        "retained_host_us": 152.3435,
+        "retained_host_us_p90": 242.013,
+        "full_complete_us": 13506.2415,
+        "full_complete_us_p90": 15451.412,
+        "retained_complete_us": 840.1514999999999,
+        "retained_complete_us_p90": 1324.418,
+        "complete_ratio": 0.062204685145012394
+      }
+    ],
+    "median_full_us": 12986.9015,
+    "median_retained_us": 721.3945,
+    "median_ratio": 0.055547853350547086,
+    "ratio_range": [
+      0.04417608993179056,
+      0.062204685145012394
+    ]
+  },
+  "overlap-sparse": {
+    "processes": [
+      {
+        "repeat": 0,
+        "full_host_us": 120.452,
+        "full_host_us_p90": 197.901,
+        "retained_host_us": 137.71749999999997,
+        "retained_host_us_p90": 314.597,
+        "full_complete_us": 68363.957,
+        "full_complete_us_p90": 91438.777,
+        "retained_complete_us": 1135.721,
+        "retained_complete_us_p90": 2010.322,
+        "complete_ratio": 0.016612862242599565
+      },
+      {
+        "repeat": 1,
+        "full_host_us": 138.6875,
+        "full_host_us_p90": 277.625,
+        "retained_host_us": 155.0655,
+        "retained_host_us_p90": 252.994,
+        "full_complete_us": 69552.4715,
+        "full_complete_us_p90": 84074.228,
+        "retained_complete_us": 1285.914,
+        "retained_complete_us_p90": 2730.407,
+        "complete_ratio": 0.01848840123531771
+      },
+      {
+        "repeat": 2,
+        "full_host_us": 109.76650000000001,
+        "full_host_us_p90": 219.504,
+        "retained_host_us": 128.8195,
+        "retained_host_us_p90": 232.238,
+        "full_complete_us": 64670.739499999996,
+        "full_complete_us_p90": 70210.421,
+        "retained_complete_us": 1075.8449999999998,
+        "retained_complete_us_p90": 1712.837,
+        "complete_ratio": 0.016635730599616847
+      },
+      {
+        "repeat": 3,
+        "full_host_us": 106.8995,
+        "full_host_us_p90": 187.117,
+        "retained_host_us": 121.87450000000001,
+        "retained_host_us_p90": 162.658,
+        "full_complete_us": 66646.2875,
+        "full_complete_us_p90": 72120.032,
+        "retained_complete_us": 1053.539,
+        "retained_complete_us_p90": 1209.997,
+        "complete_ratio": 0.015807917282714357
+      },
+      {
+        "repeat": 4,
+        "full_host_us": 112.25450000000001,
+        "full_host_us_p90": 190.282,
+        "retained_host_us": 138.526,
+        "retained_host_us_p90": 262.462,
+        "full_complete_us": 67057.1305,
+        "full_complete_us_p90": 71668.878,
+        "retained_complete_us": 1097.5394999999999,
+        "retained_complete_us_p90": 2055.868,
+        "complete_ratio": 0.01636723032757866
+      }
+    ],
+    "median_full_us": 67057.1305,
+    "median_retained_us": 1097.5394999999999,
+    "median_ratio": 0.016612862242599565,
+    "ratio_range": [
+      0.015807917282714357,
+      0.01848840123531771
+    ]
+  },
+  "text-full": {
+    "processes": [
+      {
+        "repeat": 0,
+        "full_host_us": 126.91,
+        "full_host_us_p90": 238.56,
+        "retained_host_us": 144.2,
+        "retained_host_us_p90": 286.026,
+        "full_complete_us": 15184.3275,
+        "full_complete_us_p90": 17302.291,
+        "retained_complete_us": 15521.1075,
+        "retained_complete_us_p90": 18879.181,
+        "complete_ratio": 1.0221794478550335
+      },
+      {
+        "repeat": 1,
+        "full_host_us": 116.67699999999999,
+        "full_host_us_p90": 158.686,
+        "retained_host_us": 129.30349999999999,
+        "retained_host_us_p90": 200.711,
+        "full_complete_us": 15710.476999999999,
+        "full_complete_us_p90": 18495.657,
+        "retained_complete_us": 16166.6005,
+        "retained_complete_us_p90": 19085.071,
+        "complete_ratio": 1.029033077735323
+      },
+      {
+        "repeat": 2,
+        "full_host_us": 160.6125,
+        "full_host_us_p90": 278.23,
+        "retained_host_us": 190.0355,
+        "retained_host_us_p90": 397.093,
+        "full_complete_us": 16938.786,
+        "full_complete_us_p90": 22832.028,
+        "retained_complete_us": 17833.601000000002,
+        "retained_complete_us_p90": 22608.156,
+        "complete_ratio": 1.0528263949966663
+      },
+      {
+        "repeat": 3,
+        "full_host_us": 128.3965,
+        "full_host_us_p90": 203.128,
+        "retained_host_us": 155.96550000000002,
+        "retained_host_us_p90": 219.48,
+        "full_complete_us": 16295.202000000001,
+        "full_complete_us_p90": 18309.571,
+        "retained_complete_us": 16607.8805,
+        "retained_complete_us_p90": 19162.065,
+        "complete_ratio": 1.019188378272328
+      },
+      {
+        "repeat": 4,
+        "full_host_us": 141.39,
+        "full_host_us_p90": 270.507,
+        "retained_host_us": 163.262,
+        "retained_host_us_p90": 223.094,
+        "full_complete_us": 16433.176,
+        "full_complete_us_p90": 18634.524,
+        "retained_complete_us": 16566.871,
+        "retained_complete_us_p90": 18806.568,
+        "complete_ratio": 1.0081356762685436
+      }
+    ],
+    "median_full_us": 16295.202000000001,
+    "median_retained_us": 16566.871,
+    "median_ratio": 1.0221794478550335,
+    "ratio_range": [
+      1.0081356762685436,
+      1.0528263949966663
+    ]
+  },
+  "text-exposure": {
+    "processes": [
+      {
+        "repeat": 0,
+        "full_host_us": 63.979,
+        "full_host_us_p90": 219.892,
+        "retained_host_us": 97.6165,
+        "retained_host_us_p90": 189.632,
+        "full_complete_us": 12699.862000000001,
+        "full_complete_us_p90": 15728.873,
+        "retained_complete_us": 479.273,
+        "retained_complete_us_p90": 1099.64,
+        "complete_ratio": 0.037738441567317815
+      },
+      {
+        "repeat": 1,
+        "full_host_us": 59.4135,
+        "full_host_us_p90": 115.951,
+        "retained_host_us": 72.089,
+        "retained_host_us_p90": 117.605,
+        "full_complete_us": 12933.858,
+        "full_complete_us_p90": 14041.68,
+        "retained_complete_us": 434.264,
+        "retained_complete_us_p90": 582.539,
+        "complete_ratio": 0.03357575133421134
+      },
+      {
+        "repeat": 2,
+        "full_host_us": 48.064,
+        "full_host_us_p90": 102.001,
+        "retained_host_us": 59.753,
+        "retained_host_us_p90": 97.682,
+        "full_complete_us": 12565.6965,
+        "full_complete_us_p90": 13709.811,
+        "retained_complete_us": 401.25149999999996,
+        "retained_complete_us_p90": 544.423,
+        "complete_ratio": 0.03193229281003245
+      },
+      {
+        "repeat": 3,
+        "full_host_us": 47.307,
+        "full_host_us_p90": 160.374,
+        "retained_host_us": 64.0355,
+        "retained_host_us_p90": 136.287,
+        "full_complete_us": 12467.645,
+        "full_complete_us_p90": 14300.034,
+        "retained_complete_us": 421.6395,
+        "retained_complete_us_p90": 643.247,
+        "complete_ratio": 0.03381869631353796
+      },
+      {
+        "repeat": 4,
+        "full_host_us": 101.152,
+        "full_host_us_p90": 190.991,
+        "retained_host_us": 100.495,
+        "retained_host_us_p90": 215.89,
+        "full_complete_us": 13455.8265,
+        "full_complete_us_p90": 15498.913,
+        "retained_complete_us": 543.3555,
+        "retained_complete_us_p90": 1061.993,
+        "complete_ratio": 0.04038068564573124
+      }
+    ],
+    "median_full_us": 12699.862000000001,
+    "median_retained_us": 434.264,
+    "median_ratio": 0.03381869631353796,
+    "ratio_range": [
+      0.03193229281003245,
+      0.04038068564573124
+    ]
+  }
+}

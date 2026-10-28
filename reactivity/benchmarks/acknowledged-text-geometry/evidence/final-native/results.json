@@ -1,0 +1,104 @@
+{
+  "source": "eace5a4a6db805d6ccdf1aacd5b848a5215bb2f5",
+  "shipping_base": "6d77c71c1227bd2609518cc5f3a49e37fc176f82",
+  "features": "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache",
+  "profile": "test/unoptimized+debuginfo",
+  "artifact_selection": "Cargo test-lib artifact; compiled after pinned commit; eace-only test name checked; full integration compilation may still be running",
+  "executable": "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+  "original": "/tmp/gpui-acknowledged-text-target/debug/deps/gpui-b07901c2a739e6e3",
+  "executable_sha256": "7a8725bc43b02be47277d6f2cab37bfce300169f8defc7c13073aa5dec8c8ea0",
+  "full_test_log_sha256": "256d674aab32bf3f3e48c923ec99e36949b5d7aa3be22ac0b694b3735a2ebe49",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)\nbinary: rustc\ncommit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452\ncommit-date: 2026-07-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.1\nLLVM version: 22.1.6\n",
+  "cases": [
+    {
+      "name": "headers",
+      "command": [
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "runtime::parent_tests::compact_parent_covers_the_admitted_index_domain",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "84c4f8d68e7534177212d0a49ad62e8c2c9ec3240b4a189188e4dc85e57debf0"
+    },
+    {
+      "name": "plain",
+      "command": [
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "e0fdcb7b915c6d68a218a3515e95859aa540dcb445da2f32828cea059068c599"
+    },
+    {
+      "name": "epochs",
+      "command": [
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "runtime::text_geometry::tests::acknowledged_geometry_owner_epoch_and_allocation_ledger",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "a2a953a0f736795d288b2389140ea519583bb807219ff3df357039c9129f0200"
+    },
+    {
+      "name": "native-allocations",
+      "command": [
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "native::accessibility::geometry_tests::native_geometry_projection_allocation_ledger",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "a1f2bee79b79a327e27accafce863513a4df3314e0872b1facd575a90f3d60eb"
+    },
+    {
+      "name": "cohort-header",
+      "command": [
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "native::accessibility::text::native_input_authority_memory_budget",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "b16c0df21fbe3cefbf71e97831da1e08d0c5b4178f5f66cb49e61fc38d84fa63"
+    },
+    {
+      "name": "actual-registry",
+      "command": [
+        "bash",
+        "/root/gpui-acknowledged-text-geometry/reactivity/tools/test_atspi.sh",
+        "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui"
+      ],
+      "exit": 0,
+      "log_sha256": "07de4ccbf28ea803712b2f4fb31842e6486dca67a6e1215040c7f15e4b78cf3e"
+    },
+    {
+      "name": "late-service-owner-replacement",
+      "command": [
+        "dbus-run-session",
+        "--",
+        "/tmp/gpui-acknowledged-text-evidence/final-native/gpui",
+        "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+        "--ignored",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "log_sha256": "e097c119822579224c25e0b8db0cb1173982cf0e67e28a5046715afba85122c7"
+    }
+  ],
+  "full_suite_completed_same_artifact": true,
+  "full_gpui_passed": 505,
+  "full_gpui_ignored": 25,
+  "final_complete_log": "/tmp/gpui-acknowledged-text-evidence/final-gpui-full-map-contract.log"
+}

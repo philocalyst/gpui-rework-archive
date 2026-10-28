@@ -1,0 +1,182 @@
+{
+  "scope": {
+    "repository": "/tmp/gpui-glyph-count-root/reactivity",
+    "commit": "fb99927063be3d0e9eb2e59e927228d43aaa3087",
+    "pinned_ttf_parser": "0.25.1; Cargo.lock checksum d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31",
+    "restriction": "Read-only audit; no source edits, builds, tests, timings, assembly inspection or generated artifacts. This JSON report is the only new file.",
+    "finding": "The committed partition has 195 maximal LE24 intervals (585 bytes) and the source includes an exhaustive valid-char oracle against the exact three pinned Face::glyph_index results. It removes bundled cmap parsing/search from coverage planning while retaining the custom Cmap path. The exact static size and source-level lookup bound are established; no speedup is claimed."
+  },
+  "source_identity": [
+    {
+      "path": "crates/canvas/examples/coverage_table.rs",
+      "lines": "1-37",
+      "sha256": "cfe600380531f442461439dcb098229f8dd8568bf40c944d8e5325ee83383854",
+      "role": "Generator computes all three Face masks for each Unicode scalar and emits transition endpoint + prior mask."
+    },
+    {
+      "path": "crates/canvas/src/text/bundled_coverage.rs",
+      "lines": "1-58",
+      "sha256": "088efb852f1db1b53043b3419d1c20cd4152154126756bfa42383c97044b0f3e",
+      "role": "Runtime lookup, partition invariants, exhaustive scalar oracle."
+    },
+    {
+      "path": "crates/canvas/assets/font-coverage.bin",
+      "lines": "binary/585B",
+      "sha256": "45efa6adf765161f311a0dba3b0fc36388082efa33c209a5d5e6af1fa3aad384",
+      "role": "195 × 3-byte records."
+    },
+    {
+      "path": "crates/canvas/src/text/planner.rs",
+      "lines": "21-41,43-80,91-126,588-666",
+      "sha256": "2357c17ea1fa3d45622b8561714681fe211788485e548e0277bc8b038ed8473f",
+      "role": "Cmap path for custom font, bundled dispatch, precedence, synthetic subtable tests."
+    },
+    {
+      "path": "crates/canvas/src/text.rs",
+      "lines": "47-125",
+      "sha256": "06b118de775041649095a6986e7da14f9b96b963246a38798f83ccb4b885cc58",
+      "role": "FontData owns Cow bytes; constructor parses and drops Face."
+    },
+    {
+      "path": "Cargo.lock",
+      "lines": "ttf-parser entry",
+      "sha256": "9ae338d4b4b372f62bd1708f49866026a91acea2962d5a8e5e67aaacf2671c22"
+    },
+    {
+      "path": "assets/NotoSans.ttf",
+      "sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+    },
+    {
+      "path": "assets/arabic/NotoSansArabic-Regular.ttf",
+      "sha256": "ceea25b464a656dc3b26849bab9356740401af62aedf1bfa8b7f0d9b75925b1b"
+    },
+    {
+      "path": "assets/hebrew/NotoSansHebrew-Regular.ttf",
+      "sha256": "a7fa16fffb27bedb060a0866267c29e9859aeb9c21cc33f5b3aaf6eb062eca85"
+    }
+  ],
+  "exact_semantics": {
+    "record": "(font_mask << 21) | inclusive_endpoint: exactly 3 mask bits + 21 scalar bits = 24 bits. Starts are previous endpoint + 1. A transition writes the prior mask through scalar-1; terminal endpoint is U+10FFFF. Asset length 585/3 = 195.",
+    "lookup": "For 195 entries, partition_point performs an implementation-dependent binary-search-like sequence of endpoint predicate evaluations, then extracts the selected mask. Exact predicate count depends on the pinned Rust implementation and is not established here. Each predicate reconstructs an LE24 value from three bytes and masks the low 21 bits; selected record is decoded again. Actual machine branches/instructions are unknown.",
+    "unicode": "Generator maps invalid char::from_u32 scalars (surrogates) to zero; Rust char and str::chars exclude surrogates. The committed exhaustive oracle skips those integers and checks every valid scalar, including unassigned and noncharacter code points. Terminal covers max char.",
+    "glyph": "Pinned Face::glyph_index walks subtables in order, ignores non-Unicode subtables, and returns the first Some. An explicit Some(GlyphId(0)) terminates search, then planner treats it as uncovered. Generator calls Face directly, preserving first-match semantics, rather than reimplementing it.",
+    "planner": "Coverage skips CR, LF, NEL, U+2028/U+2029 and Default_Ignorable before control rejection. Primary bit accepts immediately; otherwise all fallback bits are accumulated; zero mask gives MissingGlyph. Fallback fonts register only after the full string scan, in slot order. Custom fonts retain dynamic Cmap and primary miss remains MissingGlyph."
+  },
+  "formulation_costs": [
+    {
+      "name": "LE24 maximal ranges (current)",
+      "size": "585 bytes; 195 records",
+      "lookup": "Implementation-dependent endpoint comparisons; each reconstructs 3-byte little-endian word + masks endpoint; one final decode",
+      "owner": "Read-only byte asset, no runtime allocation, dependency, unsafe or alignment requirement",
+      "judgment": "Best size baseline; about ten 64-byte lines cold, with bounded serial search."
+    },
+    {
+      "name": "Aligned logical u32 records",
+      "size": "780 bytes; +195 bytes (+33.3%)",
+      "lookup": "Same implementation-dependent comparison count; one u32 load and low-21-bit test per comparison; mask extraction from selected word",
+      "owner": "Static aligned integer array, safe loads; emit logical integer constants or otherwise preserve endian semantics",
+      "judgment": "Plausible codegen simplification. Keep only if optimized artifact or paired benchmark shows benefit; no evidence byte assembly survives optimization."
+    },
+    {
+      "name": "Separate u32 endpoints + u8 masks",
+      "size": "975 bytes minimum (780+195); +390B",
+      "lookup": "Endpoint-only comparisons; final separate mask load. A padded u32+u8 struct is commonly 8B/record (1560B); packed typed refs introduce unaligned-access complexity.",
+      "owner": "Two static arrays, no allocation",
+      "judgment": "Reject unless endpoint masking is proven material."
+    },
+    {
+      "name": "Dense direct 3-bit masks",
+      "size": "417,792 bytes (408 KiB) indexed across 0x110000 codepoints; ~714× current",
+      "lookup": "O(1) addressing but bit index is scalar*3, with shift/mask and possible cross-byte/word extraction. Three separate bitmaps have the same bit payload and need three tests.",
+      "owner": "Static blob, no runtime allocation",
+      "judgment": "Reject for only 195 ranges."
+    },
+    {
+      "name": "Page directory + local interval search",
+      "size": "256-codepoint pages: 4352B directory +585B=4937B. 4096-codepoint pages: 272B+585B=857B.",
+      "lookup": "Extra directory load then local binary search. Global comparison count is implementation-dependent; 4Ki pages need up to 12 worst-case local decisions by page cardinality, while 256 pages trade 4.3KiB for a smaller local search.",
+      "owner": "Static; u8 record indices suffice for current 195 entries but require width review if table grows.",
+      "judgment": "Reject at current size absent measured random-query latency."
+    },
+    {
+      "name": "Eytzinger/BFS or block-SIMD",
+      "size": "Straight u32 nodes 780B. 8-record block maxima add 25×4=100B, so at least 880B with u32 payload.",
+      "lookup": "Tree layout may reduce dependent search latency on some machines; block SIMD needs selection then vector compare. Scanning all 25 blocks costs more loads than a logarithmic scalar binary search in source-level comparisons. Batched lookup across many chars is another workload.",
+      "owner": "Generated reordered static data; likely target-specific code.",
+      "judgment": "Not selected. Khuong–Morin compare layouts empirically but do not establish a win for a 585B table. Intel AVX2 docs describe gather instructions, not interval-search performance."
+    },
+    {
+      "name": "Delta / variable-length endpoints",
+      "size": "Could be <585B, but exact encoded size not measured; checkpoints add metadata.",
+      "lookup": "Random lookup decodes from checkpoint with variable-length branches; stride 16 bounds local decode to 15 deltas but needs checkpoint offsets/endpoints.",
+      "owner": "Static byte stream; more generator and validation logic.",
+      "judgment": "Reject pending exact size and random-query timing advantage."
+    }
+  ],
+  "custom_path": {
+    "state": "FontFace stores Arc<FontData>, whose Cow bytes are immutable. from_data parses Face for constructor validation then drops it. Planner borrows FontFace; Cmap::parse reparses and retains only Option<cmap::Table<'font>>. This is a safe borrowed view, not a self-referential owner.",
+    "wrapper": "Replacing Cmap with Option<ttf_parser::cmap::Table<'font>> and the same helper removes only a wrapper name; parsing, branches and storage remain. Holding Face<'font> in Planner retains all parsed table descriptors rather than only cmap and grows the planner value without saving the parse already done in Cmap::parse.",
+    "constructor_borrow": "A plain safe struct cannot retain Face borrowing bytes owned by the same FontData. An owned descriptor/offset or copied cmap could be recorded during construction, but still needs a borrowed table view and exact duplicate-table semantics; copied data adds memory, while self-cell/yoke/unsafe adds complexity. No higher-leverage safe constructor-authoritative borrow was found.",
+    "duplicates": "ttf-parser Face::collect_tables scans directory records in order and assigns cmap = table_data for each, so the later duplicate replaces earlier; an invalid later range can replace it with None (overflow branch continues). RawFace::table uses binary_search_by over tags and equal-key selection is not guaranteed to match Face::collect_tables. Do not swap to RawFace.table or first-duplicate-wins for custom fonts unless behavior is deliberately changed. Existing tests cover subtable ordering/Some(0), but duplicate directory tags should be an added oracle case."
+  },
+  "acceptance": [
+    "Run exhaustive oracle and maximal partition tests with exact lock and bundled font hashes; none were run in this audit.",
+    "Test custom cmap synthetic cases: non-Unicode first; Unicode None followed by nonzero; Some(0) followed by nonzero; missing cmap; unsupported format; duplicate cmap directory tags including invalid later record. Compare exact pinned Face::parse results.",
+    "Test planner ordering: ignorable/newline skip before control, primary preference, all fallback bits, first missing/control error, and no fallback registration before full scan succeeds.",
+    "Probe U+0000, specified hard breaks, ZWJ/variation selectors, combining marks, Arabic/Hebrew, noncharacters/unassigned values, both sides of each endpoint. Surrogates cannot be Rust char and are skipped.",
+    "Confirm custom input remains on Cmap regardless of equal bytes; bundled flag, not byte equality, dispatches the table.",
+    "Performance claim requires optimized artifact and paired coverage timings on ASCII, missing-script, Arabic/Hebrew, mark-heavy, ignorable-heavy and long input; collect p50/p95 and instruction/cycle data before saying 4B/SIMD is faster."
+  ],
+  "recommendation": "Keep the current LE24 table as the small safe baseline. At 195 entries its fixed payload is 585B with zero runtime allocation. Its exact partition_point predicate count is implementation-dependent and not established by this audit. Preserve dynamic Cmap for custom fonts; wrapper removal is cosmetic, and constructor-owned parsed references add self-reference/copy complexity without a demonstrated win.",
+  "primary_sources": [
+    {
+      "title": "ttf-parser 0.25.1 Face parse/collect_tables source",
+      "url": "https://raw.githubusercontent.com/harfbuzz/ttf-parser/v0.25.1/src/lib.rs",
+      "supports": "Face::parse invokes collect_tables; collect_tables processes directory order and overwrites cmap."
+    },
+    {
+      "title": "ttf-parser 0.25.1 Face::glyph_index source",
+      "url": "https://raw.githubusercontent.com/harfbuzz/ttf-parser/v0.25.1/src/lib.rs",
+      "supports": "Unicode filter, subtable order, first Some result including Some(GlyphId(0))."
+    },
+    {
+      "title": "ttf-parser 0.25.1 RawFace::table source",
+      "url": "https://raw.githubusercontent.com/harfbuzz/ttf-parser/v0.25.1/src/lib.rs",
+      "supports": "RawFace::table uses binary_search_by for table tags, which need not select duplicate same-tag record like Face::collect_tables."
+    },
+    {
+      "title": "Rust char docs",
+      "url": "https://doc.rust-lang.org/std/primitive.char.html",
+      "supports": "char ranges 0..=0x10FFFF excluding surrogates and represents Unicode scalar values."
+    },
+    {
+      "title": "Rust slice::partition_point",
+      "url": "https://doc.rust-lang.org/stable/core/primitive.slice.html",
+      "supports": "Binary-search-like partition point requires correctly partitioned predicate."
+    },
+    {
+      "title": "Array Layouts for Comparison-Based Searching",
+      "url": "https://arxiv.org/abs/1509.05053",
+      "supports": "Primary research compares sorted binary, Eytzinger, implicit B-tree and vEB; results are machine/data dependent."
+    },
+    {
+      "title": "Rust generated Unicode tables",
+      "url": "https://github.com/rust-lang/rust/blob/main/library/core/src/unicode/unicode_data.rs",
+      "supports": "Primary implementation precedent for generated range, skiplist, bitset, cascading and 2-level LUT choices; different data/workload."
+    },
+    {
+      "title": "Intel AVX2 gather reference",
+      "url": "https://www.intel.com/content/www/us/en/docs/cpp-compiler/developer-guide-reference/2021-8/intrinsics-for-gather-operations.html",
+      "supports": "Defines AVX2 gather operations but offers no evidence that SIMD improves this lookup."
+    }
+  ],
+  "prior_report_correction": {
+    "path": "/tmp/gpui-luna-text-pipeline-research-20261023.json",
+    "detail": "Corrected unsafe owner comparison: GPU owner co-locates text_len:u16, len:u16, cap:u32 and NonNull in a nominal 16B header; parent-reported target layouts are 48B TextLayout/72B TextSite versus safe 64B/88B, a 16B delta. This is a measurable size floor, not a one-header-only claim; it requires per-target size_of and clone/drop/raw allocation qualification and is separate from this safe CPU audit."
+  },
+  "nonclaims": [
+    "No builds/tests/timings/assembly were run; exhaustive test source was reviewed, not executed.",
+    "No speed claim for LE24, u32, page, Eytzinger or SIMD representation.",
+    "No production repository edits."
+  ]
+}

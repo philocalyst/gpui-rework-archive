@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+    "/tmp/gpui-default-font-reproduction-root/generate-default-font.py",
+    "/tmp/gpui-default-font-root/fonttools-4.67.0-py3-none-any.whl"
+  ],
+  "exit": 0,
+  "bytes": 646160,
+  "output_sha256": "16a1ee5229882c1ba577d265014a85d8a4ddbcf5e45bd30bcfbabfdaf89cabf3",
+  "producer_sha256": "16a1ee5229882c1ba577d265014a85d8a4ddbcf5e45bd30bcfbabfdaf89cabf3",
+  "scope": "Independent regeneration from pinned verified local tool and original source; no compile/runtime measurement.",
+  "byte_equal": true
+}

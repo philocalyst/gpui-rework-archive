@@ -1,0 +1,11 @@
+
+running 6 tests
+test axis_rect_prefixes_lower_without_losing_continuous_geometry ... ok
+test depth_and_invalid_geometry_reject_before_mutating_the_prefix ... ok
+test every_lattice_site_matches_an_independent_oracle_at_ties_and_transformed_corners ... ok
+test handles_reject_foreign_cleared_dropped_and_replaced_scenes ... ok
+test identical_nested_rounded_clips_intersect_samples_instead_of_multiplying_alpha ... ok
+test node_budget_failed_draw_and_aborted_candidate_preserve_complete_scene ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+

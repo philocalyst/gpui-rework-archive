@@ -1,0 +1,28 @@
+warning: use of deprecated method `icu_properties::props::BidiClass::to_icu4c_value`: please comment on https://github.com/unicode-org/icu4x/issues/6067 if you need this
+   --> vendor/parley/src/bidi.rs:893:13
+    |
+893 |     1 << (t.to_icu4c_value() as u32)
+    |             ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: `parley` (lib) generated 1 warning
+   Compiling gpui v0.1.0 (/root/gpui-paint-coupling/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.78s
+     Running unittests src/lib.rs (/tmp/gpui-paint-coupling-target/debug/deps/gpui-3311db7426bce599)
+
+running 1 test
+
+thread 'native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta' (3442192) panicked at crates/gpui/src/native/accessibility/transitions.rs:50:17:
+transition must use full fallback
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta ... FAILED
+
+failures:
+
+failures:
+    native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 146 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p gpui --lib`

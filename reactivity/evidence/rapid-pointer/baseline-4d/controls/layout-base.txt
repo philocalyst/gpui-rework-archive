@@ -1,0 +1,1 @@
+point=8 option_point=12 target=16 session=32 option_session=32 session_align=8 event=24 win=8 option_win=16 window=72 option_window=72

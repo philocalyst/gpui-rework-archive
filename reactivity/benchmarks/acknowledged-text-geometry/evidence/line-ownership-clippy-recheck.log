@@ -1,0 +1,14 @@
+    Checking gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas)
+    Checking gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
+error: `usize::MAX` is never smaller than `u32::MAX as usize` and has therefore no effect
+   --> crates/canvas/src/text/line_ownership_tests.rs:225:41
+    |
+225 |                 offset: TextOffset::new(usize::MAX.min(u32::MAX as usize)).unwrap(),
+    |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `u32::MAX as usize`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.97.0/index.html#unnecessary_min_or_max
+    = note: `-D clippy::unnecessary-min-or-max` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_min_or_max)]`
+
+error: could not compile `gpui_canvas` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

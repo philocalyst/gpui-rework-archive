@@ -1,0 +1,15 @@
+Probe run from the saved research worktree; x86_64-unknown-linux-gnu.
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+cargo 1.97.1 (c980f4866 2026-06-30)
+
+Command: cargo run --release --offline
+
+queued_payload_bytes_retained_after_receiver_drop=8389896
+queued_payload_bytes_released_by_last_sender_drop=8390664
+queued_payload_bytes_before_drain=8389896
+queued_payload_bytes_released_by_drain=8388608
+race_rounds=64
+race_attempted_values=131072
+race_accepted_and_drained_values=3476
+
+The accepted count varies with thread scheduling. This is not a timing run.

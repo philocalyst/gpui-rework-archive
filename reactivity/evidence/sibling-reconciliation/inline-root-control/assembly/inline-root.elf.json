@@ -1,0 +1,294 @@
+{
+  "binary": "/tmp/gpui-sibling-controls/inline-root",
+  "bytes": 12734496,
+  "sha256": "ed948ea1e0ccddaad1104b2e89f19cdd20eff6a02c76a9d2cd924367d51f7e2d",
+  "sections": {
+    ".rodata": 6559328,
+    ".eh_frame": 287124,
+    ".text": 3989415,
+    ".data.rel.ro": 189064
+  },
+  "selected": [
+    {
+      "mangled": "_RINvMs_NtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB7_4node6HandleINtBX_7NodeRefNtNtBX_6marker3MutyAINtNtCshBhuxcId5D0_4gpui8property12ContributionINtNtCs4NRVxsYgnAr_4core6option6OptionNtNtB1R_11shared_text10SharedTextEEj2_NtB1u_4LeafENtB1u_2KVE14remove_leaf_kvNCINvMsV_NtB7_3mapINtB4w_14ExtractIfInneryB1L_NtNtNtB2C_3ops5range9RangeFullE4nextNCINvMsi_B4w_INtB4w_8BTreeMapyB1L_E6retainNCNvMst_NtB1R_7runtimeINtB6v_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersK_0E0NtNtBb_5alloc6GlobalE0B89_EB70_",
+      "address": 7279616,
+      "code_bytes": 2239
+    },
+    {
+      "mangled": "_RINvMs_NtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB7_4node6HandleINtBX_7NodeRefNtNtBX_6marker3MutyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtB1O_13GeometryStyleENtB1u_4LeafENtB1u_2KVE14remove_leaf_kvNCINvMsV_NtB7_3mapINtB3x_14ExtractIfInneryB1L_NtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullE4nextNCINvMsi_B3x_INtB3x_8BTreeMapyB1L_E6retainNCINvMsi_B1O_INtB1O_9OverridesB2q_E6retainNCNvMst_NtB1Q_7runtimeINtB6r_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersL_0E0E0NtNtBb_5alloc6GlobalE0B87_EB6W_",
+      "address": 7281856,
+      "code_bytes": 2201
+    },
+    {
+      "mangled": "_RINvMs_NtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB7_4node6HandleINtBX_7NodeRefNtNtBX_6marker3MutyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtNtB1Q_5style5StyleENtB1u_4LeafENtB1u_2KVE14remove_leaf_kvNCINvMsV_NtB7_3mapINtB3w_14ExtractIfInneryB1L_NtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullE4nextNCINvMsi_B3w_INtB3w_8BTreeMapyB1L_E6retainNCINvMsi_B1O_NtB1O_9Overrides6retainNCNvMst_NtB1Q_7runtimeINtB6k_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersJ_0E0E0NtNtBb_5alloc6GlobalE0B80_EB6P_",
+      "address": 7284064,
+      "code_bytes": 2454
+    },
+    {
+      "mangled": "_RINvMNtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB5_4node6HandleINtBV_7NodeRefNtNtBV_6marker3MutyAINtNtCshBhuxcId5D0_4gpui8property12ContributionINtNtCs4NRVxsYgnAr_4core6option6OptionNtNtB1P_11shared_text10SharedTextEEj2_NtB1s_14LeafOrInternalENtB1s_2KVE18remove_kv_trackingNCINvMsV_NtB5_3mapINtB4J_14ExtractIfInneryB1J_NtNtNtB2A_3ops5range9RangeFullE4nextNCINvMsi_B4J_INtB4J_8BTreeMapyB1J_E6retainNCNvMst_NtB1P_7runtimeINtB6I_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersK_0E0NtNtB9_5alloc6GlobalE0B8m_EB7d_",
+      "address": 7255904,
+      "code_bytes": 689
+    },
+    {
+      "mangled": "_RINvMNtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB5_4node6HandleINtBV_7NodeRefNtNtBV_6marker3MutyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtB1M_13GeometryStyleENtB1s_14LeafOrInternalENtB1s_2KVE18remove_kv_trackingNCINvMsV_NtB5_3mapINtB3K_14ExtractIfInneryB1J_NtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullE4nextNCINvMsi_B3K_INtB3K_8BTreeMapyB1J_E6retainNCINvMsi_B1M_INtB1M_9OverridesB2o_E6retainNCNvMst_NtB1O_7runtimeINtB6E_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersL_0E0E0NtNtB9_5alloc6GlobalE0B8k_EB79_",
+      "address": 7256608,
+      "code_bytes": 689
+    },
+    {
+      "mangled": "_RINvMNtNtNtCscdodAO9FK5_5alloc11collections5btree6removeINtNtB5_4node6HandleINtBV_7NodeRefNtNtBV_6marker3MutyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtNtB1O_5style5StyleENtB1s_14LeafOrInternalENtB1s_2KVE18remove_kv_trackingNCINvMsV_NtB5_3mapINtB3J_14ExtractIfInneryB1J_NtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullE4nextNCINvMsi_B3J_INtB3J_8BTreeMapyB1J_E6retainNCINvMsi_B1M_NtB1M_9Overrides6retainNCNvMst_NtB1O_7runtimeINtB6x_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersJ_0E0E0NtNtB9_5alloc6GlobalE0B8d_EB72_",
+      "address": 7257312,
+      "code_bytes": 964
+    },
+    {
+      "mangled": "_RINvMNtCs4NRVxsYgnAr_4core5sliceSNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8Declared20sort_unstable_by_keyyNCNvMst_Bz_INtBz_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0EB28_",
+      "address": 7291840,
+      "code_bytes": 66
+    },
+    {
+      "mangled": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionINtNtCscdodAO9FK5_5alloc5boxed3BoxNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8MetadataEE18get_or_insert_withNCNvMst_B1k_INtB1k_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersE_0EB2U_",
+      "address": 7292176,
+      "code_bytes": 272
+    },
+    {
+      "mangled": "_RINvMsi_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB6_8BTreeMapyAINtNtCshBhuxcId5D0_4gpui8property12ContributionINtNtCs4NRVxsYgnAr_4core6option6OptionNtNtB1e_11shared_text10SharedTextEEj2_E6retainNCNvMst_NtB1e_7runtimeINtB3o_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersK_0EB3T_",
+      "address": 7292656,
+      "code_bytes": 485
+    },
+    {
+      "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtNtCshBhuxcId5D0_4gpui7runtime8siblings8SiblingsECs4gwBMgNbBwV_27sibling_reconciliation_cost",
+      "address": 7313968,
+      "code_bytes": 45
+    },
+    {
+      "mangled": "_RNvMst_NtCshBhuxcId5D0_4gpui7runtimeINtB5_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innerBO_",
+      "address": 7357776,
+      "code_bytes": 32054
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort12sort8_stableTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB19_7sort_byNCINvXs1o_NtNtNtB1T_11collections5btree3mapINtB2F_8BTreeMapjB1b_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB19_E9from_iterINtNtNtB3F_8adapters3map3MapINtNtB8_4iter4IterNtB1d_9ListDraftENCNvMst_NtB1f_7runtimeINtB5G_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB6b_",
+      "address": 7397792,
+      "code_bytes": 885
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB8_SB1m_20sort_unstable_by_keyyNCNvMst_B1q_INtB1q_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB3f_",
+      "address": 7410384,
+      "code_bytes": 160
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort18small_sort_generalNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB8_SB1f_20sort_unstable_by_keyyNCNvMst_B1j_INtB1j_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB38_",
+      "address": 7405456,
+      "code_bytes": 1273
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort18small_sort_networkNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata11DestinationNCINvMB8_SB1f_20sort_unstable_by_keymNCNvMst_B1j_INtB1j_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersc_0E0EB3c_",
+      "address": 7407968,
+      "code_bytes": 1691
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB1m_7sort_byNCINvXs1o_NtNtNtB26_11collections5btree3mapINtB2S_8BTreeMapjB1o_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1m_E9from_iterINtNtNtB3S_8adapters3map3MapINtNtB8_4iter4IterNtB1q_9ListDraftENCNvMst_NtB1s_7runtimeINtB5T_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB6o_",
+      "address": 7410544,
+      "code_bytes": 118
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB1r_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSB1m_7sort_byNCINvXs1o_NtNtNtB2o_11collections5btree3mapINtB3a_8BTreeMapjB1o_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1m_E9from_iterINtNtNtB4a_8adapters7flatten7FlatMapINtNtB8_4iter4IterNtB1r_9ListDraftEINtNtB57_3map3MapIB5D_B1Z_ENCNCNvMst_NtB1t_7runtimeINtB6M_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6G_s2_0EE0E0EB7h_",
+      "address": 7410672,
+      "code_bytes": 160
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort31small_sort_general_with_scratchTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB1s_7sort_byNCINvXs1o_NtNtNtB2c_11collections5btree3mapINtB2Y_8BTreeMapjB1u_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1s_E9from_iterINtNtNtB3Y_8adapters3map3MapINtNtB8_4iter4IterNtB1w_9ListDraftENCNvMst_NtB1y_7runtimeINtB5Z_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB6u_",
+      "address": 7410960,
+      "code_bytes": 1181
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort31small_sort_general_with_scratchTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB1x_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSB1s_7sort_byNCINvXs1o_NtNtNtB2u_11collections5btree3mapINtB3g_8BTreeMapjB1u_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1s_E9from_iterINtNtNtB4g_8adapters7flatten7FlatMapINtNtB8_4iter4IterNtB1x_9ListDraftEINtNtB5d_3map3MapIB5J_B25_ENCNCNvMst_NtB1z_7runtimeINtB6S_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6M_s2_0EE0E0EB7n_",
+      "address": 7412144,
+      "code_bytes": 1301
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort25insertion_sort_shift_leftTyNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB1m_7sort_byNCINvXs1o_NtNtNtB26_11collections5btree3mapINtB2S_8BTreeMapyB1o_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1m_E9from_iterINtNtNtB3S_8adapters10filter_map9FilterMapINtB2S_4IterNtNtNtB1s_7runtime6scroll11ViewportKeyNtB5E_13ViewportStateENCNvMst_B5G_INtB5G_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE0E0EB73_",
+      "address": 7410544,
+      "code_bytes": 118
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared9smallsort31small_sort_general_with_scratchTyNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB1s_7sort_byNCINvXs1o_NtNtNtB2c_11collections5btree3mapINtB2Y_8BTreeMapyB1u_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB1s_E9from_iterINtNtNtB3Y_8adapters10filter_map9FilterMapINtB2Y_4IterNtNtNtB1y_7runtime6scroll11ViewportKeyNtB5K_13ViewportStateENCNvMst_B5M_INtB5M_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE0E0EB79_",
+      "address": 7410960,
+      "code_bytes": 1181
+    },
+    {
+      "mangled": "_RNvXNtNtCscdodAO9FK5_5alloc3vec14spec_from_iterINtB4_3VecTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtBY_8RowDraftEEEINtB2_12SpecFromIterBT_INtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters7flatten7FlatMapINtNtNtB2j_5slice4iter4IterNtBY_9ListDraftEINtNtB2f_3map3MapIB37_B1w_ENCNCNvMst_NtB10_7runtimeINtB4o_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB4i_s2_0EE9from_iterB4T_",
+      "address": 7420496,
+      "code_bytes": 955
+    },
+    {
+      "mangled": "_RNvXNtNtCscdodAO9FK5_5alloc3vec14spec_from_iterINtB4_3VecTyNtNtCshBhuxcId5D0_4gpui4list6ListIdEEINtB2_12SpecFromIterBT_INtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters10filter_map9FilterMapINtNtNtNtB6_11collections5btree3map4IterNtNtNtBZ_7runtime6scroll11ViewportKeyNtB3B_13ViewportStateENCNvMst_B3D_INtB3D_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE9from_iterB4Z_",
+      "address": 7421456,
+      "code_bytes": 956
+    },
+    {
+      "mangled": "_RNvXsU_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB5_9ExtractIfyAINtNtCshBhuxcId5D0_4gpui8property12ContributionINtNtCs4NRVxsYgnAr_4core6option6OptionNtNtB1e_11shared_text10SharedTextEEj2_NtNtNtB1Z_3ops5range9RangeFullNCINvMsi_B5_INtB5_8BTreeMapyB18_E6retainNCNvMst_NtB1e_7runtimeINtB4o_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersK_0E0ENtNtNtNtB1Z_4iter6traits8iterator8Iterator4nextB4T_",
+      "address": 7441392,
+      "code_bytes": 481
+    },
+    {
+      "mangled": "_RINvXs1o_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB7_8BTreeMapjNtNtCshBhuxcId5D0_4gpui4list6ListIdEINtNtNtNtCs4NRVxsYgnAr_4core4iter6traits7collect12FromIteratorTjB19_EE9from_iterINtNtNtB1Q_8adapters3map3MapINtNtNtB1S_5slice4iter4IterNtB1b_9ListDraftENCNvMst_NtB1d_7runtimeINtB4j_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EEB4O_",
+      "address": 7424688,
+      "code_bytes": 596
+    },
+    {
+      "mangled": "_RINvXs1o_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB7_8BTreeMapjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB1c_8RowDraftEEINtNtNtNtCs4NRVxsYgnAr_4core4iter6traits7collect12FromIteratorTjB19_EE9from_iterINtNtNtB28_8adapters7flatten7FlatMapINtNtNtB2a_5slice4iter4IterNtB1c_9ListDraftEINtNtB3o_3map3MapIB3U_B1K_ENCNCNvMst_NtB1e_7runtimeINtB5c_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB56_s2_0EEB5H_",
+      "address": 7425296,
+      "code_bytes": 447
+    },
+    {
+      "mangled": "_RINvXs1o_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB7_8BTreeMapyNtNtCshBhuxcId5D0_4gpui4list6ListIdEINtNtNtNtCs4NRVxsYgnAr_4core4iter6traits7collect12FromIteratorTyB19_EE9from_iterINtNtNtB1Q_8adapters10filter_map9FilterMapINtB7_4IterNtNtNtB1d_7runtime6scroll11ViewportKeyNtB3U_13ViewportStateENCNvMst_B3W_INtB3W_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EEB5j_",
+      "address": 7425744,
+      "code_bytes": 449
+    },
+    {
+      "mangled": "_RNvXsU_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB5_9ExtractIfyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtB1b_13GeometryStyleENtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullNCINvMsi_B5_INtB5_8BTreeMapyB18_E6retainNCINvMsi_B1b_INtB1b_9OverridesB1N_E6retainNCNvMst_NtB1d_7runtimeINtB4k_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersL_0E0E0ENtNtNtNtB2f_4iter6traits8iterator8Iterator4nextB4P_",
+      "address": 7441888,
+      "code_bytes": 488
+    },
+    {
+      "mangled": "_RNvXsU_NtNtNtCscdodAO9FK5_5alloc11collections5btree3mapINtB5_9ExtractIfyINtNtCshBhuxcId5D0_4gpui8property7OverlayNtNtB1d_5style5StyleENtNtNtCs4NRVxsYgnAr_4core3ops5range9RangeFullNCINvMsi_B5_INtB5_8BTreeMapyB18_E6retainNCINvMsi_B1b_NtB1b_9Overrides6retainNCNvMst_NtB1d_7runtimeINtB4d_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersJ_0E0E0ENtNtNtNtB2e_4iter6traits8iterator8Iterator4nextB4I_",
+      "address": 7442384,
+      "code_bytes": 562
+    },
+    {
+      "mangled": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtNtB4_4iter8adapters10filter_map9FilterMapINtNtNtCscdodAO9FK5_5alloc3vec9into_iter8IntoIterNtNtCshBhuxcId5D0_4gpui4list13ViewportDraftENCNvMst_NtB2e_7runtimeINtB30_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners0_0EEB3v_",
+      "address": 7467952,
+      "code_bytes": 206
+    },
+    {
+      "mangled": "_RINvNtNtCscdodAO9FK5_5alloc3vec16in_place_collect18from_iter_in_placeINtNtNtNtCs4NRVxsYgnAr_4core4iter8adapters10filter_map9FilterMapINtNtB4_9into_iter8IntoIterNtNtCshBhuxcId5D0_4gpui4list13ViewportDraftENCNvMst_NtB2C_7runtimeINtB3o_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners0_0ENtB2A_9ListDraftEB3T_",
+      "address": 7469616,
+      "code_bytes": 540
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable9quicksort9quicksortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata11DestinationNCINvMB8_SB17_20sort_unstable_by_keymNCNvMst_B1b_INtB1b_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersc_0E0EB34_",
+      "address": 7475952,
+      "code_bytes": 796
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable9quicksort9quicksortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB8_SB17_20sort_unstable_by_keyyNCNvMst_B1b_INtB1b_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB30_",
+      "address": 7476752,
+      "code_bytes": 1039
+    },
+    {
+      "mangled": "_RINvMs5_NtCshBhuxcId5D0_4gpui7elementNtB6_2El13flatten_listsNCNvMst_NtB8_7runtimeINtB14_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners_0EB1y_",
+      "address": 7478720,
+      "code_bytes": 9348
+    },
+    {
+      "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable7ipnsortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB6_SBT_20sort_unstable_by_keyyNCNvMst_BX_INtBX_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB2J_",
+      "address": 7495472,
+      "code_bytes": 242
+    },
+    {
+      "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable7ipnsortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata11DestinationNCINvMB6_SBT_20sort_unstable_by_keymNCNvMst_BX_INtBX_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersc_0E0EB2N_",
+      "address": 7495120,
+      "code_bytes": 345
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable8heapsort8heapsortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata11DestinationNCINvMB8_SB15_20sort_unstable_by_keymNCNvMst_B19_INtB19_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersc_0E0EB32_",
+      "address": 7527200,
+      "code_bytes": 151
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort8unstable8heapsort8heapsortNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB8_SB15_20sort_unstable_by_keyyNCNvMst_B19_INtB19_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB2Y_",
+      "address": 7527360,
+      "code_bytes": 244
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable5drift4sortTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSBW_7sort_byNCINvXs1o_NtNtNtB1G_11collections5btree3mapINtB2r_8BTreeMapjBY_EINtNtNtNtBa_4iter6traits7collect12FromIteratorBW_E9from_iterINtNtNtB3q_8adapters3map3MapINtNtB8_4iter4IterNtB10_9ListDraftENCNvMst_NtB12_7runtimeINtB5q_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB5V_",
+      "address": 7521152,
+      "code_bytes": 1664
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable5drift4sortTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB11_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSBW_7sort_byNCINvXs1o_NtNtNtB1Y_11collections5btree3mapINtB2J_8BTreeMapjBY_EINtNtNtNtBa_4iter6traits7collect12FromIteratorBW_E9from_iterINtNtNtB3I_8adapters7flatten7FlatMapINtNtB8_4iter4IterNtB11_9ListDraftEINtNtB4E_3map3MapIB5a_B1z_ENCNCNvMst_NtB13_7runtimeINtB6j_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6d_s2_0EE0E0EB6O_",
+      "address": 7522816,
+      "code_bytes": 1597
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable5drift4sortTyNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSBW_7sort_byNCINvXs1o_NtNtNtB1G_11collections5btree3mapINtB2r_8BTreeMapyBY_EINtNtNtNtBa_4iter6traits7collect12FromIteratorBW_E9from_iterINtNtNtB3q_8adapters10filter_map9FilterMapINtB2r_4IterNtNtNtB12_7runtime6scroll11ViewportKeyNtB5b_13ViewportStateENCNvMst_B5d_INtB5d_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE0E0EB6A_",
+      "address": 7524416,
+      "code_bytes": 1664
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB14_7sort_byNCINvXs1o_NtNtNtB1O_11collections5btree3mapINtB2A_8BTreeMapjB16_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB14_E9from_iterINtNtNtB3A_8adapters3map3MapINtNtB8_4iter4IterNtB18_9ListDraftENCNvMst_NtB1a_7runtimeINtB5B_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB66_",
+      "address": 7530208,
+      "code_bytes": 167
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB19_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSB14_7sort_byNCINvXs1o_NtNtNtB26_11collections5btree3mapINtB2S_8BTreeMapjB16_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB14_E9from_iterINtNtNtB3S_8adapters7flatten7FlatMapINtNtB8_4iter4IterNtB19_9ListDraftEINtNtB4P_3map3MapIB5l_B1H_ENCNCNvMst_NtB1b_7runtimeINtB6u_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6o_s2_0EE0E0EB6Z_",
+      "address": 7530384,
+      "code_bytes": 174
+    },
+    {
+      "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable14driftsort_mainTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSBZ_7sort_byNCINvXs1o_NtNtNtB1J_11collections5btree3mapINtB2u_8BTreeMapjB11_EINtNtNtNtB8_4iter6traits7collect12FromIteratorBZ_E9from_iterINtNtNtB3u_8adapters3map3MapINtNtB6_4iter4IterNtB13_9ListDraftENCNvMst_NtB15_7runtimeINtB5u_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0INtNtB1J_3vec3VecBZ_EEB5Z_",
+      "address": 7528048,
+      "code_bytes": 302
+    },
+    {
+      "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable14driftsort_mainTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB14_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSBZ_7sort_byNCINvXs1o_NtNtNtB21_11collections5btree3mapINtB2M_8BTreeMapjB11_EINtNtNtNtB8_4iter6traits7collect12FromIteratorBZ_E9from_iterINtNtNtB3M_8adapters7flatten7FlatMapINtNtB6_4iter4IterNtB14_9ListDraftEINtNtB4I_3map3MapIB5e_B1C_ENCNCNvMst_NtB16_7runtimeINtB6n_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6h_s2_0EE0E0INtNtB21_3vec3VecBZ_EEB6S_",
+      "address": 7528352,
+      "code_bytes": 312
+    },
+    {
+      "mangled": "_RINvNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable14driftsort_mainTyNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSBZ_7sort_byNCINvXs1o_NtNtNtB1J_11collections5btree3mapINtB2u_8BTreeMapyB11_EINtNtNtNtB8_4iter6traits7collect12FromIteratorBZ_E9from_iterINtNtNtB3u_8adapters10filter_map9FilterMapINtB2u_4IterNtNtNtB15_7runtime6scroll11ViewportKeyNtB5f_13ViewportStateENCNvMst_B5h_INtB5h_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE0E0INtNtB1J_3vec3VecBZ_EEB6E_",
+      "address": 7528672,
+      "code_bytes": 302
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata11DestinationNCINvMB8_SB14_20sort_unstable_by_keymNCNvMst_B18_INtB18_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersc_0E0EB31_",
+      "address": 7529792,
+      "code_bytes": 194
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6shared5pivot11median3_recNtNtNtCshBhuxcId5D0_4gpui7runtime8metadata8DeclaredNCINvMB8_SB14_20sort_unstable_by_keyyNCNvMst_B18_INtB18_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersI_0E0EB2X_",
+      "address": 7530000,
+      "code_bytes": 198
+    },
+    {
+      "mangled": "_RINvXs_NtNtNtCs4NRVxsYgnAr_4core4iter8adapters3revINtB5_3RevINtNtNtCscdodAO9FK5_5alloc3vec9into_iter8IntoIterNtNtCshBhuxcId5D0_4gpui7element2ElEENtNtNtB9_6traits8iterator8Iterator4folduNCINvNtB7_3map8map_foldB1J_TINtNtBb_6option6OptionmEB1J_IB3q_TjNtNtB1N_4list7ItemKeymffEEEuNCINvMs5_B1L_B1J_13flatten_listsNCNvMst_NtB1N_7runtimeINtB54_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners_0Es0_0NCINvNvB2j_8for_each4callB3o_NCINvMsj_B11_INtB11_3VecB3o_E14extend_trustedINtB32_3MapBM_B4q_EE0E0E0EB5z_",
+      "address": 7535232,
+      "code_bytes": 274
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable9quicksort9quicksortTjNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB15_7sort_byNCINvXs1o_NtNtNtB1P_11collections5btree3mapINtB2B_8BTreeMapjB17_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB15_E9from_iterINtNtNtB3B_8adapters3map3MapINtNtB8_4iter4IterNtB19_9ListDraftENCNvMst_NtB1b_7runtimeINtB5C_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners1_0EE0E0EB67_",
+      "address": 7530752,
+      "code_bytes": 1598
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable9quicksort9quicksortTjTNtNtCshBhuxcId5D0_4gpui4list6ListIdRNtB1a_8RowDraftEENCINvMNtCscdodAO9FK5_5alloc5sliceSB15_7sort_byNCINvXs1o_NtNtNtB27_11collections5btree3mapINtB2T_8BTreeMapjB17_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB15_E9from_iterINtNtNtB3T_8adapters7flatten7FlatMapINtNtB8_4iter4IterNtB1a_9ListDraftEINtNtB4Q_3map3MapIB5m_B1I_ENCNCNvMst_NtB1c_7runtimeINtB6v_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_inners2_00ENCB6p_s2_0EE0E0EB70_",
+      "address": 7532352,
+      "code_bytes": 1272
+    },
+    {
+      "mangled": "_RINvNtNtNtNtCs4NRVxsYgnAr_4core5slice4sort6stable9quicksort9quicksortTyNtNtCshBhuxcId5D0_4gpui4list6ListIdENCINvMNtCscdodAO9FK5_5alloc5sliceSB15_7sort_byNCINvXs1o_NtNtNtB1P_11collections5btree3mapINtB2B_8BTreeMapyB17_EINtNtNtNtBa_4iter6traits7collect12FromIteratorB15_E9from_iterINtNtNtB3B_8adapters10filter_map9FilterMapINtB2B_4IterNtNtNtB1b_7runtime6scroll11ViewportKeyNtB5n_13ViewportStateENCNvMst_B5p_INtB5p_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersd_0EE0E0EB6M_",
+      "address": 7533632,
+      "code_bytes": 1598
+    },
+    {
+      "mangled": "_RINvMsi_NtCshBhuxcId5D0_4gpui8propertyNtB6_9Overrides6retainNCNvMst_NtB8_7runtimeINtB14_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersJ_0EB1y_",
+      "address": 7536688,
+      "code_bytes": 520
+    },
+    {
+      "mangled": "_RINvMsi_NtCshBhuxcId5D0_4gpui8propertyINtB6_9OverridesNtB6_13GeometryStyleE6retainNCNvMst_NtB8_7runtimeINtB1q_7RuntimeNtCs4gwBMgNbBwV_27sibling_reconciliation_cost4TreeE14describe_innersL_0EB1U_",
+      "address": 7535808,
+      "code_bytes": 402
+    },
+    {
+      "mangled": "_RNvMNtNtCshBhuxcId5D0_4gpui7runtime8siblingsNtB2_8Siblings3new",
+      "address": 7848112,
+      "code_bytes": 552
+    },
+    {
+      "mangled": "_RNvMNtNtCshBhuxcId5D0_4gpui7runtime8siblingsNtB2_8Siblings8children",
+      "address": 7848672,
+      "code_bytes": 195
+    }
+  ],
+  "limit": "Actual linked ELF sizes; disassembly retained. No stack-size metadata or dynamic stack claim."
+}

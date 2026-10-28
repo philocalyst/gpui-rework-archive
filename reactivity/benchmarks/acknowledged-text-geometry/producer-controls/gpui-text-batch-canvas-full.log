@@ -1,0 +1,370 @@
+   Compiling crossbeam-utils v0.8.23
+   Compiling crossbeam-epoch v0.9.21
+   Compiling crossbeam-deque v0.8.8
+   Compiling rayon-core v1.13.0
+   Compiling either v1.19.0
+   Compiling rayon v1.12.0
+   Compiling gpui_canvas v0.1.0 (/root/gpui-text-batch-break/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.80s
+     Running unittests src/lib.rs (/tmp/gpui-text-batch-target/debug/deps/gpui_canvas-376332b3f9f05e5a)
+
+running 64 tests
+test canvas::columns::tests::complete_bank_layout_and_plain_recording_floor_are_explicit ... ok
+test canvas::columns::tests::palette_flags_survive_support_union_without_leaking_into_geometry ... ok
+test canvas::bins::tests::bounds_projection_and_csr_match_independent_command_membership ... ok
+test canvas::columns::tests::literal_palette_shares_exact_bits_without_aliasing_mutable_sources ... ok
+test canvas::columns::tests::support_flags_never_enter_empty_or_maximum_canvas_geometry ... ok
+test canvas::paint::tests::paint_plan_adds_no_canvas_fields_and_allocates_nothing ... ok
+test canvas::rounded::storage::rounded_sources_keep_retained_strides_without_image_extension_allocations ... ok
+test canvas::bins::tests::recording_has_no_scratch_allocation_and_first_raster_charges_one_owner ... ok
+test canvas::rounded::tests::closed_circle_and_half_open_box ... ok
+test canvas::samples::tests::identical_finite_samples_preserve_exact_bits_including_signed_zero ... ok
+test canvas::columns::tests::alternating_late_scopes_disclose_bounded_discovery_fallback_growth ... ok
+test canvas::image_axis::work_tests::setup_is_per_axis_and_adjacent_filter_rows_are_reused_without_allocation ... ok
+test canvas::columns::tests::positional_writes_detach_once_and_never_rejoin_literal_discovery ... ok
+test canvas::columns::tests::empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full ... ok
+test canvas::bins::tests::embedded_cut_preserves_a_nonzero_first_painter_and_no_opaque_prefix ... ok
+test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test color::gamut::tests::first_outward_roots_and_unresolved_contacts_keep_separate_authority ... ok
+test canvas::glyph_axis::tests::clipped_command_bounds_and_signed_zero_axes_match_scalar_samples ... ok
+test color::gamut::tests::nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign ... ok
+test color::half_tests::authored_color_keeps_sixteen_byte_provenance_header ... ok
+test canvas::columns::tests::repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations ... ok
+test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+test color::gamut::tests::author_bits_alpha_validation_and_extended_colors_have_explicit_contracts ... ok
+test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
+test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
+test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
+test image::tests::bilinear_reconstruction_is_linear_premultiplied_and_clamps_texel_edges ... ok
+test canvas::bins::tests::opaque_certificates_follow_physical_tiles_and_exact_alpha ... ok
+test image::tests::encoded_premultiplication_is_undone_before_linear_conversion ... ok
+test image::tests::immutable_ids_and_hdr_working_pixels_keep_their_leases ... ok
+test image::tests::rejects_bad_lengths_alpha_and_nonfinite_hdr_before_publication ... ok
+test image::tests::scenes_lease_each_distinct_image_once_and_failed_candidates_keep_old_leases ... ok
+test image::tests::byte_table_preserves_existing_color_bits_for_every_channel_and_alpha ... ok
+test image::tests::tile_decode_cache_is_exact_under_collisions_profiles_alpha_and_filters ... ok
+test color::packing_tests::raw_rgb_and_oklch_layouts_preserve_every_lane ... ok
+test canvas::columns::tests::repeated_unique_and_late_miss_palette_storage_is_explicit ... ok
+test text::layout::interaction::tests::byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source ... ok
+test text::paragraph::tests::original_utf8_ranges_empty_and_crlf_are_exact ... ok
+test canvas::image_axis::tests::whole_tile_overlaps_match_generic_painter_order_and_partial_tiles ... ok
+test text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract ... ok
+test text::planner::line_break_tests::batch_incremental_revert_and_mixed_breaking_preserve_actual_layout_bits ... ok
+test canvas::mask_kernel::tests::every_supported_backend_matches_mapping_bits_and_all_primitive_sites ... ok
+test canvas::scaled_mask_tests::separable_masks_and_certificates_match_every_scalar_sample ... ok
+test canvas::bins::tests::admitted_reference_and_command_limits_fit_narrow_membership_and_cuts ... ok
+test canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition ... ok
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... ok
+test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
+test canvas::samples::tests::promotion_preserves_every_sample_and_later_overlap ... ok
+test text::planner::tests::indexed_cursor_geometry_matches_original_at_every_byte_and_affinity ... ok
+test canvas::samples::tests::binary_masks_preserve_absent_bits_in_both_promotion_modes ... ok
+test text::planner::tests::rejected_expanding_output_does_not_contaminate_the_next_paragraph ... ok
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... ok
+test text::planner::line_ownership_tests::mandatory_break_lines_exclude_separators_but_runs_cover_document ... ok
+test text::planner::line_ownership_tests::visual_line_transitions_do_not_rehit_collapsed_line_tops ... ok
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... ok
+test canvas::glyph_axis::tests::shared_mask_addresses_match_every_original_scalar_sample ... ok
+test color::packing_tests::every_base199_exponent_triple_round_trips ... ok
+test canvas::image_axis::tests::every_correlated_sample_matches_generic_inverse_filter_and_decoder_bits ... ok
+test color::gamut::tests::limits_match_independent_high_precision_monotone_interval_oracle ... ok
+test text::planner::tests::cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables ... ok
+test color::gamut::tests::finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness ... ok
+
+test result: ok. 62 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 38.51s
+
+     Running tests/bins.rs (/tmp/gpui-text-batch-target/debug/deps/bins-a70bf93fcc60298b)
+
+running 10 tests
+test fresh_negative_zero_opaque_cut_matches_scalar_hdr ... ok
+test containing_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving ... ok
+test exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry ... ok
+test shared_colors_revoke_cached_cuts_without_touching_geometry_or_allocating ... ok
+test failed_and_dropped_work_preserves_valid_bins_and_prior_pixels ... ok
+test parallel_repairs_use_cached_stride_but_visit_only_requested_bands ... ok
+test serial_and_parallel_raster_share_the_same_current_geometry_cache ... ok
+test structural_commits_reject_stale_bins_even_with_identical_counts_and_bounds ... ok
+test cached_origin_and_stride_do_not_change_regional_output_or_reference_stats ... ok
+test color_patches_reuse_unpruned_bins_and_match_fresh_full_scenes ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
+
+     Running tests/color.rs (/tmp/gpui-text-batch-target/debug/deps/color-3d4694502c1635e0)
+
+running 6 tests
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test invalid_color_values_and_configuration_are_rejected ... ok
+test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
+test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
+test final_mapping_occurs_after_extended_linear_composition ... ok
+test tone_mapping_is_selected_not_implicit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/color_authoring.rs (/tmp/gpui-text-batch-target/debug/deps/color_authoring-3842d1db197fb909)
+
+running 2 tests
+test numeric_equality_remains_distinct_from_exact_authoring ... ok
+test exact_authoring_comparison_matches_observable_channel_bits_and_profile ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/color_packing.rs (/tmp/gpui-text-batch-target/debug/deps/color_packing-a85f20cf2da02e9b)
+
+running 3 tests
+test const_palette_alpha_and_float_equality_keep_their_contracts ... ok
+test legacy_working_colors_produce_identical_cpu_pixels ... ok
+test legacy_admission_channels_and_conversion_are_bit_exact ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/damage.rs (/tmp/gpui-text-batch-target/debug/deps/damage-72b9587abddff32b)
+
+running 8 tests
+test hdr_sample_promotion_matches_the_uncompressed_path ... ok
+test hdr_support_uses_unquantized_working_colors ... ok
+test identical_leased_text_is_empty_and_moved_text_repairs_old_and_new_support ... ok
+test unpresented_edits_union_without_retaining_the_intermediate_scene ... ok
+test disjoint_workers_repair_the_same_tiles_without_touching_other_bands ... ok
+test a_small_repair_at_a_distant_origin_needs_only_local_bins ... ok
+test insert_remove_reorder_and_transformed_color_edits_repair_every_pixel ... ok
+test randomized_repairs_cross_partial_tile_and_viewport_edges ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.31s
+
+     Running tests/dpi.rs (/tmp/gpui-text-batch-target/debug/deps/dpi-6830117d9e197b3d)
+
+running 3 tests
+test invalid_density_and_physical_font_size_reject_even_empty_layouts_atomically ... ok
+test two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering ... ok
+test density_one_preserves_existing_pixels_and_fractional_density_uses_physical_raster_keys ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external.rs (/tmp/gpui-text-batch-target/debug/deps/external-7eacfa4e3c785e9d)
+
+running 3 tests
+test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
+test external_parallel_word_bands_are_exact_and_allocate_no_internal_image ... ok
+test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/font_quality.rs (/tmp/gpui-text-batch-target/debug/deps/font_quality-f451f7b5a3f37cea)
+
+running 3 tests
+test immutable_font_admission_has_no_eager_outline_heap ... ok
+test empty_glyphs_do_not_create_masks_and_clearing_cache_preserves_scene_leases ... ok
+test requested_outline_masks_have_real_coverage_and_preserve_placement ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/font_sharing.rs (/tmp/gpui-text-batch-target/debug/deps/font_sharing-ef56752573dc4e55)
+
+running 3 tests
+test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes
+test supplied_font_bytes_are_owned_once_by_the_shared_face ... ok
+test shared_face_accepts_cross_service_layouts_but_caches_are_independent ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/grouped.rs (/tmp/gpui-text-batch-target/debug/deps/grouped-bf1735d5c550db0c)
+
+running 2 tests
+test groups_are_the_same_canonical_painter_sequence_in_both_directions ... ok
+test masks_are_leased_once_per_stable_key_across_runs_cache_eviction_and_services ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/hdr.rs (/tmp/gpui-text-batch-target/debug/deps/hdr-c71803f21389a198)
+
+running 6 tests
+test byte_counts_and_checked_configuration_are_format_specific ... ok
+test extended_values_compose_before_finite_storage_saturation ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
+test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/images.rs (/tmp/gpui-text-batch-target/debug/deps/images-a46c29289880f3fe)
+
+running 5 tests
+test nearest_packed_texels_match_independent_color_rectangles ... ok
+test image_identity_filter_and_removal_damage_repair_preserved_pixels ... ok
+test constant_images_match_independent_solid_geometry_for_every_sample ... ok
+test immutable_images_and_correlated_samples_are_identical_across_scoped_workers ... ok
+test distinct_payload_budget_is_checked_before_publishing_a_new_resource_or_draw ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
+     Running tests/literal_cow.rs (/tmp/gpui-text-batch-target/debug/deps/literal_cow-439c638ef1d1e61f)
+
+running 2 tests
+test dropped_and_rejected_transactions_preserve_all_aliases_and_future_source_updates ... ok
+test equal_and_changed_positional_writes_detach_locally_without_mutating_literal_peers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/oklch.rs (/tmp/gpui-text-batch-target/debug/deps/oklch-dd144a74ccc2d018)
+
+running 5 tests
+test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
+test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
+test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
+test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/paint.rs (/tmp/gpui-text-batch-target/debug/deps/paint-d8bc96079cdb2e4b)
+
+running 4 tests
+test validation_and_dropping_a_prepared_commit_are_transactional ... ok
+test group_boundaries_empty_calls_and_image_material_are_checked ... ok
+test returned_damage_repairs_a_preserved_image_and_leaves_outside_pixels_unchanged ... ok
+test patches_match_full_replacement_for_profiles_hdr_masks_and_ordered_overlap ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests/parallel.rs (/tmp/gpui-text-batch-target/debug/deps/parallel-f9bf06a1cc58c283)
+
+running 5 tests
+test pool_memory_measurement ... ignored, process RSS/thread measurement; run separately with GPUI_RENDER_WORKERS=1,2,4,8
+test threshold_and_invalid_worker_counts_are_explicit ... ok
+test scheduling_threshold_preserves_exact_pixel_and_command_boundaries ... ok
+test tallest_admitted_canvas_keeps_sample_storage_on_leaf_worker_stacks ... ok
+test serial_and_scoped_disjoint_bands_are_byte_identical ... ok
+
+test result: ok. 4 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 24.70s
+
+     Running tests/prepared_scene.rs (/tmp/gpui-text-batch-target/debug/deps/prepared_scene-dcc33a42b7d1f2ce)
+
+running 3 tests
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/render.rs (/tmp/gpui-text-batch-target/debug/deps/render-4298b681a649ce07)
+
+running 10 tests
+test correlated_edges_are_composited_before_sample_average ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
+test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
+test wrapped_runs_keep_utf8_and_whole_shaping_clusters ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
+test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
+test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
+test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
+test transformed_rectangles_match_exhaustive_sample_oracle ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.13s
+
+     Running tests/rounded.rs (/tmp/gpui-text-batch-target/debug/deps/rounded-628ea8dd3a2cd133)
+
+running 5 tests
+test public_image_views_keep_canonical_material_and_exact_authored_radius ... ok
+test invalid_radius_is_transactional_and_negative_zero_is_rectangular ... ok
+test source_word_preserves_every_finite_radius_exponent_and_mantissa_samples ... ok
+test correlated_layers_cannot_fill_each_others_rounded_corners ... ok
+test analytic_sample_oracle_reflections_shear_clips_and_radius_clamping ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+     Running tests/sample_clip.rs (/tmp/gpui-text-batch-target/debug/deps/sample_clip-3971249e401f1b98)
+
+running 2 tests
+test nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing ... ok
+test sampled_clips_match_independent_ordinary_canvas_for_signs_ties_and_extreme_inverse ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/sample_storage.rs (/tmp/gpui-text-batch-target/debug/deps/sample_storage-030a9301eebc3b4b)
+
+running 2 tests
+test adjacent_hdr_zeros_keep_distinct_output_signs ... ok
+test promoted_pixels_match_uncompressed_samples_across_tiles_and_color_formats ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 25.25s
+
+     Running tests/selection.rs (/tmp/gpui-text-batch-target/debug/deps/selection-b96018e68b4eb96e)
+
+running 10 tests
+test independent_visible_order_hits_half_intervals_with_source_affinity ... ok
+test physical_arrows_walk_independent_known_visual_edges ... ok
+test source_affinity_at_bidi_wrap_owns_the_correct_adjacent_line ... ok
+test ordinary_interaction_queries_allocate_nothing_and_preserve_layout_size ... ok
+test discarding_interaction_keeps_glyph_storage_source_runs_and_lines ... ok
+test distant_hits_and_line_transitions_choose_physical_extrema ... ok
+test hit_selection_and_motion_share_exact_grapheme_crlf_and_bidi_positions ... ok
+test selected_crlf_is_atomic_and_its_marker_extends_past_the_source_trailing_edge ... ok
+test directional_run_boxes_do_not_span_disconnected_isolate_fragments ... ok
+test derived_selection_intervals_match_parley_real_bidi_ligature_and_wrap_geometry ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/shaping.rs (/tmp/gpui-text-batch-target/debug/deps/shaping-9690a130ead34ac2)
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/slots.rs (/tmp/gpui-text-batch-target/debug/deps/slots-86a5738c4046291d)
+
+running 6 tests
+test equal_legacy_edit_of_nondefault_shared_paint_is_infallible_without_allocation ... ok
+test legacy_positional_edit_detaches_only_that_common_from_shared_slot ... ok
+test equal_positional_set_detaches_from_future_shared_color_edits ... ok
+test transaction_rejection_and_drop_leave_complete_bank_untouched ... ok
+test deferred_shared_paints_allocate_no_bank_for_empty_geometry_or_clipped_glyphs ... ok
+test shared_slot_matches_full_literal_oracle_after_each_transaction ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s
+
+     Running tests/solid.rs (/tmp/gpui-text-batch-target/debug/deps/solid-ed488c64b4fc3569)
+
+running 3 tests
+test public_scene_metadata_edits_cannot_certify_invalid_content ... ok
+test unsupported_and_nonempty_scenes_use_normal_renderer ... ok
+test solid_certificate_uses_exact_output_quantizer_without_rendering_or_allocating ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/unicode.rs (/tmp/gpui-text-batch-target/debug/deps/unicode-8593be1a4846ddd9)
+
+running 15 tests
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test unicode_runs_are_byte_identical_in_scoped_parallel_rendering ... ok
+test single_script_glyphs_match_independent_harfbuzz_implementation ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+   Doc-tests gpui_canvas
+
+running 2 tests
+test crates/canvas/src/canvas/paint.rs - canvas::paint::PaintCommit (line 66) - compile fail ... ok
+test crates/canvas/src/canvas.rs - canvas::CanvasScene (line 2457) - compile fail ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

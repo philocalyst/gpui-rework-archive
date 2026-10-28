@@ -1,0 +1,126 @@
+{
+  "evidence_commit": "f812f2c121bf0217492ff475b78dc4d74bebdd7d",
+  "selected_source": "22541342e3c10a962bc61f76088c7bfdb1b21bbd",
+  "payloads": 692,
+  "unpacked_bytes": 74322090,
+  "external_artifacts": 11,
+  "guard_pairs": [
+    {
+      "before": "apple-before.json",
+      "records": 1149
+    },
+    {
+      "before": "contracts-before.json",
+      "records": 1149
+    },
+    {
+      "before": "contracts-canonical-before.json",
+      "records": 1149
+    },
+    {
+      "before": "contracts-final-before.json",
+      "records": 1149
+    },
+    {
+      "before": "contracts-v2-before.json",
+      "records": 1149
+    },
+    {
+      "before": "cost-a2-build-before.json",
+      "records": 1145
+    },
+    {
+      "before": "cost-a2-clean-before.json",
+      "records": 1145
+    },
+    {
+      "before": "cost-b-build-before.json",
+      "records": 1150
+    },
+    {
+      "before": "cost-b-clean-before.json",
+      "records": 1150
+    },
+    {
+      "before": "cost-c-build-before.json",
+      "records": 1150
+    },
+    {
+      "before": "cost-embedded-assets-before.json",
+      "records": 3
+    },
+    {
+      "before": "default-build-before.json",
+      "records": 1149
+    },
+    {
+      "before": "default-build-v2-before.json",
+      "records": 1149
+    },
+    {
+      "before": "default-tests-before.json",
+      "records": 1149
+    },
+    {
+      "before": "fmt-final-before.json",
+      "records": 1149
+    },
+    {
+      "before": "hb-build-before.json",
+      "records": 1149
+    },
+    {
+      "before": "hb-build-v2-before.json",
+      "records": 1149
+    },
+    {
+      "before": "hb-tests-v2-before.json",
+      "records": 1149
+    },
+    {
+      "before": "library-build-before.json",
+      "records": 1149
+    },
+    {
+      "before": "msvc-before.json",
+      "records": 1149
+    },
+    {
+      "before": "native-build-before.json",
+      "records": 1149
+    },
+    {
+      "before": "native-tests-before.json",
+      "records": 1149
+    },
+    {
+      "before": "native-three-before.json",
+      "records": 1149
+    },
+    {
+      "before": "native-three-replay-before.json",
+      "records": 1149
+    },
+    {
+      "before": "registry-replay-before.json",
+      "records": 1149
+    },
+    {
+      "before": "runtime-parallel-before.json",
+      "records": 1149
+    },
+    {
+      "before": "source-authority-final-before.json",
+      "records": 1149
+    },
+    {
+      "before": "strict-default-before.json",
+      "records": 1149
+    },
+    {
+      "before": "strict-native-before.json",
+      "records": 1149
+    }
+  ],
+  "scope": "Independent reopening and identity validation only; no transferred timing or Main adoption."
+}

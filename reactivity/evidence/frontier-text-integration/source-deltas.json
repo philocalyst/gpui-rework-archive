@@ -1,0 +1,17 @@
+{
+  "final-description-delta": {
+    "old": "73fe8cf27b01d4517076ca49b4a9c076f7a40838",
+    "new": "22dae0afcc65071909ddbfcce0d2d8bc00dcbfa1",
+    "changed_files": [
+      "reactivity/crates/gpui/src/runtime.rs",
+      "reactivity/crates/gpui/tests/frontier.rs"
+    ]
+  },
+  "port-lock-only": {
+    "old": "22dae0afcc65071909ddbfcce0d2d8bc00dcbfa1",
+    "new": "c6bef498a41a96ab23938f9025aa0ef0a63431b5",
+    "changed_files": [
+      "reactivity/ports/hummingbird/Cargo.lock"
+    ]
+  }
+}

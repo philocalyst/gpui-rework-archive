@@ -1,0 +1,23 @@
+[
+  {
+    "capsule": "text-blocks",
+    "evidence_commit": "ac26d70a8b100315eceb25f09ee6ee4f436c8255",
+    "local_reference": "/tmp/gpui-text-blocks-sol/reactivity/evidence/text-blocks/README.md",
+    "README_sha256": "b5d09238296f7340eda104346acbe459caa7255c8509cfb9732ccff7d22d75af",
+    "qualification_is_historical_not_rerun": true
+  },
+  {
+    "capsule": "safe-owner",
+    "evidence_commit": "74698bf6846ed52792fc1f0bf61d2692dd0fba8e",
+    "local_reference": "/tmp/gpui-text-ecow-owner-sol/reactivity/evidence/text-ecow-owner/README.md",
+    "README_sha256": "68b2a069e700ede6db35d18db4f7cb1ced3382fb3a60811abd0342d1c8624f7d",
+    "qualification_is_historical_not_rerun": true
+  },
+  {
+    "capsule": "metric",
+    "evidence_commit": "5fcd17f378c6cd6f5fe9df1b68ab3ab8fe269e1c",
+    "local_reference": "/tmp/gpui-text-metric-scale-sol/reactivity/evidence/text-metric-scale/README.md",
+    "README_sha256": "db7b75ac9aa676112e1cc2b7ca76f035dafc9c1a3b682f034e234f2697f506eb",
+    "qualification_is_historical_not_rerun": true
+  }
+]

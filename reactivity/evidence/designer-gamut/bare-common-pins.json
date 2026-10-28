@@ -1,0 +1,28 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-bare-consumer/Cargo.toml",
+    "--message-format=json",
+    "--features",
+    "primitive"
+  ],
+  "env": {
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_TARGET_DIR": "/tmp/gpui-gamut-bare-target"
+  },
+  "executable": "/tmp/gpui-gamut-bare-common-frozen",
+  "sha256": "bdb5129a32c3f03119a281bdc14a9d1c31189d577513a06c6f2fea4c5334fe0d",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-bare-target/release/deps/libgpui_canvas-5c557df9da2b2cbc.rlib",
+      "sha256": "7dd872f43fd162021fc103832659cf8f8534adb1c8e5a3a5f629749a8b1419d5",
+      "bytes": 7079954
+    }
+  ],
+  "timing_qualified": false
+}

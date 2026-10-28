@@ -1,0 +1,188 @@
+[
+  {
+    "name": "<core::iter::adapters::zip::Zip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>, core::iter::adapters::skip::Skip<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}>>> as core::iter::traits::iterator::Iterator>::next",
+    "baseline": {
+      "code_bytes": 289,
+      "frame_bytes": 24
+    },
+    "candidate": null
+  },
+  {
+    "name": "<core::slice::iter::ChunkBy<gpui_canvas::text::layout::Stop, <gpui_canvas::text::layout::TextGeometry>::intervals::{closure#0}> as core::iter::traits::iterator::Iterator>::nth",
+    "baseline": {
+      "code_bytes": 232,
+      "frame_bytes": 8
+    },
+    "candidate": null
+  },
+  {
+    "name": "<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::interaction_layout",
+    "baseline": {
+      "code_bytes": 1471,
+      "frame_bytes": 280
+    },
+    "candidate": {
+      "code_bytes": 1226,
+      "frame_bytes": 248
+    }
+  },
+  {
+    "name": "<gpui::runtime::TextSite>::shape_for",
+    "baseline": {
+      "code_bytes": 463,
+      "frame_bytes": 168
+    },
+    "candidate": {
+      "code_bytes": 402,
+      "frame_bytes": 168
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::TextLayout>::selection_rects::<<gpui::runtime::Runtime<canonical_text_public_control::Editor>>::present_inner::{closure#30}>",
+    "baseline": {
+      "code_bytes": 1753,
+      "frame_bytes": 424
+    },
+    "candidate": {
+      "code_bytes": 1513,
+      "frame_bytes": 328
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::caret_bounds",
+    "baseline": {
+      "code_bytes": 461,
+      "frame_bytes": 24
+    },
+    "candidate": {
+      "code_bytes": 429,
+      "frame_bytes": 24
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::grapheme_at",
+    "baseline": {
+      "code_bytes": 850,
+      "frame_bytes": 376
+    },
+    "candidate": {
+      "code_bytes": 850,
+      "frame_bytes": 264
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::graphemes",
+    "baseline": {
+      "code_bytes": 78,
+      "frame_bytes": 0
+    },
+    "candidate": {
+      "code_bytes": 178,
+      "frame_bytes": 16
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::intervals",
+    "baseline": {
+      "code_bytes": 43,
+      "frame_bytes": 0
+    },
+    "candidate": {
+      "code_bytes": 154,
+      "frame_bytes": 16
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#1}",
+    "baseline": {
+      "code_bytes": 791,
+      "frame_bytes": 56
+    },
+    "candidate": null
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::intervals::{closure#3}",
+    "baseline": null,
+    "candidate": {
+      "code_bytes": 687,
+      "frame_bytes": 56
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::move_visual",
+    "baseline": {
+      "code_bytes": 1691,
+      "frame_bytes": 328
+    },
+    "candidate": {
+      "code_bytes": 1175,
+      "frame_bytes": 216
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::position_on_line",
+    "baseline": {
+      "code_bytes": 2185,
+      "frame_bytes": 360
+    },
+    "candidate": {
+      "code_bytes": 1664,
+      "frame_bytes": 232
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::stops",
+    "baseline": {
+      "code_bytes": 213,
+      "frame_bytes": 8
+    },
+    "candidate": {
+      "code_bytes": 190,
+      "frame_bytes": 0
+    }
+  },
+  {
+    "name": "<gpui_canvas::text::layout::TextGeometry>::validates_selection",
+    "baseline": {
+      "code_bytes": 290,
+      "frame_bytes": 8
+    },
+    "candidate": {
+      "code_bytes": 287,
+      "frame_bytes": 8
+    }
+  },
+  {
+    "name": "canonical_text_public_control::map_transcript",
+    "baseline": {
+      "code_bytes": 880,
+      "frame_bytes": 312
+    },
+    "candidate": {
+      "code_bytes": 303,
+      "frame_bytes": 136
+    }
+  },
+  {
+    "name": "canonical_text_public_control::query_selection",
+    "baseline": {
+      "code_bytes": 1484,
+      "frame_bytes": 312
+    },
+    "candidate": {
+      "code_bytes": 1157,
+      "frame_bytes": 200
+    }
+  },
+  {
+    "name": "canonical_text_public_control::run",
+    "baseline": {
+      "code_bytes": 10177,
+      "frame_bytes": 904
+    },
+    "candidate": {
+      "code_bytes": 8994,
+      "frame_bytes": 872
+    }
+  }
+]

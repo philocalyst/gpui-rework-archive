@@ -1,0 +1,11 @@
+{
+  "qualified_source": "a70abc536190566563399638362f8b314d52e3d4",
+  "candidate_inputs": 2034,
+  "equal": 2032,
+  "unequal_non_shipping": [
+    "reactivity/crates/gpui/Cargo.toml",
+    "reactivity/crates/gpui/README.md"
+  ],
+  "additional_Main_sources": "Previously qualified Todo comparison example and support; no shipping source differences. Main Cargo manifest registers both Todo and mapped_properties examples, with identical dependencies/features.",
+  "shipping_bytes_identical": true
+}

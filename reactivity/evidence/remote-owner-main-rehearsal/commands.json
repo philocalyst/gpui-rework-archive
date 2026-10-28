@@ -1,0 +1,14 @@
+{
+  "base": "f102ef111c7214c7ace900f76a74c9d3e7ca14e2",
+  "source_commit": "d198075bbc604a06ac75c1f84261f9601687c90b",
+  "environment": "source /tmp/gpui-hummingbird-audio-env.sh; Rust1.97.1; own target; jobs1; unset RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS; repository root flags; no target-CPU flags",
+  "commands": {
+    "default": "cargo test --manifest-path reactivity/Cargo.toml --offline --locked -p gpui",
+    "native": "cargo test --manifest-path reactivity/Cargo.toml --offline --locked -p gpui --features x11",
+    "clippy": "cargo clippy --manifest-path reactivity/Cargo.toml --offline --locked -p gpui --all-targets --features x11 -- -D warnings",
+    "foreign_template": "env RUSTC_BOOTSTRAP=1 cargo check --manifest-path reactivity/Cargo.toml --offline --locked -p gpui --lib --features native --target TARGET -Zbuild-std=std,panic_abort --message-format=json",
+    "actual_native": "python3 /tmp/gpui-remote-owner-main-qualification/capture-native.py"
+  },
+  "patch_note": "core-source.patch includes existing inline cfg(test) controls; public-native-fixtures.patch contains the three separate fixture modules. Their union is the exact full transport patch.",
+  "quiet_boundary": "Native Cargo exited0; wrapper intentionally143 after current gate, before queued Clippy, to honor GPU quiet. Linux wait status captured separately. Strict and actual native/cross resumed only after explicit quiet end."
+}

@@ -1,0 +1,165 @@
+{
+  "candidate_source": "715603431bfd5f435ce6a9f53d996a881f60e87a",
+  "implementation_commit": "690a00cade",
+  "baseline": "cc193f85f5766c90a0677631c70c54c1eec4da1d",
+  "negative_source": "92562a1f74",
+  "checks": [
+    {
+      "name": "gpui-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--target-dir",
+        "/home/user/gpui-target-native"
+      ],
+      "cwd": "/home/user/gpui-architecture-local/reactivity",
+      "log": "qualification/gpui-tests.log",
+      "exit_code": 0,
+      "passed": 775,
+      "failed": 0,
+      "ignored": 38
+    },
+    {
+      "name": "gpu-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests",
+        "--lib",
+        "--test",
+        "render",
+        "--target-dir",
+        "/home/user/gpui-target-retained",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/user/gpui-architecture-local/reactivity",
+      "log": "qualification/gpu-tests.log",
+      "exit_code": 0,
+      "passed": 68,
+      "failed": 0,
+      "ignored": 0,
+      "environment": {
+        "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+        "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+        "LP_NUM_THREADS": "4"
+      }
+    },
+    {
+      "name": "gpui-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--all-targets",
+        "--target-dir",
+        "/home/user/gpui-target-native",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/home/user/gpui-architecture-local/reactivity",
+      "log": "qualification/gpui-clippy.log",
+      "exit_code": 0
+    },
+    {
+      "name": "gpu-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests",
+        "--all-targets",
+        "--target-dir",
+        "/home/user/gpui-target-retained",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "cwd": "/home/user/gpui-architecture-local/reactivity",
+      "log": "qualification/gpu-clippy.log",
+      "exit_code": 0
+    },
+    {
+      "name": "native-x11",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "--lib",
+        "native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+        "--target-dir",
+        "/home/user/gpui-target-native",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/user/gpui-architecture-local/reactivity",
+      "log": "qualification/native-x11.log",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "environment": {
+        "DISPLAY": ":93",
+        "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+        "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+        "LP_NUM_THREADS": "4",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent"
+      }
+    },
+    {
+      "name": "negative-control",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests",
+        "--test",
+        "render",
+        "retained_repair_matches_full_gpu_through_moves_removals_resize_and_failures",
+        "--target-dir",
+        "/home/user/gpui-target-negative",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/user/gpui-retained-negative/reactivity",
+      "log": "qualification/negative-control.log",
+      "exit_code": 101,
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "environment": {
+        "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+        "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+        "LP_NUM_THREADS": "4"
+      }
+    }
+  ],
+  "performance_adoption": "not qualified; exploratory timings, no preregistered thresholds",
+  "competitor_claim": "not established"
+}

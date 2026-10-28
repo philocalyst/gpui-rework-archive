@@ -1,0 +1,213 @@
+{
+  "reactivity/crates/gpu/src/lib.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          3,
+          0,
+          3,
+          13
+        ],
+        "name": "renderer",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      },
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          4,
+          0,
+          4,
+          15
+        ],
+        "name": "shader",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      }
+    ],
+    "path": "reactivity/crates/gpu/src/lib.rs",
+    "test_ranges": [],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/renderer.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          11,
+          0,
+          11,
+          11
+        ],
+        "name": "images",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      },
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          12,
+          0,
+          12,
+          10
+        ],
+        "name": "owned",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      },
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          13,
+          0,
+          13,
+          10
+        ],
+        "name": "paint",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      },
+      {
+        "alternate_paths": [],
+        "inline": [],
+        "lines": [
+          14,
+          0,
+          14,
+          10
+        ],
+        "name": "slots",
+        "path": null,
+        "test_only": false,
+        "uncertain": false
+      }
+    ],
+    "path": "reactivity/crates/gpu/src/renderer.rs",
+    "test_ranges": [
+      [
+        1313,
+        0,
+        1511,
+        1
+      ],
+      [
+        1318,
+        4,
+        1327,
+        5
+      ],
+      [
+        1329,
+        4,
+        1350,
+        5
+      ],
+      [
+        1352,
+        4,
+        1416,
+        5
+      ],
+      [
+        1418,
+        4,
+        1442,
+        5
+      ],
+      [
+        1444,
+        4,
+        1466,
+        5
+      ],
+      [
+        1468,
+        4,
+        1510,
+        5
+      ]
+    ],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/renderer/images.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [],
+    "path": "reactivity/crates/gpu/src/renderer/images.rs",
+    "test_ranges": [],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/renderer/owned.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [],
+    "path": "reactivity/crates/gpu/src/renderer/owned.rs",
+    "test_ranges": [],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/renderer/paint.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [],
+    "path": "reactivity/crates/gpu/src/renderer/paint.rs",
+    "test_ranges": [
+      [
+        385,
+        0,
+        407,
+        1
+      ],
+      [
+        388,
+        4,
+        406,
+        5
+      ]
+    ],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/renderer/slots.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [],
+    "path": "reactivity/crates/gpu/src/renderer/slots.rs",
+    "test_ranges": [],
+    "unclassified": []
+  },
+  "reactivity/crates/gpu/src/shader.rs": {
+    "file_test_only": false,
+    "macro_modules": [],
+    "modules": [],
+    "path": "reactivity/crates/gpu/src/shader.rs",
+    "test_ranges": [
+      [
+        521,
+        0,
+        527,
+        1
+      ],
+      [
+        523,
+        4,
+        526,
+        5
+      ]
+    ],
+    "unclassified": []
+  }
+}

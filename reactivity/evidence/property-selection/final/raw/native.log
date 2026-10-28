@@ -1,0 +1,502 @@
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-property-selection-sol/reactivity/vendor/wgpu-hal)
+   Compiling parley_engine v0.12.0 (/tmp/gpui-property-selection-sol/reactivity/vendor/parley_engine)
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-property-selection-sol/reactivity/vendor/accesskit_consumer)
+   Compiling winit v0.30.13 (/tmp/gpui-property-selection-sol/reactivity/vendor/winit)
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-property-selection-sol/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/gpu)
+   Compiling accesskit_atspi_common v0.21.0 (/tmp/gpui-property-selection-sol/reactivity/vendor/accesskit_atspi_common)
+   Compiling parley v0.12.0 (/tmp/gpui-property-selection-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/canvas)
+   Compiling accesskit_unix v0.24.0 (/tmp/gpui-property-selection-sol/reactivity/vendor/accesskit_unix)
+   Compiling wgpu v30.0.1 (/tmp/gpui-property-selection-sol/reactivity/vendor/wgpu)
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/tmp/gpui-property-selection-sol/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-property-selection-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 14s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-bc29ffeac34bc65f)
+
+running 228 tests
+test component::tests::component_storage_ledger_has_no_owning_model_pointer ... Component=40 FieldId=8 Sources=104 ComponentEntry=160
+ok
+test element::tests::adversarial_depth_drop_and_lowering_fit_a_small_stack ... 
+thread '<unnamed>' (1643004) panicked at crates/gpui/src/element.rs:644:14:
+invalid literal style property: PropertyError { property: Width, reason: Negative }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test element::tests::concrete_branches_opaque_leaves_and_constructor_children_lower ... ok
+test element::tests::input_role_and_literal_style_reach_the_same_draft ... ok
+test element::tests::literal_radius_retains_original_bits_until_typed_admission ... ok
+test element::tests::method_items_keep_zero_sized_callback_and_receiver_check ... ok
+test element::tests::property_method_items_keep_an_empty_capture_and_ordinary_headers ... property_action_headers,Handler=16,Admission=16,PropertyChange=48,OptionChange=48,PropertyPhase=40
+property_state_headers,State=80,Result=80,Request=48,OptionRequest=48,Phase=40,SelectionCapture=0
+ok
+test element::tests::size_ledger_counts_inline_route_and_style_costs ... El=176 Style=88 DraftNode=152 Handler=16 ComponentRoute=56
+ok
+test element::tests::static_and_erased_literals_match_the_canonical_typed_schema ... ok
+test element::tests::typed_field_routes_validate_projection_before_exact_admission ... ok
+test element::tests::unlowered_handler_payloads_drop_once_in_preorder ... ok
+test element::tests::wide_description_preserves_order ... ok
+test element::tests::window_admission_cannot_be_projected_into_a_component_receiver ... ok
+test identity::tests::target_stamps_are_pure_and_window_qualified ... ok
+test native::accessibility::geometry_tests::failed_new_l_and_old_c_ack_never_reinterpret_native_p_geometry ... ok
+test native::accessibility::geometry_tests::native_caret_runs_match_canonical_line_at_wraps_and_hard_separators ... ok
+test native::accessibility::geometry_tests::native_geometry_projection_allocation_ledger ... NATIVE_GEOMETRY case=label_short cohort_alloc=1 cohort_retained=56 nodes=4 runs=2 units=15 output_alloc=24 output_requested=2237 output_retained=1813 output_peak=1964 consumer_alloc=31 consumer_requested=6372 consumer_retained=4244 consumer_peak=4244
+NATIVE_GEOMETRY case=renamed_short cohort_alloc=1 cohort_retained=56 nodes=5 runs=2 units=15 output_alloc=27 output_requested=2572 output_retained=2148 output_peak=2267 consumer_alloc=35 consumer_requested=6659 consumer_retained=4243 consumer_peak=4243
+NATIVE_GEOMETRY case=input_short cohort_alloc=1 cohort_retained=56 nodes=4 runs=2 units=15 output_alloc=26 output_requested=2589 output_retained=2005 output_peak=2156 consumer_alloc=32 consumer_requested=6444 consumer_retained=4316 consumer_peak=4316
+NATIVE_GEOMETRY case=input_32k cohort_alloc=1 cohort_retained=56 nodes=765 runs=763 units=32768 output_alloc=6885 output_requested=906623 output_retained=733455 output_peak=733606 consumer_alloc=3860 consumer_requested=1425711 consumer_retained=809407 consumer_peak=809407
+ok
+test native::accessibility::geometry_tests::nonpainted_unplaced_text_preserves_content_without_inventing_window_geometry ... ok
+test native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers ... 
+thread 'native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers' (1643021) panicked at crates/gpui/src/element.rs:572:9:
+this element does not accept children
+
+thread 'native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers' (1643021) panicked at crates/gpui/src/element.rs:572:9:
+this element does not accept children
+ok
+test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... ok
+test native::accessibility::linux_tests::checkbox::native_atspi_checkbox_action_state_and_events ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents ... ignored, requires X11 and DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus
+test native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation ... ignored, requires X11 and an isolated session bus with org.a11y.Bus/AT-SPI registry
+test native::accessibility::selection_tests::cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair ... ok
+test native::accessibility::selection_tests::empty_static_text_does_not_qualify_another_owner ... ok
+test native::accessibility::selection_tests::equal_text_field_rebind_survives_failed_prepare_and_older_ack ... ok
+test native::accessibility::selection_tests::failed_newer_edit_and_cold_provider_keep_older_candidate_selection ... ok
+test native::accessibility::selection_tests::independent_inputs_list_rebind_and_provider_restart_do_not_reuse_authority ... ok
+test native::accessibility::selection_tests::input_root_survives_wrap_and_font_changes_but_old_run_positions_retire ... ok
+test native::accessibility::selection_tests::long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip ... ok
+test native::accessibility::selection_tests::native_selection_and_atomic_replacement_use_acknowledged_grapheme_source ... ok
+test native::accessibility::selection_tests::native_text_transport_memory_budget ... NATIVE_TEXT_MEMORY shared=80 command=32 queued=48 ingress=8 replacement=48
+NATIVE_TEXT_INGRESS allocations=3 retained=4320 peak=4320
+ok
+test native::accessibility::tests::checkbox_native_carrier_sizes ... CHECKBOX_NATIVE_CARRIER Bridge size=208 align=8
+CHECKBOX_NATIVE_CARRIER State size=56 align=8
+CHECKBOX_NATIVE_CARRIER Option<State> size=56 align=8
+CHECKBOX_NATIVE_CARRIER Queued size=48 align=8
+CHECKBOX_NATIVE_CARRIER Command size=32 align=8
+CHECKBOX_NATIVE_CARRIER Node size=128 align=8
+CHECKBOX_NATIVE_CARRIER Cohort size=64 align=8
+CHECKBOX_NATIVE_CARRIER text::Relink size=48 align=8
+CHECKBOX_NATIVE_LAYOUT bridge_test=208 state=56 option_state=56 queued=48 command=32 node=128 cohort_test=64 relink=48
+ok
+test native::accessibility::tests::consumer_validates_topology_names_values_full_geometry_and_live_focus ... ok
+test native::accessibility::tests::idle_state_and_focus_transport_do_not_allocate ... ok
+test native::accessibility::tests::library_projects_bounded_frozen_count_positions_and_never_resurrects_ids ... ok
+test native::accessibility::tests::native_callbacks_are_inert_bounded_and_activation_bypasses_saturation ... ok
+test native::accessibility::tests::native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi ... ok
+test native::accessibility::tests::native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte ... ok
+test native::accessibility::tests::owner_budget_fifo_old_live_targets_and_revocation ... ok
+test native::accessibility::tests::projection_ledger ... ignored, explicit projection allocation/timing ledger; run alone in release mode
+test native::accessibility::tests::projection_uses_old_p_during_pending_edit_and_failed_preparation ... ok
+test native::accessibility::tests::renamed_static_text_preserves_content_and_explicit_none_then_inherits ... ok
+test native::accessibility::tests::root_and_synthetic_ids_cannot_invoke_real_sites ... ok
+test native::accessibility::tests::scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection ... ok
+test native::accessibility::tests::scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions ... ok
+test native::accessibility::tests::semantic_only_change_advances_p_epoch_at_the_same_scene_token ... ok
+test native::accessibility::tests::unsupported_foreign_tree_and_utf8_byte_limit ... ok
+test native::accessibility::text::native_input_authority_memory_budget ... NATIVE_TEXT_AUTHORITY input=56 cohort_production=40
+ok
+test native::accessibility::transitions::checkbox_state_native_click_and_sparse_updates_match_full_acknowledged_tree ... CHECKBOX_NATIVE_ALLOCATION full_nodes=4 full_allocations=23 full_requested=2241 full_retained=1817 full_peak=1936 sparse_nodes=3 sparse_allocations=17 sparse_requested=1802 sparse_retained=1474 sparse_peak=1602
+ok
+test native::accessibility::transitions::clipped_logical_index_hint_is_verified_before_sparse_use ... ok
+test native::accessibility::transitions::exact_window_stamp_empty_recovery_and_observer_storage_are_bounded ... ok
+test native::accessibility::transitions::hundred_thousand_p_one_leaf_field_and_inspector_match_full_consumer ... ok
+test native::accessibility::transitions::list_scroll_same_source_epoch_and_reindex_match_full_oracle ... ok
+test native::accessibility::transitions::missed_epochs_topology_cap_deactivation_and_resize_are_full ... ok
+test native::accessibility::transitions::nonleaf_replacements_keep_all_ordered_children_and_geometry ... ok
+test native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta ... ok
+test native::accessibility::transitions::paint_complete_transitions_preserve_pending_full_rows_and_zero_node_deltas ... ok
+test native::accessibility::transitions::pending_complete_coverage_noop_preserves_exact_consumer_transition ... ok
+test native::accessibility::transitions::pending_metadata_and_failed_newer_prepare_keep_old_p_and_fallback ... ok
+test native::accessibility::transitions::same_pool_index_with_different_exact_basis_updates_native_sparse_tree ... ok
+test native::accessibility::transitions::selection_and_placement_keep_native_run_arrays_while_wrap_retires_them ... ok
+test native::accessibility::transitions::sparse_transition_measurements ... ignored, serialized release timing; writes CSV rows to stdout
+test native::accessibility::transitions::synthetic_shape_changes_and_value_children_match_full ... ok
+test native::accessibility::transitions::thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded ... ok
+test native::accessibility::transitions::virtual_focus_revocation_and_reappearance_match_full_consumer ... ok
+test native::destination::tests::takes_and_partial_submits_never_erase_a_full_repair_obligation ... ok
+test native::destination::tests::unsupported_backends_need_full_submission_on_every_redraw ... ok
+test native::destination_tests::destination_invalidation_controls_actual_x11_uploads_and_failure_retry ... ignored, requires actual X11 with MIT-SHM + RECORD; complete server-pixel oracle
+test native::destination_tests::invalidation_state_adds_no_host_constructor_allocation ... ok
+test native::destination_tests::wire_fallback_still_uploads_full_for_empty_and_partial_scene_damage ... ignored, requires actual X11 with RECORD and MIT-SHM explicitly disabled
+test native::image_tests::native_image_pointer_resize_resume_matches_complete_surface ... ignored, requires real X11; exact CPU submit, pointer event, resize and resume
+test native::inspector_tests::native_inspector_picks_and_edits_actual_application_without_owner_rerun ... ignored, requires X11 native presentation and server pixel fetch
+test native::list_tests::native_library_250k_wheel_pointer_resize_resume ... ignored, requires a real X11 display; runs the actual CPU presenter, without a GPU
+test native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets ... ignored, requires X11 native presentation and server pixel fetch
+test native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input ... ignored, requires real X11; deadline is a watchdog, never a completion delivery poll
+test native::question_tests::native_question_result_and_credit_wake_without_unrelated_input ... ignored, requires real X11; deadline is only a watchdog, never a delivery poll
+test native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling ... ignored, requires real X11; deadline is a failure watchdog, not a delivery poll
+test native::scroll_tests::native_ordinary_scroll_wheel_reveal_pointer_resize_resume ... ignored, requires real X11; actual wheel, activation, resize/resume and complete server pixel oracle
+test native::style_tests::native_reactive_dimensions_and_color_match_full_server_image ... ignored, requires real X11 pointer events, native acknowledgements and server pixel fetch
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... ignored, requires a real X11 display and Vulkan driver; see README
+test native::tests::packet_gpu_header_ledger ... packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1008,NativeHost=760,Canvas=488,PreparedScene=56
+ok
+test native::unicode_tests::native_unicode_keyboard_and_surface_match_complete_cpu_pixels ... ignored, requires a real X11 display; actual software presenter, no GPU initialization
+test native::upgrade::tests::initialization_cohort_ledger ... GPUI_AUTO_COHORT,old_message=32,message=24,renderer=888,candidate=1000,surface=96,optional_surface=96,old_upgrade=56,upgrade=40,production_flag=1,flag_requests=1,flag_requested=24,flag_retained=24,flag_peak=24
+GPUI_AUTO_QUEUE,old_requests=2,old_requested=680,old_retained=680,old_peak=680,requests=2,requested=672,retained=672,peak=672
+ok
+test native::upgrade::tests::production_policy_rejects_cpu_before_renderer_phase_and_cheap_missing_hint ... ok
+test native::upgrade_tests::automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame ... ignored, requires private X11 and Mesa CPU Vulkan for delayed automatic handoff
+test native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window ... ignored, requires private X11 and Mesa CPU Vulkan, with no local render-node hint
+test property::tests::all_typed_selectors_and_the_erased_seam_edit_the_same_style ... ok
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... property_declaration_bytes=56
+catalog_baseline,info=24,value=28,contribution=28,declaration=56,catalog_reference_bytes=104
+ok
+test property::tests::contribution_presence_survives_destination_equality_and_auto_is_explicit ... ok
+test property::tests::independent_overrides_survive_base_changes_and_lifecycle_purge ... ok
+test property::tests::invalid_typed_and_erased_edits_leave_all_fields_unchanged ... ok
+test property::tests::rejected_override_changes_neither_existing_bases_nor_any_contribution ... ok
+test property::tests::sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset ... ok
+test reader::future::tests::future_wrapper_has_no_result_slot_or_poll_allocation ... future_wrapper,small_future=0,wrapper=64,completion=40,output=4096,poll_allocations=0
+ok
+test reader::inputs::tests::earlier_key_validation_rejects_foreign_equal_and_later_sites ... ok
+test reader::question::tests::a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever ... ok
+test reader::question::tests::binding_rejection_retires_the_staged_terminal_before_returning_error ... ok
+test reader::question::tests::close_and_natural_drop_release_owner_lease_before_synchronous_task_cancellation ... ok
+test reader::question::tests::input_family_owner_record_ledger ... owner_record,State_u64_infallible=24,Work_u64=40,Source_version=8,Reader_version=16,QuestionInfo=96
+ok
+test reader::question::tests::version_exhaustion_faults_instead_of_leaving_unstartable_pending_work ... ok
+test reader::tests::absent_plan_and_static_producer_projection_allocation_ledger ... question_plan,allocations=2,requested=168,projection_allocations=2,projection_requested=88,Reader=16,Completion=40,Version=32,Controller=112,El=176
+plan_bytes=328
+bound_lane_bytes=320
+ok
+test reader::tests::cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it ... borrowed_cancellation_bytes=16,allocations=0,controller_leases_during_compute=2
+ok
+test reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic ... 
+thread 'reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic' (1643097) panicked at crates/gpui/src/reader.rs:480:17:
+payload drop panic outside mailbox mutex
+ok
+test reader::tests::closed_completion_returns_the_same_owned_result ... ok
+test reader::tests::input_family_storage_and_allocation_ledger ... family=one_source,plan=328,inputs=40,versions=4,optional_versions=8,allocations=2,requested=168
+family=two_sources,plan=368,inputs=80,versions=8,optional_versions=12,allocations=2,requested=168
+family=three_nested,plan=416,inputs=120,versions=12,optional_versions=16,allocations=2,requested=168
+family=reader_and_source,total_plan=656,incremental_allocations=1,incremental_requested=128,reader_versions=16
+ok
+test remote::ledger::requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer ... remote=24 inbox=64 lane=80 notification=48 delivery=72 error=128 empty_win=8 channel_allocs=4 channel_bytes=896 bind_allocs=0 bind_bytes=0
+ok
+test remote::tests::preallocated_static_transport_and_staging_have_no_per_message_allocations ... ok
+test runtime::accessibility::tests::input_authority_barrier_survives_failure_old_ack_and_same_source_rebind ... ok
+test runtime::basis_layout_probe::basis_ordinary_window_allocation_cohorts ... BASIS_WINDOW case=plain children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6904 retained=5676 peak=5844
+BASIS_WINDOW case=named children=0 rows=1 row_capacity=1 metadata=true geometry=false records=0 record_capacity=0 allocations=41 requested=7524 retained=6000 peak=6160
+BASIS_WINDOW case=rounded children=0 rows=1 row_capacity=1 metadata=true geometry=true records=1 record_capacity=1 allocations=40 requested=7416 retained=6068 peak=6228
+BASIS_WINDOW case=custom_root children=0 rows=1 row_capacity=1 metadata=true geometry=true records=1 record_capacity=4 allocations=37 requested=7328 retained=6100 peak=6260
+BASIS_WINDOW case=axis_root children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6904 retained=5676 peak=5844
+BASIS_WINDOW case=sparse_custom children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6904 retained=5676 peak=5844
+BASIS_WINDOW case=same_custom_siblings children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6904 retained=5676 peak=5844
+BASIS_WINDOW case=unique_custom children=0 rows=1 row_capacity=1 metadata=false geometry=false records=0 record_capacity=0 allocations=34 requested=6904 retained=5676 peak=5844
+BASIS_WINDOW case=plain children=1 rows=2 row_capacity=2 metadata=false geometry=false records=0 record_capacity=0 allocations=38 requested=8488 retained=6468 peak=6684
+BASIS_WINDOW case=named children=1 rows=2 row_capacity=2 metadata=true geometry=false records=0 record_capacity=0 allocations=45 requested=9108 retained=6792 peak=7008
+BASIS_WINDOW case=rounded children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=1 allocations=44 requested=9000 retained=6860 peak=7076
+BASIS_WINDOW case=custom_root children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9104 retained=7084 peak=7300
+BASIS_WINDOW case=axis_root children=1 rows=2 row_capacity=2 metadata=false geometry=false records=0 record_capacity=0 allocations=39 requested=8680 retained=6660 peak=6876
+BASIS_WINDOW case=sparse_custom children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9104 retained=7084 peak=7300
+BASIS_WINDOW case=same_custom_siblings children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9104 retained=7084 peak=7300
+BASIS_WINDOW case=unique_custom children=1 rows=2 row_capacity=2 metadata=true geometry=true records=1 record_capacity=4 allocations=42 requested=9104 retained=7084 peak=7300
+BASIS_WINDOW case=plain children=64 rows=65 row_capacity=65 metadata=false geometry=false records=0 record_capacity=0 allocations=106 requested=143777 retained=36149 peak=45376
+BASIS_WINDOW case=named children=64 rows=65 row_capacity=65 metadata=true geometry=false records=0 record_capacity=0 allocations=113 requested=144397 retained=36473 peak=45600
+BASIS_WINDOW case=rounded children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=1 allocations=112 requested=144289 retained=36541 peak=45440
+BASIS_WINDOW case=custom_root children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=4 allocations=110 requested=144393 retained=36765 peak=45376
+BASIS_WINDOW case=axis_root children=64 rows=65 row_capacity=65 metadata=false geometry=false records=0 record_capacity=0 allocations=107 requested=143969 retained=36341 peak=45376
+BASIS_WINDOW case=sparse_custom children=64 rows=65 row_capacity=65 metadata=true geometry=true records=1 record_capacity=4 allocations=110 requested=144481 retained=36853 peak=45376
+BASIS_WINDOW case=same_custom_siblings children=64 rows=65 row_capacity=65 metadata=true geometry=true records=64 record_capacity=64 allocations=114 requested=146313 retained=37725 peak=45376
+BASIS_WINDOW case=unique_custom children=64 rows=65 row_capacity=65 metadata=true geometry=true records=64 record_capacity=64 allocations=118 requested=157617 retained=46084 peak=51780
+BASIS_WINDOW case=plain children=1024 rows=1025 row_capacity=1025 metadata=false geometry=false records=0 record_capacity=0 allocations=313 requested=2141385 retained=465269 peak=698176
+BASIS_WINDOW case=named children=1024 rows=1025 row_capacity=1025 metadata=true geometry=false records=0 record_capacity=0 allocations=320 requested=2142005 retained=465593 peak=698400
+BASIS_WINDOW case=rounded children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=1 allocations=319 requested=2141897 retained=465661 peak=698240
+BASIS_WINDOW case=custom_root children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=4 allocations=315 requested=2111281 retained=450525 peak=698176
+BASIS_WINDOW case=axis_root children=1024 rows=1025 row_capacity=1025 metadata=false geometry=false records=0 record_capacity=0 allocations=312 requested=2110857 retained=450101 peak=698176
+BASIS_WINDOW case=sparse_custom children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1 record_capacity=4 allocations=317 requested=2142089 retained=465973 peak=698176
+BASIS_WINDOW case=same_custom_siblings children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1024 record_capacity=1024 allocations=325 requested=2174641 retained=482205 peak=698176
+BASIS_WINDOW case=unique_custom children=1024 rows=1025 row_capacity=1025 metadata=true geometry=true records=1024 record_capacity=1024 allocations=332 requested=2313433 retained=595588 peak=698176
+ok
+test runtime::basis_layout_probe::inline_basis_proposal_uses_existing_row_padding ... BASIS_INLINE_PROPOSAL actual_row=64 actual_field_bytes=63 padding=1 proposed_row=64 proposed_align=8
+BASIS_INLINE_OFFSETS identity=32 parent=56 kind=61 text=40 placement=0 basis=48 bounds=16 hittable=62 actions=60
+ok
+test runtime::basis_layout_probe::proposal_basis_headers_and_owner_allocations ... BASIS_PROPOSAL_HEADER accessibility::RowView<'_> size=24 align=8
+BASIS_PROPOSAL_HEADER Option<accessibility::RowView<'_>> size=24 align=8
+BASIS_PROPOSAL_HEADER accessibility::ComparedRows<'_, '_> size=48 align=8
+BASIS_PROPOSAL_HEADER Presented size=64 align=8
+BASIS_PROPOSAL_HEADER Option<Presented> size=64 align=8
+BASIS_PROPOSAL_HEADER geometry::Placement size=16 align=4
+BASIS_PROPOSAL_HEADER geometry::MapBasis size=8 align=4
+BASIS_PROPOSAL_HEADER geometry::Record size=16 align=4
+BASIS_PROPOSAL_HEADER geometry::Bases<'_> size=16 align=8
+BASIS_PROPOSAL_HEADER geometry::GeometryView<'_> size=24 align=8
+BASIS_PROPOSAL_HEADER Affine size=24 align=4
+BASIS_PROPOSAL_HEADER CoordinateSpace size=56 align=8
+BASIS_PROPOSAL_HEADER Point size=8 align=4
+BASIS_PROPOSAL_HEADER Rect size=16 align=4
+BASIS_PROPOSAL_HEADER ProposedRow size=64 align=8
+BASIS_PROPOSAL_HEADER ProposedPlacement size=16 align=4
+BASIS_PROPOSAL_HEADER Prepared size=40 align=8
+BASIS_PROPOSAL_HEADER Option<Prepared> size=40 align=8
+BASIS_PROPOSAL_HEADER Runtime<()> size=1840 align=8
+BASIS_PROPOSAL_HEADER Metadata size=264 align=8
+BASIS_PROPOSAL_HEADER geometry::Geometry size=96 align=8
+BASIS_PROPOSAL_HEADER (u64, crate::property::GeometryStyle) size=16 align=8
+BASIS_PROPOSAL_HEADER [u32; 4] size=16 align=4
+BASIS_PROPOSAL_HEADER SeparatePools size=48 align=8
+BASIS_PROPOSAL_HEADER MetadataWithSeparatePools size=272 align=8
+BASIS_PROPOSAL_HEADER GeometryWithSeparatePools size=144 align=8
+BASIS_PROPOSAL_OWNER metadata_baseline allocations=1 requested=264 retained=264 peak=264
+BASIS_PROPOSAL_OWNER metadata_separate_none allocations=1 requested=272 retained=272 peak=272
+BASIS_PROPOSAL_OWNER rounded_geometry_baseline_and_shared_stream allocations=1 requested=96 retained=96 peak=96
+BASIS_PROPOSAL_OWNER rounded_geometry_separate_direct allocations=1 requested=144 retained=144 peak=144
+BASIS_PROPOSAL_OWNER custom_only_shared_headers allocations=2 requested=360 retained=360 peak=360
+BASIS_PROPOSAL_OWNER custom_only_sidecar_headers allocations=2 requested=320 retained=320 peak=320
+ok
+test runtime::basis_lifecycle_tests::candidate_scale_failed_lowering_and_empty_ack_keep_geometry_epoch_coherent ... ok
+test runtime::basis_lifecycle_tests::custom_candidate_survives_failed_default_lowering_without_a_custom_p_owner ... ok
+test runtime::basis_lifecycle_tests::typed_paint_keep_preserves_custom_basis_and_radius_storage ... ok
+test runtime::basis_lifecycle_tests::unavailable_parent_map_does_not_reject_a_finite_admitted_child ... ok
+test runtime::delivery::tests::epoch_exhaustion_retires_delivery_without_consuming_or_retaining_the_remaining_queue ... ok
+test runtime::delivery::tests::mount_preparation_and_description_faults_close_lanes_before_the_model ... 
+thread 'runtime::delivery::tests::mount_preparation_and_description_faults_close_lanes_before_the_model' (1643111) panicked at crates/gpui/src/runtime/delivery.rs:258:17:
+schema fault
+
+thread 'runtime::delivery::tests::mount_preparation_and_description_faults_close_lanes_before_the_model' (1643111) panicked at crates/gpui/src/runtime/delivery.rs:264:22:
+view fault
+ok
+test runtime::editing::tests::all_presented_inputs_retain_stable_geometry_and_share_one_cold_editor ... ok
+test runtime::editing::tests::exhausted_epoch_rejects_focus_publication_without_changing_logical_focus ... ok
+test runtime::editing::tests::shared_owner_drops_revoked_logical_lease_but_keeps_old_p_until_repair_ack ... ok
+test runtime::geometry::basis_tests::exact_admitted_maps_and_zero_origin_extent_survive_factorization ... ok
+test runtime::geometry::basis_tests::finite_diagonals_are_inline_but_signed_off_diagonal_zeros_are_pooled ... ok
+test runtime::geometry::basis_tests::mixed_stream_keeps_full_radius_identity_and_empty_candidate_clears_p ... ok
+test runtime::geometry::basis_tests::parent_reuse_requires_every_basis_bit_and_keys_are_sheet_local ... ok
+test runtime::geometry::tests::cold_geometry_storage_is_absent_from_plain_owners_and_reclaimed_after_removal ... rounded_gpui,Style=88,El=176,Extra=56,Annotations=48,ImageSpec=16,Node=40,P=64,Runtime=1840,Metadata=264,Sheet=96,Geometry=96,Entry=16,PropertyStyle=8,PropertyGeometry=8
+rounded_element,absent,allocations=0,bytes=0
+rounded_element,rounded,allocations=1,bytes=56
+rounded_element,named,allocations=1,bytes=56
+rounded_element,rounded_named,allocations=2,bytes=104
+rounded_element,named_rounded,allocations=2,bytes=104
+ok
+test runtime::geometry::tests::sparse_frozen_radii_include_only_admitted_list_sites_without_history ... ok
+test runtime::geometry::virtual_basis_tests::omitted_virtual_geometry_has_no_basis_key_and_radius_capacity_is_charged ... BASIS_VIRTUAL_RADIUS logical_rows=9 published_rows=5 published_custom=2 logical_radii=4 published_radii=2 record_capacity=6 retained_record_bytes=96
+ok
+test runtime::hit_tests::compacted_list_parents_and_scroll_keep_exact_routing ... ok
+test runtime::hit_tests::compressed_hits_match_exhaustive_routing_across_publication_and_failure ... ok
+test runtime::hit_tests::packed_parent_and_saturated_runs_have_independent_exact_domains ... ok
+test runtime::identity_index::tests::a_large_replaced_child_run_retains_only_two_mappings ... ok
+test runtime::identity_index::tests::chunk_permutations_and_holes_match_the_previous_map ... ok
+test runtime::identity_index::tests::dense_reordering_does_not_allocate_an_unprofitable_run_table ... ok
+test runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error - should panic ... 
+thread 'runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error' (1643171) panicked at crates/gpui/src/runtime/identity_index.rs:94:9:
+distinct admitted logical identities
+ok
+test runtime::identity_index::tests::empty_and_full_width_contiguous_ranges_allocate_nothing ... ok
+test runtime::identity_index::tests::gaps_and_permutations_match_the_previous_map_exactly ... ok
+test runtime::identity_index::tests::header_and_exact_fallback_entry_layouts ... ok
+test runtime::identity_index::tests::live_storage_uses_no_range_heap_or_spare_fallback_capacity ... index-storage,contiguous,0,old,0,0,0,0,new,0,0,0,0
+index-storage,gaps,0,old,0,0,0,0,new,0,0,0,0
+index-storage,reverse,0,old,0,0,0,0,new,0,0,0,0
+index-storage,contiguous,1,old,2,208,192,208,new,0,0,0,0
+index-storage,gaps,1,old,2,208,192,208,new,0,0,0,0
+index-storage,reverse,1,old,2,208,192,208,new,0,0,0,0
+index-storage,contiguous,60,old,8,2400,1440,2400,new,0,0,0,0
+index-storage,gaps,60,old,8,2400,1440,2400,new,1,720,720,720
+index-storage,reverse,60,old,8,2400,1440,2400,new,1,720,720,720
+index-storage,contiguous,4096,old,377,206240,75168,140704,new,0,0,0,0
+index-storage,gaps,4096,old,377,206240,75168,140704,new,1,49152,49152,49152
+index-storage,reverse,4096,old,377,206240,75168,140704,new,1,49152,49152,49152
+index-storage,contiguous,65536,old,5963,3289568,1192416,2240992,new,0,0,0,0
+index-storage,gaps,65536,old,5963,3289568,1192416,2240992,new,1,786432,786432,786432
+index-storage,reverse,65536,old,5963,3289568,1192416,2240992,new,1,786432,786432,786432
+ok
+test runtime::identity_index::tests::overlapping_runs_reject_duplicate_identity_admission - should panic ... 
+thread 'runtime::identity_index::tests::overlapping_runs_reject_duplicate_identity_admission' (1643176) panicked at crates/gpui/src/runtime/identity_index.rs:74:13:
+distinct admitted logical identities
+ok
+test runtime::identity_index::tests::sparse_edits_and_moved_subtrees_use_exact_affine_runs ... ok
+test runtime::identity_index::tests::whole_replacement_releases_fallback_and_does_not_revive_ids ... ok
+test runtime::image::tests::exact_image_cohort_leases_survive_failed_newer_candidate_loss_and_removal ... ok
+test runtime::image::tests::image_only_owner_does_not_initialize_text_services ... Image=8 ImageState=80 Runtime=1856 Node=40 Presented=64 El=176 Draft=152 Style=88 Canvas=488
+ok
+test runtime::inspector::tests::every_typed_caption_matches_its_constructed_panel_slot ... ok
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... inspector_blank_headless_retained,plain_bytes=5572,plain_allocs=21,tool_bytes=76086,tool_allocs=355,delta_bytes=70514 (includes font/text/layout/paint resources)
+inspector_bytes,Node=40,Runtime=1840,Metadata=264,Inspector=24,Handler=16,WindowAction=4,tool_nodes=28,texts_capacity=26
+catalog_headers,El=176,Style=88,Presented=64,Admission=16,InspectorAction=4
+catalog_warm_inspector_idle,allocations=0,total_bytes=0,retained=0
+ok
+test runtime::metadata::destination_tests::closed_destinations_round_trip_without_truncating_or_mixing_node_groups ... ok
+test runtime::paint::tests::cold_storage_and_warm_edits_have_explicit_allocation_costs ... paint_headers,Node=40,Presented=64,Runtime=1840,Fanout=32,Metadata=264,Transition=40,Prepared=40
+paint_mount,bound=false,allocations=39,retained=6028,peak=6188
+paint_warm,allocations=0,bytes=0
+paint_mount,bound=true,allocations=49,retained=6884,peak=7044
+ok
+test runtime::parent_tests::checkbox_state_preserves_carrier_layouts ... CHECKBOX_CARRIER NodeKind size=1 align=1
+CHECKBOX_CARRIER Option<NodeKind> size=1 align=1
+CHECKBOX_CARRIER Content size=4 align=4
+CHECKBOX_CARRIER Node size=40 align=8
+CHECKBOX_CARRIER Option<Node> size=40 align=8
+CHECKBOX_CARRIER Presented size=64 align=8
+CHECKBOX_CARRIER Option<Presented> size=64 align=8
+CHECKBOX_CARRIER Prepared size=40 align=8
+CHECKBOX_CARRIER Option<Prepared> size=40 align=8
+CHECKBOX_CARRIER crate::El<'_> size=176 align=8
+CHECKBOX_CARRIER Option<crate::El<'_>> size=176 align=8
+CHECKBOX_CARRIER crate::element::DraftNode<'_> size=152 align=8
+CHECKBOX_CARRIER Option<crate::element::DraftNode<'_>> size=152 align=8
+CHECKBOX_CARRIER (Option<u64>, u32, NodeKind) size=24 align=8
+CHECKBOX_CARRIER (Option<u64>, crate::ItemKey, NodeKind) size=32 align=8
+CHECKBOX_CARRIER (Option<u64>, crate::ListId, NodeKind) size=32 align=8
+CHECKBOX_CARRIER Runtime<()> size=1840 align=8
+CHECKBOX_CARRIER crate::Role size=1 align=1
+CHECKBOX_CARRIER Option<crate::Role> size=1 align=1
+CHECKBOX_CARRIER crate::Part<'_> size=16 align=8
+CHECKBOX_CARRIER Actions size=1 align=1
+CHECKBOX_WRAPPERS option_el=176 option_draft=152 option_presented=64 option_prepared=40 ordinal_key=24 keyed_key=32 runtime=1840 role=1 option_role=1
+CHECKBOX_LAYOUT kind=1 option_kind=1 content=4 node=40 option_node=40 presented=64 prepared=40 el=176 draft=152
+ok
+test runtime::parent_tests::compact_parent_covers_the_admitted_index_domain ... Parent=4 Map=8 Node=40 Presented=64
+TextLayout=56 Shaped=64 OptionShaped=64 RuntimeHeader=1840 TextSite=80 OptionTextSite=80
+GEOMETRY_RUNTIME system=72 option_system=72 prepared=40
+ok
+test runtime::parent_tests::content_preserves_all_image_resources_and_both_sampling_modes ... ok
+test runtime::parent_tests::content_preserves_every_kind_and_admitted_text_index ... ok
+test runtime::parent_tests::content_rejects_the_first_unadmitted_text_index - should panic ... 
+thread 'runtime::parent_tests::content_rejects_the_first_unadmitted_text_index' (1643190) panicked at crates/gpui/src/runtime.rs:569:13:
+text belongs to the admitted description
+ok
+test runtime::parent_tests::nonzero_identity_keeps_old_node_migration_in_place ... ok
+test runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit ... BASIS_QUERY_LAYOUT context=128 context_align=8 part=16 geometry_view=24 bases=16
+ok
+test runtime::query::tests::focus_hint_requires_acknowledged_identity_membership ... ok
+test runtime::scroll::tests::frozen_viewport_index_cannot_alias_a_different_p_node ... ok
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ignored, explicit cold and warm whole-operation allocation ledger
+test runtime::scroll::tests::wheel_plan_is_repeatable_without_allocation ... ok
+test runtime::semantic_storage_ledger::dense_annotation_capacity_evidence ... ignored, manual dense storage evidence; includes 30,003 layout nodes
+test runtime::semantic_storage_ledger::shared_ports_retain_one_payload_and_do_not_create_text_service ... ok
+test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=40 Presented=64 El=176 Draft=152 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=264 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16
+Extra=56 Annotations=48 ListSpec=48 AnnotationDraft=56
+element,absent,allocations=0,bytes=0
+element,semantic,allocations=1,bytes=56
+element,list,allocations=1,bytes=56
+element,combined,allocations=2,bytes=104
+element,component_named=false,allocations=3,bytes=88
+element,component_named=true,allocations=4,bytes=144
+ok
+test runtime::style_ledger::inspector_dense_lane_is_reclaimed_after_inherit_and_redescription ... ok
+test runtime::style_ledger::real_application_and_adversarial_distribution ... ignored, explicit retained style/map distribution; no timing claim
+test runtime::style_ledger::retained_style_cost ... ignored, explicit paired release fixture; coordinate a quiet CPU window
+test runtime::style_ledger::retained_style_owner_memory ... ignored, explicit whole-owner allocation and peak ledger, including layout/canvas
+test runtime::style_port_tests::fresh_cold_binding_owner_ledger ... style_owner,ports=0,requests=41,requested=7456,retained=6156,peak=6316,fanouts=0,destination_capacity_bytes=0
+style_owner,ports=1,requests=46,requested=8104,retained=6628,peak=6788,fanouts=1,destination_capacity_bytes=16
+style_owner,ports=2,requests=47,requested=8152,retained=6628,peak=6788,fanouts=1,destination_capacity_bytes=16
+style_owner,ports=8,requests=58,requested=9256,retained=7060,peak=7220,fanouts=3,destination_capacity_bytes=48
+style_plain_owner,requests=33,requested=6800,retained=5572,peak=5740
+ok
+test runtime::style_port_tests::invalid_shared_scalar_cannot_patch_text_style_or_masked_base_in_either_order ... ok
+test runtime::style_port_tests::ordinary_headers_and_literal_owner_allocation_floor_remain_unchanged ... style_headers,Style=88,El=176,Draft=152,Node=40,P=64,Runtime=1840,Fanout=32,Destination=4,Flex=12
+ok
+test runtime::styles::colours::admission_tests::more_than_canvas_bank_limit_distinct_source_ports_can_emit_no_commands ... ok
+test runtime::styles::colours::tests::default_authored_spaces_and_negative_zero_do_not_collapse ... ok
+test runtime::styles::colours::tests::equal_fields_are_distinct_and_masked_bases_follow_their_source ... ok
+test runtime::styles::colours::tests::existing_fanouts_freeze_one_sparse_port_allocation_and_both_fields ... ok
+test runtime::styles::colours::tests::source_update_has_one_owned_write_and_no_allocation ... color_bank_layout,Styles=40,Fanout=32,Layout=56,Record=72,Bound=128,Bank=48,Source=48,Slot=4,Pair=8,retained=4488
+ok
+test runtime::styles::colours::tests::sparse_port_storage_compares_exact_old_map_and_paired_payloads ... port_storage,nodes=1,dual=false,old_allocations=1,old_requested=232,old_live=232,new_allocations=1,new_requested=8,new_live=8,paired_payload=12
+port_storage,nodes=1,dual=true,old_allocations=1,old_requested=232,old_live=232,new_allocations=1,new_requested=16,new_live=16,paired_payload=12
+port_storage,nodes=16,dual=false,old_allocations=3,old_requested=792,old_live=792,new_allocations=1,new_requested=128,new_live=128,paired_payload=192
+port_storage,nodes=16,dual=true,old_allocations=5,old_requested=1256,old_live=1256,new_allocations=1,new_requested=256,new_live=256,paired_payload=192
+port_storage,nodes=4096,dual=false,old_allocations=681,old_requested=167208,old_live=167208,new_allocations=1,new_requested=32768,new_live=32768,paired_payload=49152
+port_storage,nodes=4096,dual=true,old_allocations=1365,old_requested=335400,old_live=335400,new_allocations=1,new_requested=65536,new_live=65536,paired_payload=49152
+ok
+test runtime::styles::tests::exact_comparison_covers_every_style_field ... ok
+test runtime::styles::tests::inspector_edits_densify_once_and_do_not_mutate_shared_peers ... ok
+test runtime::styles::tests::late_palette_overflow_and_late_nondefault_prefix_preserve_all_values ... ok
+test runtime::styles::tests::ordinary_property_reads_borrow_the_actual_style_once ... ok
+test runtime::styles::tests::rebuilt_lanes_keep_no_historical_style_palette ... ok
+test runtime::styles::tests::shared_values_preserve_author_channels_profiles_and_signed_zero ... ok
+test runtime::styles::tests::storage_modes_and_overflow_preserve_every_admitted_style ... ok
+test runtime::styles::tests::style_lane_allocation_ledger ... style_lane,default,nodes=4096,allocations=0,requested_bytes=0,live_bytes=0,peak_bytes=0
+style_lane,small,nodes=3,allocations=1,requested_bytes=264,live_bytes=264,peak_bytes=264
+style_lane,shared,nodes=4096,allocations=3,requested_bytes=7616,live_bytes=4800,peak_bytes=7616
+style_lane,unique,nodes=4096,allocations=3,requested_bytes=367360,live_bytes=360448,peak_bytes=367360
+ok
+test runtime::tests::an_unchanged_borrowed_string_keeps_its_retained_allocation ... ok
+test runtime::tests::headless_acknowledgement_defers_pixels_and_diagnostics_follow_edits_and_resize ... ok
+test runtime::tests::native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels ... ok
+test runtime::tests::preserved_surface_repairs_coalesced_candidates_and_keeps_failed_edits_out ... ok
+test runtime::tests::rectangle_windows_do_not_initialize_font_services ... ok
+test runtime::tests::software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage ... ok
+test runtime::tests::surface_damage_repairs_aged_buffers_and_falls_back_when_history_expires ... ok
+test runtime::tests::text_lane_moves_one_cache_per_site_and_releases_removed_capacity ... ok
+test runtime::tests::text_width_cache_preserves_keys_and_replaces_only_after_success ... ok
+test runtime::tests::the_last_text_service_is_released_after_a_text_free_sheet_commits ... ok
+test runtime::text_geometry::tests::acknowledged_geometry_owner_epoch_and_allocation_ledger ... TEXT_OWNER_HEADERS resources=120 entry=24 runtime=1840 text_site=80 node=40 presented=64 prepared=40 part=16
+TEXT_OWNER case=first_c unique_maps=1 l_glyph_len_bytes=524288 p_entries=0 p_capacity_bytes=0 c_entries=1 c_capacity_bytes=96 allocations=383 requested=21246272 peak_extra=12817056 retained_delta=1091672
+TEXT_OWNER case=old_p_new_c unique_maps=2 l_glyph_len_bytes=524288 p_entries=1 p_capacity_bytes=96 c_entries=1 c_capacity_bytes=96 allocations=341 requested=21232796 peak_extra=12253348 retained_delta=482088
+TEXT_OWNER case=old_p_old_c_failed_l unique_maps=3 l_glyph_len_bytes=524288 p_entries=1 p_capacity_bytes=96 c_entries=1 c_capacity_bytes=96 allocations=338 requested=21232656 peak_extra=12253348 retained_delta=483084
+TEXT_OWNER case=old_c_ack_failed_l unique_maps=2 l_glyph_len_bytes=524288 p_entries=1 p_capacity_bytes=96 c_entries=0 c_capacity_bytes=0 allocations=0 requested=0 peak_extra=0 retained_delta=-484476
+ok
+test semantic::decoration_tests::binding_accumulator_costs_are_cold_and_literal_overwrites_release_it ... style_decorations,ports=0,requests=0,requested=0,retained=0,peak=0
+style_decorations,ports=1,requests=2,requested=80,retained=80,peak=80
+style_decorations,ports=2,requests=3,requested=128,retained=104,peak=128
+style_decorations,ports=8,requests=5,requested=416,retained=248,peak=344
+ok
+test semantic::decoration_tests::cold_headers_and_alternating_builders_have_one_nonrecursive_decoration ... style_decorations,alternating,requests=3,requested=128,retained=128,peak=128
+ok
+test shared_text::tests::exact_allocation_requests_include_header_growth_and_static_empty ... lease,len=0,triomphe_bytes=8,thin_bytes=0
+lease,len=3,triomphe_bytes=16,thin_bytes=19
+lease,len=8,triomphe_bytes=16,thin_bytes=24
+lease,len=23,triomphe_bytes=32,thin_bytes=39
+lease,len=24,triomphe_bytes=32,thin_bytes=40
+lease,len=25,triomphe_bytes=40,thin_bytes=41
+lease,len=64,triomphe_bytes=72,thin_bytes=80
+lease,len=6,triomphe_bytes=16,thin_bytes=22
+lease,len=4096,triomphe_bytes=4104,thin_bytes=4112
+ok
+test shared_text::tests::one_word_utf8_lease_preserves_owned_unicode_and_thread_transfer ... ok
+test source::component_tests::component_schemas_reject_duplicate_names_ids_and_cross_scope_source_aliases ... ok
+test source::component_tests::namespace_exhaustion_is_checked_before_a_component_is_registered ... ok
+test source::component_tests::resolved_component_ids_are_rejected_as_local_source_declarations ... ok
+test source::component_tests::scoped_scan_and_revision_preserve_local_ids_without_namespace_collision ... ok
+test source::component_tests::the_last_component_namespace_routes_edits_before_exhaustion ... ok
+test source::tests::a_text_operand_supplies_the_codec_and_wrong_codecs_cannot_edit ... ok
+test source::tests::aliased_fields_are_ambiguous_even_when_keys_differ ... ok
+test source::tests::binding_and_scanning_read_each_field_once_exact_edits_read_only_the_target ... ok
+test source::tests::bound_key_survives_moving_the_entire_model ... ok
+test source::tests::domain_sources_register_resolve_and_edit_without_text_support ... ok
+test source::tests::duplicate_names_and_ids_are_rejected ... ok
+test source::tests::every_supported_scalar_formats_and_floats_validate ... ok
+test source::tests::exact_action_edits_only_its_value_and_requires_registered_projection ... ok
+test source::tests::field_ids_preserve_the_full_local_domain_and_pair_order ... ok
+test source::tests::mismatched_read_write_paths_fail_before_a_value_mutates ... ok
+test source::tests::owner_dependency_is_the_default_and_direct_ports_are_explicit ... ok
+test source::tests::parse_failure_returns_payload_and_preserves_value_and_revision ... ok
+test source::tests::replacement_revision_equality_requires_owner_boundary_value_comparison ... ok
+test source::tests::same_typed_fields_bind_by_projection_not_equal_value ... ok
+test source::tests::scan_reports_all_registered_field_revisions ... ok
+test source::tests::string_edits_transfer_the_owned_input_allocation ... ok
+test source::tests::unchanged_borrowed_strings_are_zero_copy ... ok
+test source::tests::unknown_key_returns_unchanged_payload ... ok
+test style::recipe_tests::dynamic_recipe_stores_only_thin_references_and_lowers_without_recipe_allocation ... ok
+test style::recipe_tests::stable_const_recipes_store_raw_values_with_the_original_literal_floor ... ok
+test style_port::admission_tests::wide_numeric_admission_preserves_range_sign_and_canonical_property_errors ... ok
+test style_port::tests::all_length_primitives_and_borrowed_literals_keep_into_length_conversion ... ok
+test style_port::tests::numeric_text_and_style_install_orders_share_both_capabilities ... ok
+test style_port::tests::style_only_descriptor_checks_type_and_never_fabricates_text ... ok
+
+test result: ok. 202 passed; 0 failed; 26 ignored; 0 measured; 0 filtered out; finished in 25.70s
+
+     Running tests/property_selection.rs (/tmp/gpui-presented-basis-target/debug/deps/property_selection-7976d93c2a91faf2)
+
+running 10 tests
+test canonical_edit_result_survives_failed_prepare_until_repair_ack ... ok
+test every_closed_catalog_family_returns_canonical_value_and_equal_presence ... ok
+test explicit_selection_surface_keeps_normal_library_behavior_independent ... ok
+test foreign_and_empty_selection_requests_do_not_fabricate_property_edits ... ok
+test inherit_and_refresh_read_canonical_state_after_a_masked_source_change ... ok
+test owned_result_precedes_mutable_reply_source_edits ... ok
+test public_consumer_headers_remain_explicit ... PROPERTY_PUBLIC_HEADERS Win=8 OptionWin=16 Window=208 OptionWindow=208 Companion=136 ValueEntry=104
+ok
+test selection_is_logical_before_ack_and_stale_ack_does_not_replace_p ... ok
+test selection_reply_checks_the_same_contained_mutable_owner ... ok
+test stale_refresh_is_rejected_and_explicit_reselection_recovers ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+

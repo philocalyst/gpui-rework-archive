@@ -1,0 +1,43 @@
+{
+  "source_pin": "8c17a763ee7a5f1d2d932d375d2c839759d8a28b",
+  "reviewed_at_utc": "2026-10-23",
+  "producer": "gpu_zero_floor_luna / gpt-6-luna",
+  "producer_sha256": "8e22e383ec632051bd2821fe21aa6d0850aad1ae1484fb0d5db0e00342da3700",
+  "shipping_edits": false,
+  "builds_or_measurements": false,
+  "references": [
+    {
+      "name": "webgpu-security",
+      "url": "https://raw.githubusercontent.com/gpuweb/gpuweb/0ba4e22611c995abd3077e422cb82e5ad203974b/spec/sections/privacy-and-security.bs",
+      "http_status": 200,
+      "decoded_bytes": 18393,
+      "decoded_sha256": "9e1bcc0389d21fea6015ed72377fe94f012f4aa07cff32c0d1bc0bde03cc4b2c",
+      "reviewed_claim": "Lines38-57: conceptual zero initialization, developer initialization and enqueue-time status.",
+      "full_source_archived": false
+    },
+    {
+      "name": "dawn-d3d12",
+      "url": "https://dawn.googlesource.com/dawn/+/2d4d6e9b3b3ed923d62ccffebdaf52371d47d89d/src/dawn/native/d3d12/TextureD3D12.cpp?format=TEXT",
+      "http_status": 200,
+      "decoded_bytes": 55370,
+      "decoded_sha256": "b54e48f4910270c2094ee9fec43a03b23e6985b893c61ad6e4a91e4a4a218c8d",
+      "reviewed_claim": "Lines114-130 flags and803-956 clear: flagged attachments use clears; other textures use upload-buffer copies.",
+      "full_source_archived": false
+    },
+    {
+      "name": "dawn-command",
+      "url": "https://dawn.googlesource.com/dawn/+/2d4d6e9b3b3ed923d62ccffebdaf52371d47d89d/src/dawn/native/CommandBuffer.cpp?format=TEXT",
+      "http_status": 200,
+      "decoded_bytes": 17067,
+      "decoded_sha256": "f13ab256104fd6aab297f648f789b2a9f6521c4e4cddbfe727f940aac710a018",
+      "reviewed_claim": "LazyClearRenderPassAttachments replaces uninitialized Load with Clear.",
+      "full_source_archived": false
+    },
+    {
+      "name": "producer-dawn-d3d12-pin",
+      "url": "https://dawn.googlesource.com/dawn/+/41f8aa550b4304d6132f8f7f7a6c0ae5eeee319d/src/dawn/native/d3d12/TextureD3D12.cpp?format=TEXT",
+      "http_status": 404,
+      "disposition": "Unsupported historical behavior claim withdrawn in reviewed report; original retained unchanged."
+    }
+  ]
+}

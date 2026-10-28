@@ -1,0 +1,62 @@
+   Compiling quote v1.0.47
+   Compiling proc-macro2 v1.0.107
+    Checking bitflags v2.13.2
+    Checking spirv v0.4.0+sdk-1.4.341.0
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling synstructure v0.14.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+    Checking bytemuck v1.25.2
+   Compiling thiserror-impl v2.0.21
+    Checking yoke v0.8.3
+   Compiling zerocopy-derive v0.8.63
+   Compiling zerovec-derive v0.11.6
+    Checking zerovec v0.11.8
+   Compiling displaydoc v0.2.7
+    Checking thiserror v2.0.21
+    Checking font-types v0.12.7
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+    Checking naga-types v30.0.1
+    Checking zerocopy v0.8.63
+    Checking icu_provider v2.3.1
+    Checking icu_collections v2.3.0
+    Checking read-fonts v0.41.0
+    Checking half v2.7.1
+   Compiling snafu-derive v0.8.9
+    Checking naga v30.0.1
+    Checking wgpu-types v30.0.1
+   Compiling indexmap v2.14.2
+   Compiling snafu v0.8.9
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-shared-gpu-sol/reactivity/vendor/wgpu-hal)
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+    Checking wgpu-naga-bridge v30.0.1
+    Checking gpu-allocator v0.28.0
+    Checking icu_properties v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking read-fonts v0.46.0
+    Checking skrifa v0.49.0
+    Checking fontique v0.12.0
+    Checking icu_normalizer v2.3.0
+    Checking icu_segmenter v2.3.0
+    Checking parley_data v0.12.0
+    Checking harfrust v0.12.0
+   Compiling wgsl-rs v0.1.0-beta.6
+    Checking parley_engine v0.12.0 (/tmp/gpui-shared-gpu-sol/reactivity/vendor/parley_engine)
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking skrifa v0.44.0
+   Compiling wgpu v30.0.1 (/tmp/gpui-shared-gpu-sol/reactivity/vendor/wgpu)
+    Checking swash v0.2.10
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-shared-gpu-sol/reactivity/crates/gpu)
+    Checking wgpu-core v30.0.1
+    Checking parley v0.12.0 (/tmp/gpui-shared-gpu-sol/reactivity/vendor/parley)
+   Compiling fearless_simd_macros v0.1.0
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-shared-gpu-sol/reactivity/crates/core)
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-shared-gpu-sol/reactivity/crates/canvas)
+    Checking gpui-gpu-owner-fixture v0.0.0 (/tmp/gpui-shared-gpu-sol/reactivity/benchmarks/gpu-owner)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 37.08s

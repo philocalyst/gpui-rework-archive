@@ -1,0 +1,170 @@
+{
+  "recording_only": {
+    "candidate": {
+      "median_ns_each": 35,
+      "min_ns_each": 35,
+      "max_ns_each": 35,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 37,
+      "min_ns_each": 37,
+      "max_ns_each": 37,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    }
+  },
+  "first_blank_cpu": {
+    "candidate": {
+      "median_ns_each": 3664,
+      "min_ns_each": 3618,
+      "max_ns_each": 3691,
+      "requested_bytes_per_iteration": [
+        280.0
+      ],
+      "requests_per_iteration": [
+        3.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 3652,
+      "min_ns_each": 3646,
+      "max_ns_each": 3658,
+      "requested_bytes_per_iteration": [
+        200.0
+      ],
+      "requests_per_iteration": [
+        2.0
+      ]
+    }
+  },
+  "first_panel_scene": {
+    "candidate": {
+      "median_ns_each": 2810500,
+      "min_ns_each": 2803525,
+      "max_ns_each": 2819975,
+      "requested_bytes_per_iteration": [
+        1127080.0
+      ],
+      "requests_per_iteration": [
+        37.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 2812197,
+      "min_ns_each": 2791796,
+      "max_ns_each": 2860356,
+      "requested_bytes_per_iteration": [
+        1127000.0
+      ],
+      "requests_per_iteration": [
+        36.0
+      ]
+    }
+  },
+  "same_tile_color_repair": {
+    "candidate": {
+      "median_ns_each": 3090,
+      "min_ns_each": 3087,
+      "max_ns_each": 3094,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 44514,
+      "min_ns_each": 44412,
+      "max_ns_each": 45330,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    }
+  },
+  "alternating_tile_color_repair": {
+    "candidate": {
+      "median_ns_each": 90955,
+      "min_ns_each": 90556,
+      "max_ns_each": 92532,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 44453,
+      "min_ns_each": 44194,
+      "max_ns_each": 44640,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    }
+  },
+  "full_color_raster": {
+    "candidate": {
+      "median_ns_each": 1957987,
+      "min_ns_each": 1957472,
+      "max_ns_each": 1977131,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 2152983,
+      "min_ns_each": 2151377,
+      "max_ns_each": 2157904,
+      "requested_bytes_per_iteration": [
+        0.0
+      ],
+      "requests_per_iteration": [
+        0.0
+      ]
+    }
+  },
+  "full_geometry_replacement": {
+    "candidate": {
+      "median_ns_each": 12955348,
+      "min_ns_each": 12916104,
+      "max_ns_each": 13004059,
+      "requested_bytes_per_iteration": [
+        917056.0
+      ],
+      "requests_per_iteration": [
+        33.0
+      ]
+    },
+    "parent": {
+      "median_ns_each": 13627608,
+      "min_ns_each": 13610979,
+      "max_ns_each": 13654726,
+      "requested_bytes_per_iteration": [
+        917056.0
+      ],
+      "requests_per_iteration": [
+        33.0
+      ]
+    }
+  }
+}

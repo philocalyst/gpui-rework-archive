@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py", line 149, in <module>
+    main()
+    ~~~~^^
+  File "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py", line 121, in main
+    assert bus(address, "call", search[1], search[2], "org.a11y.atspi.EditableText", "SetTextContents", "s", "μαρ") == [True]
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/gpui-ce3/reactivity/ports/hummingbird/native-transcript.py", line 54, in bus
+    result = subprocess.run(["busctl", "--json=short", "--timeout=2", "--address=" + address, *command],
+                            env=env, text=True, capture_output=True, check=True)
+  File "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['busctl', '--json=short', '--timeout=2', '--address=unix:path=/tmp/hummingbird-native-keeh66g8/at-spi/bus_152,guid=873de88714bfd95295ee37596ad9dde8', 'call', ':1.3', '/org/a11y/atspi/accessible/0/170141183460469231731687303715884105728', 'org.a11y.atspi.EditableText', 'SetTextContents', 's', 'μαρ']' returned non-zero exit status 1.

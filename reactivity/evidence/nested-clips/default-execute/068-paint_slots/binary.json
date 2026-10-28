@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/7b681b282a4ae2ee/out/paint_slots-7b681b282a4ae2ee",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/068-paint_slots/test",
+  "sha256": "272119ad12de66237bdf471c0fb056a9378b2512cad14e6817444bee3f9f03b6",
+  "bytes": 151579872,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "paint_slots",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/paint_slots.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

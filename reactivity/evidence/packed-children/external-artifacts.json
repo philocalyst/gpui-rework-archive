@@ -1,0 +1,34 @@
+{
+  "isolated_route_producer": {
+    "path": "/tmp/gpui-component-routing-sol-c9-evidence-v2.tar.gz",
+    "bytes": 9878184,
+    "sha256": "6523f9e8e4faf74c83e2859b1aadf29baec4fb068b93d0a3cb726ed5cd519dac",
+    "source": "c9d3f13ece29faff315e2ff95976123f87c1f1ab"
+  },
+  "optimized_executables_and_full_assembly": {
+    "baseline": {
+      "counter.elf": {
+        "path": "/tmp/gpui-packed-children-codegen-root-baseline-artifacts/counter.elf",
+        "bytes": 9970056,
+        "sha256": "fc4f0e4739aa32efa9934444c49da54995d91e0985381e4a4df700a4c51247ed"
+      },
+      "assembly.txt.gz": {
+        "path": "/tmp/gpui-packed-children-codegen-root-baseline-artifacts/assembly.txt.gz",
+        "bytes": 8131120,
+        "sha256": "c836a54183e9a6fa0ff05c8e0091a75c8499a36d6572cc8e7c99f3b01e9b08d0"
+      }
+    },
+    "candidate": {
+      "counter.elf": {
+        "path": "/tmp/gpui-packed-children-codegen-root-candidate-artifacts/counter.elf",
+        "bytes": 9970984,
+        "sha256": "3816d1048e50743e076aaac5a0862c0096409a02d760c38aff256798d426e3f7"
+      },
+      "assembly.txt.gz": {
+        "path": "/tmp/gpui-packed-children-codegen-root-candidate-artifacts/assembly.txt.gz",
+        "bytes": 8132572,
+        "sha256": "b776d6934077b80b9faf9139c3445aa0f3b6624c24bfdae62090c35a5a7ac931"
+      }
+    }
+  }
+}

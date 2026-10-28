@@ -1,0 +1,17 @@
+{
+  "source": "cb83d485451e2cbd69da95b68f58409a4dee5abf",
+  "parent": "e31ffdbc15c8e786e822715c7c0d00d95629f97c",
+  "exit": 101,
+  "passed": 1,
+  "failed": 1,
+  "ignored": 0,
+  "harnesses": 1,
+  "source_guards": 1994,
+  "guards_match": true,
+  "original_parser_limitation": "initial generic helper only parsed ok summaries; original0/0 report kept, rawFAILED1/1 independently parsed here",
+  "actual_cargo_executable": "/tmp/gpui-source-alias-root-target/debug/build/gpui/9e72926c0f640666/out/source_alias_contract-9e72926c0f640666",
+  "frozen_executable": "/tmp/gpui-source-alias-negative-frozen-cb83/source_alias_contract-9e72926c0f640666",
+  "bytes": 160342240,
+  "sha256": "cc62097038e781d43c1b82a1c434bd51bef8e5bce3db7f6d5f82819b88f19faa",
+  "observed": "typedA changes canonical shared B to1; BQuestion remainsReady inputrev0 ticket1 frozen/dispatched/accepted1 and visiblecaptured0. Same coarse edit refreshes and passes."
+}

@@ -1,0 +1,50 @@
+{
+  "source_head": "56e1f5ddf1f6e01a176b103c0423c75ffdbd9775",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///root/gpui-ce3/reactivity/crates/gpui#0.1.0",
+    "manifest_path": "/root/gpui-ce3/reactivity/crates/gpui/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/root/gpui-ce3/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [
+      "accessibility",
+      "default",
+      "desktop",
+      "native",
+      "simd",
+      "wayland",
+      "wayland-minimal",
+      "x11",
+      "x11-minimal"
+    ],
+    "filenames": [
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc"
+    ],
+    "executable": "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc",
+    "fresh": true
+  },
+  "binary_sha256": "4dc31597946f154ae91466f76bba1e79338995f1b7079d9ba9a9ad3e2aec268f",
+  "display": ":151",
+  "source_unchanged": true,
+  "owned_display_stopped": true,
+  "limits": "Actual X11/Xvfb/llvmpipe/private-D-Bus protocol execution, not native Apple/Windows/Wayland, a screen-reader audit or hardware latency evidence."
+}

@@ -1,0 +1,6 @@
+pattern,count,stage,operations,ns,allocations,requested,delta,retained,peak
+Contiguous,1,mount,1,16471,57,15576,9008,9008,9392
+Contiguous,1,prepare,1,2970,19,6620,0,9008,3272
+Contiguous,1,equal,1,1960,19,6620,0,9008,3272
+Contiguous,1,focus_first,10000,88232,0,0,0,9008,0
+Contiguous,1,focus_last,10000,80582,0,0,0,9008,0

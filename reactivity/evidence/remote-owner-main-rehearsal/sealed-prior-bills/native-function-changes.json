@@ -1,0 +1,626 @@
+[
+  {
+    "name": "<alloc[24b8200b0946867]::sync::Arc<gpui[2e59527d19372dc9]::remote::Notification>>::drop_slow",
+    "old": {
+      "symbol": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtCs3YIhkERLvVB_4gpui6remote12NotificationE9drop_slowCs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcNtNtCs3YIhkERLvVB_4gpui6remote12NotificationE9drop_slowCs4wvzfdZQtD2_12remote_probe",
+      "size": 193,
+      "value": 0,
+      "sha256": "d1570d91c0e1d507f1194fb398407a9449362fbca7e520e22d3a3e7bc529dfeb",
+      "demangled": "<alloc[24b8200b0946867]::sync::Arc<gpui[2e59527d19372dc9]::remote::Notification>>::drop_slow",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "new": null,
+    "size_delta": -193
+  },
+  {
+    "name": "<alloc[24b8200b0946867]::sync::Arc<gpui[2e59527d19372dc9]::remote::Producer<u64>>>::drop_slow",
+    "old": null,
+    "new": {
+      "symbol": "_RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcINtNtCs3YIhkERLvVB_4gpui6remote8ProduceryEE9drop_slowCs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RNvMsn_NtCscdodAO9FK5_5alloc4syncINtB5_3ArcINtNtCs3YIhkERLvVB_4gpui6remote8ProduceryEE9drop_slowCs4wvzfdZQtD2_12remote_probe",
+      "size": 407,
+      "value": 0,
+      "sha256": "f8965987c9fc94d9174f444a36f01d6e2165eec495d72b117b5c340a83012b6c",
+      "demangled": "<alloc[24b8200b0946867]::sync::Arc<gpui[2e59527d19372dc9]::remote::Producer<u64>>>::drop_slow",
+      "explicit_stack_subtractions": [
+        16
+      ],
+      "push_count": 3
+    },
+    "size_delta": 407
+  },
+  {
+    "name": "<core[37f591cfbe66b0b1]::option::Option<gpui[2e59527d19372dc9]::source::SourceCodec>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+    "old": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCs3YIhkERLvVB_4gpui6source11SourceCodecE5ok_orNtNtBM_7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCs3YIhkERLvVB_4gpui6source11SourceCodecE5ok_orNtNtBM_7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 119,
+      "value": 0,
+      "sha256": "0b06d02ee004a17646a3429918affa3fea33cace9237f54ad727d26a2b7f195d",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui[2e59527d19372dc9]::source::SourceCodec>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "new": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCs3YIhkERLvVB_4gpui6source11SourceCodecE5ok_orNtNtBM_7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCs3YIhkERLvVB_4gpui6source11SourceCodecE5ok_orNtNtBM_7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 119,
+      "value": 0,
+      "sha256": "2ae6bc619300110a3a332f1c789f6e497080094894cac19cd64c187db3b2fb57",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui[2e59527d19372dc9]::source::SourceCodec>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Affine>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+    "old": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry6AffineE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry6AffineE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 131,
+      "value": 0,
+      "sha256": "b24edad6d46128d5502b90b37748af13a063d343caa89edd31728d4f0fea0823",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Affine>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "new": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry6AffineE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry6AffineE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 131,
+      "value": 0,
+      "sha256": "0ca67bf1c030b296ef4fa31c0cff4f52ff1c67b60f202b356d63bf65f8ab7e43",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Affine>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Rect>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+    "old": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 123,
+      "value": 0,
+      "sha256": "458c9098a24fd1901a83b519ab8d7c9f7f5f4d00e953c91d59823d933c4a352e",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Rect>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "new": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6optionINtB3_6OptionNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectE5ok_orNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 123,
+      "value": 0,
+      "sha256": "f3b2447c37ddc14b3a831063b3b47c1292153c0ed249d87d05e647c1636fb6ed",
+      "demangled": "<core[37f591cfbe66b0b1]::option::Option<gpui_reactivity_core[2179bc387b73d03]::geometry::Rect>>::ok_or::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<core[37f591cfbe66b0b1]::result::Result<(gpui_reactivity_core[2179bc387b73d03]::geometry::Rect, gpui_reactivity_core[2179bc387b73d03]::geometry::Rect), gpui[2e59527d19372dc9]::runtime::Error>>::map_err::<gpui[2e59527d19372dc9]::runtime::Error, <gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#23}>",
+    "old": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6resultINtB3_6ResultTNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectBJ_ENtNtCs3YIhkERLvVB_4gpui7runtime5ErrorE7map_errB1E_NCNvMsu_B1G_INtB1G_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innersl_0EB2V_",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6resultINtB3_6ResultTNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectBJ_ENtNtCs3YIhkERLvVB_4gpui7runtime5ErrorE7map_errB1E_NCNvMsu_B1G_INtB1G_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innersl_0EB2V_",
+      "size": 208,
+      "value": 0,
+      "sha256": "fef6c148daee917cd1750a26922f6e258f0fb5627afda4949dafe6db11368c14",
+      "demangled": "<core[37f591cfbe66b0b1]::result::Result<(gpui_reactivity_core[2179bc387b73d03]::geometry::Rect, gpui_reactivity_core[2179bc387b73d03]::geometry::Rect), gpui[2e59527d19372dc9]::runtime::Error>>::map_err::<gpui[2e59527d19372dc9]::runtime::Error, <gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#23}>",
+      "explicit_stack_subtractions": [
+        56
+      ],
+      "push_count": 2
+    },
+    "new": {
+      "symbol": "_RINvMNtCs4NRVxsYgnAr_4core6resultINtB3_6ResultTNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectBJ_ENtNtCs3YIhkERLvVB_4gpui7runtime5ErrorE7map_errB1E_NCNvMsu_B1G_INtB1G_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innersl_0EB2V_",
+      "section": ".text._RINvMNtCs4NRVxsYgnAr_4core6resultINtB3_6ResultTNtNtCsb8u0YpBqff_20gpui_reactivity_core8geometry4RectBJ_ENtNtCs3YIhkERLvVB_4gpui7runtime5ErrorE7map_errB1E_NCNvMsu_B1G_INtB1G_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innersl_0EB2V_",
+      "size": 208,
+      "value": 0,
+      "sha256": "7c9a1da1feea645f486b4f64e5173a33cd429a20a7b9af0bb28344ab32e05b35",
+      "demangled": "<core[37f591cfbe66b0b1]::result::Result<(gpui_reactivity_core[2179bc387b73d03]::geometry::Rect, gpui_reactivity_core[2179bc387b73d03]::geometry::Rect), gpui[2e59527d19372dc9]::runtime::Error>>::map_err::<gpui[2e59527d19372dc9]::runtime::Error, <gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#23}>",
+      "explicit_stack_subtractions": [
+        56
+      ],
+      "push_count": 2
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::paint::PatchOutcome, gpui[2e59527d19372dc9]::runtime::Error> as core[37f591cfbe66b0b1]::cmp::PartialEq>::eq",
+    "old": {
+      "symbol": "_RNvXsw_NtCs4NRVxsYgnAr_4core6resultINtB5_6ResultNtNtNtCs3YIhkERLvVB_4gpui7runtime5paint12PatchOutcomeNtBO_5ErrorENtNtB7_3cmp9PartialEq2eqCs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RNvXsw_NtCs4NRVxsYgnAr_4core6resultINtB5_6ResultNtNtNtCs3YIhkERLvVB_4gpui7runtime5paint12PatchOutcomeNtBO_5ErrorENtNtB7_3cmp9PartialEq2eqCs4wvzfdZQtD2_12remote_probe",
+      "size": 402,
+      "value": 0,
+      "sha256": "ee1045426f5d3cc1e366588e30091d75860e12a1d0092611b05dd6c312e4ea75",
+      "demangled": "<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::paint::PatchOutcome, gpui[2e59527d19372dc9]::runtime::Error> as core[37f591cfbe66b0b1]::cmp::PartialEq>::eq",
+      "explicit_stack_subtractions": [],
+      "push_count": 1
+    },
+    "new": {
+      "symbol": "_RNvXsw_NtCs4NRVxsYgnAr_4core6resultINtB5_6ResultNtNtNtCs3YIhkERLvVB_4gpui7runtime5paint12PatchOutcomeNtBO_5ErrorENtNtB7_3cmp9PartialEq2eqCs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RNvXsw_NtCs4NRVxsYgnAr_4core6resultINtB5_6ResultNtNtNtCs3YIhkERLvVB_4gpui7runtime5paint12PatchOutcomeNtBO_5ErrorENtNtB7_3cmp9PartialEq2eqCs4wvzfdZQtD2_12remote_probe",
+      "size": 402,
+      "value": 0,
+      "sha256": "faddade4713252a6ae1027e67f0d9eae7c946185ac3c2d9dd5c76544567bef20",
+      "demangled": "<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::paint::PatchOutcome, gpui[2e59527d19372dc9]::runtime::Error> as core[37f591cfbe66b0b1]::cmp::PartialEq>::eq",
+      "explicit_stack_subtractions": [],
+      "push_count": 1
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::acknowledge",
+    "old": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11acknowledgeBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11acknowledgeBO_",
+      "size": 1402,
+      "value": 0,
+      "sha256": "a60ff32436baaf455a012e9de4364a62789d3653a3cf9f60900819fa7ca72d3b",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::acknowledge",
+      "explicit_stack_subtractions": [
+        192
+      ],
+      "push_count": 5
+    },
+    "new": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11acknowledgeBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11acknowledgeBO_",
+      "size": 1402,
+      "value": 0,
+      "sha256": "c96c7e000dfef035cd3dc0f3417a50ea1d5ddb7a9091a069c2699fb2bb1efcdd",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::acknowledge",
+      "explicit_stack_subtractions": [
+        192
+      ],
+      "push_count": 5
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::describe_inner",
+    "old": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE14describe_innerBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE14describe_innerBO_",
+      "size": 50627,
+      "value": 0,
+      "sha256": "8dd670ff3055d9b8f9828987f9fef1c8ca9dddf5594d696301c9d623745f8355",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::describe_inner",
+      "explicit_stack_subtractions": [
+        4096,
+        4096,
+        936
+      ],
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE14describe_innerBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE14describe_innerBO_",
+      "size": 50627,
+      "value": 0,
+      "sha256": "6fb0768d3ab2a7b7dcb201bf4cd165221149279853aa32f39b1e87736548a391",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::describe_inner",
+      "explicit_stack_subtractions": [
+        4096,
+        4096,
+        936
+      ],
+      "push_count": 6
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::inspector_display",
+    "old": {
+      "symbol": "_RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17inspector_displayB10_",
+      "section": ".text._RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17inspector_displayB10_",
+      "size": 787,
+      "value": 0,
+      "sha256": "9ad257aa67f4efbdbd7e9acbeea58c93f1a5323e2af36e71b940d2cd42dbd127",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::inspector_display",
+      "explicit_stack_subtractions": [
+        88
+      ],
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "_RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17inspector_displayB10_",
+      "section": ".text._RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17inspector_displayB10_",
+      "size": 787,
+      "value": 0,
+      "sha256": "f12aac6acabf5e432349d662361800392bc6c46b5aa7cc1521139d50b1779241",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::inspector_display",
+      "explicit_stack_subtractions": [
+        88
+      ],
+      "push_count": 6
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner",
+    "old": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innerBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innerBO_",
+      "size": 21991,
+      "value": 0,
+      "sha256": "6a7010323869743bd11ac5d78eb7e27edea2a518ccd1c418efe036caddcfb17c",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner",
+      "explicit_stack_subtractions": [
+        4096,
+        4096,
+        808
+      ],
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "_RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innerBO_",
+      "section": ".text._RNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB5_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_innerBO_",
+      "size": 21991,
+      "value": 0,
+      "sha256": "8f7f410440807886c6fd6e9bf327ea98765b84e9d24c938d2472d4c6528fb02b",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner",
+      "explicit_stack_subtractions": [
+        4096,
+        4096,
+        808
+      ],
+      "push_count": 6
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#9}",
+    "old": {
+      "symbol": "_RNCNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_inners7_0BQ_",
+      "section": ".text._RNCNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_inners7_0BQ_",
+      "size": 1419,
+      "value": 0,
+      "sha256": "45768466b13f2c4206940b3ad30494f814b404c531999a95dd17377fb5dadddf",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#9}",
+      "explicit_stack_subtractions": [
+        232
+      ],
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "_RNCNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_inners7_0BQ_",
+      "section": ".text._RNCNvMsu_NtCs3YIhkERLvVB_4gpui7runtimeINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE13present_inners7_0BQ_",
+      "size": 1419,
+      "value": 0,
+      "sha256": "4326e585e271de23d3f409efb78e537a0c0f5743792b0aefbc56826ca2eeb8a8",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::present_inner::{closure#9}",
+      "explicit_stack_subtractions": [
+        232
+      ],
+      "push_count": 6
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::prune_focus",
+    "old": {
+      "symbol": "_RNvMs3_NtNtCs3YIhkERLvVB_4gpui7runtime5inputINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11prune_focusBW_",
+      "section": ".text._RNvMs3_NtNtCs3YIhkERLvVB_4gpui7runtime5inputINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11prune_focusBW_",
+      "size": 201,
+      "value": 0,
+      "sha256": "bc91607e0f23b1df78c63fedc1ac296089ab5a2e8092b598e3d3527b665f70fa",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::prune_focus",
+      "explicit_stack_subtractions": [
+        64
+      ],
+      "push_count": 1
+    },
+    "new": {
+      "symbol": "_RNvMs3_NtNtCs3YIhkERLvVB_4gpui7runtime5inputINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11prune_focusBW_",
+      "section": ".text._RNvMs3_NtNtCs3YIhkERLvVB_4gpui7runtime5inputINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE11prune_focusBW_",
+      "size": 201,
+      "value": 0,
+      "sha256": "669fc94d3a8fe0d6d747f25d92db163414a0de3b349baf44901091a3453d555c",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::prune_focus",
+      "explicit_stack_subtractions": [
+        64
+      ],
+      "push_count": 1
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::refresh_inspector",
+    "old": {
+      "symbol": "_RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17refresh_inspectorB10_",
+      "section": ".text._RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17refresh_inspectorB10_",
+      "size": 5583,
+      "value": 0,
+      "sha256": "e8d299d6697a43cde31eac91ebaf2087a92655fd30a66f635c2e0f892421c37a",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::refresh_inspector",
+      "explicit_stack_subtractions": [
+        1752
+      ],
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "_RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17refresh_inspectorB10_",
+      "section": ".text._RNvMs2_NtNtCs3YIhkERLvVB_4gpui7runtime9inspectorINtB7_7RuntimeNtCs4wvzfdZQtD2_12remote_probe4PageE17refresh_inspectorB10_",
+      "size": 5583,
+      "value": 0,
+      "sha256": "82e83bb6ee65d3ff151644a12b2c17a285b4e00decc87589e4819b1852545a1b",
+      "demangled": "<gpui[2e59527d19372dc9]::runtime::Runtime<remote_probe[34b2a338312cd6ba]::Page>>::refresh_inspector",
+      "explicit_stack_subtractions": [
+        1752
+      ],
+      "push_count": 6
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<core[37f591cfbe66b0b1]::result::Result<(), gpui[2e59527d19372dc9]::runtime::Error>, alloc[24b8200b0946867]::boxed::Box<dyn core[37f591cfbe66b0b1]::any::Any + core[37f591cfbe66b0b1]::marker::Send>>>",
+    "old": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultIBC_uNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorEINtNtCscdodAO9FK5_5alloc5boxed3BoxDNtNtB4_3any3AnyNtNtB4_6marker4SendEL_EEECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultIBC_uNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorEINtNtCscdodAO9FK5_5alloc5boxed3BoxDNtNtB4_3any3AnyNtNtB4_6marker4SendEL_EEECs4wvzfdZQtD2_12remote_probe",
+      "size": 179,
+      "value": 0,
+      "sha256": "4c21adff52507203c3dc7bdfc3636f362c9ac0ea87f70d50e0bdfd97353df9eb",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<core[37f591cfbe66b0b1]::result::Result<(), gpui[2e59527d19372dc9]::runtime::Error>, alloc[24b8200b0946867]::boxed::Box<dyn core[37f591cfbe66b0b1]::any::Any + core[37f591cfbe66b0b1]::marker::Send>>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultIBC_uNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorEINtNtCscdodAO9FK5_5alloc5boxed3BoxDNtNtB4_3any3AnyNtNtB4_6marker4SendEL_EEECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultIBC_uNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorEINtNtCscdodAO9FK5_5alloc5boxed3BoxDNtNtB4_3any3AnyNtNtB4_6marker4SendEL_EEECs4wvzfdZQtD2_12remote_probe",
+      "size": 179,
+      "value": 0,
+      "sha256": "511d8f524f4982ca9705b3498c7a7ffddb015e8dd393426775ba38c2ed7895a0",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<core[37f591cfbe66b0b1]::result::Result<(), gpui[2e59527d19372dc9]::runtime::Error>, alloc[24b8200b0946867]::boxed::Box<dyn core[37f591cfbe66b0b1]::any::Any + core[37f591cfbe66b0b1]::marker::Send>>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::Commit, gpui[2e59527d19372dc9]::runtime::Error>>",
+    "old": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultNtNtCs3YIhkERLvVB_4gpui7runtime6CommitNtBZ_5ErrorEECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultNtNtCs3YIhkERLvVB_4gpui7runtime6CommitNtBZ_5ErrorEECs4wvzfdZQtD2_12remote_probe",
+      "size": 78,
+      "value": 0,
+      "sha256": "fffb22c31c566ed1e7c6d4247100548be29faaf4a71b36b422300b70463f5f12",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::Commit, gpui[2e59527d19372dc9]::runtime::Error>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultNtNtCs3YIhkERLvVB_4gpui7runtime6CommitNtBZ_5ErrorEECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtB4_6result6ResultNtNtCs3YIhkERLvVB_4gpui7runtime6CommitNtBZ_5ErrorEECs4wvzfdZQtD2_12remote_probe",
+      "size": 78,
+      "value": 0,
+      "sha256": "cc5b2c9ac5860b6f82f166e77d55dbe9b09f755853f2228acf11a4fe2b7d628a",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<core[37f591cfbe66b0b1]::result::Result<gpui[2e59527d19372dc9]::runtime::Commit, gpui[2e59527d19372dc9]::runtime::Error>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>",
+    "old": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui6remote4LaneyFG_QL0_NtCs4wvzfdZQtD2_12remote_probe4PageyEuuEEB1l_",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui6remote4LaneyFG_QL0_NtCs4wvzfdZQtD2_12remote_probe4PageyEuuEEB1l_",
+      "size": 153,
+      "value": 0,
+      "sha256": "a616b9e8618ab1c4f33202cea3826a3b46acec1144aa6426a866c6c18f133e1e",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui6remote4LaneyFG_QL0_NtCs4wvzfdZQtD2_12remote_probe4PageyEuuEEB1l_",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui6remote4LaneyFG_QL0_NtCs4wvzfdZQtD2_12remote_probe4PageyEuuEEB1l_",
+      "size": 167,
+      "value": 0,
+      "sha256": "c6d9913dcd23139033627df9f9a9b6acf411afa922a657878273880ba242afa5",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "size_delta": 14
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::remote::Notification>",
+    "old": null,
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui6remote12NotificationECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui6remote12NotificationECs4wvzfdZQtD2_12remote_probe",
+      "size": 140,
+      "value": 0,
+      "sha256": "f93746e3d32fcf77c4503a0bb28c4c74c5f85fc4ccefeeb456c6cc5a8760e6ba",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::remote::Notification>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "size_delta": 140
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::Error>",
+    "old": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 72,
+      "value": 0,
+      "sha256": "2b812d733abe9d03a1b2695b08c044c821c8d351935f84e004717bf271828791",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueNtNtCs3YIhkERLvVB_4gpui7runtime5ErrorECs4wvzfdZQtD2_12remote_probe",
+      "size": 72,
+      "value": 0,
+      "sha256": "5ef4e1679a7809739c32f6f04e85f8963b23536b26ceab7dc5aca2e8f1922b3f",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::Error>",
+      "explicit_stack_subtractions": [],
+      "push_count": 0
+    },
+    "size_delta": 0
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::RuntimeMut<remote_probe[34b2a338312cd6ba]::Page, gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>>",
+    "old": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui7runtime10RuntimeMutNtCs4wvzfdZQtD2_12remote_probe4PageINtNtBG_6remote4LaneyFG_QL0_B1j_yEuuEEEB1l_",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui7runtime10RuntimeMutNtCs4wvzfdZQtD2_12remote_probe4PageINtNtBG_6remote4LaneyFG_QL0_B1j_yEuuEEEB1l_",
+      "size": 76,
+      "value": 0,
+      "sha256": "1f4cda2c61bb261aac9c36845ccea25adb70bc441ae2ad7fb117c0952fe848bd",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::RuntimeMut<remote_probe[34b2a338312cd6ba]::Page, gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 1
+    },
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui7runtime10RuntimeMutNtCs4wvzfdZQtD2_12remote_probe4PageINtNtBG_6remote4LaneyFG_QL0_B1j_yEuuEEEB1l_",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtCs3YIhkERLvVB_4gpui7runtime10RuntimeMutNtCs4wvzfdZQtD2_12remote_probe4PageINtNtBG_6remote4LaneyFG_QL0_B1j_yEuuEEEB1l_",
+      "size": 84,
+      "value": 0,
+      "sha256": "83f9d09f4ff1b1da4c8efcda5df9cc4ea14f69853499097b6c2345add012f7da",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<gpui[2e59527d19372dc9]::runtime::RuntimeMut<remote_probe[34b2a338312cd6ba]::Page, gpui[2e59527d19372dc9]::remote::Lane<u64, for<'a> fn(&'a mut remote_probe[34b2a338312cd6ba]::Page, u64), ()>>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 1
+    },
+    "size_delta": 8
+  },
+  {
+    "name": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::once_lock::OnceLock<gpui_reactivity_host[32590366fd69069b]::native::Wake>>",
+    "old": null,
+    "new": {
+      "symbol": "_RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync9once_lock8OnceLockNtNtCs4jZYJ9inag9_20gpui_reactivity_host6native4WakeEECs4wvzfdZQtD2_12remote_probe",
+      "section": ".text._RINvNtCs4NRVxsYgnAr_4core3ptr9drop_glueINtNtNtCs2AWtUsOyxgP_3std4sync9once_lock8OnceLockNtNtCs4jZYJ9inag9_20gpui_reactivity_host6native4WakeEECs4wvzfdZQtD2_12remote_probe",
+      "size": 115,
+      "value": 0,
+      "sha256": "181623d6e8dbaf3067a830e6e6ea76d8ecc00c39899c62fcd405e9c8dbdfa0da",
+      "demangled": "core[37f591cfbe66b0b1]::ptr::drop_glue::<std[1e3c4ec04c5261a9]::sync::once_lock::OnceLock<gpui_reactivity_host[32590366fd69069b]::native::Wake>>",
+      "explicit_stack_subtractions": [],
+      "push_count": 3
+    },
+    "size_delta": 115
+  },
+  {
+    "name": "ordinary_delivery",
+    "old": {
+      "symbol": "ordinary_delivery",
+      "section": ".text.ordinary_delivery",
+      "size": 4659,
+      "value": 0,
+      "sha256": "90b1d080bdc1cb18df0ccae7899d837dc4dca50aa1dd8ffc1c3b18cb5d0ae8f5",
+      "demangled": "ordinary_delivery",
+      "explicit_stack_subtractions": [
+        152
+      ],
+      "lock_instruction_count": 12,
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "ordinary_delivery",
+      "section": ".text.ordinary_delivery",
+      "size": 4665,
+      "value": 0,
+      "sha256": "c3150d5a65d104fd6c2ba35dfb4ba13adc8d4b3f97245e00f1492c187e3def17",
+      "demangled": "ordinary_delivery",
+      "explicit_stack_subtractions": [
+        152
+      ],
+      "lock_instruction_count": 12,
+      "push_count": 6
+    },
+    "size_delta": 6
+  },
+  {
+    "name": "remote_clone",
+    "old": {
+      "symbol": "remote_clone",
+      "section": ".text.remote_clone",
+      "size": 81,
+      "value": 0,
+      "sha256": "2de87916d4adf9c0a2c7b18d99393fef531b1a87f26888f956904f972289a0ed",
+      "demangled": "remote_clone",
+      "explicit_stack_subtractions": [],
+      "lock_instruction_count": 4,
+      "push_count": 1
+    },
+    "new": {
+      "symbol": "remote_clone",
+      "section": ".text.remote_clone",
+      "size": 12,
+      "value": 0,
+      "sha256": "031092e55cc4d95940f951c19d148c8aa9fe112f6199d14a1bceafadea11a3e7",
+      "demangled": "remote_clone",
+      "explicit_stack_subtractions": [],
+      "lock_instruction_count": 1,
+      "push_count": 0
+    },
+    "size_delta": -69
+  },
+  {
+    "name": "remote_drop",
+    "old": {
+      "symbol": "remote_drop",
+      "section": ".text.remote_drop",
+      "size": 366,
+      "value": 0,
+      "sha256": "6069a0662069a3fd6129a8881580be2f48b4888030a0a492ab1d5dce1ea088ef",
+      "demangled": "remote_drop",
+      "explicit_stack_subtractions": [
+        16
+      ],
+      "lock_instruction_count": 7,
+      "push_count": 3
+    },
+    "new": {
+      "symbol": "remote_drop",
+      "section": ".text.remote_drop",
+      "size": 22,
+      "value": 0,
+      "sha256": "deee27c0240ded6bf5db994a932bc9be1f8d569b05730ae3b1de0e1ab41d5e88",
+      "demangled": "remote_drop",
+      "explicit_stack_subtractions": [],
+      "lock_instruction_count": 1,
+      "push_count": 1
+    },
+    "size_delta": -344
+  },
+  {
+    "name": "remote_send",
+    "old": {
+      "symbol": "remote_send",
+      "section": ".text.remote_send",
+      "size": 2153,
+      "value": 0,
+      "sha256": "b12cdc41fa99a828d958f3933fa1be08b2fe41e14fff94a9425c75207d8af43e",
+      "demangled": "remote_send",
+      "explicit_stack_subtractions": [
+        72
+      ],
+      "lock_instruction_count": 11,
+      "push_count": 6
+    },
+    "new": {
+      "symbol": "remote_send",
+      "section": ".text.remote_send",
+      "size": 2168,
+      "value": 0,
+      "sha256": "a46c5f3a1e652ee6612e0f8ab537e868430d98dfa4ada8dbc090e6be22fb7558",
+      "demangled": "remote_send",
+      "explicit_stack_subtractions": [
+        72
+      ],
+      "lock_instruction_count": 11,
+      "push_count": 6
+    },
+    "size_delta": 15
+  }
+]

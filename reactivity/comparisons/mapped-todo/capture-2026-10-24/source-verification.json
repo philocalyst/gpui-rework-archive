@@ -1,0 +1,1 @@
+{"all_files_verified": 2036, "exact_set_verified": true, "core_pin": "0062bf589829c4f28807ad0fde3e13285379294c", "build_scope": [".cargo", "clippy.toml", "reactivity/Cargo.toml", "reactivity/Cargo.lock", "reactivity/rust-toolchain.toml", "reactivity/crates", "reactivity/vendor"], "full_repository_claim": false}

@@ -1,0 +1,26 @@
+{
+  "/tmp/gpui-pointer-code-4d-frozen": {
+    "bytes": 15341064,
+    "sha256": "967e0a10123b5404c6ce9eb1d83b81adc55205216a584ce63aa2f1be4587cd26"
+  },
+  "/tmp/gpui-pointer-code-niche-frozen": {
+    "bytes": 15341072,
+    "sha256": "c02d677db65994971415e4fe8539a45291210c5de5fd1bf9c28cfe415537021a"
+  },
+  "/tmp/gpui-pointer-niche-native-tests-frozen": {
+    "bytes": 685301128,
+    "sha256": "6d614bbf240282524e1e8db6263a8324898e8930c396774ffb828ff8926ab7dd"
+  },
+  "/tmp/gpui-pointer-niche-native-pointer-tests-frozen": {
+    "bytes": 349470608,
+    "sha256": "9194e6e8af5a598e6f512cc8728375b05ef89915084af1baa2ad663ba8708ac1"
+  },
+  "/tmp/gpui-pointer-niche-default-pointer-tests-frozen": {
+    "bytes": 163629040,
+    "sha256": "74b4632bf66e3f7e747fdf5b31e4c738a9ab3d2e8646c1048f63802a71a12564"
+  },
+  "/tmp/gpui-pointer-niche-hb-frozen": {
+    "bytes": 420779744,
+    "sha256": "80118287b730de6c4cfad999f90e5b24286e48beec9a1f87717f6279dcbb9c1a"
+  }
+}

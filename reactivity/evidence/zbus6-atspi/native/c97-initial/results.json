@@ -1,0 +1,37 @@
+[
+  {
+    "gate": "lifecycle",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/tmp/gpui-zbus6-atspi-target/debug/deps/gpui-dea27d691d384fed",
+      "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0
+  },
+  {
+    "gate": "real-registry",
+    "command": [
+      "bash",
+      "/root/gpui-zbus6-atspi/reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher"
+    ],
+    "exit": 0
+  },
+  {
+    "gate": "no-session",
+    "command": [
+      "/tmp/gpui-zbus6-atspi-target/debug/deps/gpui-dea27d691d384fed",
+      "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0
+  }
+]

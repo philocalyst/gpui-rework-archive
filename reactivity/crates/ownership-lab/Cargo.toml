@@ -1,0 +1,16 @@
+[package]
+name = "gpui_reactivity_ownership_lab"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+[features]
+loom = ["dep:loom"]
+
+[dependencies]
+loom = {version = "=0.7.2", optional = true}
+rtrb = "=0.4.0"
+
+[dev-dependencies]
+loom = "=0.7.2"

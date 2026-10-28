@@ -1,0 +1,20 @@
+{
+  "name": "fixture-build",
+  "command": [
+    "cargo",
+    "build",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "benchmarks/gpu-owner/Cargo.toml",
+    "--bin",
+    "static-lifetime",
+    "--features",
+    "offline-shader,trace,noop",
+    "--message-format=json"
+  ],
+  "environment_shell": "",
+  "exit": 0,
+  "log_sha256": "dfc172a27c80f3a2f0356a3339c803d131fcc48e8bc50b9b01b04abcf24d7e3b",
+  "json_sha256": "11687485e12a21168b5ae05e661908c65631c5791f9c069e9d1fdde674a4ae85"
+}

@@ -1,0 +1,7 @@
+{
+  "command": [
+    "python3",
+    "/home/user/gpui-glyph-submit-evidence/shader_receipt.py"
+  ],
+  "exit": 0
+}

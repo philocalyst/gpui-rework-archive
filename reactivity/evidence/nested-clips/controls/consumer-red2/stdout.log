@@ -1,0 +1,11 @@
+
+running 1 test
+test node::tests::child_clip_prunes_descendants_without_excluding_parent ... FAILED
+
+failures:
+
+failures:
+    node::tests::child_clip_prunes_descendants_without_excluding_parent
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 209 filtered out; finished in 0.00s
+

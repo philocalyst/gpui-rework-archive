@@ -1,0 +1,86 @@
+warning: fields `component` and `handler` are never read
+   --> crates/gpui/src/element.rs:317:5
+    |
+316 | struct ThinComponentRouteLayout<P, C> {
+    |        ------------------------ fields in this struct
+317 |     component: Component<P, C>,
+    |     ^^^^^^^^^
+318 |     handler: ThinHandlerLayout,
+    |     ^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: multiple fields are never read
+    --> crates/gpui/src/element.rs:1074:5
+     |
+1073 | struct ThinElLayout<'a> {
+     |        ------------ fields in this struct
+1074 |     kind: NodeKind,
+     |     ^^^^
+1075 |     text: Option<Text<'a>>,
+     |     ^^^^
+1076 |     children: Vec<El<'a>>,
+     |     ^^^^^^^^
+1077 |     style: Style,
+     |     ^^^^^
+1078 |     on_click: Option<ThinHandlerLayout>,
+     |     ^^^^^^^^
+1079 |     components: ComponentBoundaries,
+     |     ^^^^^^^^^^
+1080 |     extra: Option<Box<crate::semantic::ElementExtra<'a>>>,
+     |     ^^^^^
+
+warning: fields `parent`, `kind`, `text`, `style`, `on_click`, and `components` are never read
+    --> crates/gpui/src/element.rs:1083:5
+     |
+1082 | struct ThinDraftNodeLayout<'a> {
+     |        ------------------- fields in this struct
+1083 |     parent: Option<u32>,
+     |     ^^^^^^
+1084 |     kind: NodeKind,
+     |     ^^^^
+1085 |     text: Option<Text<'a>>,
+     |     ^^^^
+1086 |     style: Style,
+     |     ^^^^^
+1087 |     on_click: Option<ThinHandlerLayout>,
+     |     ^^^^^^^^
+1088 |     components: ComponentBoundaries,
+     |     ^^^^^^^^^^
+
+warning: fields `identity`, `parent`, `ordinal`, `content`, `component_scope`, and `handler` are never read
+   --> crates/gpui/src/runtime.rs:632:5
+    |
+631 | struct ThinNodeLayout {
+    |        -------------- fields in this struct
+632 |     identity: NonZeroU64,
+    |     ^^^^^^^^
+633 |     parent: Parent,
+    |     ^^^^^^
+634 |     ordinal: u32,
+    |     ^^^^^^^
+635 |     content: Content,
+    |     ^^^^^^^
+636 |     component_scope: u32,
+    |     ^^^^^^^^^^^^^^^
+637 |     handler: Option<ThinHandlerLayout>,
+    |     ^^^^^^^
+
+warning: `gpui` (lib) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running `/tmp/gpui-route-census-target/debug/examples/route_census_controls captured`
+ROUTE_OVERLAP old_nodes=0 old_slots=0 draft_nodes=129 draft_capacity=256 draft_slots=128 draft_component_checks=0 el_live=0 el_peak=129
+ROUTE_SUMMARY label=old-during-description objects=0 zst=0 base_allocs=0 thin_allocs=0 base_requested=0 thin_requested=0 request_delta=0
+ROUTE_SUMMARY label=draft-before-publication objects=128 zst=0 base_allocs=128 thin_allocs=128 base_requested=1024 thin_requested=2048 request_delta=1024
+ROUTE_TYPE label=draft-before-publication kind=captured-method name="gpui::element::MethodRoute<route_census_controls::Captured, <route_census_controls::Captured as gpui::View>::view::{{closure}}::{{closure}}>" count=128 base_payload=8/8 base_request=8/8 thin_payload=8/8 thin_request=16/8
+ROUTE_OWNERS label=captured_128_initial nodes=129 node_capacity=129 none=1 some=128 node_size=40 thin_node_size=32 option_handler_size=16 thin_option_handler_size=8 handler_size=16 thin_handler_size=8 el_size=176 thin_el_size=168 draft_size=152 thin_draft_size=144 el_live=0 el_peak=129
+ROUTE_SUMMARY label=captured_128_initial objects=128 zst=0 base_allocs=128 thin_allocs=128 base_requested=1024 thin_requested=2048 request_delta=1024
+ROUTE_TYPE label=captured_128_initial kind=captured-method name="gpui::element::MethodRoute<route_census_controls::Captured, <route_census_controls::Captured as gpui::View>::view::{{closure}}::{{closure}}>" count=128 base_payload=8/8 base_request=8/8 thin_payload=8/8 thin_request=16/8
+ROUTE_OVERLAP old_nodes=129 old_slots=128 draft_nodes=129 draft_capacity=256 draft_slots=128 draft_component_checks=0 el_live=0 el_peak=129
+ROUTE_SUMMARY label=old-during-description objects=128 zst=0 base_allocs=128 thin_allocs=128 base_requested=1024 thin_requested=2048 request_delta=1024
+ROUTE_TYPE label=old-during-description kind=captured-method name="gpui::element::MethodRoute<route_census_controls::Captured, <route_census_controls::Captured as gpui::View>::view::{{closure}}::{{closure}}>" count=128 base_payload=8/8 base_request=8/8 thin_payload=8/8 thin_request=16/8
+ROUTE_SUMMARY label=draft-before-publication objects=128 zst=0 base_allocs=128 thin_allocs=128 base_requested=1024 thin_requested=2048 request_delta=1024
+ROUTE_TYPE label=draft-before-publication kind=captured-method name="gpui::element::MethodRoute<route_census_controls::Captured, <route_census_controls::Captured as gpui::View>::view::{{closure}}::{{closure}}>" count=128 base_payload=8/8 base_request=8/8 thin_payload=8/8 thin_request=16/8
+ROUTE_OWNERS label=captured_128_after_click nodes=129 node_capacity=129 none=1 some=128 node_size=40 thin_node_size=32 option_handler_size=16 thin_option_handler_size=8 handler_size=16 thin_handler_size=8 el_size=176 thin_el_size=168 draft_size=152 thin_draft_size=144 el_live=0 el_peak=129
+ROUTE_SUMMARY label=captured_128_after_click objects=128 zst=0 base_allocs=128 thin_allocs=128 base_requested=1024 thin_requested=2048 request_delta=1024
+ROUTE_TYPE label=captured_128_after_click kind=captured-method name="gpui::element::MethodRoute<route_census_controls::Captured, <route_census_controls::Captured as gpui::View>::view::{{closure}}::{{closure}}>" count=128 base_payload=8/8 base_request=8/8 thin_payload=8/8 thin_request=16/8

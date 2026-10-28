@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/gpui-inspector-pointer-native-client-v2.py", line 149, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/tmp/gpui-inspector-pointer-native-client-v2.py", line 94, in main
+    assert 'Div' in selected,selected
+           ^^^^^^^^^^^^^^^^^
+AssertionError: Selected: Generic #6

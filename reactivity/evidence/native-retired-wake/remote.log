@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.23s
+     Running tests/remote.rs (/tmp/gpui-todo-comparison-target/debug/deps/remote-0ea72120ae236805)
+
+running 13 tests
+test full_and_closed_return_the_same_non_clone_non_debug_payload ... ok
+test an_unopened_native_builder_closes_its_inboxes_before_dropping_the_model ... ok
+test queued_staged_and_applied_payloads_are_dropped_exactly_once_after_quarantine ... ok
+test close_and_drop_close_receivers_before_a_model_held_sender_can_run_its_destructor ... ok
+test preallocated_transport_and_idle_turns_do_not_allocate ... ok
+test outside_owner_fault_releases_queued_payloads_before_returning_to_the_caller ... ok
+test quarantine_revokes_existing_remotes_and_cancels_the_remaining_queue ... ok
+test owner_fault_outside_delivery_also_closes_worker_admission_immediately ... ok
+test messages_enqueued_by_a_callback_wait_for_the_following_turn ... ok
+test pre_mount_messages_are_bounded_and_zero_budget_is_idle ... ok
+test presentation_and_description_failures_keep_later_queued_repairs_and_never_replay_applied_values ... ok
+test real_worker_completion_is_inert_until_the_same_owner_barrier_accepts_a_frozen_batch ... ok
+test small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

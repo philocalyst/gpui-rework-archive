@@ -1,0 +1,59 @@
+   Compiling proc-macro2 v1.0.107
+    Checking rustix v1.1.5
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+    Checking cephal v0.1.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/cephal)
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+    Checking yoke v0.8.3
+    Checking zerovec v0.11.8
+   Compiling bytemuck_derive v1.12.1
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking bytemuck v1.25.2
+    Checking font-types v0.12.7
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+   Compiling serde_derive v1.0.229
+    Checking icu_provider v2.3.1
+    Checking icu_collections v2.3.0
+    Checking read-fonts v0.41.0
+    Checking serde v1.0.229
+    Checking icu_properties v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking read-fonts v0.46.0
+    Checking fontique v0.12.0
+    Checking harfrust v0.12.0
+    Checking icu_segmenter v2.3.0
+    Checking parley_data v0.12.0
+    Checking icu_normalizer v2.3.0
+    Checking skrifa v0.44.0
+   Compiling zbus_utils v6.0.0
+    Checking swash v0.2.10
+    Checking skrifa v0.49.0
+    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/core)
+    Checking parley_engine v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley_engine)
+   Compiling fearless_simd_macros v0.1.0
+    Checking parley v0.12.0 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/parley)
+    Checking socket2 v0.6.5
+    Checking memchr v2.8.3
+    Checking gpui_canvas v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/canvas)
+    Checking serde_json v1.0.154
+    Checking zruntime v0.2.0
+   Compiling zbus_macros v6.0.0
+    Checking zcheapstr v1.1.0
+    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/state)
+   Compiling serde_repr v0.1.21
+   Compiling async-trait v0.1.92
+    Checking accesskit v0.25.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit)
+    Checking gethostname v1.1.0
+    Checking x11rb-protocol v0.14.0
+    Checking zbus v6.0.0
+    Checking x11rb v0.14.0
+    Checking accesskit_consumer v0.39.1 (/tmp/gpui-rapid-pointer-sol/reactivity/vendor/accesskit_consumer)
+    Checking gpui v0.1.0 (/tmp/gpui-rapid-pointer-sol/reactivity/crates/gpui)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 30.74s

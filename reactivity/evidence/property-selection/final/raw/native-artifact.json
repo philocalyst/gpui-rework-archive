@@ -1,0 +1,7 @@
+{
+  "source": "021dcb5d29a84269c896674823b3a508d7b22d97",
+  "bytes": 722549856,
+  "sha256": "dfed1f223e7451888d6050952055c4234bfb1509ce78d95147da14cdb410b2bc",
+  "frozen_path": "/tmp/gpui-property-selection-native-021d-frozen",
+  "kind": "unstripped debug native test executable"
+}

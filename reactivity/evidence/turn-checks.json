@@ -1,0 +1,114 @@
+{
+  "source_code_head": "067eebce12",
+  "cwd": "/root/gpui-ce3/reactivity",
+  "environment": "Rust/native tools from /tmp/gpui-native-env.sh; cross targets build their own std; no target OS execution is implied.",
+  "checks": [
+    {
+      "check": "turn-gpui",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "log": "turn-gpui.txt",
+      "passed_tests": 199
+    },
+    {
+      "check": "turn-linux-clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11,wayland",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "log": "turn-linux-clippy.txt"
+    },
+    {
+      "check": "turn-native-remote",
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "native_remote_results",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "env": {},
+      "exit_code": 0,
+      "log": "turn-native-remote.txt",
+      "passed_tests": 1
+    },
+    {
+      "check": "turn-apple-clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-Zbuild-std=std,panic_abort",
+        "--target",
+        "aarch64-apple-darwin",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {
+        "RUSTC_BOOTSTRAP": "1",
+        "CARGO_TARGET_DIR": "/tmp/gpui-accesskit-apple-target"
+      },
+      "exit_code": 0,
+      "log": "turn-apple-clippy.txt"
+    },
+    {
+      "check": "turn-windows-clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "-Zbuild-std=std,panic_abort",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "-p",
+        "gpui",
+        "--features",
+        "desktop",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "env": {
+        "RUSTC_BOOTSTRAP": "1",
+        "CARGO_TARGET_DIR": "/tmp/gpui-accesskit-windows-msvc-target",
+        "CC_x86_64_pc_windows_msvc": "clang-cl"
+      },
+      "exit_code": 0,
+      "log": "turn-windows-clippy.txt"
+    }
+  ]
+}

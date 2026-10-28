@@ -1,0 +1,11 @@
+{
+  "source": "d6883d6d6ad2cee0ba3d3458ac9ef7fac5dea78e",
+  "exit": 124,
+  "source_guards": 1989,
+  "guards_match": true,
+  "passed": 610,
+  "failed": 0,
+  "ignored": 33,
+  "harnesses": 56,
+  "bootstrap": false
+}

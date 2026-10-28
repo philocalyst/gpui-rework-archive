@@ -1,0 +1,45 @@
+     Locking 11 packages to latest Rust 1.97.1 compatible versions
+      Adding block-buffer v0.12.1
+      Adding cpufeatures v0.3.1
+      Adding crypto-common v0.2.2
+      Adding digest v0.11.3
+      Adding fixedbitset v0.5.7
+      Adding foldhash v0.1.5
+      Adding hashbrown v0.15.5
+      Adding hybrid-array v0.4.15
+      Adding petgraph v0.8.3
+      Adding sha2 v0.11.1
+      Adding typenum v1.20.1
+   Compiling typenum v1.20.1
+   Compiling foldhash v0.1.5
+   Compiling hashbrown v0.15.5
+   Compiling naga v30.0.1
+   Compiling fixedbitset v0.5.7
+   Compiling hybrid-array v0.4.15
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling petgraph v0.8.3
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu-hal)
+   Compiling digest v0.11.3
+   Compiling cpufeatures v0.3.1
+   Compiling sha2 v0.11.1
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu)
+   Compiling wgpu-core v30.0.1
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)
+error: failed to run custom build command for `gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)`
+
+Caused by:
+  process didn't exit successfully: `/tmp/gpui-offline-shader-target/release/build/gpui_gpu-219984cf26922adc/build-script-build` (exit status: 101)
+  --- stdout
+  cargo::rerun-if-changed=src
+  cargo::rerun-if-env-changed=GPUI_SPIRV_VAL
+
+  --- stderr
+
+  thread 'main' (655831) panicked at /tmp/gpui-offline-shader-sol/reactivity/crates/gpu/src/shader_build.rs:175:19:
+  optional SPIR-V extension
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

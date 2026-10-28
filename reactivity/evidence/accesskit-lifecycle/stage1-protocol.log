@@ -1,0 +1,9 @@
+   Compiling accesskit_unix v0.24.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_unix)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.89s
+     Running tests/service_lifecycle.rs (gpui-a11y-target/debug/deps/service_lifecycle-4b95487a29a24dd6)
+
+running 1 test
+actual Adapter protocol: late initial-true -> action/update -> disable/re-enable -> live true/true replacement -> stale-owner ignored -> destroy
+test late_service_initial_true_disable_reenable_and_live_owner_replacement ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s

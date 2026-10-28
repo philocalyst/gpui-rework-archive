@@ -1,0 +1,11 @@
+
+running 1 test
+test native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume ... FAILED
+
+failures:
+
+failures:
+    native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 300 filtered out; finished in 0.06s
+

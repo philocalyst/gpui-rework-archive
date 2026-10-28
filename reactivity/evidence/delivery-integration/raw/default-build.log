@@ -1,0 +1,10 @@
+   Compiling parley_engine v0.12.0 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/core)
+   Compiling parley v0.12.0 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/canvas)
+   Compiling accesskit v0.25.1 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/accesskit)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/state)
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-delivery-integration-sol/reactivity/vendor/accesskit_consumer)
+   Compiling gpui v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6m 06s

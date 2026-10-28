@@ -1,0 +1,415 @@
+diff --git a/reactivity/crates/gpui/Cargo.toml b/reactivity/crates/gpui/Cargo.toml
+index 8115600052..63d8cbb830 100644
+--- a/reactivity/crates/gpui/Cargo.toml
++++ b/reactivity/crates/gpui/Cargo.toml
+@@ -7,6 +7,7 @@ description = "Clean-room GPUI implementation: typed views and coherent retained
+ publish = false
+ 
+ [dependencies]
++triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
+ arcstr = { version = "=1.2.0", default-features = false, features = ["std"] }
+ gpui_reactivity_core = { path = "../core", features = ["layout"] }
+ gpui_reactivity_state = { path = "../state", features = ["serde"] }
+@@ -39,7 +40,6 @@ x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "sof
+ wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+ 
+ [dev-dependencies]
+-triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
+ allocation-counter = "=0.8.1"
+ accesskit_consumer = "=0.39.1"
+ 
+diff --git a/reactivity/crates/gpui/src/source/value.rs b/reactivity/crates/gpui/src/source/value.rs
+index f8dcb732bf..22ef8ba7db 100644
+--- a/reactivity/crates/gpui/src/source/value.rs
++++ b/reactivity/crates/gpui/src/source/value.rs
+@@ -5,13 +5,24 @@ mod representation {
+ 
+     pub auto trait Leaf {}
+     impl<T> !Leaf for Signal<T> {}
++    impl<T: ?Sized> !Leaf for std::cell::UnsafeCell<T> {}
++
++    // Reference-count metadata is not canonical value data. Still inspect the
++    // pointee: immutable sharing and copy-on-write preserve independent sources.
++    impl<T: Leaf + ?Sized> Leaf for std::sync::Arc<T> {}
++    impl<T: Leaf + ?Sized> Leaf for triomphe::Arc<T> {}
++    // ArcStr's fixed str bytes are immutable; only lease metadata can change.
++    impl Leaf for arcstr::ArcStr {}
+ }
+ 
+ /// A value that can grant an exact source-edit capability.
+ ///
+-/// This automatically implemented, sealed bound excludes `Signal` anywhere in
+-/// the value's owned or borrowed representation, including through containers.
+-/// Editing an outer value must not silently edit another registered signal.
++/// This sealed bound excludes nested `Signal` and `UnsafeCell` storage in the
++/// value's owned or borrowed representation, including through containers.
++/// Standard and Triomphe Arc leases inspect their pointee rather than their
++/// reference-count metadata; ArcStr leases contain fixed immutable str bytes.
++/// An exact edit cannot mutate another source's
++/// canonical data through a shared atomic, lock, Cell or RefCell payload.
+ /// General nested `Signal` state remains supported through coarse `Win::update`
+ /// edits; component models can expose their own independent leaf sources.
+ ///
+@@ -20,4 +31,9 @@ mod representation {
+ /// `Box<dyn Any>` cannot prove that it excludes signals. This alias cannot be
+ /// implemented manually, and its private underlying trait cannot be named by
+ /// consumers.
++///
++/// This representation check does not prove arbitrary closure purity. External
++/// state and reference-count observations are outside canonical source data.
++/// Models with shared mutable resources can still use coarse owner updates;
++/// exact dependencies should declare immutable snapshots or explicit versions.
+ pub trait SourceValue = representation::Leaf;
+diff --git a/reactivity/crates/gpui/tests/runtime.rs b/reactivity/crates/gpui/tests/runtime.rs
+index 51c20cb06e..126c2162df 100644
+--- a/reactivity/crates/gpui/tests/runtime.rs
++++ b/reactivity/crates/gpui/tests/runtime.rs
+@@ -1,5 +1,5 @@
+ use gpui::{Error, prelude::*};
+-use std::{cell::RefCell, rc::Rc};
++use std::sync::atomic::{AtomicUsize, Ordering};
+ 
+ struct Counter {
+     count: Signal<u32>,
+@@ -526,19 +526,22 @@ fn a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning()
+ // resource, and even generic error diagnostics must not impose those bounds.
+ struct Resource {
+     bytes: Vec<u8>,
+-    drops: Rc<std::cell::Cell<usize>>,
++    // Test instrumentation is external to the canonical resource representation.
++    drops: fn() -> usize,
++    dropped: fn(),
+ }
+ impl Resource {
+-    fn new(drops: &Rc<std::cell::Cell<usize>>) -> Self {
++    fn new(drops: fn() -> usize, dropped: fn()) -> Self {
+         Self {
+             bytes: vec![1, 2, 3],
+-            drops: drops.clone(),
++            drops,
++            dropped,
+         }
+     }
+ }
+ impl Drop for Resource {
+     fn drop(&mut self) {
+-        self.drops.set(self.drops.get() + 1);
++        (self.dropped)();
+     }
+ }
+ struct Resources {
+@@ -572,11 +575,10 @@ impl View for Resources {
+     }
+ }
+ fn resources() -> Win<Resources> {
+-    let old_drops = Rc::new(std::cell::Cell::new(0));
+     Win::with_size(
+         Resources {
+-            first: Signal::new(Resource::new(&old_drops)),
+-            second: Signal::new(Resource::new(&old_drops)),
++            first: Signal::new(Resource::new(|| 0, || {})),
++            second: Signal::new(Resource::new(|| 0, || {})),
+         },
+         8,
+         8,
+@@ -593,7 +595,7 @@ fn rejected_resource(
+         gpui::SetError::Rejected { error, value } => {
+             assert_eq!(error, expected);
+             assert_eq!(value.bytes.as_ptr(), pointer);
+-            assert_eq!(value.drops.get(), 0);
++            assert_eq!((value.drops)(), 0);
+             value
+         }
+         _ => panic!("a pre-admission error consumed the resource"),
+@@ -602,9 +604,15 @@ fn rejected_resource(
+ 
+ #[test]
+ fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
++    static DROPS: AtomicUsize = AtomicUsize::new(0);
+     let mut win = resources();
+-    let drops = Rc::new(std::cell::Cell::new(0));
+-    let value = Resource::new(&drops);
++    DROPS.store(0, Ordering::Relaxed);
++    let value = Resource::new(
++        || DROPS.load(Ordering::Relaxed),
++        || {
++            DROPS.fetch_add(1, Ordering::Relaxed);
++        },
++    );
+     let pointer = value.bytes.as_ptr();
+     let mut closed = resources();
+     closed.close();
+@@ -637,16 +645,22 @@ fn rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry() {
+     let commit = win.set(Resources::FIRST, value).unwrap();
+     assert_eq!(commit.source_epoch, 1);
+     assert_eq!(win.with_model(|m| m.first.bytes.as_ptr()).unwrap(), pointer);
+-    assert_eq!(drops.get(), 0);
++    assert_eq!(DROPS.load(Ordering::Relaxed), 0);
+     drop(win);
+-    assert_eq!(drops.get(), 1);
++    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
+ }
+ 
+ #[test]
+ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
++    static DROPS: AtomicUsize = AtomicUsize::new(0);
+     let mut win = resources();
+-    let drops = Rc::new(std::cell::Cell::new(0));
+-    let value = Resource::new(&drops);
++    DROPS.store(0, Ordering::Relaxed);
++    let value = Resource::new(
++        || DROPS.load(Ordering::Relaxed),
++        || {
++            DROPS.fetch_add(1, Ordering::Relaxed);
++        },
++    );
+     let pointer = value.bytes.as_ptr();
+     let bad_getter = Source::new(
+         Resources::FIRST.id(),
+@@ -666,11 +680,16 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
+         pointer,
+     );
+     drop(value);
+-    assert_eq!(drops.get(), 1);
++    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
+ 
+     let mut win = resources();
+-    let drops = Rc::new(std::cell::Cell::new(0));
+-    let value = Resource::new(&drops);
++    DROPS.store(0, Ordering::Relaxed);
++    let value = Resource::new(
++        || DROPS.load(Ordering::Relaxed),
++        || {
++            DROPS.fetch_add(1, Ordering::Relaxed);
++        },
++    );
+     let pointer = value.bytes.as_ptr();
+     let bad_writer = Source::new(
+         Resources::FIRST.id(),
+@@ -686,7 +705,7 @@ fn poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads() {
+     assert!(win.snapshot().unwrap().poisoned);
+     assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+     drop(value);
+-    assert_eq!(drops.get(), 1);
++    assert_eq!(DROPS.load(Ordering::Relaxed), 1);
+ }
+ 
+ #[test]
+@@ -715,14 +734,18 @@ fn committed_sets_report_the_actual_epochs_without_returning_a_consumed_value()
+ 
+ #[test]
+ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback() {
++    static DROPS: [AtomicUsize; 3] = [const { AtomicUsize::new(0) }; 3];
++    fn observe_drop(id: u8) {
++        DROPS[usize::from(id)].fetch_add(1, Ordering::Relaxed);
++    }
+     struct Owned {
+         id: u8,
+         panic: bool,
+-        drops: Rc<RefCell<Vec<u8>>>,
++        dropped: fn(u8),
+     }
+     impl Drop for Owned {
+         fn drop(&mut self) {
+-            self.drops.borrow_mut().push(self.id);
++            (self.dropped)(self.id);
+             if self.panic {
+                 self.panic = false;
+                 panic!("old value destructor panic");
+@@ -742,13 +765,12 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback()
+             div().size(8).bg(Color::BLACK)
+         }
+     }
+-    let drops = Rc::new(RefCell::new(Vec::new()));
+     let mut win = Win::with_size(
+         Owner {
+             value: Signal::new(Owned {
+                 id: 1,
+                 panic: true,
+-                drops: drops.clone(),
++                dropped: observe_drop,
+             }),
+         },
+         8,
+@@ -761,7 +783,7 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback()
+             Owned {
+                 id: 2,
+                 panic: false,
+-                drops: drops.clone(),
++                dropped: observe_drop,
+             },
+         )
+         .unwrap_err();
+@@ -774,7 +796,6 @@ fn an_old_values_destructor_panic_reports_consumed_ownership_without_rollback()
+     assert!(win.snapshot().unwrap().poisoned);
+     assert_eq!(win.snapshot().unwrap().source_epoch, 0);
+     drop(win);
+-    let dropped = drops.borrow();
+-    assert_eq!(dropped.iter().filter(|&&id| id == 1).count(), 1);
+-    assert_eq!(dropped.iter().filter(|&&id| id == 2).count(), 1);
++    assert_eq!(DROPS[1].load(Ordering::Relaxed), 1);
++    assert_eq!(DROPS[2].load(Ordering::Relaxed), 1);
+ }
+diff --git a/reactivity/crates/gpui/tests/source_value_isolation.rs b/reactivity/crates/gpui/tests/source_value_isolation.rs
+new file mode 100644
+index 0000000000..a7d48af292
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/source_value_isolation.rs
+@@ -0,0 +1,145 @@
++use gpui::{
++    Completion, El, FieldId, Questions, Remote, Signal, Source, Sources, StartError, View, Win,
++    WindowOptions, text,
++};
++use std::{
++    convert::Infallible,
++    sync::{
++        Arc,
++        atomic::{AtomicU64, Ordering},
++        mpsc,
++    },
++    time::Duration,
++};
++
++struct Model {
++    left: Signal<Arc<Vec<u64>>>,
++    right: Signal<Arc<Vec<u64>>>,
++    shared_text: Signal<triomphe::Arc<str>>,
++    answer: gpui::Reader<u64>,
++}
++impl Model {
++    const LEFT: Source<Self, Arc<Vec<u64>>> =
++        Source::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
++    const RIGHT: Source<Self, Arc<Vec<u64>>> =
++        Source::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
++    const TEXT: Source<Self, triomphe::Arc<str>> = Source::new(
++        FieldId::new(3),
++        "text",
++        |m| &m.shared_text,
++        |m| &mut m.shared_text,
++    );
++}
++impl View for Model {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .field(Self::LEFT)
++            .field(Self::RIGHT)
++            .field(Self::TEXT)
++    }
++    fn view(&self) -> El<'_> {
++        self.answer
++            .project(|value| text(format!("captured {value}")))
++    }
++}
++
++#[test]
++fn immutable_arc_copy_on_write_keeps_peer_data_and_ready_capture_coherent() {
++    let (send, receive) = mpsc::channel();
++    let (questions, answer) = Questions::new()
++        .question(
++            Model::RIGHT,
++            |value| value[0],
++            move |input, completion: Completion<u64, Infallible>| {
++                send.send((input, completion))
++                    .map_err(|_| StartError::Closed)
++            },
++        )
++        .unwrap();
++    let data = Arc::new(vec![0]);
++    let model = Model {
++        left: Signal::new(data.clone()),
++        right: Signal::new(data),
++        shared_text: Signal::new(triomphe::Arc::<str>::from("shared")),
++        answer,
++    };
++    let mut win = Win::with_questions(model, questions, WindowOptions::default()).unwrap();
++    let (_, completion) = receive.recv_timeout(Duration::from_secs(2)).unwrap();
++    completion.complete(Ok(0)).unwrap();
++    win.deliver_ready(8).unwrap();
++    let before = win.question_info(answer).unwrap();
++    let (remote, inbox) = Remote::bounded(1);
++    let mut win = win
++        .with_inbox_for(inbox, Model::LEFT, |value, message| {
++            Arc::make_mut(value)[0] = message
++        })
++        .unwrap();
++    remote.try_send(1).unwrap();
++    win.deliver_ready(8).unwrap();
++    assert_eq!(win.read(Model::LEFT).unwrap()[0], 1);
++    assert_eq!(win.read(Model::RIGHT).unwrap()[0], 0);
++    assert_eq!(win.question_info(answer).unwrap(), before);
++    assert!(receive.try_recv().is_err());
++    assert!(win.contains_text("captured 0").unwrap());
++    assert_eq!(&**win.read(Model::TEXT).unwrap(), "shared");
++}
++
++#[test]
++fn coarse_models_still_allow_shared_mutable_resources() {
++    struct Coarse(Signal<Arc<AtomicU64>>);
++    impl View for Coarse {
++        fn view(&self) -> El<'_> {
++            text(format!("value {}", self.0.load(Ordering::Relaxed)))
++        }
++    }
++    let (remote, inbox) = Remote::bounded(1);
++    let mut win = Win::demo(Coarse(Signal::new(Arc::new(AtomicU64::new(0)))))
++        .with_inbox(inbox, |model, message| {
++            model.0.store(message, Ordering::Relaxed)
++        })
++        .unwrap();
++    remote.try_send(1).unwrap();
++    win.deliver_ready(1).unwrap();
++    assert!(win.contains_text("value 1").unwrap());
++}
++
++#[test]
++fn immutable_arcstr_leases_allow_exact_replacement_without_changing_a_peer() {
++    struct Captions {
++        left: Signal<arcstr::ArcStr>,
++        right: Signal<arcstr::ArcStr>,
++    }
++    impl Captions {
++        const LEFT: Source<Self, arcstr::ArcStr> =
++            Source::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
++        const RIGHT: Source<Self, arcstr::ArcStr> =
++            Source::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
++    }
++    impl View for Captions {
++        fn sources() -> Sources<Self> {
++            Sources::new().direct(Self::LEFT).direct(Self::RIGHT)
++        }
++        fn view(&self) -> El<'_> {
++            gpui::div()
++        }
++    }
++    let shared = arcstr::ArcStr::from("shared immutable bytes");
++    let (remote, inbox) = Remote::bounded(1);
++    let mut win = Win::demo(Captions {
++        left: Signal::new(shared.clone()),
++        right: Signal::new(shared.clone()),
++    })
++    .with_inbox_for(inbox, Captions::LEFT, |value, replacement| {
++        *value = replacement;
++    })
++    .unwrap();
++    remote
++        .try_send(arcstr::ArcStr::from("replacement"))
++        .unwrap();
++    win.reset_counters().unwrap();
++    assert_eq!(win.deliver_ready(1).unwrap().applied, 1);
++    assert_eq!(win.read(Captions::LEFT).unwrap().as_str(), "replacement");
++    assert_eq!(win.read(Captions::RIGHT).unwrap(), &shared);
++    assert_eq!(shared.as_str(), "shared immutable bytes");
++    assert_eq!(win.counters().owner_reruns, 0);
++}
+diff --git a/reactivity/ports/hummingbird/Cargo.lock b/reactivity/ports/hummingbird/Cargo.lock
+index fbd5c3bc1a..92c23b5b20 100644
+--- a/reactivity/ports/hummingbird/Cargo.lock
++++ b/reactivity/ports/hummingbird/Cargo.lock
+@@ -1061,6 +1061,7 @@ dependencies = [
+  "serde",
+  "serde_json",
+  "softbuffer",
++ "triomphe",
+ ]
+ 
+ [[package]]

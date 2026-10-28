@@ -1,0 +1,80 @@
+{
+  "linux": [
+    {
+      "fingerprint": "debug/.fingerprint/gpui-03917cb629f1df71/lib-gpui.json",
+      "sha256": "56e34704eecaef403891ff3a51b0f887ff7113756b2e15ae38e96684a7764368",
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+      "profile": 17672942494452627365
+    },
+    {
+      "fingerprint": "debug/.fingerprint/gpui-757b45f575e92acf/lib-gpui.json",
+      "sha256": "5780363ec6c9d26e1e62581aa663f455b1cdb57eb170625221d85d277d74ff30",
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+      "profile": 8731458305071235362
+    },
+    {
+      "fingerprint": "debug/.fingerprint/gpui-b245cb34e693f9e1/lib-gpui.json",
+      "sha256": "7448aaeddb38c17930edff50ea704736fc09dc129be392f52ab026e3ea8a95af",
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+      "profile": 8731458305071235362
+    },
+    {
+      "fingerprint": "debug/.fingerprint/gpui-fb30f77e4a57bd11/lib-gpui.json",
+      "sha256": "4608b8cccbe324b7fcb12aae0b0bc727d8e406756fd4dae86bc1803ac9609df8",
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "features": "[\"default\", \"simd\"]",
+      "profile": 17672942494452627365
+    }
+  ],
+  "apple": [
+    {
+      "fingerprint": "aarch64-apple-darwin/debug/.fingerprint/gpui-a933d2713d620d47/lib-gpui.json",
+      "sha256": "4f803c10ba0ba76ccce14d995727eb1c4c4ae21b4fe1c158370b5e38a1a9a026",
+      "rustflags": [
+        "-C",
+        "symbol-mangling-version=v0",
+        "--cfg",
+        "tokio_unstable"
+      ],
+      "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+      "profile": 2330448797067240312
+    }
+  ],
+  "windows": [
+    {
+      "fingerprint": "x86_64-pc-windows-msvc/debug/.fingerprint/gpui-9fa49e1895d09e6e/lib-gpui.json",
+      "sha256": "a957823ab29f5b234fe812cf372a80f05678c891e3fe5a544a71f584dda53273",
+      "rustflags": [
+        "--cfg",
+        "windows_slim_errors",
+        "-C",
+        "target-feature=+crt-static"
+      ],
+      "features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\"]",
+      "profile": 17672942494452627365
+    }
+  ]
+}

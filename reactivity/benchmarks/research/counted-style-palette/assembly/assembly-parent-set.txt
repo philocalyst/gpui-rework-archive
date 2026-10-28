@@ -1,0 +1,14 @@
+
+/root/gpui-palette-phase/target-parent/release/deps/gpui-cbd3c7d919c25ad8:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000cb20c0 <gpui::runtime::style_ledger::palette_set_probe>:
+  cb20c0:	e9 9b cd e8 ff       	jmp    b3ee60 <<gpui::runtime::styles::Styles>::set>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:

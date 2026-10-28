@@ -1,0 +1,23 @@
+[
+  {
+    "name": "unittests src/lib.rs",
+    "original": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/2b823755502cd61b/out/gpui_gpu-2b823755502cd61b",
+    "copy": "/tmp/gpui-lowered-solid-evidence/gpu-checked-wgsl/gpui_gpu-2b823755502cd61b",
+    "bytes": 220567104,
+    "sha256": "4d5add0b9495f934d46fd567fb81e4eed1cc6c84e6f9de27f9c7d5a0a58173f1"
+  },
+  {
+    "name": "tests/presentation.rs",
+    "original": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/36b245021ee09c62/out/presentation-36b245021ee09c62",
+    "copy": "/tmp/gpui-lowered-solid-evidence/gpu-checked-wgsl/presentation-36b245021ee09c62",
+    "bytes": 107989208,
+    "sha256": "009b43b33f1afcc0b2d2e8fad2c50700a66319642f6ab4ed9642bb24d60765c3"
+  },
+  {
+    "name": "tests/render.rs",
+    "original": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/afe157e2369925c6/out/render-afe157e2369925c6",
+    "copy": "/tmp/gpui-lowered-solid-evidence/gpu-checked-wgsl/render-afe157e2369925c6",
+    "bytes": 227609984,
+    "sha256": "e9ba12d9c90f3094a1c5186010dc1d5b210f19bf35869ca41059bdd9cc546798"
+  }
+]

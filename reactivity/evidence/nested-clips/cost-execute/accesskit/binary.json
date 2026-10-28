@@ -1,0 +1,13 @@
+{
+  "source": "b164198e02ca4172a8cd56308ad204d30f1da333",
+  "original": "/tmp/clips-sol-evidence/final-b164/vendor-execute/001-accesskit/test",
+  "sha256": "1d2c60d62ca090a3dcb2e94c3edf0f7e03f1625b98c03710477856d21de70c4e",
+  "bytes": 18879560,
+  "args": [
+    "sparse_shape_clone_clear_and_headers",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "hash_matches": true
+}

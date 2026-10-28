@@ -1,0 +1,2 @@
+    Checking gpui v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpui)
+error: could not compile `gpui` (test "acceptance") due to 1 previous error

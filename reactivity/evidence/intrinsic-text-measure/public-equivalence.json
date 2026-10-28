@@ -1,0 +1,10 @@
+{
+  "cases": 83,
+  "baseline_bytes": 2678729,
+  "candidate_bytes": 2678729,
+  "baseline_sha256": "1d529192f8bce827403feb865c800d20054ef98b96fa8043e29edce018f69a4f",
+  "candidate_sha256": "1d529192f8bce827403feb865c800d20054ef98b96fa8043e29edce018f69a4f",
+  "byte_equal": true,
+  "compared": "Paint draw geometry, color and mask bytes; acknowledged semantic JSON; every source byte and both caret affinities including invalid interiors and source-owned line indexes",
+  "limits": "Dev-profile behavior only. No query timing or universal font/glyph equivalence claim."
+}

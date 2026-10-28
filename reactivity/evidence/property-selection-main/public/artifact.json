@@ -1,0 +1,46 @@
+{
+  "reason": "compiler-artifact",
+  "package_id": "path+file:///root/gpui-ce3/reactivity/crates/gpui#0.1.0",
+  "manifest_path": "/root/gpui-ce3/reactivity/crates/gpui/Cargo.toml",
+  "target": {
+    "kind": [
+      "example"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "property_editor",
+    "src_path": "/root/gpui-ce3/reactivity/crates/gpui/examples/property_editor.rs",
+    "edition": "2024",
+    "required-features": [
+      "native-core"
+    ],
+    "doc": false,
+    "doctest": false,
+    "test": false
+  },
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "features": [
+    "accessibility",
+    "default",
+    "desktop",
+    "native",
+    "native-core",
+    "simd",
+    "wayland",
+    "wayland-minimal",
+    "x11",
+    "x11-minimal"
+  ],
+  "filenames": [
+    "/root/gpui-ce3/reactivity/target/debug/examples/property_editor"
+  ],
+  "executable": "/root/gpui-ce3/reactivity/target/debug/examples/property_editor",
+  "fresh": false
+}

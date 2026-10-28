@@ -1,0 +1,50 @@
+{
+  "status": "functional preflight only; no matched release or codegen qualification; NO timing registration or execution",
+  "fixture_path": "/tmp/gpui-canonical-text-public-control",
+  "fixture_sha256": {
+    "Cargo.lock": "cd7520fe6a1f7c4929dffc71c226a9b7a53605d32137658c62b37a4f6f7c1841",
+    "Cargo.toml": "d32c34111ebe76cef0ec5136c83b2d36d3486c37beca2e400357b6e1fc10ee4c",
+    "src/main.rs": "7a89251ae72aa490e05d24a1e7ad2745143b7eb0d4c8db4dceab340ca1ff2147",
+    "src/native.rs": "5bd2da72225713cf19ded8ef9ae34073f4cf792212e2de61cd64d7e5ba746a46",
+    "src/bin/x11_close_probe.rs": "47c4c007b53d7160aede4bccb65643111ac4c45404af11cd3dd0550a05b6fa3b"
+  },
+  "source_pins": {
+    "baseline": "9874a6e15bf4f69e63ae493924c093583375e12b",
+    "candidate": "501368955ee9021c56933614522dfb087620dc81",
+    "common_fix": "cc74e92d7fb2ffd9eedb9b66813a79c2fcfc41b5",
+    "baseline_shipping": "51f38a3a9b7f62e6f45fbfcd9c95292eb98cb0df",
+    "candidate_shipping": "9f934e85b5b6211a3985b830ce4dcc672a1ffe16"
+  },
+  "rootflags": [
+    "-C",
+    "symbol-mangling-version=v0",
+    "--cfg",
+    "tokio_unstable"
+  ],
+  "features": [
+    "native",
+    "simd"
+  ],
+  "default_features": false,
+  "profile": "release opt3/noLTO/CGU1/debug0/stripnone",
+  "binaries": {
+    "canonical-text-public-control": {
+      "path": "/tmp/gpui-text-selection-foundation-evidence/canonical-text-public-control-preflight-frozen",
+      "sha256": "b0d39de28ad773bcf28e1c899b60040ad420c76c0a7612bbcf5d663fa4a5766d",
+      "bytes": 17314096
+    },
+    "canonical-text-native-control": {
+      "path": "/tmp/gpui-text-selection-foundation-evidence/canonical-text-native-control-preflight-frozen",
+      "sha256": "e651f5e6a57b471a3e9566d5ca307dad1d843f9d5a1931cd712cf99f9ed261d3",
+      "bytes": 30286200
+    }
+  },
+  "ordinary_public_cells": 60,
+  "ordinary_cycles_per_cell": 4,
+  "native_cohorts": 6,
+  "native_cycles_per_cohort": 4,
+  "observer_active_through_close": true,
+  "actual_native_failed_prepare_old_P_and_repair": true,
+  "counting_allocator": false,
+  "quiet_hold": true
+}

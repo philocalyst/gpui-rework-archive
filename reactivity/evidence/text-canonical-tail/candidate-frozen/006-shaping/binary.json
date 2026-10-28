@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/89e18c44e95b3a50/out/shaping-89e18c44e95b3a50",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/006-shaping/test",
+  "sha256": "69469f9afa616cc15d2cff694c2d14bc8c6ffb405659849dab571146158330f6",
+  "bytes": 98294920,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "shaping",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/shaping.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

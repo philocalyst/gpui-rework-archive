@@ -1,0 +1,16 @@
+{
+  "source_head": "8ea8b9d76abb76717bd84fc28a5d471ce69f5ed3",
+  "artifact": {
+    "executable": "/tmp/gpui-native-text-native-test-bin",
+    "original_executable": "/root/gpui-ce3/reactivity/target/debug/deps/gpui-b07901c2a739e6e3",
+    "selection": "Actual unittest artifact named in the passed full GPUI test log",
+    "features": "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache"
+  },
+  "binary_sha256": "0126bcc287af3801bdde1142350fda3c5555dfc17c5bb6e283b590643bba3809",
+  "display": ":151",
+  "source_unchanged": true,
+  "owned_display_stopped": true,
+  "driver_sha256": "af5ed97e628674c4d97aab1bd24fc145e52ec797105cb284322fdf06306cfc66",
+  "public_test_log_sha256": "c8168a1f5cf810056ae6884d5465c9407f3e6dfab8b1dd1d69baa3ce8911b48f",
+  "limits": "Actual X11/Xvfb/llvmpipe/private-D-Bus protocol execution, not native Apple/Windows/Wayland, a screen-reader audit or hardware latency evidence."
+}

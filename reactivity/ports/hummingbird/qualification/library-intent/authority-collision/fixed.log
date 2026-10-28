@@ -1,0 +1,9 @@
+   Compiling hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-library-oneclick-sol/reactivity/ports/hummingbird)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.87s
+     Running tests/preparation_authority_probe.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/preparation_authority_probe-f230167f3c63a23e)
+
+running 1 test
+test prequeued_public_request_cannot_claim_library_issued_authority ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+

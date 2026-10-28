@@ -1,0 +1,8 @@
+[package]
+name = "gpui-cephal-oof-map-ledger"
+version = "0.0.0"
+edition = "2024"
+[dependencies]
+cephal = { path = "/root/gpui-cephal-flat-oof/reactivity/vendor/cephal" }
+gpui_reactivity_core = { path = "/root/gpui-cephal-flat-oof/reactivity/crates/core", features = ["layout"] }
+allocation-counter = "=0.8.1"

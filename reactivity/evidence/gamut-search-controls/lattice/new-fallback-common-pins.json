@@ -1,0 +1,25 @@
+{
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--manifest-path",
+    "/tmp/gpui-gamut-lattice-common-consumer/Cargo.toml",
+    "--message-format=json",
+    "--no-default-features",
+    "--features",
+    "primitive"
+  ],
+  "executable": "/tmp/gpui-gamut-lattice-new-fallback-common-frozen",
+  "sha256": "1c9eb254dfe3d234a73fedf9ec3c26e74a5e26a8a31a92d81badf56eed4a1324",
+  "libraries": [
+    {
+      "path": "/tmp/gpui-gamut-lattice-consumer-fallback-target/release/deps/libgpui_canvas-2c9d2a7227726f9a.rlib",
+      "sha256": "0bda6b494c7650ab454aa36434df9250245d126e15aa8ee0b64c6d90440dfc6c",
+      "bytes": 6979542
+    }
+  ],
+  "timing_qualified": false
+}

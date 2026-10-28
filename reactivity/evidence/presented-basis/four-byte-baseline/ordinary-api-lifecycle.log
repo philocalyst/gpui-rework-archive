@@ -1,0 +1,10 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-presented-basis-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 57.09s
+     Running unittests src/lib.rs (/tmp/gpui-presented-basis-target/debug/deps/gpui-e6cd8fa3fbb726e9)
+
+running 2 tests
+test runtime::basis_lifecycle_tests::candidate_scale_failed_lowering_and_empty_ack_keep_geometry_epoch_coherent ... ok
+test runtime::basis_lifecycle_tests::typed_paint_keep_preserves_custom_basis_and_radius_storage ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 143 filtered out; finished in 0.00s
+

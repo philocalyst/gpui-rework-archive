@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/f1eb26b9ce6270df/out/literal_dispatch-f1eb26b9ce6270df",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/054-literal_dispatch/test",
+  "sha256": "3ff7143bcbe5078b7c932893210f342086094d8d50c8c4c700d8b8cedfce7d63",
+  "bytes": 147586360,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "literal_dispatch",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/literal_dispatch.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

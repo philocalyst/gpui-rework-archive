@@ -1,0 +1,12 @@
+{
+  "status": "REJECTED BEFORE CAPTURE",
+  "reason": "Changing worktree while reusing one target directory reported a changed Canvas source as fresh and reused the inline artifact.",
+  "attempted_source": "6a5b205350",
+  "package_id": "path+file:///root/gpui-bin-miss-bounds/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "reported_canvas_fresh": true,
+  "reported_test_fresh": true,
+  "shared_executable": "/tmp/gpui-bin-miss-release-target/release/deps/bin_phase-d773cf8873bbe22b",
+  "actual_inline_sha256": "a22a9b21125d7aab88b97a97fd0982a3854cd16e015fa3363d7eb85b40ffd3ce",
+  "resolution": "Every formulation now has a dedicated target directory. Frozen copies and actual callee inspection precede capture.",
+  "evidence_note": "Selected fields preserved from the inspected Cargo JSON, not a copy of the entire rejected stream. No timing run or candidate artifact copy was accepted from this build."
+}

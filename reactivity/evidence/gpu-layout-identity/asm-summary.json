@@ -1,0 +1,34 @@
+{
+  "numeric": {
+    "sha256": "251d4611afe41e05b2f4031c98769800f8d940757e1a73642361fc5de043d471",
+    "entries": {
+      "render": {
+        "bytes": 9317,
+        "entry_lock_instructions": [
+          "  845f05:\tf0 48 ff 08          \tlock decq (%rax)"
+        ]
+      },
+      "redraw": {
+        "bytes": 314,
+        "entry_lock_instructions": []
+      }
+    },
+    "owned_render_forwarder_symbol": false
+  },
+  "lease": {
+    "sha256": "552a3fea2dbab4d55f2b7be36238600d3ee5897c67fd3ece15e951d53dddc242",
+    "entries": {
+      "render": {
+        "bytes": 9346,
+        "entry_lock_instructions": [
+          "  845c40:\tf0 48 ff 08          \tlock decq (%rax)"
+        ]
+      },
+      "redraw": {
+        "bytes": 334,
+        "entry_lock_instructions": []
+      }
+    },
+    "owned_render_forwarder_symbol": false
+  }
+}

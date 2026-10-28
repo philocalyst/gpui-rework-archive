@@ -1,0 +1,16 @@
+    Blocking waiting for file lock on build directory
+   Compiling gpui v0.1.0 (/root/gpui-typed-catalog/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.61s
+     Running unittests src/lib.rs (/tmp/gpui-typed-catalog-target/debug/deps/gpui-3119c911f6f1cfd7)
+
+running 7 tests
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... ok
+test property::tests::contribution_presence_survives_destination_equality_and_auto_is_explicit ... ok
+test property::tests::all_typed_selectors_and_the_erased_seam_edit_the_same_style ... ok
+test property::tests::invalid_typed_and_erased_edits_leave_all_fields_unchanged ... ok
+test property::tests::sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset ... ok
+test property::tests::independent_overrides_survive_base_changes_and_lifecycle_purge ... ok
+test property::tests::rejected_override_changes_neither_existing_bases_nor_any_contribution ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 126 filtered out; finished in 0.00s
+

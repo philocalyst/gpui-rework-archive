@@ -1,0 +1,7 @@
+{
+  "command": [
+    "python3",
+    "/home/user/gpui-glyph-submit-evidence/minimal_native_checks.py"
+  ],
+  "exit": 0
+}

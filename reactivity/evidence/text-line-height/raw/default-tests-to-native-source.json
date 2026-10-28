@@ -1,0 +1,8 @@
+{
+  "default_tests_source": "4e80b9e5cf452c74ab1c8153dab8ed8d2eba20e4",
+  "native_source": "9ffba981b8f6c5cbacbc669d36b423b7090cebd3",
+  "changed_inputs": [
+    "reactivity/crates/canvas/examples/text_cache_capacity.rs"
+  ],
+  "scope": "diagnostic example alias only; default tested libraries and tests byte-identical"
+}

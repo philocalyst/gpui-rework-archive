@@ -1,0 +1,28 @@
+item,baseline_bytes,final_bytes,scope
+Style,88,88,each authored style
+El,176,176,each temporary description
+ElementExtra,56,56,each opted-in cold description
+Annotations,48,48,explicit semantic payload
+ImageSpec,16,16,each temporary image description
+Node,40,40,each logical node
+Presented,80,80,each frozen node
+Runtime_unit,2384,2384,owner header
+Metadata,240,248,only owners already needing metadata
+Sheet,96,96,each cold semantic cohort header
+Geometry,0,96,only opted-in owners
+Geometry_entry,0,16,each current or frozen opted-in identity
+Property_handle,8,8,static typed selector
+Property_declaration,48,56,static rodata per declaration
+Canvas,552,552,canvas header
+DisplayList,288,288,canonical command header
+InlineDraw,104,104,retained CPU inline command
+Common,80,80,shared CPU command state
+Placement,32,32,retained CPU compact placement
+ImageResources,80,80,only image owners
+BorrowedSource,16,16,transient borrowed command source
+PreparedSource,56,56,transient public source view
+PreparedDraw,168,168,transient public draw view
+GPU_inline,96,96,uploaded packet record
+GPU_common,80,80,uploaded shared packet record
+GPU_placement,32,32,uploaded compact placement
+GPU_correction,32,32,uploaded correction record

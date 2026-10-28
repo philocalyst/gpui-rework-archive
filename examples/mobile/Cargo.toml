@@ -1,0 +1,29 @@
+[package]
+name = "gpui-ce-mobile-example"
+version = "0.1.0"
+description = "Shared GPUI CE iOS and Android example app"
+autoexamples = false
+edition.workspace = true
+publish = false
+license = "Apache-2.0"
+
+[lib]
+name = "gpui_ce_mobile_example"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "gpui-ce-mobile-example-ios"
+path = "examples/ios.rs"
+
+[dependencies]
+gpui.workspace = true
+accesskit.workspace = true
+gpui_platform.workspace = true
+gpui_elements = { path = "../../crates/gpui_elements", version = "0.3.0", package = "gpui_ce_elements" }
+anyhow.workspace = true
+log.workspace = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+android-activity = { version = "0.6", features = ["native-activity"] }
+android_logger = "0.15"
+gpui_mobile.workspace = true

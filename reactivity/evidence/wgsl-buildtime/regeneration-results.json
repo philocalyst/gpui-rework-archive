@@ -1,0 +1,86 @@
+[
+  {
+    "case": "noop",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "-vv",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "wall_ns_uncontrolled": 560758647,
+    "artifact_mtime_ns_before": 1792652245604993447,
+    "artifact_mtime_ns_after": 1792652245604993447,
+    "regenerated": false,
+    "artifact_sha256": "5af0c419683eb64b945b477d631583aca670b3a504a09f596f6ed4efa26cb1a5"
+  },
+  {
+    "case": "shader-edit",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "-vv",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "wall_ns_uncontrolled": 13408610109,
+    "artifact_mtime_ns_before": 1792652245604993447,
+    "artifact_mtime_ns_after": 1792652419137732684,
+    "regenerated": true,
+    "artifact_sha256": "5af0c419683eb64b945b477d631583aca670b3a504a09f596f6ed4efa26cb1a5"
+  },
+  {
+    "case": "shader-child",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "-vv",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "wall_ns_uncontrolled": 9699632015,
+    "artifact_mtime_ns_before": 1792652419137732684,
+    "artifact_mtime_ns_after": 1792652430653981023,
+    "regenerated": true,
+    "artifact_sha256": "5af0c419683eb64b945b477d631583aca670b3a504a09f596f6ed4efa26cb1a5"
+  },
+  {
+    "case": "restored",
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--release",
+      "--manifest-path",
+      "/tmp/gpui-wgsl-control/Cargo.toml",
+      "--bin",
+      "ordinary",
+      "-vv",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "wall_ns_uncontrolled": 10999334672,
+    "artifact_mtime_ns_before": 1792652430653981023,
+    "artifact_mtime_ns_after": 1792652441351211719,
+    "regenerated": true,
+    "artifact_sha256": "5af0c419683eb64b945b477d631583aca670b3a504a09f596f6ed4efa26cb1a5"
+  }
+]

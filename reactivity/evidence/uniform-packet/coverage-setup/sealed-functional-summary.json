@@ -1,0 +1,308 @@
+{
+  "source": "6158d25e483dea439832399e768ff4fbe1202640",
+  "fixture_sha256": "8773146b44150adb0150323d51f241c946fb5cda26328f004562dcd9dee39cc0",
+  "binary_sha256": "ff3e19d24ab3364cd9c2dc60c5ee22c91247bd305b1595b1855e127f5d7b1f80",
+  "artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/gpui-coverage-setup-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "manifest_path": "/tmp/gpui-coverage-setup-sol/reactivity/crates/gpu/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "qualification",
+      "src_path": "/tmp/gpui-coverage-setup-sol/reactivity/crates/gpu/examples/qualification.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "simd",
+      "vulkan-tests"
+    ],
+    "filenames": [
+      "/tmp/gpui-coverage-setup-target/release/examples/qualification"
+    ],
+    "executable": "/tmp/gpui-coverage-setup-target/release/examples/qualification",
+    "fresh": false
+  },
+  "scope": "One two-frame functional process only; no timing qualification or claim.",
+  "returncode": 0,
+  "readbacks": [
+    {
+      "path": "flat-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "flat-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "flat-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "flat-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "image-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "path": "image-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "path": "image-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "27e1347f8fc675837359c7e8065d65604c9190ca40e9263c58a5f1bbd0adf32d"
+    },
+    {
+      "path": "image-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "cdc24b083b91785bcdef79644baecebb4e3b8236273473cced19f6c62853829b"
+    },
+    {
+      "path": "image-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "path": "image-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "path": "image-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "07b9f4044053769b96cd4ced50265b25d761669a1fbc4e211d70fde4e123ad5a"
+    },
+    {
+      "path": "image-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "2aa354c4c477c5b5d3713f0e4ca8861814b1d7c9d85bedac95d71e5941c5c18c"
+    },
+    {
+      "path": "layers8-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "path": "layers8-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "path": "layers8-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "path": "layers8-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "51aeeb1d734292ad86cde985c46c149216c2c919cb429a02265b255be3374c2b"
+    },
+    {
+      "path": "layers8-text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "path": "layers8-text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "path": "layers8-text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c6fd0854e45f1df855d6a2ff2ac79bf27f7206902e4e7e9e4435891475a0ba94"
+    },
+    {
+      "path": "layers8-text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "3967c10ae69b13c065ea60bd2e82f3d3ccd97cd5de21ef496e7ec95a19f52211"
+    },
+    {
+      "path": "layers8-text-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "path": "layers8-text-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "path": "layers8-text-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "5ebb06af2c16e7c8d89c73b742f44db955cda7eb874babc7df3715e70be8e0bd"
+    },
+    {
+      "path": "layers8-text-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "d33ac5de12c8981a84daaf0a0184e5d1be73721dff6f109aed9633616895e86f"
+    },
+    {
+      "path": "layers8-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "path": "layers8-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "path": "layers8-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "path": "layers8-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "76887d4d79160063047467bf4461bc5fed355da004a15c873148a4abb282b286"
+    },
+    {
+      "path": "rounded-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "path": "rounded-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "path": "rounded-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "0fe9b509ba68620001f5ecb3d0c0e7ef0dbb597071016ab59bca21a121724d19"
+    },
+    {
+      "path": "rounded-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4ebdc582d23230a45c4860c452221dd80649ae7597349f48b7247d558f10eef5"
+    },
+    {
+      "path": "rounded-true-false-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "path": "rounded-true-false-1.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "path": "rounded-true-true-0.bin",
+      "bytes": 1048576,
+      "sha256": "2decbf06afac16b7e59a02c0de465732801ec3fdd8038575d6a8d8783a894a45"
+    },
+    {
+      "path": "rounded-true-true-1.bin",
+      "bytes": 1048576,
+      "sha256": "629c2fcf4e1763214fa5375ac4f4f79f0385a338e32610b86998e5ee1b2d4042"
+    },
+    {
+      "path": "runs32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "runs32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "runs32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "runs32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "singletons32k-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "singletons32k-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "singletons32k-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "singletons32k-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "4b71e50ac12fc27898b0d24e2a7587679dc8d223e246af6e1198b84a06066607"
+    },
+    {
+      "path": "text-bg-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "path": "text-bg-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "path": "text-bg-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "c673b495d8db69c4e91c73072da31588f3f5b18be81efcf717894aed2ef1926d"
+    },
+    {
+      "path": "text-bg-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "7e80ee0c392355c9d1c785c673bc65246ee5738443960efb7c2e1c41660e5330"
+    },
+    {
+      "path": "text-false-false-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "path": "text-false-false-1.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "path": "text-false-true-0.bin",
+      "bytes": 524288,
+      "sha256": "e9c6794a8983809079d4f55a31875d4cc985bff485d85300e619a4575ed810a5"
+    },
+    {
+      "path": "text-false-true-1.bin",
+      "bytes": 524288,
+      "sha256": "fcb4392ca44b6c92637d454dc4850ad14ca9b1f4c7a0a746b23efaf6e3df3181"
+    }
+  ],
+  "exact_readback_bytes": 35651584,
+  "all_52_renderer_and_image_diagnostics_match": true,
+  "adapter_matches": true
+}

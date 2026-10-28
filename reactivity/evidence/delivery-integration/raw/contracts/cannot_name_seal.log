@@ -1,0 +1,12 @@
+error[E0603]: module `value` is private
+ --> /tmp/gpui-delivery-integration-captures/contracts/cannot_name_seal.rs:5:20
+  |
+5 | impl gpui::source::value::representation::Leaf for Escape {}
+  |                    ^^^^^ private module   ---- trait `Leaf` is not publicly re-exported
+  |
+note: the module `value` is defined here
+ --> crates/gpui/src/source.rs:5:0
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0603`.

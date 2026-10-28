@@ -1,0 +1,7 @@
+value,value_bytes,plan_bytes,transient_close_bytes
+u64,8,328,40
+String,24,336,56
+Page304,304,608,336
+Inline4096,4096,4400,4128
+Aligned4096,4096,4608,4160
+detached_inbox_receiver_bytes,16

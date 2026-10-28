@@ -1,0 +1,116 @@
+{
+  "selected_source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+  "adopted_commit": "2fefe2d26692e7839231318a71dc4055a694f456",
+  "production_adopted": true,
+  "gates": {
+    "raw-unit-tests": {
+      "source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 73,
+      "failed": 0,
+      "ignored": 2,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "raw-fallback-unit-tests": {
+      "source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+      "exit": 0,
+      "guards": 2214,
+      "guards_match": true,
+      "passed": 73,
+      "failed": 0,
+      "ignored": 2,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "raw-strict": {
+      "source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+      "exit": 0,
+      "guards": 2215,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "raw-check-apple": {
+      "source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+      "exit": 0,
+      "guards": 2214,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "raw-check-msvc": {
+      "source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+      "exit": 0,
+      "guards": 2214,
+      "guards_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "oracle": {
+    "canvas_source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+    "fixture": "35fdf80a1a5d45d6769ca0e5fc8f1c64b3595eb0",
+    "old_sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+    "actual_sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+    "bytes": 285940280,
+    "cases": 1120,
+    "shape_or_error_records": 2240,
+    "stdout_byte_equal": true,
+    "scope": "Existing shape and interactive layout/error/selection oracle only; no new measurement API, timing or GPU result."
+  },
+  "whole_text_delta_bytes": -1392,
+  "whole_rodata_delta_bytes": -8,
+  "all_allocated_sections_delta_bytes": -4,
+  "count_helper": {
+    "code_bytes": [
+      1118,
+      444
+    ],
+    "max_observed_rsp_cfa_bytes": [
+      352,
+      48
+    ]
+  },
+  "shape": {
+    "code_bytes": [
+      13544,
+      13312
+    ],
+    "max_observed_rsp_cfa_bytes": [
+      3056,
+      3040
+    ]
+  },
+  "core_noncomment_nontest_lines": [
+    31321,
+    31318
+  ],
+  "loop": "Four-way unrolled scalar loads/additions; no SIMD claim.",
+  "headers_or_allocations_added": false,
+  "rejected_cached_count": "One usize per positioned run; its iterator code +155B and own static frame +32B.",
+  "failed_headerless_source": "1c6bee compiled neither unit nor public fixture: patch removed the debug assertion argument rather than initializer field. Corrected bfba before the selected raw-run formulation.",
+  "fault_control": {
+    "source": "98b1ced9a46ef20391806dd72f4f87a91a61a21e",
+    "positive_passed": 1,
+    "negative_failed": 1,
+    "source_restored_clean": true
+  },
+  "guard_scope": "Strict/default/oracle/fault have 2215 materialized inputs. After restoring the fault source, sparse checkout removed clippy.toml only: fallback and foreign source checks have 2214, otherwise identical source hashes. These latter gates are not lint claims. Main retains the tracked policy.",
+  "oracle_payload": "../bundled-coverage/raw/integration/certificate-run/stdout.log.gz",
+  "oracle_payload_scope": "Selected original output is byte-identical by SHA to the previously archived full output; the new original output remains externally indexed.",
+  "timing_claim": false,
+  "rss_claim": false,
+  "dynamic_stack_claim": false
+}

@@ -1,0 +1,22 @@
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling enumflags2_derive v0.7.12
+    Checking uuid v1.28.0
+   Compiling serde_derive v1.0.229
+    Checking accesskit v0.25.1
+   Compiling phf_macros v0.14.0
+    Checking phf v0.14.0
+    Checking accesskit_consumer v0.39.1
+   Compiling serde v1.0.229
+    Checking zcheapstr v1.1.0
+   Compiling zvariant_utils v4.2.0
+   Compiling enumflags2 v0.7.12
+   Compiling zvariant_derive v5.15.1
+   Compiling zvariant v5.15.1
+    Checking zbus_names v4.3.5
+    Checking zbus_xml v5.2.1
+    Checking zbus-lockstep v0.5.2
+   Compiling zbus-lockstep-macros v0.5.2
+    Checking atspi-common v0.13.0
+    Checking accesskit_atspi_common v0.21.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_atspi_common)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.93s

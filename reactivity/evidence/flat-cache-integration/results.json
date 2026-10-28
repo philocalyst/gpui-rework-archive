@@ -1,0 +1,54 @@
+[
+  {
+    "case": "todo",
+    "command": [
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc",
+      "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "8cfd3efd23ce6d1e5ea6a005d6439629f0c244ed87ad8127b23851db3989a6e7"
+  },
+  {
+    "case": "lifecycle",
+    "command": [
+      "dbus-run-session",
+      "--",
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc",
+      "native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "a58f2186c7d7f3666da5096ebf521da5ee4caef6b01bb5f318819c15137462ea"
+  },
+  {
+    "case": "real-registry",
+    "command": [
+      "bash",
+      "/root/gpui-ce3/reactivity/tools/test_atspi.sh",
+      "/nix/store/4g39rajyrxqn3na1kd4pykdigsr82af5-at-spi2-core-2.60.6/libexec/at-spi-bus-launcher",
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc"
+    ],
+    "exit": 0,
+    "log_sha256": "4ba5c126782cba1db879c484c0ce3407cb60b9b6f36b1d2edac1646f05e43013"
+  },
+  {
+    "case": "no-session",
+    "command": [
+      "/root/gpui-ce3/reactivity/target/debug/deps/gpui-4f371c2cb0e22ddc",
+      "native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents",
+      "--ignored",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "log_sha256": "61e0d890e3c2ad849a065f30a9866b5d6f3afc1874d70ec4f3892a4166ddc5af"
+  }
+]

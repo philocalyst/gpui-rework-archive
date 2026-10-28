@@ -1,0 +1,9 @@
+
+running 1 test
+test runtime::parent_tests::compact_parent_covers_the_admitted_index_domain ... Parent=4 Map=24 Node=40 Presented=80
+TextLayout=56 Shaped=64 OptionShaped=64 RuntimeHeader=1840 TextSite=80 OptionTextSite=80
+GEOMETRY_RUNTIME system=72 option_system=72 prepared=40
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.00s
+

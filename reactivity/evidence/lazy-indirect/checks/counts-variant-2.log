@@ -1,0 +1,59 @@
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-core)
+warning: unnecessary qualification
+  --> /tmp/gpui-lazy-indirect-sol/reactivity/evidence/lazy-indirect/qualification.rs:86:24
+   |
+86 |     fn error(&self) -> hal::DeviceError {
+   |                        ^^^^^^^^^^^^^^^^
+   |
+note: the lint level is defined here
+  --> src/lib.rs:53:5
+   |
+53 |     unused_qualifications
+   |     ^^^^^^^^^^^^^^^^^^^^^
+help: remove the unnecessary path segments
+   |
+86 -     fn error(&self) -> hal::DeviceError {
+86 +     fn error(&self) -> DeviceError {
+   |
+
+warning: unnecessary qualification
+  --> /tmp/gpui-lazy-indirect-sol/reactivity/evidence/lazy-indirect/qualification.rs:88:13
+   |
+88 |             hal::DeviceError::OutOfMemory
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: remove the unnecessary path segments
+   |
+88 -             hal::DeviceError::OutOfMemory
+88 +             DeviceError::OutOfMemory
+   |
+
+warning: unnecessary qualification
+  --> /tmp/gpui-lazy-indirect-sol/reactivity/evidence/lazy-indirect/qualification.rs:90:13
+   |
+90 |             hal::DeviceError::Lost
+   |             ^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: remove the unnecessary path segments
+   |
+90 -             hal::DeviceError::Lost
+90 +             DeviceError::Lost
+   |
+
+warning: `wgpu-core` (lib test) generated 3 warnings (run `cargo fix --lib -p wgpu-core --tests` to apply 3 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.41s
+     Running unittests src/lib.rs (/tmp/gpui-lazy-indirect-sol-target/debug/deps/wgpu_core-9ca501da85c23be0)
+
+running 1 test
+test lazy_indirect_qualification::lazy_native_constructor_counts_and_sizes ... constructor Rust allocator [alloc/realloc calls, requested bytes, dealloc/realloc calls, freed bytes, retained new bytes, freed old bytes, overflow]=[39, 6026, 2, 468, 5558, 0, 0]
+buffer indirect=false use=0 Rust allocator=[7, 488, 0, 0, 488, 0, 0]
+native Vulkan indirect=false: ["create_fence", "create_buffer", "create_bind_group_layout", "create_buffer", "create_command_encoder", "create_buffer", "create_buffer", "destroy_buffer", "destroy_buffer", "destroy_buffer", "destroy_bind_group_layout", "destroy_buffer", "destroy_fence"]
+constructor Rust allocator [alloc/realloc calls, requested bytes, dealloc/realloc calls, freed bytes, retained new bytes, freed old bytes, overflow]=[39, 6026, 2, 468, 5558, 0, 0]
+buffer indirect=true use=0 Rust allocator=[1587, 469569, 1386, 399569, 70000, 0, 0]
+buffer indirect=true use=1 Rust allocator=[14, 768, 9, 520, 528, 280, 0]
+native Vulkan indirect=true: ["create_fence", "create_buffer", "create_bind_group_layout", "create_buffer", "create_command_encoder", "create_buffer", "create_buffer", "create_shader_module", "create_bind_group_layout", "create_bind_group_layout", "create_pipeline_layout", "create_compute_pipeline", "create_buffer", "create_bind_group", "create_shader_module", "create_bind_group_layout", "create_bind_group_layout", "create_bind_group_layout", "create_pipeline_layout", "create_compute_pipeline", "create_bind_group", "create_bind_group", "destroy_bind_group", "destroy_bind_group", "destroy_buffer", "create_buffer", "create_bind_group", "create_bind_group", "destroy_bind_group", "destroy_bind_group", "destroy_buffer", "destroy_buffer", "destroy_bind_group", "destroy_buffer", "destroy_compute_pipeline", "destroy_pipeline_layout", "destroy_bind_group_layout", "destroy_bind_group_layout", "destroy_shader_module", "destroy_compute_pipeline", "destroy_pipeline_layout", "destroy_bind_group_layout", "destroy_bind_group_layout", "destroy_bind_group_layout", "destroy_shader_module", "destroy_buffer", "destroy_bind_group_layout", "destroy_buffer", "destroy_fence"]
+Device=1104 owner=272 policy_cell=32 old_inline=272
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 0.06s
+

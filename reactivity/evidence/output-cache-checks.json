@@ -1,0 +1,85 @@
+{
+  "source_commit": "b4598cb303eb90bef9304e153ddf26bac71826ef",
+  "checks": [
+    {
+      "check": "canvas",
+      "argv": [
+        "cargo",
+        "test",
+        "--release",
+        "--offline",
+        "--locked",
+        "-p",
+        "gpui_canvas",
+        "--features",
+        "parallel"
+      ],
+      "exit_code": 0,
+      "passed_tests": 79,
+      "elapsed_seconds": 39.81874537299154,
+      "log": "output-cache-canvas.txt"
+    },
+    {
+      "check": "clippy",
+      "argv": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11,wayland",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "passed_tests": 0,
+      "elapsed_seconds": 142.14004691399168,
+      "log": "output-cache-clippy.txt"
+    },
+    {
+      "check": "gpu",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "gpui_gpu",
+        "--features",
+        "vulkan-tests",
+        "--test",
+        "render"
+      ],
+      "exit_code": 0,
+      "passed_tests": 19,
+      "elapsed_seconds": 65.06787532399176,
+      "log": "output-cache-gpu.txt"
+    },
+    {
+      "check": "native",
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "gpui",
+        "--features",
+        "x11",
+        "native_todo_port",
+        "--",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit_code": 0,
+      "passed_tests": 1,
+      "elapsed_seconds": 112.97498869802803,
+      "log": "output-cache-native.txt"
+    }
+  ]
+}

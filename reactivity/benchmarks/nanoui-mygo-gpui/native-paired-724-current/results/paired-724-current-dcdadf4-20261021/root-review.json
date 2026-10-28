@@ -1,0 +1,23 @@
+{
+  "reviewer": "root",
+  "baseline_source": "724ece73cb665a1f6d83e97ae7d431eee11a887a",
+  "current_source": "dcdadf4d527cb669c13d9e99271bb1f956f95a1f",
+  "status": "accepted_all_six_cells",
+  "checks": [
+    "All ten manifest-listed files independently SHA-256 verified.",
+    "Six raw cells each contain exactly 100 startup, 1000 unique start/click-pair and 5 idle rows.",
+    "All window rows are 800x600; all idle rows have 4 threads.",
+    "All p50/p95/p99 independently recomputed from full raw sample sets using observer round-to-nearest index.",
+    "All idle RSS/PSS medians and observed ranges independently recomputed.",
+    "Current full nine preflight PPM files independently match accepted prior preflight byte for byte; root review and hashes preserved in native-current-dcdadf4 preflight."
+  ],
+  "scope": "Sequential 100-start blocks; descriptive statistics only. Auto observed ReferenceCpu; Xvfb drawable endpoint, no active AT client, hardware GPU or scanout claim. Earlier competitor capture is separate.",
+  "raw_sha256": {
+    "baseline-eager-0.raw": "25aed53e3706b75a5183826f2c1de31dea3c0f86089317dca59dc1a7bec90634",
+    "baseline-eager-1000.raw": "cf08a3687ca26755a237fad3fcf5b6f8c2c47e8a96137522046798936663bdea",
+    "baseline-virtual-250000.raw": "1a2ff96dd9c32a37422b4a2e3431a77cf6f6481711fc1a1df506ea9b58d4dd7e",
+    "current-eager-0.raw": "b01c3efc00a9da2af2fcad1ada859f9b5cdaa04ea6cd34f731a7abcf583bfb39",
+    "current-eager-1000.raw": "077d8cba47d0557303a94150577ab4ba652f945c28113ad725808a4639d62d7c",
+    "current-virtual-250000.raw": "795cf696b55f13b939421310b1c1297a42f64017efaa2435dbbfd32c923f6ce3"
+  }
+}

@@ -1,0 +1,32 @@
+case=session-address
+pid=3568220
+address=unix:path=/run/user/0/bus
+alive_after_1s=yes
+--- status ---
+Name:	empty-x11
+VmRSS:	   12284 kB
+RssAnon:	    1792 kB
+RssFile:	   10492 kB
+Threads:	4
+--- smaps_rollup ---
+Rss:               12284 kB
+Pss:               10275 kB
+Pss_Anon:           1792 kB
+Pss_File:           8483 kB
+Shared_Clean:       2596 kB
+Private_Clean:      7896 kB
+Private_Dirty:      1792 kB
+--- task names ---
+3568220 empty-x11
+3568222 empty-x11
+3568223 blocking-1
+3568224 async-io
+--- executable VMAs ---
+Rss=1200kB Pss=1200kB 617bcf132000-617bcf8cb000 r--p 00000000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=4640kB Pss=4640kB 617bcf8cb000-617bd0363000 r-xp 00798000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=460kB Pss=460kB 617bd0363000-617bd03d6000 r--p 0122f000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+Rss=12kB Pss=12kB 617bd03d6000-617bd03d9000 rw-p 012a1000 08:12 89275898                   /tmp/gpui-luna-memoryfloor-724-artifacts/empty-x11
+--- X root children ---
+root_children 1
+0x200002 GPUI
+--- app stderr/stdout ---
