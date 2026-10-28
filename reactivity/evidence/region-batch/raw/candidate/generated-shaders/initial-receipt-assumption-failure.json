@@ -1,0 +1,40 @@
+{
+  "assumption": "Incorrectly required the regional shader in every GPU unit binary, even where all callers are dead stripped. Preserve diagnostic; require it in actual render integration and native executables.",
+  "binaries": [
+    {
+      "stage": "boundary-admission",
+      "target": "gpui_gpu",
+      "ui_offset": 890212,
+      "region_offset": -1,
+      "sha256": "288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e"
+    },
+    {
+      "stage": "boundary-admission",
+      "target": "render",
+      "ui_offset": 614954,
+      "region_offset": 677698,
+      "sha256": "68f9e553bc9bac147351763920819bcbd253e6675e0e71f98c2ebea189daa323"
+    },
+    {
+      "stage": "offline-cached",
+      "target": "render",
+      "ui_offset": 615658,
+      "region_offset": -1,
+      "sha256": "172afa43c231ca59c4e7a502ab0e381f22265545a61f05cd3149c3a3bc530637"
+    },
+    {
+      "stage": "offline-cached",
+      "target": "gpui_gpu",
+      "ui_offset": 891368,
+      "region_offset": -1,
+      "sha256": "de4657aaf6880adab47a87d04a9a0696562e8a5b9ba480cbdf90a15f3eb61813"
+    },
+    {
+      "stage": "full-native",
+      "target": "zgx_native_lab",
+      "ui_offset": 2329421,
+      "region_offset": 2546966,
+      "sha256": "8091f2e0696031545b72e007008127fb6a8a9d3d0f1eb152a07c4e85110568c4"
+    }
+  ]
+}

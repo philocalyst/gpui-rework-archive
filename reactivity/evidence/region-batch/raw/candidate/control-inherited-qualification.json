@@ -1,0 +1,35 @@
+[
+  {
+    "variant": "control",
+    "qualified_core_source": "bb83c5d8f3da446d4cc1c259141f335797b1b60d",
+    "current_source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+    "only_changed_build_input": [
+      "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+    ],
+    "prior_full_native_gate": "/home/user/gpui-glyph-damage-control-evidence/full-native",
+    "prior_native_checks": "/home/user/gpui-glyph-damage-control-evidence/native-checks",
+    "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+  },
+  {
+    "variant": "bounds",
+    "qualified_core_source": "be8300c1e3eafacedfa20c062bf2e31ed1ada9ca",
+    "current_source": "d67a538b9502fb778460d9c59e726d5bb502ce28",
+    "only_changed_build_input": [
+      "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+    ],
+    "prior_full_native_gate": "/home/user/gpui-glyph-damage-bounds-evidence/full-native",
+    "prior_native_checks": "/home/user/gpui-glyph-damage-bounds-evidence/native-checks",
+    "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+  },
+  {
+    "variant": "predecessor",
+    "qualified_core_source": "669487c35d557d4cb480cfd519bb7476a07c4459",
+    "current_source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "only_changed_build_input": [
+      "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+    ],
+    "prior_full_native_gate": "/home/user/gpui-glyph-submit-evidence/full-native",
+    "prior_native_checks": "/home/user/gpui-glyph-submit-evidence/native-checks",
+    "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+  }
+]

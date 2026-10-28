@@ -1,0 +1,19 @@
+   Compiling core_maths v0.1.1
+   Compiling foldhash v0.1.5
+   Compiling skrifa v0.44.0
+   Compiling unicode-properties v0.1.4
+   Compiling ttf-parser v0.25.1
+   Compiling hashbrown v0.15.5
+   Compiling yazi v0.2.1
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling unicode-script v0.5.8
+   Compiling unicode-ccc v0.4.0
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-region-static-lab/reactivity/crates/canvas)
+   Compiling fontdue v0.9.5
+   Compiling swash v0.2.10
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-region-static-lab/reactivity/crates/gpu)
+   Compiling rustybuzz v0.20.1
+   Compiling gpui v0.1.0 (/home/user/gpui-region-static-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2m 26s
+     Running unittests src/lib.rs (/home/user/gpui-region-static-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521)
+     Running unittests src/lib.rs (/home/user/gpui-region-static-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d)

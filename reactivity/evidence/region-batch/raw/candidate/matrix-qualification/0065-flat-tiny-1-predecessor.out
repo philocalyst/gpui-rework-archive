@@ -1,0 +1,28 @@
+
+running 1 test
+test native::scroll_bench::complete_workload_cost ... SETUP,flat-tiny,240222,6864195,d219fe4d821f6d25,20
+HEADERS,SceneDamage=32,RetainedRenderer=920,GpuSurface=1040
+FRAME,flat-tiny,0,211677,64,64,256
+FRAME,flat-tiny,1,119364,64,64,256
+FRAME,flat-tiny,2,115586,64,64,256
+FRAME,flat-tiny,3,113304,64,64,256
+FRAME,flat-tiny,4,109325,64,64,256
+FRAME,flat-tiny,5,109657,64,64,256
+FRAME,flat-tiny,6,112441,64,64,256
+FRAME,flat-tiny,7,116159,64,64,256
+FRAME,flat-tiny,8,103003,64,64,256
+FRAME,flat-tiny,9,99358,64,64,256
+FRAME,flat-tiny,10,93987,64,64,256
+FRAME,flat-tiny,11,103346,64,64,256
+FRAME,flat-tiny,12,111620,64,64,256
+FRAME,flat-tiny,13,110760,64,64,256
+FRAME,flat-tiny,14,104316,64,64,256
+FRAME,flat-tiny,15,99398,64,64,256
+FRAME,flat-tiny,16,95409,64,64,256
+FRAME,flat-tiny,17,114796,64,64,256
+FRAME,flat-tiny,18,92914,64,64,256
+FRAME,flat-tiny,19,102833,64,64,256
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 321 filtered out; finished in 0.23s
+

@@ -1,0 +1,1 @@
+{"reason":"Receipt used a nonexistent guessed native/gpu.rs path; actual bridge is native.rs. No production/test failure or source mutation."}

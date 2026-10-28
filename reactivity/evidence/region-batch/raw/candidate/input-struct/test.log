@@ -1,0 +1,18 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-region-batch-lab/reactivity/crates/gpu)
+   Compiling parley v0.12.0 (/home/user/gpui-region-batch-lab/reactivity/vendor/parley)
+   Compiling snafu v0.8.9
+   Compiling fearless_simd_macros v0.1.0
+   Compiling glam v0.30.10
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-region-batch-lab/reactivity/crates/core)
+   Compiling fearless_simd v1.1.0
+   Compiling ttf-parser v0.25.1
+   Compiling triomphe v0.1.17
+   Compiling zeno v0.3.3
+   Compiling ecow v0.3.1
+   Compiling wgsl-rs-ir v0.1.0-beta.6
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu v30.0.1 (/home/user/gpui-region-batch-lab/reactivity/vendor/wgpu)
+   Compiling pollster v1.0.1
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-region-batch-lab/reactivity/crates/canvas)
+error: could not compile `gpui_gpu` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

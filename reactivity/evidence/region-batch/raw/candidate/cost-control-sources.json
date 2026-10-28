@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "control",
+    "base": "20919cb160f6fcc5ab85eca607b97d4173739409",
+    "source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+    "worktree": "/home/user/gpui-region-control-lab",
+    "target": "/home/user/gpui-region-control-target",
+    "native_example_overlay": false
+  },
+  {
+    "variant": "bounds",
+    "base": "be8300c1e3eafacedfa20c062bf2e31ed1ada9ca",
+    "source": "d67a538b9502fb778460d9c59e726d5bb502ce28",
+    "worktree": "/home/user/gpui-region-bounds-lab",
+    "target": "/home/user/gpui-region-bounds-target",
+    "native_example_overlay": true
+  },
+  {
+    "variant": "predecessor",
+    "base": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "worktree": "/home/user/gpui-region-static-lab",
+    "target": "/home/user/gpui-region-static-target",
+    "native_example_overlay": false
+  }
+]

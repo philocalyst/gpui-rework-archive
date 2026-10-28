@@ -1,0 +1,7 @@
+{
+  "timing_sha256": "fd94c85126f63897e746d0b7bd785f789e6c04b7bf9215e77c61b698f99f5861",
+  "analysis_sha256": "42b4c6cd8904c21ec91350f1df61191f44bca3cdf5d39b77632b5cf7f31274fc",
+  "protocol_commit": "6f1cf9e1ae170bcffef62665b3b3f91c22e880ab",
+  "process_manifest_sha256": "7f21c35f5d2c784fb6b05755a6826b8c1984b6b4904920acae2504c32e3e29b2",
+  "note": "Runner preserved from sealed static sparse experiment with external frozen manifest path; new seed from definition. Analyzer fixed beforehand to require both original and static-sparse stream ratios <=0.8. No timings taken."
+}

@@ -1,0 +1,3 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-region-batch-lab/reactivity/crates/gpu)
+error: could not compile `gpui_gpu` (test "render") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

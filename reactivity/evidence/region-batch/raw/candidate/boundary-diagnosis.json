@@ -1,0 +1,6 @@
+{
+  "diagnostic_source": "b046b3cc891c5a77689f632a8578ebfde23cc6a8",
+  "diagnostic": "ordinary oracle Rgba8UnormSrgb/16384x1 rejects identity draw0 under unchanged 1/32 pixel ceiling; earlier image-scale hypothesis not established",
+  "correction": "Preserve maximum-axis geometry rejection and qualify clear-only same-scene regions there. Add 8191x1 and 1x8191 actual changed-pixel comparisons; all smaller and overflow tests retained. Maximum-axis clear test alone cannot detect an omitted instance; admitted geometry pixel tests supply that witness.",
+  "production_changed": false
+}

@@ -1,0 +1,56 @@
+{
+  "command": [
+    "/home/user/gpui-preserved-test-binaries/932c81b94ca4b574d9f001acc84dd1ce7b5eb6c6653bd1f07cf6c4197e6f0e86",
+    "runtime::damage_header_ledger::runtime_damage_headers",
+    "--exact",
+    "--nocapture"
+  ],
+  "exit": 0,
+  "artifact": {
+    "path": "/home/user/gpui-region-batch-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+    "sha256": "932c81b94ca4b574d9f001acc84dd1ce7b5eb6c6653bd1f07cf6c4197e6f0e86",
+    "preserved": "/home/user/gpui-preserved-test-binaries/932c81b94ca4b574d9f001acc84dd1ce7b5eb6c6653bd1f07cf6c4197e6f0e86",
+    "bytes": 61444096,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "filenames": [
+        "/home/user/gpui-region-batch-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521"
+      ],
+      "executable": "/home/user/gpui-region-batch-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+      "fresh": false
+    }
+  }
+}

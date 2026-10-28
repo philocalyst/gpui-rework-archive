@@ -1,0 +1,1 @@
+{"command": ["rustc", "+nightly-2026-10-23", "--version", "--verbose"], "exit": 0}

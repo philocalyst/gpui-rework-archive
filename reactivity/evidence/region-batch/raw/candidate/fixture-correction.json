@@ -1,0 +1,6 @@
+{
+  "failed_source": "46cab276551716f31f03feb32746229da7254b65",
+  "failure": "new boundary fixture rejected by unchanged initial full renderer: Precision { draw: 0 }, before any regional submission",
+  "correction": "use a 1:1 image rectangle instead of scaling a 1x1 image across non-power-of-two dimensions; validate initial full-render oracle before candidate. Exact pixel, 64-region, overflow and axis gates unchanged.",
+  "production_changed": false
+}

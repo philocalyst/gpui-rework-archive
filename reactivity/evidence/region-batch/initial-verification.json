@@ -1,0 +1,5 @@
+{
+  "output": "verified 10018 files, 2688 timing/336 qualification/112 allocation processes, 2 failed comparisons, 636 preserved ELFs, 888 archived cache identities",
+  "initial_manifest_sha256": "6f1979e60d99544a5a948859659c60349f19255bbc698b738580cbca4b1424c2",
+  "additional_check": "Manifest completeness also checked and added to standalone verifier; no production, artifact, measurement or verdict change."
+}

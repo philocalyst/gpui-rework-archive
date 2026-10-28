@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/932c81b94ca4b574d9f001acc84dd1ce7b5eb6c6653bd1f07cf6c4197e6f0e86", "--ignored", "--exact", "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes", "--nocapture"], "exit": 0}

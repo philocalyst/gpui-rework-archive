@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--manifest-path",
+    "reactivity/Cargo.toml",
+    "--release",
+    "-p",
+    "gpui_gpu",
+    "--target-dir",
+    "/home/user/gpui-region-batch-target"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "     Removed 18 files, 7.9MiB total\n",
+  "note": "Installed standard Cargo cache tag after preserving executed build script and generated shaders; no source changes during active gates."
+}

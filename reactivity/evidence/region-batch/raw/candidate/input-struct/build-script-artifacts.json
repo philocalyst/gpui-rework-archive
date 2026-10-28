@@ -1,0 +1,9 @@
+[
+  {
+    "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/a7e285389186b836/out/build_script_build",
+    "sha256": "4a98acd60fce7ec5d14da81c002ff10c015e05c0350d8b3cb8f1c5bb234154e9",
+    "preserved": "/home/user/gpui-preserved-test-binaries/4a98acd60fce7ec5d14da81c002ff10c015e05c0350d8b3cb8f1c5bb234154e9",
+    "bytes": 8228264,
+    "role": "executed GPU build script"
+  }
+]

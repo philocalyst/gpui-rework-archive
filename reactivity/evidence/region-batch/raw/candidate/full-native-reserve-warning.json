@@ -1,0 +1,6 @@
+{
+  "free_bytes_at_preflight": 12867629056,
+  "preferred_fresh_build_reserve": 12884901888,
+  "minimum_required_during_build": 8589934592,
+  "note": "Shell did not stop at optional 12GiB reserve assertion; composed gate started 17,272,832 bytes below that reserve. Its active 8GiB monitor is enabled. Inactive tool library cache cleanup performed during compilation, not timing. No worktree mutation."
+}

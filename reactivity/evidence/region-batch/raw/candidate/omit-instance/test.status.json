@@ -1,0 +1,30 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "gpui_gpu",
+    "--features",
+    "vulkan-tests",
+    "--message-format=json",
+    "--test",
+    "render",
+    "region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "minimum_free_bytes": 13987299328,
+  "storage_stop": false,
+  "seconds": 52.00650188099826
+}

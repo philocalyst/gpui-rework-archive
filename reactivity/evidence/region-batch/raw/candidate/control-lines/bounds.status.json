@@ -1,0 +1,1 @@
+{"command": ["python3", "reactivity/tools/core_lines.py", "--ref", "d67a538b9502fb778460d9c59e726d5bb502ce28", "--helper", "/home/user/gpui-target-inventory/release/inventory-rust", "--tokei", "/home/user/gpui-local-tools/bin/tokei"], "exit": 0}

@@ -1,0 +1,53 @@
+{
+  "command": [
+    "/home/user/gpui-preserved-test-binaries/288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e",
+    "renderer::retained::damage_header_ledger::retained_damage_headers",
+    "--exact",
+    "--nocapture"
+  ],
+  "exit": 0,
+  "artifact": {
+    "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+    "sha256": "288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e",
+    "preserved": "/home/user/gpui-preserved-test-binaries/288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e",
+    "bytes": 17140072,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_gpu",
+        "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a"
+      ],
+      "executable": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+      "fresh": true
+    }
+  }
+}

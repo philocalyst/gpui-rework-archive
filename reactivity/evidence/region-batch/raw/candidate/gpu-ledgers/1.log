@@ -1,0 +1,4 @@
+region_storage,ColdBatch=40,VertexBufferBytes=1024,MaxInstances=64
+retained_storage,Renderer=920,Output=40,Backing=120
+ownership_storage,Renderer=888,GpuContext=48,RendererState=840,LayoutLease=8,SlotGuard=80
+packet_storage,Renderer=888,Stats=200,Packet=16,OptionPacket=16,BindGroup=8,Canvas=464,PreparedScene=56

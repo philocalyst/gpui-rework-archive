@@ -1,0 +1,58 @@
+{
+  "cases": [
+    "scroll",
+    "both",
+    "stream",
+    "stream-owner",
+    "fractional",
+    "flat-tiny",
+    "flat-full",
+    "list-tiny",
+    "list-flat",
+    "exposure",
+    "text-0-1-source",
+    "text-0-1-owner",
+    "text-0-2-source",
+    "text-0-2-owner",
+    "text-0-4-source",
+    "text-0-4-owner",
+    "text-25-1-source",
+    "text-25-1-owner",
+    "text-25-2-source",
+    "text-25-2-owner",
+    "text-25-4-source",
+    "text-25-4-owner",
+    "text-1000-1-source",
+    "text-1000-1-owner",
+    "text-1000-2-source",
+    "text-1000-2-owner",
+    "text-1000-4-source",
+    "text-1000-4-owner"
+  ],
+  "variants": [
+    "control",
+    "predecessor",
+    "bounds",
+    "candidate"
+  ],
+  "pairs": 24,
+  "seed": 20261103,
+  "process_manifest_sha256": "7f21c35f5d2c784fb6b05755a6826b8c1984b6b4904920acae2504c32e3e29b2",
+  "thresholds": {
+    "stream": {
+      "control": 0.8,
+      "predecessor": 0.8,
+      "bounds": 1.05
+    },
+    "stream-owner": {
+      "control": 0.8,
+      "predecessor": 0.8,
+      "bounds": 1.05
+    },
+    "every_other_case": {
+      "control": 1.05,
+      "predecessor": 1.05,
+      "bounds": 1.05
+    }
+  }
+}

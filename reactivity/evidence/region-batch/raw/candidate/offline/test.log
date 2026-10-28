@@ -1,0 +1,4 @@
+error: failed to download `fixedbitset v0.5.7`
+
+Caused by:
+  attempting to make an HTTP request, but --offline was specified

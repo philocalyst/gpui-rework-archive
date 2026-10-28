@@ -1,0 +1,560 @@
+{
+  "generated_files": [
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/74f283b45b2110f7/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/74f283b45b2110f7/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-0-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-0-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-artifacts.json",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/aa49e4a96658098f39530be9269641654f27376f314d1f9967026c096770bf91-ui-artifacts.json",
+      "bytes": 2720,
+      "sha256": "aa49e4a96658098f39530be9269641654f27376f314d1f9967026c096770bf91"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-1-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-1-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-artifacts.rs",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/20340a791515f18b6f815671f11082e9a13a0b53963fadcb6170b2196ac08ae2-ui-artifacts.rs",
+      "bytes": 486539,
+      "sha256": "20340a791515f18b6f815671f11082e9a13a0b53963fadcb6170b2196ac08ae2"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-3-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-3-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-2-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-2-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-0-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427-ui-0-fragment.spv",
+      "bytes": 41636,
+      "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-1-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e-ui-1-fragment.spv",
+      "bytes": 41796,
+      "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-3-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20-ui-3-fragment.spv",
+      "bytes": 45060,
+      "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui-2-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f-ui-2-fragment.spv",
+      "bytes": 44900,
+      "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/96e8f6570db9d2af/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-0-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-0-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-artifacts.json",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/aa49e4a96658098f39530be9269641654f27376f314d1f9967026c096770bf91-ui-artifacts.json",
+      "bytes": 2720,
+      "sha256": "aa49e4a96658098f39530be9269641654f27376f314d1f9967026c096770bf91"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-1-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-1-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-artifacts.rs",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/20340a791515f18b6f815671f11082e9a13a0b53963fadcb6170b2196ac08ae2-ui-artifacts.rs",
+      "bytes": 486539,
+      "sha256": "20340a791515f18b6f815671f11082e9a13a0b53963fadcb6170b2196ac08ae2"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-3-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-3-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-2-vertex.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3-ui-2-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-0-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427-ui-0-fragment.spv",
+      "bytes": 41636,
+      "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-1-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e-ui-1-fragment.spv",
+      "bytes": 41796,
+      "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-3-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20-ui-3-fragment.spv",
+      "bytes": 45060,
+      "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui-2-fragment.spv",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f-ui-2-fragment.spv",
+      "bytes": 44900,
+      "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/e33822bd5bf2cd01/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/0b12888bfbf6a76e/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/0b12888bfbf6a76e/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/5e5ec4fa7dc68373/out/region.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c-region.wgsl",
+      "bytes": 486,
+      "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c"
+    },
+    {
+      "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/5e5ec4fa7dc68373/out/ui.wgsl",
+      "saved": "/home/user/gpui-region-batch-evidence/generated-shaders/ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1-ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+    }
+  ],
+  "binaries": [
+    {
+      "stage": "boundary-admission",
+      "artifact": {
+        "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+        "sha256": "288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e",
+        "preserved": "/home/user/gpui-preserved-test-binaries/288a752b042505d0b8e26dbd4fc8a430ec247aa7501e1bfe76e6b75504bd502e",
+        "bytes": 17140072,
+        "executed": true,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+          "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui_gpu",
+            "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": true
+          },
+          "features": [
+            "default",
+            "gpu-tests",
+            "simd",
+            "vulkan-tests"
+          ],
+          "filenames": [
+            "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a"
+          ],
+          "executable": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+          "fresh": true
+        }
+      },
+      "embedded": [
+        {
+          "name": "ui.wgsl",
+          "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+          "offset": 890212,
+          "bytes": 18995
+        }
+      ]
+    },
+    {
+      "stage": "boundary-admission",
+      "artifact": {
+        "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+        "sha256": "68f9e553bc9bac147351763920819bcbd253e6675e0e71f98c2ebea189daa323",
+        "preserved": "/home/user/gpui-preserved-test-binaries/68f9e553bc9bac147351763920819bcbd253e6675e0e71f98c2ebea189daa323",
+        "bytes": 16837952,
+        "executed": true,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+          "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/Cargo.toml",
+          "target": {
+            "kind": [
+              "test"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "render",
+            "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/tests/render.rs",
+            "edition": "2024",
+            "required-features": [
+              "gpu-tests"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": true
+          },
+          "features": [
+            "default",
+            "gpu-tests",
+            "simd",
+            "vulkan-tests"
+          ],
+          "filenames": [
+            "/home/user/gpui-region-batch-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97"
+          ],
+          "executable": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+          "fresh": false
+        }
+      },
+      "embedded": [
+        {
+          "name": "region.wgsl",
+          "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c",
+          "offset": 677698,
+          "bytes": 486
+        },
+        {
+          "name": "ui.wgsl",
+          "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+          "offset": 614954,
+          "bytes": 18995
+        }
+      ]
+    },
+    {
+      "stage": "offline-cached",
+      "artifact": {
+        "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/58ea720b9d42b54c/out/render-58ea720b9d42b54c",
+        "sha256": "172afa43c231ca59c4e7a502ab0e381f22265545a61f05cd3149c3a3bc530637",
+        "preserved": "/home/user/gpui-preserved-test-binaries/172afa43c231ca59c4e7a502ab0e381f22265545a61f05cd3149c3a3bc530637",
+        "bytes": 17019352,
+        "executed": true,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+          "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/Cargo.toml",
+          "target": {
+            "kind": [
+              "test"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "render",
+            "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/tests/render.rs",
+            "edition": "2024",
+            "required-features": [
+              "gpu-tests"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": true
+          },
+          "features": [
+            "default",
+            "gpu-tests",
+            "offline-shader",
+            "simd",
+            "vulkan-tests"
+          ],
+          "filenames": [
+            "/home/user/gpui-region-batch-target/release/build/gpui_gpu/58ea720b9d42b54c/out/render-58ea720b9d42b54c"
+          ],
+          "executable": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/58ea720b9d42b54c/out/render-58ea720b9d42b54c",
+          "fresh": false
+        }
+      },
+      "embedded": [
+        {
+          "name": "ui.wgsl",
+          "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+          "offset": 615658,
+          "bytes": 18995
+        },
+        {
+          "name": "ui-0-vertex.spv",
+          "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+          "offset": 852824,
+          "bytes": 880
+        },
+        {
+          "name": "ui-0-fragment.spv",
+          "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427",
+          "offset": 679432,
+          "bytes": 41636
+        },
+        {
+          "name": "ui-1-fragment.spv",
+          "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e",
+          "offset": 721068,
+          "bytes": 41796
+        },
+        {
+          "name": "ui-3-fragment.spv",
+          "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20",
+          "offset": 807764,
+          "bytes": 45060
+        },
+        {
+          "name": "ui-2-fragment.spv",
+          "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f",
+          "offset": 762864,
+          "bytes": 44900
+        }
+      ]
+    },
+    {
+      "stage": "offline-cached",
+      "artifact": {
+        "path": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/8d28cb085757f051/out/gpui_gpu-8d28cb085757f051",
+        "sha256": "de4657aaf6880adab47a87d04a9a0696562e8a5b9ba480cbdf90a15f3eb61813",
+        "preserved": "/home/user/gpui-preserved-test-binaries/de4657aaf6880adab47a87d04a9a0696562e8a5b9ba480cbdf90a15f3eb61813",
+        "bytes": 17347800,
+        "executed": true,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+          "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "gpui_gpu",
+            "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpu/src/lib.rs",
+            "edition": "2024",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": true
+          },
+          "features": [
+            "default",
+            "gpu-tests",
+            "offline-shader",
+            "simd",
+            "vulkan-tests"
+          ],
+          "filenames": [
+            "/home/user/gpui-region-batch-target/release/build/gpui_gpu/8d28cb085757f051/out/gpui_gpu-8d28cb085757f051"
+          ],
+          "executable": "/home/user/gpui-region-batch-target/release/build/gpui_gpu/8d28cb085757f051/out/gpui_gpu-8d28cb085757f051",
+          "fresh": false
+        }
+      },
+      "embedded": [
+        {
+          "name": "ui.wgsl",
+          "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+          "offset": 891368,
+          "bytes": 18995
+        },
+        {
+          "name": "ui-0-vertex.spv",
+          "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+          "offset": 1105120,
+          "bytes": 880
+        },
+        {
+          "name": "ui-0-fragment.spv",
+          "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427",
+          "offset": 931712,
+          "bytes": 41636
+        },
+        {
+          "name": "ui-1-fragment.spv",
+          "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e",
+          "offset": 973348,
+          "bytes": 41796
+        },
+        {
+          "name": "ui-3-fragment.spv",
+          "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20",
+          "offset": 1060044,
+          "bytes": 45060
+        },
+        {
+          "name": "ui-2-fragment.spv",
+          "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f",
+          "offset": 1015144,
+          "bytes": 44900
+        }
+      ]
+    },
+    {
+      "stage": "full-native",
+      "artifact": {
+        "path": "/home/user/gpui-region-batch-target/release/examples/zgx_native_lab",
+        "sha256": "8091f2e0696031545b72e007008127fb6a8a9d3d0f1eb152a07c4e85110568c4",
+        "preserved": "/home/user/gpui-preserved-test-binaries/8091f2e0696031545b72e007008127fb6a8a9d3d0f1eb152a07c4e85110568c4",
+        "bytes": 26412144,
+        "executed": false,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-region-batch-lab/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "zgx_native_lab",
+            "src_path": "/home/user/gpui-region-batch-lab/reactivity/crates/gpui/examples/zgx_native_lab.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/user/gpui-region-batch-target/release/examples/zgx_native_lab"
+          ],
+          "executable": "/home/user/gpui-region-batch-target/release/examples/zgx_native_lab",
+          "fresh": false
+        }
+      },
+      "embedded": [
+        {
+          "name": "region.wgsl",
+          "sha256": "6af2f8ac8608e407756c3d4afd2bfe736f58886bc193be00fecbf8c0577afc0c",
+          "offset": 2546966,
+          "bytes": 486
+        },
+        {
+          "name": "ui.wgsl",
+          "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+          "offset": 2329421,
+          "bytes": 18995
+        }
+      ]
+    }
+  ],
+  "note": "Original typed/generated equality test passed. Both generated WGSL programs embedded in executed default GPU render integration test and native example. GPU unit binary dead strips unused regional caller. Offline feature uses separately validated original artifact/fallback and no region pipeline."
+}
