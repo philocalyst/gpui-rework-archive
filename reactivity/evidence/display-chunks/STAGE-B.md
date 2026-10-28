@@ -33,3 +33,10 @@ would not falsify this bug; deferred consumption is deliberate and specified.
 Freeze before building/running. Fresh unique target, pinned locked/checksum
 build, source guards, exact font digest, actual ELF/embedded WGSL, all actual
 readbacks and failure logs. Any failure is preserved; no performance verdict.
+
+Initial88e3e997 build and all16 public edits/actual resource extraction pass.
+Serial, overlap and raw-overlap each pass17 actual GPU root byte readbacks;
+the missing-resource-lease mutant fails at deferred fence0 with267 wrong bytes.
+Strict Clippy rejects chunks_exact(4) in the readback parser; retain this
+complete initial evidence and change only parsing to as_chunks::<4>().0.iter().
+The corrected frozen cohort repeats all gates, with no case or oracle changes.

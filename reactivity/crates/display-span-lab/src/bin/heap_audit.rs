@@ -48,8 +48,10 @@ fn finish(
     frame.readback.unmap();
     fs::write(out.join(format!("readback-{id}.u32")), &raw).unwrap();
     let actual: Vec<u32> = raw
-        .chunks_exact(4)
-        .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|b| u32::from_le_bytes(*b))
         .collect();
     let errors = actual
         .iter()
