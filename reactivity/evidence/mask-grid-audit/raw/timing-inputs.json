@@ -1,0 +1,63 @@
+{
+  "files": {
+    "build.out": "a020ea6e000854c303904bae6954c1460bdd2c635fc2552968a1ad97a3c33c61",
+    "parent-analysis.json": "72007f519ad8d9bd2d38c0b97269c126d473c31f107d73c236c38bb39446df23",
+    "completed-cleanup-plan.json": "43baa54b4facf1e7b6016e6afd063caea3ebd3b65559a955950d73dcd6b694c8",
+    "guard.py": "f5606caad541f4d27e0d537b8a7cbd304d38f2b1f63d6efc5028239ebc73b1cd",
+    "candidate-current-inputs.json": "ea521f6fd5fa16458cc2642d37dcf925208365c1925594cd369c281b8cc59439",
+    "completed-cleanup.out": "7bfbb7ec98fc0ee9c9a40216093a99e8cf11c2852ebf67559407f081c91f1a2d",
+    "build-gates.json": "f3feb113a86aafacfe401a65eb4158919abf72237e504f3c08a8ecc3f63550af",
+    "completed-cleanup.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shader-admission-reverification.json": "8484bb9df489ca8b3ad407bf1e4e35f5f93c23f399cedcf5eb33014fc15edf92",
+    "oracle-190.png": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "verify_dossier.pre-observation.py": "8f2dc5b1e6a4f27b49948886c3b25cc032ac988a68257949a2d2fd943c144bad",
+    "analyze.py": "41b83c4e7bc7008bd4c5df931ff4089414b133d3685c877da98cf5808fa88aa5",
+    "PROTOCOL.md": "91d252c61d7672e310fe2bbd820dd8fee402affa0d96bd717b032dacfed00457",
+    "reclaim_completed.py": "bdee73e46b98541f6f473f0910e90d0d24499b3ccec0fec4fea7a37b82e29de9",
+    "native.py": "f1919254e7f8607c51bd1a34bd21c54084ad8c61860a2a0ebb6465bcbe12f0f2",
+    "oracle-0.png": "626b541b01329869e60159381cada9fdaaa8f37f675da0f9dfc6a9bb3f73ac46",
+    "window-manager.txt": "e1ada4d8108f4df0b666397b7ccbfde68726a8290dcc58486fa52f062f8ef9b9",
+    "package.py": "1f127cda963ee51c54ec6170ef360f902dea81830bcfa3de8b09c7a37dcb8c7a",
+    "artifacts.json": "19e1175a5f534db4795cb3b618b4a712ec7604547ffb118cc6ec308ce296930e",
+    "verify_dossier.py": "13606590f3bf5b81d09d6bb18b0b81144a5f952c2c994e77a1f0d0df7d0e2ad2",
+    "ORDER.json": "564f2e30d991604122bf450ad1c54398c129d2228f5785ee0fcbef4b8c3c5cad",
+    "pre-observation-correction.json": "ad7555a52605230eec35bc0c59b2d1fb4a8ee4b5277eb81d42d1c3e1e6ed7bfe",
+    "environment.json": "6c191528daf477401d4659c7e08f07dd1d8eec33799f2be34aff2b6d0be4fba3",
+    "completed-cleanup-receipt.json": "c8f3d3f2206ae49288b5e40a9f3c809de1834dae59318164788851b2c0349c5c",
+    "parent-reverification.json": "31fbc5592813e802cc3fcb871093f3d8f6a523c9dc0951430d88d67d76931eed",
+    "freeze.py": "5f1e1fbe6e35fc55ef2e99ca450b749c6c638c04eec05c6cd1680dc946511f97",
+    "shader.json": "05096f4a107e9c04ddea847082adaafbb35c9404bbc454f2bccebe805d8b5d33",
+    "parent-reference.json": "7c5f0ee71ab60c1b1ad8110b9ea4851536a09c5df64df5a354cc87d599c2d260",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ui.wgsl": "07a94fa243212e5261309a7f5d7234e7c7f0ae668302cac1fae27f6939fa7a7e",
+    "build.py": "867303047cd80f756f14c207bd091686c75b46171ebaabbfe5c7dc3d5c6d2a6a",
+    "build-candidate/build.out": "fdf315c9c275806a2073ca73f0e9a34a924d7129fa534657da560a24660e8c0a",
+    "build-candidate/source.txt": "28ba193db560e19671725e9decee1673a26906d207a4c4c4a004d8da90c3939b",
+    "build-candidate/test-artifacts.json": "81b2f0fa7046a6a8e9887c1713cab1d6e129a65865e7157be498806de6c3f498",
+    "build-candidate/build-artifacts.json": "1b0c11682dbb50780b8b82f26c884099c301aec2b185521f20dc0f75f00cd56d",
+    "build-candidate/test.log": "aace42dcb673f46a553ce3e11f0c216a540d055c34ebc069cf364a3aa21a1e30",
+    "build-candidate/build.status.json": "64b83392e88b01c03f35110862742adea8d56ca89823e090090c65142a5fbdda",
+    "build-candidate/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "build-candidate/reserve.json": "f075b73143f58c62079eca8a758eac9f0a8cff3ecdecda28b3c978d8c953c859",
+    "build-candidate/toolchain.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "build-candidate/test.status.json": "9012874bcd91b195a7c30a0f6a86b0cb855099ce56f81c682375b1bfa22d967d",
+    "build-candidate/inputs.json": "6b670b3b4a8247674bc9d79e999d8b4b9a4df635b3b8b981678fd400c34bbdce",
+    "build-candidate/environment.json": "154c82efce390d99d7819929569267b696907793676267263b8286b1c915fc67",
+    "build-candidate/test.out": "9496b3282083dfe4ba4d0bbec14a0f195cb6915a046318c2d396919fb9fb69ac",
+    "build-candidate/build.log": "824151bba344b292d86c32977f9c1f4e6df5820a2f791575f273273d47461271"
+  },
+  "sources": {
+    "candidate": {
+      "worktree": "/home/user/gpui-mask-grid-audit-lab",
+      "compiled_source": "7cc9497c427adbd0079f3b9c330effc50cb56d1a",
+      "current_source": "7cc9497c427adbd0079f3b9c330effc50cb56d1a"
+    }
+  },
+  "environment_files": {
+    "/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so": "9d69cae2004b16572acca424741109be37c4ffc759c2461af69d75f7d1c6c139",
+    "/usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275": "e833b010f814b72c6aca0300c8b5f19b6106ffa06c24ddc95a293970c7d6058e",
+    "/usr/share/vulkan/icd.d/lvp_icd.json": "70d49f7fd41a7593a4e283543ed4855c139c700e5c1b31792f56e9576ede2398",
+    "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "frozen_utc": "2026-10-28T18:48:16.001455+00:00"
+}

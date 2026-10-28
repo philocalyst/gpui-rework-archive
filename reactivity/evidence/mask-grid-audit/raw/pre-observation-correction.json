@@ -1,0 +1,5 @@
+{
+  "reason": "Static review caught duplicated planned-work assertion inserted before packet parsing. Removed early duplicate before freeze/observations; retained the assertion after independent packet parsing. No source, fixture or threshold change.",
+  "before": "8f2dc5b1e6a4f27b49948886c3b25cc032ac988a68257949a2d2fd943c144bad",
+  "after": "8c647fc92fbf49080096d9d0c45df999983bba6a7934f61a834441a497383ab1"
+}
