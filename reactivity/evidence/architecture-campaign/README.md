@@ -588,3 +588,26 @@ compression/index costs, structural relocation, dependency closure, old/new
 damage and stale-frame/resource authority. Fixed-size publication descriptors
 are separated from payload copies, CPU scans, GPU decoding and rendering.
 Executable models are research, not a completed integration or a ZGX victory.
+
+
+First representation pair sealed **36f700a7345e7a561c66de498f840437ad4f0d3c**
+on local/display-spans. Verifier checks1054 files,172 exact Vulkan pixel/word
+frames,132 codec cases and4 actual GPU mutants. Public source/structural trace
+uses unchanged APIs, fresh full View oracle,9->10->9 nodes and stale authority.
+Packed1024-node front insertion moves49056 logical bytes/uploads15248; stable
+slots move0/upload1416. Cross-group move uploads1336 packed versus1488 paged.
+These are structural counts, not timings. CPU full scans/mirrors remain; tiny
+compressed tree loses904 vs432 raw bytes; append-only version memory grows.
+The full-snapshot adapter, staged GPU writes and serialized completion are not
+the requested integrated architecture. Resource payload lifetimes remain open.
+
+Next isolated hypothesis local/display-chunks retains this first-pair baseline:
+ordered compressed chunks, stable identity directory, incremental dirty-page
+journal, raw tiny fallback and fenced reclamation. Charge total metadata,
+description, damage, indices, scratch, fragmentation and in-flight versions.
+Direct ordinary Source paint must avoid full-snapshot extraction; subtree start
+lookup and extent enumeration are separate. Overlapping GPU submissions and
+real text/image payload leases precede any resource-completeness claim.
+Historical469.5x is CPU recording versus old GPUI, not ZGX; older native workspace
+mixed CPU remains6.06x ZGX. New representations have no competitor timing claim.
+All new work stays local.
