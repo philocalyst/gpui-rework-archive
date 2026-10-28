@@ -913,3 +913,34 @@ adversaries, clip/transform and old/new support closure, spatial-index/COW and
 structural work, and raw/serial controls. Preregister prototype timing after
 bounded correctness: preparation, staging, GPU completion and retained memory,
 not another indefinite correctness-only series or a production performance claim.
+
+
+Independent mechanism A correctness is sealed **d40381fa539f2b58b400785b386fe8477bba0954**
+(local/display-hot):5749 CPU checks,208 hot GPU frames,33 cold controls,254
+independent replay frames. Six48-byte-per-key version slots preserve old semantic
+values; one paint edit stages104B (108B with actual audit-count argument), without
+cold page/directory rewrite. Full traversal is unchanged. Round-robin eviction
+corrupts4 decoded color bytes while stale-protected pixels stay correct. Dense
+1024-key storage costs49152B. Still restricted/offline, no production integration.
+
+A cost is sealed **be4833a9cfe2fa41acc7cd61338b5851984793e3**:
+180 processes/92160 samples, complete prototype preparation/JSON/IPC/staging/GPU
+completion/reply/owner-ack endpoint. Sparse median p95 ratios0.88225 at256 and
+0.92282 at1024 meet0.95. Admission is withheld: regression aggregation was
+underspecified and the conservative per-round reading fails3 tiny pairs. That is
+not proof of a reproducible causal regression; all median regression summaries
+pass. No reinterpretation, rerun, threshold/fallback changes or sample removal.
+Raw serial beats compressed A at all32/256/1024 cases; raw/A paired p95 at1024
+is0.86843 sparse/0.83370 overlap. A reduces preparation but adds version decode,
+per-key storage and roughly4–5MiB worker peak RSS; serialized reserved GPU memory
+also rises slightly. No GPUI frame, hardware, scanout or ZGX claim.
+
+Next independent **local/display-traversal** descends from radix bb21d114, not A.
+Original encoding plus ordered conservative tile-to-chunk lists; direct paint
+must avoid index scans, unrelated chunks must stop increasing record visits.
+A stronger source-edited background/staircase sibling fixture ensures each
+occluding sibling has visible pixels; original opaque-last-target overlap alone
+does not prove all underlying rectangles are inherently required. Full structural
+index rebuild cost is explicit. Future timing aggregation is prospectively
+specified as median paired per-round p95 for every gain/regression cell, with
+raw controls and before/after generated-input digests. A+B remains uncombined.
