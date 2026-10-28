@@ -1132,6 +1132,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpui_display_span_lab"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "pollster",
+ "serde_json",
+ "wgpu",
+]
+
+[[package]]
 name = "gpui_gpu"
 version = "0.1.0"
 dependencies = [
