@@ -517,3 +517,11 @@ and a proof-toggle wrong-row failure. Native audit **68682a99** confirms all
 1,082 literal packets now select marked mask tiles with exact initial images.
 Native screenf21f5dab is frozen; build complete,tests/preflights/timing pending.
 No performance result or adoption.
+
+
+Mask-tiles screen **f0da94c8** rejected: stream .92343 exceeds .8; baseline
+cadence failures suppress scroll/mixed comparisons. All64 processes normal.
+New mask-miss662707d7/b817779c preserves16 blends but reuses a proven-identical
+source sample. Early GPU seal **e97729cb** passes353 tests,Clippy,336 exact
+frames and a3718-byte invalid-certificate witness. Native first-packet audit
+70b75c8c is building; no performance, adoption or ZGX claim.

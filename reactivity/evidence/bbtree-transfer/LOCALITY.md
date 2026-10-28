@@ -684,3 +684,27 @@ The uninstrumented native screen is frozen at
 complete; workload tests/preflights/timing remain pending. Both independent
 admission receipts are mandatory before observations. Prior failures retain
 their verdicts; no full-cost/ZGX/hardware admission or victory yet.
+
+
+Mask-tiles native screen sealed **f0da94c8f4847a22c2db96c5038d79d8fc23662a**:
+827 independently verified files,64 normal processes,34 workload tests and10
+preflights. Stream CPU ratio .923431477 (95%[.843563731,.951912205]) misses .8.
+Scroll/mixed comparisons are suppressed because baseline cadence gates failed;
+all candidate work gates pass. No retry or full-cost admission.
+
+New mask-miss preregistration **662707d79f3b3da28dacfc452090ff0c5f6c52a1**,
+production **b817779c5609a038edd8f7d22f46863416c9e17e**, reuses one original
+source sample only when the existing exact lowered-mask certificate proves all
+16 samples miss the mask domain. Every original blend and reduction remains.
+No signed-zero no-op assumption, new API, storage, dependency or unsafe.
+Early GPU seal **e97729cbb03e71890f4f8efb97ce1920594284ca** independently
+verifies727 files,64 ELF identities,353 tests,Clippy and336 exact frames. An
+over-broad miss certificate6afe48dd fails the ordinary proof-toggle fixture,
+3718 differing bytes against independently equal fallback/oracle/candidate.
+Shipping38207 lines (+26 parent,+179 suffix); generated WGSL22857 bytes.
+First-packet support audit70b75c8c is building; no native performance result.
+
+The BBTree transfer remains explicit: reduce repeated work within bounded,
+independent operation lanes while charging lane state and compilation costs.
+It does not justify changing Solid/Ripple dependency authority or task wakeups,
+and neither planned mask reuse nor software rendering establishes cache hits.
