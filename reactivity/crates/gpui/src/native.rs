@@ -335,42 +335,63 @@ impl GpuSurface {
         target: &wgpu::TextureView,
         transition: Option<crate::runtime::paint::SceneDamage<'_>>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        let valid_transition =
-            transition.filter(|d| d.base.is_some() && d.base == self.packet_token);
-        let damage = valid_transition.map(|d| d.region);
-        if self.packet_token == Some(token)
-            && let Some(submitted) = self.renderer.redraw(target)?
-        {
-            return Ok(submitted);
-        }
-        // Revoke image authority before any packet or image mutation.
-        let previous = self.packet_token.take();
-        if let Some(paint) = paint
-            && previous == Some(paint.from)
-            && let Ok(submitted) = self.renderer.patch_slots(&paint.edits, target, damage)
-        {
-            self.packet_token = Some(token);
-            return Ok(submitted);
-        }
-        let submitted = if let Some(repair) = valid_transition
-            .and_then(|d| d.repair)
-            .filter(|repair| previous == Some(repair.from) && token == repair.to)
-        {
-            self.renderer
-                .render_regions(scene, target, &repair.regions)?
-        } else if let Some(scroll) = valid_transition
-            .and_then(|d| d.scroll)
-            .filter(|scroll| previous == Some(scroll.from) && token == scroll.to)
-        {
-            self.renderer
-                .render_with_scroll(scene, target, damage, Some(&scroll.copy))?
-        } else {
-            self.renderer.render(scene, target, damage)?
-        };
-        self.packet_token = Some(token);
-        Ok(submitted)
+        render_packet(
+            &mut self.renderer,
+            &mut self.packet_token,
+            scene,
+            token,
+            paint,
+            target,
+            transition,
+        )
     }
 }
+
+/// Existing native authority boundary, shared with the offscreen integration gate.
+fn render_packet(
+    renderer: &mut gpui_gpu::RetainedRenderer,
+    packet_token: &mut Option<crate::PresentationToken>,
+    scene: gpui_canvas::PreparedScene<'_>,
+    token: crate::PresentationToken,
+    paint: Option<&crate::runtime::paint::SlotTransition>,
+    target: &wgpu::TextureView,
+    transition: Option<crate::runtime::paint::SceneDamage<'_>>,
+) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+    let valid_transition = transition.filter(|d| d.base.is_some() && d.base == *packet_token);
+    let damage = valid_transition.map(|d| d.region);
+    if *packet_token == Some(token)
+        && let Some(submitted) = renderer.redraw(target)?
+    {
+        return Ok(submitted);
+    }
+    // Revoke image authority before any packet or image mutation.
+    let previous = packet_token.take();
+    if let Some(paint) = paint
+        && previous == Some(paint.from)
+        && let Ok(submitted) = renderer.patch_slots(&paint.edits, target, damage)
+    {
+        *packet_token = Some(token);
+        return Ok(submitted);
+    }
+    let submitted = if let Some(repair) = valid_transition
+        .and_then(|d| d.repair)
+        .filter(|repair| previous == Some(repair.from) && token == repair.to)
+    {
+        renderer.render_regions(scene, target, &repair.regions)?
+    } else if let Some(scroll) = valid_transition
+        .and_then(|d| d.scroll)
+        .filter(|scroll| previous == Some(scroll.from) && token == scroll.to)
+    {
+        renderer.render_with_scroll(scene, target, damage, Some(&scroll.copy))?
+    } else {
+        renderer.render(scene, target, damage)?
+    };
+    *packet_token = Some(token);
+    Ok(submitted)
+}
+
+#[cfg(test)]
+mod live_seam_tests;
 
 type CpuSurface = softbuffer::Surface<Arc<NativeWindow>, Arc<NativeWindow>>;
 enum Graphics {
