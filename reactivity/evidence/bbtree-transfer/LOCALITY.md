@@ -1,5 +1,19 @@
 # BBTree, Solid and Ripple: preserve locality through publication
 
+**Production baseline correction:** the existing native path already carries an
+exact predecessor token, scene-positional PaintSlot edit and acknowledged-image
+damage into retained ordered tile traversal. An eligible equal-alpha slot edit
+stages **16 bytes** without revalidating/rebinning the whole scene. B's prototype
+full-scan comparison does not establish an improvement over this production path;
+A's104-byte staged publication is not an upload win against it. The new
+local/display-live-seam investigation extracts the existing private native
+render decision for ordinary live Win::set-to-GPU observability, not adoption.
+PaintSlot and virtual packet addresses are not semantic subtree identity. Generic
+structural/dependency journals and the requested unified compressed display tree
+remain open. Before choosing cold compression, identify a remaining measured
+cost on this live baseline and charge mirrors, directories, raw fallback and
+complete endpoint/storage. No prototype p95 carries over as native latency.
+
 Research follow-up to the maintainer's request, 2026-10-27. This is a transfer
 hypothesis, not a breakthrough or performance claim. All references are pinned
 read-only checkouts. Prior failed experiments retain their original verdicts.
