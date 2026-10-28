@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/8c60f2c045b824ab92e86ae709d15eaea98626dde1f1f3c11c11cc55bd413cac",
+    "/home/user/gpui-display-traversal-evidence/gpu-first/jobs/staircase-9-overlap-raw-m0/jobs.json"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.780686616897583
+}

@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "/home/user/gpui-display-traversal-evidence/gpu-first/public"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.14432930946350098
+}

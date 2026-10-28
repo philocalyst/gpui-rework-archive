@@ -1,0 +1,12 @@
+{
+  "traversal_public": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200
+  },
+  "traversal_gpu": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/8c60f2c045b824ab92e86ae709d15eaea98626dde1f1f3c11c11cc55bd413cac",
+    "sha256": "8c60f2c045b824ab92e86ae709d15eaea98626dde1f1f3c11c11cc55bd413cac",
+    "bytes": 6976832
+  }
+}

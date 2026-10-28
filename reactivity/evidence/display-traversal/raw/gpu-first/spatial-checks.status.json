@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-traversal-lab/reactivity/crates/display-span-lab/model/spatial_checks.py",
+    "/home/user/gpui-display-traversal-evidence/gpu-first/checks"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.5026280879974365
+}

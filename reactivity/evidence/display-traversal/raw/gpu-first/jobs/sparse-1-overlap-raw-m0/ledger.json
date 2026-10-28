@@ -1,0 +1,1225 @@
+{
+  "mode": "overlap-raw",
+  "mutant": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "change": {
+        "initial_admission_nodes": 1
+      },
+      "damage": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "mode_switch_pages_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 2,
+          "heap_child_edges": 1,
+          "slot_generation_entries": 2,
+          "free_bin_entries": 0,
+          "arena_high_water": 144,
+          "live_payload": 116,
+          "live_allocated": 128,
+          "fragmentation": 12,
+          "free_bytes": 0,
+          "live_allocations": 2,
+          "uploaded_bytes": 116,
+          "ref_increments": 2
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 4029,
+      "candidate_python_trace_peak": 4109,
+      "candidate_python_reachable_bytes": 14173,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 4096,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 4096,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 1,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 4,
+          "heap_child_edges": 2,
+          "slot_generation_entries": 4,
+          "free_bin_entries": 0,
+          "arena_high_water": 272,
+          "live_payload": 232,
+          "live_allocated": 256,
+          "fragmentation": 24,
+          "free_bytes": 0,
+          "live_allocations": 4,
+          "uploaded_bytes": 232,
+          "ref_increments": 5,
+          "ref_decrements": 3
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 3,
+        "ref_decrements": 3
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 4081,
+      "candidate_python_trace_peak": 4273,
+      "candidate_python_reachable_bytes": 15646,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 0,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 2,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 6,
+          "heap_child_edges": 3,
+          "slot_generation_entries": 6,
+          "free_bin_entries": 0,
+          "arena_high_water": 400,
+          "live_payload": 348,
+          "live_allocated": 384,
+          "fragmentation": 36,
+          "free_bytes": 0,
+          "live_allocations": 6,
+          "uploaded_bytes": 348,
+          "ref_increments": 7,
+          "ref_decrements": 5
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 4410,
+      "candidate_python_trace_peak": 4574,
+      "candidate_python_reachable_bytes": 16856,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 3,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 4,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 0,
+          "arena_high_water": 528,
+          "live_payload": 464,
+          "live_allocated": 512,
+          "fragmentation": 48,
+          "free_bytes": 0,
+          "live_allocations": 8,
+          "uploaded_bytes": 464,
+          "ref_increments": 9,
+          "ref_decrements": 7
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3786,
+      "candidate_python_trace_peak": 3950,
+      "candidate_python_reachable_bytes": 17746,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 4,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 4,
+          "heap_child_edges": 2,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 4,
+          "arena_high_water": 528,
+          "live_payload": 232,
+          "live_allocated": 256,
+          "fragmentation": 24,
+          "free_bytes": 256,
+          "live_allocations": 4,
+          "uploaded_bytes": 580,
+          "ref_increments": 12,
+          "ref_decrements": 16,
+          "reused_allocations": 2
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 3,
+        "ref_decrements": 9,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3582,
+      "candidate_python_trace_peak": 3774,
+      "candidate_python_reachable_bytes": 15925,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 0,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 5,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 6,
+          "heap_child_edges": 3,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 2,
+          "arena_high_water": 528,
+          "live_payload": 348,
+          "live_allocated": 384,
+          "fragmentation": 36,
+          "free_bytes": 128,
+          "live_allocations": 6,
+          "uploaded_bytes": 696,
+          "ref_increments": 14,
+          "ref_decrements": 18,
+          "reused_allocations": 4
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 4498,
+      "candidate_python_trace_peak": 4578,
+      "candidate_python_reachable_bytes": 16883,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 6,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 4,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 0,
+          "arena_high_water": 528,
+          "live_payload": 464,
+          "live_allocated": 512,
+          "fragmentation": 48,
+          "free_bytes": 0,
+          "live_allocations": 8,
+          "uploaded_bytes": 812,
+          "ref_increments": 16,
+          "ref_decrements": 20,
+          "reused_allocations": 6
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3502,
+      "candidate_python_trace_peak": 3694,
+      "candidate_python_reachable_bytes": 17529,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 7,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 4,
+          "heap_child_edges": 2,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 4,
+          "arena_high_water": 528,
+          "live_payload": 232,
+          "live_allocated": 256,
+          "fragmentation": 24,
+          "free_bytes": 256,
+          "live_allocations": 4,
+          "uploaded_bytes": 928,
+          "ref_increments": 19,
+          "ref_decrements": 29,
+          "reused_allocations": 8
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 3,
+        "ref_decrements": 9,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3446,
+      "candidate_python_trace_peak": 3638,
+      "candidate_python_reachable_bytes": 15869,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 0,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 8,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 6,
+          "heap_child_edges": 3,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 2,
+          "arena_high_water": 528,
+          "live_payload": 348,
+          "live_allocated": 384,
+          "fragmentation": 36,
+          "free_bytes": 128,
+          "live_allocations": 6,
+          "uploaded_bytes": 1044,
+          "ref_increments": 21,
+          "ref_decrements": 31,
+          "reused_allocations": 10
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3778,
+      "candidate_python_trace_peak": 3942,
+      "candidate_python_reachable_bytes": 16603,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 9,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 4,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 0,
+          "arena_high_water": 528,
+          "live_payload": 464,
+          "live_allocated": 512,
+          "fragmentation": 48,
+          "free_bytes": 0,
+          "live_allocations": 8,
+          "uploaded_bytes": 1160,
+          "ref_increments": 23,
+          "ref_decrements": 33,
+          "reused_allocations": 12
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3386,
+      "candidate_python_trace_peak": 3550,
+      "candidate_python_reachable_bytes": 17181,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 10,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 4,
+          "heap_child_edges": 2,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 4,
+          "arena_high_water": 528,
+          "live_payload": 232,
+          "live_allocated": 256,
+          "fragmentation": 24,
+          "free_bytes": 256,
+          "live_allocations": 4,
+          "uploaded_bytes": 1276,
+          "ref_increments": 26,
+          "ref_decrements": 42,
+          "reused_allocations": 14
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 3,
+        "ref_decrements": 9,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3318,
+      "candidate_python_trace_peak": 3510,
+      "candidate_python_reachable_bytes": 15685,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 0,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 11,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 6,
+          "heap_child_edges": 3,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 2,
+          "arena_high_water": 528,
+          "live_payload": 348,
+          "live_allocated": 384,
+          "fragmentation": 36,
+          "free_bytes": 128,
+          "live_allocations": 6,
+          "uploaded_bytes": 1392,
+          "ref_increments": 28,
+          "ref_decrements": 44,
+          "reused_allocations": 16
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3650,
+      "candidate_python_trace_peak": 3814,
+      "candidate_python_reachable_bytes": 16239,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": false,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    },
+    {
+      "frame": 12,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 2,
+        "encoded_words_copied": 13,
+        "page_decodes": 1,
+        "rows_decoded": 1,
+        "decode_scratch_rows_peak": 1,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 1,
+        "encoded_bytes_written": 52,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {},
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 4,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 0,
+          "arena_high_water": 528,
+          "live_payload": 464,
+          "live_allocated": 512,
+          "fragmentation": 48,
+          "free_bytes": 0,
+          "live_allocations": 8,
+          "uploaded_bytes": 1508,
+          "ref_increments": 30,
+          "ref_decrements": 46,
+          "reused_allocations": 18
+        },
+        "spatial_work": {},
+        "spatial": {
+          "current_root_bytes": 0,
+          "current_tile_payload_bytes": 0,
+          "cpu_membership_wire_bytes": 0,
+          "cpu_mask_wire_bytes": 0,
+          "cpu_order_wire_bytes": 0,
+          "cpu_rank_key_value_wire_bytes": 0,
+          "tile_memberships": 0,
+          "indexed_pages": 0
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 116,
+        "ref_increments": 2,
+        "ref_decrements": 2,
+        "reused_allocations": 2
+      },
+      "store": {
+        "payload_bytes": 52,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 12,
+        "page_count": 1,
+        "live_nodes": 1,
+        "unused_slots": 31,
+        "python_page_bytes": 429,
+        "python_index_bytes": 316
+      },
+      "candidate_python_trace_current": 3246,
+      "candidate_python_trace_peak": 3438,
+      "candidate_python_reachable_bytes": 16905,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 116,
+      "upload_padded": 116,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 512,
+      "rejected_new_request_preserves_eligible": true,
+      "expected_gpu_record_visits": 512,
+      "spatial_audit_words": 0
+    }
+  ],
+  "completion": [
+    {
+      "fence": 0,
+      "presented": true
+    },
+    {
+      "fence": 3,
+      "presented": true
+    },
+    {
+      "fence": 2,
+      "presented": false
+    },
+    {
+      "fence": 1,
+      "presented": false
+    },
+    {
+      "fence": 6,
+      "presented": true
+    },
+    {
+      "fence": 5,
+      "presented": false
+    },
+    {
+      "fence": 4,
+      "presented": false
+    },
+    {
+      "fence": 9,
+      "presented": true
+    },
+    {
+      "fence": 8,
+      "presented": false
+    },
+    {
+      "fence": 7,
+      "presented": false
+    },
+    {
+      "fence": 12,
+      "presented": true
+    },
+    {
+      "fence": 11,
+      "presented": false
+    },
+    {
+      "fence": 10,
+      "presented": false
+    }
+  ],
+  "all_released": true,
+  "scope": "restricted registered fixture binding, staged writes, opaque integer renderer; no generic runtime journal, coherent host memory, timing or ZGX inference"
+}

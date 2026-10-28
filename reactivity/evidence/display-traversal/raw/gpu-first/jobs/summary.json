@@ -1,0 +1,170 @@
+[
+  {
+    "name": "sparse-1-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 528,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-9-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 2320,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-32-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-256-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 9008,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-1024-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 22960,
+    "mutant": 0
+  },
+  {
+    "name": "overlap-1-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 528,
+    "mutant": 0
+  },
+  {
+    "name": "overlap-9-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 2320,
+    "mutant": 0
+  },
+  {
+    "name": "overlap-32-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "overlap-256-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 9808,
+    "mutant": 0
+  },
+  {
+    "name": "overlap-1024-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 24400,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-1-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 528,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-9-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 2320,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-32-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-256-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 9008,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-1024-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 22416,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-1-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 272,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-9-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 1168,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-32-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 4240,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-256-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 19344,
+    "mutant": 0
+  },
+  {
+    "name": "sparse-1024-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 68496,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-1024-serial-uncompressed-m0-full-control",
+    "frames": 13,
+    "arena_bytes": 68496,
+    "mutant": 0
+  },
+  {
+    "name": "geometry-m0",
+    "frames": 13,
+    "arena_bytes": 6544,
+    "mutant": 0
+  },
+  {
+    "name": "structural-97",
+    "frames": 4,
+    "arena_bytes": 15456,
+    "mutant": 0
+  },
+  {
+    "name": "staircase-1024-overlap-compressed-m10",
+    "frames": 13,
+    "arena_bytes": 22416,
+    "mutant": 10
+  },
+  {
+    "name": "staircase-1024-overlap-compressed-m11",
+    "frames": 13,
+    "arena_bytes": 22416,
+    "mutant": 11
+  },
+  {
+    "name": "geometry-m12",
+    "frames": 13,
+    "arena_bytes": 6544,
+    "mutant": 12
+  },
+  {
+    "name": "geometry-m13",
+    "frames": 13,
+    "arena_bytes": 6544,
+    "mutant": 13
+  },
+  {
+    "name": "geometry-m14",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 14
+  }
+]
