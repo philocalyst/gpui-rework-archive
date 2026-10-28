@@ -80,7 +80,7 @@ impl Lab {
         };
         self.controls.pending.push_back(ControlTask {
             operation,
-            yielded: false,
+            yielded: true,
         });
         if self.controls.trace {
             eprintln!(
