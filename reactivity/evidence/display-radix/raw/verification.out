@@ -1,0 +1,57 @@
+{
+  "independently_simulated_frames": 296,
+  "positive_exact_gpu_frames": 241,
+  "gpu_mutants": [
+    {
+      "case": "point-256-overlap-compressed-m1",
+      "errors": [
+        {
+          "fence": 1,
+          "audit_byte_errors": 0,
+          "pixel_byte_errors": 1024
+        }
+      ]
+    },
+    {
+      "case": "point-256-overlap-compressed-m2",
+      "errors": [
+        {
+          "fence": 0,
+          "audit_byte_errors": 866,
+          "pixel_byte_errors": 960
+        }
+      ]
+    },
+    {
+      "case": "point-256-overlap-compressed-m3",
+      "errors": [
+        {
+          "fence": 0,
+          "audit_byte_errors": 89,
+          "pixel_byte_errors": 960
+        }
+      ]
+    },
+    {
+      "case": "geometry-m4",
+      "errors": [
+        {
+          "fence": 1,
+          "audit_byte_errors": 0,
+          "pixel_byte_errors": 192
+        }
+      ]
+    },
+    {
+      "case": "resource-overlap-compressed-m5",
+      "errors": [
+        {
+          "fence": 1,
+          "audit_byte_errors": 80,
+          "pixel_byte_errors": 0
+        }
+      ]
+    }
+  ],
+  "cpu_checks": 3906
+}

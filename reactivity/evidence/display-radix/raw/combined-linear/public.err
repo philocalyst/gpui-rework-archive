@@ -1,0 +1,4 @@
+
+thread 'main' (708203) panicked at crates/display-span-lab/src/bin/radix_public.rs:114:51:
+called `Result::unwrap()` on an `Err` value: Committed { error: Property(PropertyError { property: Transform, reason: NonFinite }), commit: Commit { source_epoch: 8, presentation_epoch: 6, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 } }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

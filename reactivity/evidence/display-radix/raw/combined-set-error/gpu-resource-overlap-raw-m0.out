@@ -1,0 +1,230 @@
+{
+  "adapter": "AdapterInfo { name: \"llvmpipe (LLVM 20.1.2, 256 bits)\", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: \"\", driver: \"llvmpipe\", driver_info: \"Mesa 25.2.8-0ubuntu0.24.04.2 (LLVM 20.1.2)\", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }",
+  "arena_bytes": 5008,
+  "peak_pending_frames": 3,
+  "peak_queued_before_wait": 3,
+  "reports": [
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 0,
+      "parameter_bytes": 44,
+      "payload_bytes": 1040,
+      "pending_frames": 1,
+      "queue_writes": 8,
+      "queued_without_completion_wait": 1
+    },
+    {
+      "audit_bytes_checked": 3120,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 0,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": true,
+      "frame": 1,
+      "parameter_bytes": 44,
+      "payload_bytes": 832,
+      "pending_frames": 1,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 0
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 2,
+      "parameter_bytes": 44,
+      "payload_bytes": 856,
+      "pending_frames": 2,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 1
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 3,
+      "parameter_bytes": 44,
+      "payload_bytes": 844,
+      "pending_frames": 3,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 3
+    },
+    {
+      "audit_bytes_checked": 3120,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 3,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3168,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 2,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3060,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 1,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": true,
+      "frame": 4,
+      "parameter_bytes": 44,
+      "payload_bytes": 832,
+      "pending_frames": 1,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 0
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 5,
+      "parameter_bytes": 44,
+      "payload_bytes": 856,
+      "pending_frames": 2,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 1
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 6,
+      "parameter_bytes": 44,
+      "payload_bytes": 844,
+      "pending_frames": 3,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 3
+    },
+    {
+      "audit_bytes_checked": 3120,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 6,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3168,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 5,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3060,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 4,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": true,
+      "frame": 7,
+      "parameter_bytes": 44,
+      "payload_bytes": 832,
+      "pending_frames": 1,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 0
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 8,
+      "parameter_bytes": 44,
+      "payload_bytes": 856,
+      "pending_frames": 2,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 1
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 9,
+      "parameter_bytes": 44,
+      "payload_bytes": 844,
+      "pending_frames": 3,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 3
+    },
+    {
+      "audit_bytes_checked": 3120,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 9,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3168,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 8,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3060,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 7,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": true,
+      "frame": 10,
+      "parameter_bytes": 44,
+      "payload_bytes": 832,
+      "pending_frames": 1,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 0
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 11,
+      "parameter_bytes": 44,
+      "payload_bytes": 856,
+      "pending_frames": 2,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 1
+    },
+    {
+      "authority_bytes": 8,
+      "deferred": false,
+      "frame": 12,
+      "parameter_bytes": 44,
+      "payload_bytes": 844,
+      "pending_frames": 3,
+      "queue_writes": 7,
+      "queued_without_completion_wait": 3
+    },
+    {
+      "audit_bytes_checked": 3120,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 12,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3168,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 11,
+      "pixel_bytes_checked": 16384
+    },
+    {
+      "audit_bytes_checked": 3060,
+      "completion_waits": 1,
+      "exact": true,
+      "fence": 10,
+      "pixel_bytes_checked": 16384
+    }
+  ],
+  "scope": "actual directory decode, resource reads and retained pixels; restricted opaque integer renderer, staged writes; no display scanout or coherent shared memory"
+}

@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/2961de32b7f09ab4985b88151b3f54a1528dcdd70cac97a5a108621dfc729955",
+    "/home/user/gpui-display-radix-evidence/combined-set-error/public"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.05312943458557129
+}

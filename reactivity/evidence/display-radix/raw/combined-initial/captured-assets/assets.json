@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "resources": [
+        {
+          "bytes": 132,
+          "file": "text-0-0.a8",
+          "height": 12,
+          "kind": "text-mask",
+          "width": 11
+        },
+        {
+          "bytes": 256,
+          "file": "image-0-0.rgba",
+          "height": 8,
+          "kind": "image",
+          "width": 8
+        }
+      ],
+      "title": "A"
+    },
+    {
+      "index": 1,
+      "resources": [
+        {
+          "bytes": 117,
+          "file": "text-1-0.a8",
+          "height": 13,
+          "kind": "text-mask",
+          "width": 9
+        },
+        {
+          "bytes": 256,
+          "file": "image-1-0.rgba",
+          "height": 8,
+          "kind": "image",
+          "width": 8
+        }
+      ],
+      "title": "g"
+    },
+    {
+      "index": 2,
+      "resources": [
+        {
+          "bytes": 144,
+          "file": "text-2-0.a8",
+          "height": 12,
+          "kind": "text-mask",
+          "width": 12
+        },
+        {
+          "bytes": 256,
+          "file": "image-2-0.rgba",
+          "height": 8,
+          "kind": "image",
+          "width": 8
+        }
+      ],
+      "title": "Ω"
+    }
+  ],
+  "font_bytes": 757076,
+  "font_path": "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf",
+  "scope": "owned copies of real borrowed glyph/image bytes; source owners dropped; not a text renderer integration claim"
+}

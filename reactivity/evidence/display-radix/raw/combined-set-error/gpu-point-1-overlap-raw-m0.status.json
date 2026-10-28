@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/1410ad89039dfaa60f06466d167df4374423a8d36b2b16a2adb2f96be1683346",
+    "/home/user/gpui-display-radix-evidence/combined-set-error/jobs/point-1-overlap-raw-m0/jobs.json"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.3898186683654785
+}

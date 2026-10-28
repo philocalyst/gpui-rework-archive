@@ -1,0 +1,1135 @@
+{
+  "mode": "overlap-compressed",
+  "mutant": 0,
+  "frames": [
+    {
+      "frame": 0,
+      "change": {
+        "initial_admission_nodes": 32
+      },
+      "damage": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 4,
+          "heap_child_edges": 3,
+          "slot_generation_entries": 4,
+          "free_bin_entries": 0,
+          "arena_high_water": 1488,
+          "live_payload": 1076,
+          "live_allocated": 1472,
+          "fragmentation": 396,
+          "free_bytes": 0,
+          "live_allocations": 4,
+          "uploaded_bytes": 1076,
+          "ref_increments": 4,
+          "ref_decrements": 1
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 1
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8063,
+      "candidate_python_trace_peak": 8143,
+      "candidate_python_reachable_bytes": 14127,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 131072,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 1,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 6,
+          "slot_generation_entries": 8,
+          "free_bin_entries": 0,
+          "arena_high_water": 2960,
+          "live_payload": 2152,
+          "live_allocated": 2944,
+          "fragmentation": 792,
+          "free_bytes": 0,
+          "live_allocations": 8,
+          "uploaded_bytes": 2152,
+          "ref_increments": 9,
+          "ref_decrements": 6
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 5,
+        "ref_decrements": 5
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 9752,
+      "candidate_python_trace_peak": 13456,
+      "candidate_python_reachable_bytes": 16883,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 2,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 12,
+          "heap_child_edges": 9,
+          "slot_generation_entries": 12,
+          "free_bin_entries": 0,
+          "arena_high_water": 4432,
+          "live_payload": 3228,
+          "live_allocated": 4416,
+          "fragmentation": 1188,
+          "free_bytes": 0,
+          "live_allocations": 12,
+          "uploaded_bytes": 3228,
+          "ref_increments": 13,
+          "ref_decrements": 10
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 9452,
+      "candidate_python_trace_peak": 12812,
+      "candidate_python_reachable_bytes": 19799,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 3,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 16,
+          "heap_child_edges": 12,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 0,
+          "arena_high_water": 5904,
+          "live_payload": 4304,
+          "live_allocated": 5888,
+          "fragmentation": 1584,
+          "free_bytes": 0,
+          "live_allocations": 16,
+          "uploaded_bytes": 4304,
+          "ref_increments": 17,
+          "ref_decrements": 14
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8320,
+      "candidate_python_trace_peak": 12840,
+      "candidate_python_reachable_bytes": 22155,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 4,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 6,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 8,
+          "arena_high_water": 5904,
+          "live_payload": 2152,
+          "live_allocated": 2944,
+          "fragmentation": 792,
+          "free_bytes": 2944,
+          "live_allocations": 8,
+          "uploaded_bytes": 5380,
+          "ref_increments": 22,
+          "ref_decrements": 31,
+          "reused_allocations": 4
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 5,
+        "ref_decrements": 17,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8272,
+      "candidate_python_trace_peak": 12724,
+      "candidate_python_reachable_bytes": 17882,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 5,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 12,
+          "heap_child_edges": 9,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 4,
+          "arena_high_water": 5904,
+          "live_payload": 3228,
+          "live_allocated": 4416,
+          "fragmentation": 1188,
+          "free_bytes": 1472,
+          "live_allocations": 12,
+          "uploaded_bytes": 6456,
+          "ref_increments": 26,
+          "ref_decrements": 35,
+          "reused_allocations": 8
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 9272,
+      "candidate_python_trace_peak": 12840,
+      "candidate_python_reachable_bytes": 20282,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 6,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 16,
+          "heap_child_edges": 12,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 0,
+          "arena_high_water": 5904,
+          "live_payload": 4304,
+          "live_allocated": 5888,
+          "fragmentation": 1584,
+          "free_bytes": 0,
+          "live_allocations": 16,
+          "uploaded_bytes": 7532,
+          "ref_increments": 30,
+          "ref_decrements": 39,
+          "reused_allocations": 12
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 7968,
+      "candidate_python_trace_peak": 12812,
+      "candidate_python_reachable_bytes": 22398,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 7,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 6,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 8,
+          "arena_high_water": 5904,
+          "live_payload": 2152,
+          "live_allocated": 2944,
+          "fragmentation": 792,
+          "free_bytes": 2944,
+          "live_allocations": 8,
+          "uploaded_bytes": 8608,
+          "ref_increments": 35,
+          "ref_decrements": 56,
+          "reused_allocations": 16
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 5,
+        "ref_decrements": 17,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8304,
+      "candidate_python_trace_peak": 12784,
+      "candidate_python_reachable_bytes": 18066,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 8,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 12,
+          "heap_child_edges": 9,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 4,
+          "arena_high_water": 5904,
+          "live_payload": 3228,
+          "live_allocated": 4416,
+          "fragmentation": 1188,
+          "free_bytes": 1472,
+          "live_allocations": 12,
+          "uploaded_bytes": 9684,
+          "ref_increments": 39,
+          "ref_decrements": 60,
+          "reused_allocations": 20
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8664,
+      "candidate_python_trace_peak": 12780,
+      "candidate_python_reachable_bytes": 20310,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 9,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 16,
+          "heap_child_edges": 12,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 0,
+          "arena_high_water": 5904,
+          "live_payload": 4304,
+          "live_allocated": 5888,
+          "fragmentation": 1584,
+          "free_bytes": 0,
+          "live_allocations": 16,
+          "uploaded_bytes": 10760,
+          "ref_increments": 43,
+          "ref_decrements": 64,
+          "reused_allocations": 24
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8000,
+      "candidate_python_trace_peak": 12840,
+      "candidate_python_reachable_bytes": 22398,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 10,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 8,
+          "heap_child_edges": 6,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 8,
+          "arena_high_water": 5904,
+          "live_payload": 2152,
+          "live_allocated": 2944,
+          "fragmentation": 792,
+          "free_bytes": 2944,
+          "live_allocations": 8,
+          "uploaded_bytes": 11836,
+          "ref_increments": 48,
+          "ref_decrements": 81,
+          "reused_allocations": 28
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 5,
+        "ref_decrements": 17,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8300,
+      "candidate_python_trace_peak": 12756,
+      "candidate_python_reachable_bytes": 18066,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 1,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 11,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 12,
+          "heap_child_edges": 9,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 4,
+          "arena_high_water": 5904,
+          "live_payload": 3228,
+          "live_allocated": 4416,
+          "fragmentation": 1188,
+          "free_bytes": 1472,
+          "live_allocations": 12,
+          "uploaded_bytes": 12912,
+          "ref_increments": 52,
+          "ref_decrements": 85,
+          "reused_allocations": 32
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 8696,
+      "candidate_python_trace_peak": 12840,
+      "candidate_python_reachable_bytes": 20310,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 2,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": false
+    },
+    {
+      "frame": 12,
+      "change": {
+        "identity_lookups": 1,
+        "random_field_word_loads": 5,
+        "encoded_words_copied": 157,
+        "page_decodes": 1,
+        "rows_decoded": 32,
+        "decode_scratch_rows_peak": 32,
+        "records_changed": 1,
+        "damage_records": 2,
+        "codec_rows": 32,
+        "encoded_bytes_written": 628,
+        "dirty_pages": 1,
+        "deleted_pages": 0
+      },
+      "damage": [
+        0,
+        0,
+        32,
+        16
+      ],
+      "publication": {
+        "publication": {
+          "page_entries_examined": 1,
+          "fixed_root_bytes_written": 64
+        },
+        "node_directory": {
+          "entries_examined": 1,
+          "root_words_copied": 32,
+          "leaf_words_copied": 64,
+          "leaf_allocations": 1,
+          "root_allocations": 1
+        },
+        "resource_directory": {},
+        "heap": {
+          "pending_upload_bytes": 0,
+          "heap_bookkeeping_entries": 16,
+          "heap_child_edges": 12,
+          "slot_generation_entries": 16,
+          "free_bin_entries": 0,
+          "arena_high_water": 5904,
+          "live_payload": 4304,
+          "live_allocated": 5888,
+          "fragmentation": 1584,
+          "free_bytes": 0,
+          "live_allocations": 16,
+          "uploaded_bytes": 13988,
+          "ref_increments": 56,
+          "ref_decrements": 89,
+          "reused_allocations": 36
+        }
+      },
+      "heap_work": {
+        "uploaded_bytes": 1076,
+        "ref_increments": 4,
+        "ref_decrements": 4,
+        "reused_allocations": 4
+      },
+      "store": {
+        "payload_bytes": 628,
+        "page_header_wire_bytes": 16,
+        "identity_wire_bytes": 384,
+        "page_count": 1,
+        "live_nodes": 32,
+        "unused_slots": 0,
+        "python_page_bytes": 957,
+        "python_index_bytes": 4112
+      },
+      "candidate_python_trace_current": 7940,
+      "candidate_python_trace_peak": 12780,
+      "candidate_python_reachable_bytes": 22454,
+      "cpu_update_mirror_bytes": 0,
+      "upload_requested": 1076,
+      "upload_padded": 1076,
+      "production_parameters_bytes": 24,
+      "authority_upload_bytes": 8,
+      "diagnostic_audit_parameters_bytes": 4,
+      "diagnostic_audit_output_bytes": 1536,
+      "pending_frames": 3,
+      "resource_audit_entries": 0,
+      "gpu_pixel_record_visits": 16384,
+      "rejected_new_request_preserves_eligible": true
+    }
+  ],
+  "completion": [
+    {
+      "fence": 0,
+      "presented": true
+    },
+    {
+      "fence": 3,
+      "presented": true
+    },
+    {
+      "fence": 2,
+      "presented": false
+    },
+    {
+      "fence": 1,
+      "presented": false
+    },
+    {
+      "fence": 6,
+      "presented": true
+    },
+    {
+      "fence": 5,
+      "presented": false
+    },
+    {
+      "fence": 4,
+      "presented": false
+    },
+    {
+      "fence": 9,
+      "presented": true
+    },
+    {
+      "fence": 8,
+      "presented": false
+    },
+    {
+      "fence": 7,
+      "presented": false
+    },
+    {
+      "fence": 12,
+      "presented": true
+    },
+    {
+      "fence": 11,
+      "presented": false
+    },
+    {
+      "fence": 10,
+      "presented": false
+    }
+  ],
+  "all_released": true,
+  "scope": "restricted registered fixture binding, staged writes, opaque integer renderer; no generic runtime journal, coherent host memory, timing or ZGX inference"
+}

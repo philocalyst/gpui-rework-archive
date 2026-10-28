@@ -1,0 +1,12 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-radix-lab/reactivity/crates/display-span-lab/model/radix_jobs.py",
+    "/home/user/gpui-display-radix-evidence/combined-initial/public",
+    "/home/user/gpui-display-radix-evidence/combined-initial/captured-assets",
+    "/home/user/gpui-display-radix-evidence/combined-initial/jobs"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.7204320430755615
+}

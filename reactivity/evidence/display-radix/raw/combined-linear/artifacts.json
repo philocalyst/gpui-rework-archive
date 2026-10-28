@@ -1,0 +1,12 @@
+{
+  "radix_public": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/f82f2eea5cb40c748ea26590c7fe234756cb767098894805bf06a761c96cdf12",
+    "sha256": "f82f2eea5cb40c748ea26590c7fe234756cb767098894805bf06a761c96cdf12",
+    "bytes": 10219528
+  },
+  "radix_gpu": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/1410ad89039dfaa60f06466d167df4374423a8d36b2b16a2adb2f96be1683346",
+    "sha256": "1410ad89039dfaa60f06466d167df4374423a8d36b2b16a2adb2f96be1683346",
+    "bytes": 6978496
+  }
+}

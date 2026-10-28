@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/ac0080050ac60225ba5985b4d7ac7d63f89144906fe9f4fb078f2cd7552c8f7d",
+    "/home/user/gpui-display-radix-evidence/combined-initial/public"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.06406712532043457
+}

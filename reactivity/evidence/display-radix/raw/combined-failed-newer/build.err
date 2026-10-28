@@ -1,0 +1,2 @@
+   Compiling gpui_display_span_lab v0.1.0 (/home/user/gpui-display-radix-lab/reactivity/crates/display-span-lab)
+error: could not compile `gpui_display_span_lab` (bin "radix_public") due to 1 previous error

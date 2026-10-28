@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-radix-lab/reactivity/crates/display-span-lab/model/radix_checks.py",
+    "/home/user/gpui-display-radix-evidence/combined-failed-newer/checks"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.12165999412536621
+}

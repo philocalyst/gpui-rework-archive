@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/f82f2eea5cb40c748ea26590c7fe234756cb767098894805bf06a761c96cdf12",
+    "/home/user/gpui-display-radix-evidence/combined-linear/public"
+  ],
+  "exit": 101,
+  "expected": 0,
+  "elapsed_seconds": 0.0032501220703125
+}

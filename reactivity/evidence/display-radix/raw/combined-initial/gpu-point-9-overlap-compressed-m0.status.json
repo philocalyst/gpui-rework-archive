@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/28e924d7698419fed277ae49bbd7062b00b0d12b8f8bfe38eb0fa91469a0c0c4",
+    "/home/user/gpui-display-radix-evidence/combined-initial/jobs/point-9-overlap-compressed-m0/jobs.json"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.07833147048950195
+}

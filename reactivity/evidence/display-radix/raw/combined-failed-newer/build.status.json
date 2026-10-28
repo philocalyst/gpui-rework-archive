@@ -1,0 +1,24 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "gpui_display_span_lab",
+    "--bin",
+    "radix_public",
+    "--bin",
+    "radix_gpu",
+    "--message-format=json"
+  ],
+  "exit": 101,
+  "expected": 0,
+  "elapsed_seconds": 0.17850661277770996
+}

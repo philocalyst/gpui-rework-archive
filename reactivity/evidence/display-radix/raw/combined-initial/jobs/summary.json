@@ -1,0 +1,152 @@
+[
+  {
+    "name": "point-1-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "point-1-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 528,
+    "mutant": 0
+  },
+  {
+    "name": "point-1-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 272,
+    "mutant": 0
+  },
+  {
+    "name": "point-9-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "point-9-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 2320,
+    "mutant": 0
+  },
+  {
+    "name": "point-9-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 1168,
+    "mutant": 0
+  },
+  {
+    "name": "point-32-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 5904,
+    "mutant": 0
+  },
+  {
+    "name": "point-32-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 8464,
+    "mutant": 0
+  },
+  {
+    "name": "point-32-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 4240,
+    "mutant": 0
+  },
+  {
+    "name": "point-256-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 7952,
+    "mutant": 0
+  },
+  {
+    "name": "point-256-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 7952,
+    "mutant": 0
+  },
+  {
+    "name": "point-256-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 19344,
+    "mutant": 0
+  },
+  {
+    "name": "point-1024-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 20240,
+    "mutant": 0
+  },
+  {
+    "name": "point-1024-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 20240,
+    "mutant": 0
+  },
+  {
+    "name": "point-1024-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 68496,
+    "mutant": 0
+  },
+  {
+    "name": "resource-overlap-compressed-m0",
+    "frames": 13,
+    "arena_bytes": 6160,
+    "mutant": 0
+  },
+  {
+    "name": "resource-overlap-raw-m0",
+    "frames": 13,
+    "arena_bytes": 5008,
+    "mutant": 0
+  },
+  {
+    "name": "resource-serial-uncompressed-m0",
+    "frames": 13,
+    "arena_bytes": 2832,
+    "mutant": 0
+  },
+  {
+    "name": "geometry-m0",
+    "frames": 3,
+    "arena_bytes": 400,
+    "mutant": 0
+  },
+  {
+    "name": "structural-97",
+    "frames": 4,
+    "arena_bytes": 13456,
+    "mutant": 0
+  },
+  {
+    "name": "point-256-overlap-compressed-m1",
+    "frames": 13,
+    "arena_bytes": 7952,
+    "mutant": 1
+  },
+  {
+    "name": "point-256-overlap-compressed-m2",
+    "frames": 13,
+    "arena_bytes": 7952,
+    "mutant": 2
+  },
+  {
+    "name": "point-256-overlap-compressed-m3",
+    "frames": 13,
+    "arena_bytes": 7952,
+    "mutant": 3
+  },
+  {
+    "name": "geometry-m4",
+    "frames": 3,
+    "arena_bytes": 400,
+    "mutant": 4
+  },
+  {
+    "name": "resource-overlap-compressed-m5",
+    "frames": 13,
+    "arena_bytes": 4496,
+    "mutant": 5
+  }
+]
