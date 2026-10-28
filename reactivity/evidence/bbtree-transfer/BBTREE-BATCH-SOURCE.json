@@ -1,0 +1,8 @@
+{
+  "url": "https://raw.githubusercontent.com/XiangpengHao/bbtree/1c72bd27994ed0a38694b029618e80115e22644f/design/12-batch-api.md",
+  "remote_sha256": "53fab1c7852a02048a2671bd4e873767d57ff8456a3ca56c102e4db90e26e70d",
+  "local_sha256": "53fab1c7852a02048a2671bd4e873767d57ff8456a3ca56c102e4db90e26e70d",
+  "local_source": "1b0201087102f81189da0c4cd5054a91c8d97d62",
+  "byte_equal": true,
+  "scope": "BBTree batch design source correspondence; no GPUI performance claim."
+}
