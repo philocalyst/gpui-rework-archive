@@ -1,0 +1,606 @@
+diff --git a/reactivity/crates/canvas/src/damage.rs b/reactivity/crates/canvas/src/damage.rs
+index 76703a75f5..063037ff58 100644
+--- a/reactivity/crates/canvas/src/damage.rs
++++ b/reactivity/crates/canvas/src/damage.rs
+@@ -56,6 +56,17 @@ impl Default for DamageRegions {
+     }
+ }
+ impl DamageRegions {
++    /// Retire the previous operation while retaining bounded region capacity.
++    /// The empty view matches a fresh collection; overflow applies per operation.
++    pub fn clear(&mut self) {
++        match &mut self.0 {
++            Regions::Many(regions) => {
++                regions.clear();
++                regions.push(DamageRegion::default());
++            }
++            Regions::One(_) | Regions::Dense(_) => *self = Self::default(),
++        }
++    }
+     pub fn regions(&self) -> &[DamageRegion] {
+         match &self.0 {
+             Regions::One(region) | Regions::Dense(region) => std::slice::from_ref(region),
+@@ -96,6 +107,12 @@ impl DamageRegions {
+                 self.0 = Regions::Many(regions);
+             }
+             Regions::Many(regions) => {
++                if let [old] = regions.as_mut_slice()
++                    && old.is_empty()
++                {
++                    *old = region;
++                    return;
++                }
+                 let mut index = 0;
+                 while index < regions.len() {
+                     if touches(regions[index], region) {
+diff --git a/reactivity/crates/canvas/tests/damage_workspace.rs b/reactivity/crates/canvas/tests/damage_workspace.rs
+new file mode 100644
+index 0000000000..93b8e44872
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/damage_workspace.rs
+@@ -0,0 +1,68 @@
++use gpui_canvas::{Affine, Canvas, Color, DamageRegion, DamageRegions, PaintColor, Rect, SlotEdit};
++fn supports() -> Vec<DamageRegion> {
++    let mut canvas = Canvas::recording(512, 64, Default::default()).unwrap();
++    (0..80)
++        .map(|i| {
++            let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
++            canvas
++                .fill_rect_slot(
++                    Rect::new(i as f32 * 6., 2., 2., 2.),
++                    Affine::IDENTITY,
++                    Rect::new(0., 0., 512., 64.),
++                    slot,
++                )
++                .unwrap();
++            canvas
++                .prepare_slots(&[SlotEdit::new(slot, PaintColor::new(Color::WHITE))])
++                .unwrap()
++                .commit()
++        })
++        .collect()
++}
++#[test]
++fn reset_reuses_bounded_capacity_and_restores_empty_one_many_and_overflow() {
++    let support = supports();
++    // Slot edits include the one-pixel conservative raster fringe, clipped at x=0.
++    assert_eq!(support[0].bounds(), Some([0, 1, 3, 5]));
++    assert_eq!(support[1].bounds(), Some([5, 1, 9, 5]));
++    assert_eq!(support[2].bounds(), Some([11, 1, 15, 5]));
++    let mut regions = DamageRegions::default();
++    regions.clear();
++    assert_eq!(regions.regions(), DamageRegions::default().regions());
++    regions.include(support[0]);
++    regions.clear();
++    assert!(regions.bounds().is_empty());
++    for &s in &support[..3] {
++        regions.include(s);
++    }
++    let address = regions.regions().as_ptr();
++    assert_eq!(regions.regions().len(), 3);
++    let cost = allocation_counter::measure(|| {
++        for _ in 0..64 {
++            regions.clear();
++            assert_eq!(regions.regions(), DamageRegions::default().regions());
++            for &s in &support[..3] {
++                regions.include(s);
++            }
++            assert_eq!(regions.regions().as_ptr(), address);
++            assert_eq!(regions.regions().len(), 3);
++            assert_eq!(regions.pixels(), 44);
++        }
++    });
++    assert_eq!(cost.count_total, 0);
++    assert_eq!(cost.bytes_total, 0);
++    for &s in &support {
++        regions.include(s);
++    }
++    assert_eq!(regions.regions().len(), 1);
++    regions.clear();
++    assert!(regions.bounds().is_empty());
++    regions.include(support[0]);
++    regions.include(support[1]);
++    assert_eq!(
++        regions.regions().len(),
++        2,
++        "overflow must not poison a new operation"
++    );
++    assert_eq!(regions.pixels(), 28);
++}
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index 023cf195e8..42eec4229c 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -4605,6 +4605,7 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
+                     u64::from(size[0] * size[1])
+                 );
+                 assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
++                let mut regions = DamageRegions::default();
+                 for (index, value) in [
+                     "000001 000002\n000003 000004",
+                     "000001 000002\n000003 000004",
+@@ -4615,7 +4616,7 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
+                 .enumerate()
+                 {
+                     let layout = text.shape(value, 16., None).unwrap();
+-                    let mut regions = DamageRegions::default();
++                    regions.clear();
+                     canvas
+                         .try_patch_text_observed(
+                             slot,
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 2424f01468..8925f2fd2f 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -47,6 +47,8 @@ mod editing;
+ pub(crate) mod ime;
+ pub use ime::{ImeEvent, ImeSession, MarkedText};
+ mod frontier;
++#[cfg(test)]
++mod patch_workspace_tests;
+ mod text_geometry;
+ use editing::EditingIntent;
+ pub use text_geometry::TextGeometry;
+@@ -4021,7 +4023,9 @@ impl<M: View + 'static> Runtime<M> {
+         }
+         if let Some(text) = &mut self.text {
+             text.candidate = Some(text_geometry);
+-            text.patch = None;
++            if let Some(patch) = &mut text.patch {
++                patch.content = None;
++            }
+             text.dirty_text = None;
+         }
+         self.prepared = Some(Prepared {
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 7b4af5c040..d4cf8cad60 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -208,6 +208,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+                     .text
+                     .as_ref()
+                     .and_then(|text| text.patch.as_ref())
++                    .filter(|patch| patch.content.is_some())
+                     .map(|patch| &patch.repair)
+                     .filter(|repair| repair.to == token),
+                 base: (!runtime.automatic_presentation && runtime.presentation_valid)
+diff --git a/reactivity/crates/gpui/src/runtime/patch_workspace_tests.rs b/reactivity/crates/gpui/src/runtime/patch_workspace_tests.rs
+new file mode 100644
+index 0000000000..0f050ed24e
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/patch_workspace_tests.rs
+@@ -0,0 +1,133 @@
++use super::*;
++use crate::prelude::*;
++struct Page {
++    value: Signal<String>,
++    visible: bool,
++}
++impl Page {
++    const VALUE: Source<Self, String> =
++        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::VALUE)
++    }
++    fn view(&self) -> El<'_> {
++        column(
++            [
++                text(&self.value).font_size(16).w(290).h(28),
++                text("0123456789").font_size(16).w(290).h(28),
++            ]
++            .into_iter()
++            .take(if self.visible { 2 } else { 0 }),
++        )
++        .w(320)
++        .h(120)
++        .bg(Color::WHITE)
++        .fg(Color::BLACK)
++    }
++}
++fn ack(win: &mut Win<Page>) {
++    let t = win.with_scene(|_, t| t).unwrap();
++    win.presented(t).unwrap();
++}
++#[test]
++fn workspace_reuses_allocation_retires_payload_and_is_reclaimed_with_text() {
++    assert_eq!(
++        size_of::<text_geometry::TextPatch>(),
++        if cfg!(feature = "native-core") {
++            96
++        } else {
++            40
++        }
++    );
++    assert_eq!(size_of::<text_geometry::TextResources>(), 168);
++    let mut win = Win::recording(
++        Page {
++            value: Signal::new("000000 000000".into()),
++            visible: true,
++        },
++        WindowOptions {
++            size: [320, 120],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    win.set(Page::VALUE, "000001 000002".into()).unwrap();
++    let address = {
++        let r = win.runtime().unwrap();
++        let p = r
++            .text
++            .as_ref()
++            .unwrap()
++            .patch
++            .as_deref()
++            .expect("sparse candidate");
++        assert!(p.content.is_some());
++        std::ptr::from_ref(p) as usize
++    };
++    #[cfg(feature = "native-core")]
++    let regions = {
++        let r = win.runtime().unwrap();
++        let p = r.text.as_ref().unwrap().patch.as_deref().unwrap();
++        assert!(p.repair.regions.regions().len() > 1);
++        p.repair.regions.regions().as_ptr() as usize
++    };
++    ack(&mut win);
++    assert!(
++        win.runtime()
++            .unwrap()
++            .text
++            .as_ref()
++            .unwrap()
++            .patch
++            .as_ref()
++            .unwrap()
++            .content
++            .is_none()
++    );
++    #[cfg(feature = "native-core")]
++    win.with_paint_scene(|_, _, _, damage| assert!(damage.repair.is_none()))
++        .unwrap();
++    for i in 0..8 {
++        win.set(
++            Page::VALUE,
++            if i % 2 == 0 {
++                "000003 000004"
++            } else {
++                "000001 000002"
++            }
++            .into(),
++        )
++        .unwrap();
++        let r = win.runtime().unwrap();
++        let patch = r.text.as_ref().unwrap().patch.as_deref().unwrap();
++        assert!(patch.content.is_some());
++        assert_eq!(std::ptr::from_ref(patch) as usize, address);
++        #[cfg(feature = "native-core")]
++        {
++            assert_eq!(patch.repair.regions.regions().as_ptr() as usize, regions);
++            assert!(patch.repair.regions.regions().len() <= 64);
++        }
++        ack(&mut win);
++        assert!(
++            win.runtime()
++                .unwrap()
++                .text
++                .as_ref()
++                .unwrap()
++                .patch
++                .as_ref()
++                .unwrap()
++                .content
++                .is_none()
++        );
++    }
++    win.update(|m| m.visible = false).unwrap();
++    ack(&mut win);
++    assert!(
++        win.runtime().unwrap().text.is_none(),
++        "unused text service must reclaim publication capacity"
++    );
++}
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index 6f76995b80..3a2fb0f9b0 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -109,15 +109,30 @@ impl<M: View + 'static> Runtime<M> {
+             window: self.sites.namespace(),
+             sequence,
+         };
+-        let patch = Box::new(text_geometry::TextPatch {
++        let mut patch = self.text.as_mut().unwrap().patch.take().unwrap_or_else(|| {
++            Box::new(text_geometry::TextPatch {
++                content: None,
++                #[cfg(feature = "native-core")]
++                repair: paint::TextRepair {
++                    from: self.latest_token.expect("complete predecessor has a token"),
++                    to: token,
++                    regions: Default::default(),
++                },
++            })
++        });
++        debug_assert!(
++            patch.content.is_none(),
++            "an acknowledged predecessor has no live patch"
++        );
++        #[cfg(feature = "native-core")]
++        {
++            patch.repair.from = self.latest_token.expect("complete predecessor has a token");
++            patch.repair.to = token;
++            patch.repair.regions.clear();
++        }
++        patch.content = Some(text_geometry::TextUpdate {
+             row,
+             value,
+-            #[cfg(feature = "native-core")]
+-            repair: paint::TextRepair {
+-                from: self.latest_token.expect("complete predecessor has a token"),
+-                to: token,
+-                regions: Default::default(),
+-            },
+             geometry: text_geometry::Entry {
+                 row: row as u32,
+                 run: Some(run),
+@@ -126,9 +141,7 @@ impl<M: View + 'static> Runtime<M> {
+             },
+         });
+         let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
+-        #[cfg(feature = "native-core")]
+-        let mut patch = patch;
+-        let Some(damage) = self.canvas.try_patch_text_observed(
++        let result = self.canvas.try_patch_text_observed(
+             run,
+             service,
+             shape,
+@@ -143,9 +156,14 @@ impl<M: View + 'static> Runtime<M> {
+                 #[cfg(not(feature = "native-core"))]
+                 let _ = support;
+             },
+-        )?
+-        else {
+-            return Ok(false);
++        );
++        let damage = match result {
++            Ok(Some(damage)) => damage,
++            result => {
++                patch.content = None;
++                self.text.as_mut().unwrap().patch = Some(patch);
++                return result.map(|_| false).map_err(Error::Canvas);
++            }
+         };
+         self.text.as_mut().unwrap().patch = Some(patch);
+         self.text.as_mut().unwrap().dirty_text = None;
+@@ -258,9 +276,19 @@ mod tests {
+                 }
+                 unchanged_layout +=
+                     usize::from(runtime.layout.stats().changed_layout_writes == writes);
+-                patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
++                patches += usize::from(
++                    runtime
++                        .text
++                        .as_ref()
++                        .is_some_and(|t| t.patch.as_ref().is_some_and(|p| p.content.is_some())),
++                );
+                 full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
+-                if let Some(patch) = runtime.text.as_ref().and_then(|t| t.patch.as_ref()) {
++                if let Some(patch) = runtime
++                    .text
++                    .as_ref()
++                    .and_then(|t| t.patch.as_ref())
++                    .filter(|p| p.content.is_some())
++                {
+                     let mut pixels = std::collections::BTreeSet::new();
+                     let mut tiles = std::collections::BTreeSet::new();
+                     let mut union = gpui_canvas::DamageRegion::default();
+@@ -352,7 +380,17 @@ mod tests {
+                 .count()
+         );
+         assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
+-        assert!(runtime.text.as_ref().unwrap().patch.is_some());
++        assert!(
++            runtime
++                .text
++                .as_ref()
++                .unwrap()
++                .patch
++                .as_ref()
++                .unwrap()
++                .content
++                .is_some()
++        );
+         assert!(runtime.text.as_ref().unwrap().candidate.is_none());
+         assert!(runtime.prepared.as_ref().unwrap().nodes.is_empty());
+         assert!(
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index b7d7679694..3ba5797d50 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -18,12 +18,16 @@ pub(super) struct TextResources {
+     pub dirty_text: Option<(u64, usize)>,
+     pub patch: Option<Box<TextPatch>>,
+ }
++/// The allocation is reusable; only Some(content) denotes a live candidate.
+ pub(super) struct TextPatch {
++    pub content: Option<TextUpdate>,
++    #[cfg(feature = "native-core")]
++    pub repair: paint::TextRepair,
++}
++pub(super) struct TextUpdate {
+     pub row: usize,
+     pub value: SharedText,
+     pub geometry: Entry,
+-    #[cfg(feature = "native-core")]
+-    pub repair: paint::TextRepair,
+ }
+ impl TextResources {
+     pub fn unused(&self) -> bool {
+@@ -36,7 +40,7 @@ impl TextResources {
+         if let Some(column) = self.candidate.take() {
+             self.presented = column;
+         }
+-        if let Some(patch) = self.patch.take() {
++        if let Some(patch) = self.patch.as_mut().and_then(|patch| patch.content.take()) {
+             rows[patch.row].text = Some(patch.value);
+             let index = self
+                 .presented
+diff --git a/reactivity/crates/gpui/tests/patch_workspace.rs b/reactivity/crates/gpui/tests/patch_workspace.rs
+new file mode 100644
+index 0000000000..bc8cb71c91
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/patch_workspace.rs
+@@ -0,0 +1,151 @@
++//! Public acknowledged text/geometry witnesses for reusable publication storage.
++use gpui::*;
++struct Page {
++    value: Signal<String>,
++    other: Signal<String>,
++    invalid: bool,
++    show: bool,
++    reverse: bool,
++}
++impl Page {
++    const VALUE: Source<Self, String> =
++        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
++    const OTHER: Source<Self, String> =
++        Source::new(FieldId::new(2), "other", |m| &m.other, |m| &mut m.other);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::VALUE).direct(Self::OTHER)
++    }
++    fn view(&self) -> El<'_> {
++        let values = if self.reverse {
++            [&self.other, &self.value]
++        } else {
++            [&self.value, &self.other]
++        };
++        column(
++            values
++                .into_iter()
++                .take(if self.show { 2 } else { 0 })
++                .map(|v| text(v).font_size(12).w(160).h(28)),
++        )
++        .w(192)
++        .h(80)
++        .bg(Color::WHITE)
++        .fg(Color::BLACK)
++        .rounded(if self.invalid { f32::NAN } else { 0. })
++    }
++}
++fn window(value: &str, other: &str) -> Win<Page> {
++    Win::recording(
++        Page {
++            value: Signal::new(value.into()),
++            other: Signal::new(other.into()),
++            invalid: false,
++            show: true,
++            reverse: false,
++        },
++        WindowOptions {
++            size: [192, 80],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn ack(win: &mut Win<Page>) -> PresentationToken {
++    let t = win.with_scene(|_, t| t).unwrap();
++    win.presented(t).unwrap();
++    t
++}
++fn capture(win: &Win<Page>) -> Vec<(String, usize)> {
++    let mut values = Vec::new();
++    win.visit(|part| {
++        if let Some(text) = part.text() {
++            values.push((
++                text.to_owned(),
++                part.text_geometry().unwrap().layout().text_len(),
++            ));
++        }
++    })
++    .unwrap();
++    values
++}
++fn pixels_match_fresh(win: &mut Win<Page>, value: &str, other: &str) {
++    let mut full = window(value, other);
++    assert!(
++        win.with_pixels(|p, _, _| p.to_vec()).unwrap()
++            == full.with_pixels(|p, _, _| p.to_vec()).unwrap()
++    );
++}
++#[test]
++fn sparse_then_full_candidate_ack_does_not_replay_retired_payload() {
++    let mut win = window("0000", "0123456789");
++    ack(&mut win);
++    for tick in 0..4 {
++        let previous = capture(&win);
++        win.set(Page::VALUE, "1111".into()).unwrap();
++        assert_eq!(capture(&win), previous);
++        let value = if tick % 2 == 0 { "2222" } else { "3333" }.to_owned();
++        let other = format!("0123456789{tick}");
++        win.update(|m| {
++            *m.value = value.clone();
++            *m.other = other.clone();
++        })
++        .unwrap();
++        pixels_match_fresh(&mut win, &value, &other);
++        let token = ack(&mut win);
++        assert_eq!(
++            capture(&win),
++            vec![(value.clone(), value.len()), (other.clone(), other.len())],
++            "full supersession replayed a retired sparse payload"
++        );
++        win.presented(token).unwrap();
++        assert_eq!(
++            capture(&win),
++            vec![(value.clone(), value.len()), (other.clone(), other.len())]
++        );
++    }
++}
++#[test]
++fn reuse_preserves_failed_newer_older_ack_reorder_and_removal() {
++    let mut win = window("0000", "reservoir");
++    ack(&mut win);
++    for value in ["1111", "222222", "222222", "0000\u{200b}"] {
++        win.set(Page::VALUE, value.into()).unwrap();
++        pixels_match_fresh(&mut win, value, "reservoir");
++        let token = ack(&mut win);
++        win.presented(token).unwrap();
++        assert_eq!(capture(&win)[0], (value.into(), value.len()));
++    }
++    win.set(Page::VALUE, "eligible".into()).unwrap();
++    let eligible = win.with_scene(|_, t| t).unwrap();
++    let before = capture(&win);
++    assert!(win.update(|m| m.invalid = true).is_err());
++    assert_eq!(capture(&win), before);
++    assert_eq!(win.with_scene(|_, t| t).unwrap(), eligible);
++    win.presented(eligible).unwrap();
++    assert_eq!(capture(&win)[0], ("eligible".into(), 8));
++    win.update(|m| {
++        m.invalid = false;
++        m.reverse = true;
++    })
++    .unwrap();
++    ack(&mut win);
++    assert_eq!(
++        capture(&win),
++        vec![("reservoir".into(), 9), ("eligible".into(), 8)]
++    );
++    win.set(Page::VALUE, "after reorder".into()).unwrap();
++    ack(&mut win);
++    assert_eq!(capture(&win)[1], ("after reorder".into(), 13));
++    win.update(|m| m.show = false).unwrap();
++    ack(&mut win);
++    assert!(capture(&win).is_empty());
++    win.update(|m| {
++        m.show = true;
++        *m.value = "remounted".into();
++    })
++    .unwrap();
++    ack(&mut win);
++    assert_eq!(capture(&win)[1], ("remounted".into(), 9));
++}

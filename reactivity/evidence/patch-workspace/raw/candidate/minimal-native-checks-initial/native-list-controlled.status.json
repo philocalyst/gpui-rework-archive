@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/a4be1f517d43e21fab4d6485e7d66599748979cce5ad882fe51cea9abed23481", "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume", "--ignored", "--exact", "--nocapture", "--test-threads=1"], "exit": 0}

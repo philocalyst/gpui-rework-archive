@@ -1,0 +1,2876 @@
+[
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+    "bytes": 3980528,
+    "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/thiserror-impl/e498c2ab57550790/out/libthiserror_impl-e498c2ab57550790.so",
+    "bytes": 3883480,
+    "sha256": "cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/thiserror-impl/503f75daab1907ca/out/libthiserror_impl-503f75daab1907ca.so",
+    "bytes": 3979128,
+    "sha256": "1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/fearless_simd_macros/d47f9dfeab0a53ae/out/libfearless_simd_macros-d47f9dfeab0a53ae.so",
+    "bytes": 3722808,
+    "sha256": "605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+    "bytes": 3823840,
+    "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/fearless_simd_macros/91423a8c93fddbd0/out/libfearless_simd_macros-91423a8c93fddbd0.so",
+    "bytes": 3822544,
+    "sha256": "1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerovec-derive/f48c4e6bbf014461/out/libzerovec_derive-f48c4e6bbf014461.so",
+    "bytes": 3888448,
+    "sha256": "b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+    "bytes": 3888472,
+    "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerovec-derive/c60aeac5b371979e/out/libzerovec_derive-c60aeac5b371979e.so",
+    "bytes": 3796416,
+    "sha256": "0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+    "bytes": 3912032,
+    "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/bytemuck_derive/636d61494b405d44/out/libbytemuck_derive-636d61494b405d44.so",
+    "bytes": 3912080,
+    "sha256": "ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/bytemuck_derive/8486ab917b9e4dfb/out/libbytemuck_derive-8486ab917b9e4dfb.so",
+    "bytes": 3819640,
+    "sha256": "2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/serde_repr/78d53ac2f697cdc2/out/libserde_repr-78d53ac2f697cdc2.so",
+    "bytes": 2673184,
+    "sha256": "61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/serde_repr/9b371058a8c8172f/out/libserde_repr-9b371058a8c8172f.so",
+    "bytes": 2586168,
+    "sha256": "61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/phf_macros/5b0d3d11042a8fc2/out/libphf_macros-5b0d3d11042a8fc2.so",
+    "bytes": 3533368,
+    "sha256": "bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/09f39b25cc138ec9/out/grouped-09f39b25cc138ec9",
+    "bytes": 10585112,
+    "sha256": "7b548a75c9d2f3ab0b263a96bdfc001f104beaa33d3a207145c6b705a7f8f471",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+    "bytes": 1313080,
+    "sha256": "8af5a31cb49fa473314b2dd35b673737b1c57d7c4f4fc7c8f01fd555ad9d321f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/971b8608d86b06bd/out/font_sharing-971b8608d86b06bd",
+    "bytes": 10657448,
+    "sha256": "5bff3b57331a522d66974361f58457c79b101f9477f42196babea6cbac183c8a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/706c3421e5d8225c/out/text_cache_capacity",
+    "bytes": 7605056,
+    "sha256": "4594152b1020dfc8c52ddb1370656b549c09e239ab5c0bd1e5cc389039864264",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+    "bytes": 1075560,
+    "sha256": "909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/260eabc61cd841a2/out/text_shaping",
+    "bytes": 8009072,
+    "sha256": "f31e1366d05ebc1610e8d46a242052a50fd4c8bb4f33a0f350f20ef5266f2c93",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+    "bytes": 8558904,
+    "sha256": "e72b6fdc110d7bc27e31b5e9e4aca5f012ed0971faeea4c2d7bef138e6628242",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/226f23ac93a92960/out/parallel-226f23ac93a92960",
+    "bytes": 1075560,
+    "sha256": "a639cee1fc0fc7cf8a351b52a0c026f375b4aba01811b08dd5f225224cd68551",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/34a0861752be1a48/out/font_quality-34a0861752be1a48",
+    "bytes": 10776552,
+    "sha256": "495314838b10a40b3958b91d7a0ef688dadbc7eec74e33431ecdf2977a8f1f31",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+    "bytes": 8625008,
+    "sha256": "35a6a52b14a060b2c5c8d28bb05ce8f354555de17f521768f53b6d28cced3286",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3126e60d25619be3/out/selection_queries",
+    "bytes": 6955088,
+    "sha256": "f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/540cf57f0cec65d2/out/dpi-540cf57f0cec65d2",
+    "bytes": 8601808,
+    "sha256": "113561ad0093902e5a24d3ca53ca259846a0b0e83f4925be9dbcf02da4fcec52",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/48be0049acebbd55/out/color_authoring-48be0049acebbd55",
+    "bytes": 1196816,
+    "sha256": "77f641262b0cfe7f70ed18976a468e6e8d624df701cdc8a96ff823dd76f3d2b0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/5ae5ce7c27366cb3/out/slots-5ae5ce7c27366cb3",
+    "bytes": 8625008,
+    "sha256": "953ced3ead6d2a6cf36a429e3b1f1e69b5121d1150a49bd1b3f5c6e16ed29852",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/13eb99216a5128df/out/group_views",
+    "bytes": 7869976,
+    "sha256": "a112062750692e341bb5ab8af4ba8682f6e1ab7f74c76eb0041901c89953f428",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/fbaa1352f1fecd0d/out/text_shaping",
+    "bytes": 8040240,
+    "sha256": "9a96bf6d01d4d535ec5e3e4e459060bc980cc57760a36c74dcf13ef19fd94ee9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+    "bytes": 8595920,
+    "sha256": "96fc1c211900ac08fdb48bb6c8b5659a3257550175fef8a5a03043c399d9c534",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/21e6679cdd2bede3/out/dpi-21e6679cdd2bede3",
+    "bytes": 8599432,
+    "sha256": "6cba2b8c7719df314feea2bfcc8a4a43e176b3069af3dd353672e21836a31f7c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b994064e9147dc2f/out/cpu",
+    "bytes": 8030384,
+    "sha256": "d5a00970eecef31507d5d4a11e200231e6327fc9da82f710f53608bdc092361f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/fc7b0dd44c8082b6/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1ffc32f43a1e3cac/out/color_authoring-1ffc32f43a1e3cac",
+    "bytes": 1197200,
+    "sha256": "38b1819508788485ef451bdf7a3eeaee9a39c8c3ab4532cdf8099f2f08087ae8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/97b6b2a7d6700272/out/color_packing-97b6b2a7d6700272",
+    "bytes": 1357352,
+    "sha256": "e642c54057bbbcec140e021c6e5b70d2565c5f17e7cf91d781fb7a86be0c18f0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+    "bytes": 8608256,
+    "sha256": "884b393c3b86baedda5f7729615b5e06b4f46879032d9008cdac23d9b9489b37",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d3ab4a7cc2af9f7a/out/text_capacity-d3ab4a7cc2af9f7a",
+    "bytes": 8479312,
+    "sha256": "f030ee145cfaeefa5d991f43e77872e6e3c90bc6a0c1d71e267760b0ef3b192b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a59ff47379d46cb6/out/text_oracle",
+    "bytes": 6939000,
+    "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3331c5fe99da3696/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/2fa24cddb112cfdd/out/unicode-2fa24cddb112cfdd",
+    "bytes": 11828688,
+    "sha256": "c94335fb09cfe7e240ec8b87056b8511df04e24be2d5bd00af8529a2376d0f89",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/09d44fbbd8a57083/out/literal_cow-09d44fbbd8a57083",
+    "bytes": 1338200,
+    "sha256": "64b995f6622f5e294a3166e1d8444ba13449424c916280f2542cf3d8c99bd021",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+    "bytes": 10114864,
+    "sha256": "a2b548d8b1a66ddf3426d4c015b47820c4eb571e10e795ea3f946c72d7b0f6c2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a14e747b611b1edb/out/paint-a14e747b611b1edb",
+    "bytes": 8626688,
+    "sha256": "ed1be1c46974d486eb9eec23c9bb7a7a64af5e4bc5d87630af5d2d25fce22038",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/4190eb0452ec7d67/out/scroll_copy-4190eb0452ec7d67",
+    "bytes": 10733248,
+    "sha256": "0e5b1820530c79e8a9f13815ca4c93773d9fdb7f5dd757ec2365300e45d38380",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/74572a23cb90bd6a/out/text_cache_capacity",
+    "bytes": 7576544,
+    "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+    "bytes": 1320336,
+    "sha256": "511f8be79a38e9a5fb609257c95ef04d0601d831d990fb8b74d3491bd0795a89",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+    "bytes": 10556032,
+    "sha256": "906b6eaf88a697abbdf9db0f214dc958f77948f3033fe60150500c23ac64469e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ea5bcc72b93e25e0/out/render-ea5bcc72b93e25e0",
+    "bytes": 12077144,
+    "sha256": "a8ac673164cb452677113617d3bdfb96f904366be4c90368a934c82ffe1d5d80",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/01a4c1c35ff04425/out/clipping-01a4c1c35ff04425",
+    "bytes": 1367984,
+    "sha256": "75ac7e2a456055c8cc67343c2083716078c04b6d5394a738a17ed4db20bdfcde",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/6e6cb88f7f166e8e/out/text_interaction",
+    "bytes": 6966112,
+    "sha256": "0790a08c09cc037ca6f683d93d46a1135749814a76f4f6fc30a7a4628ed8e06c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+    "bytes": 1312744,
+    "sha256": "2a520fc897e67087a75a13bb6ab439a473d352f3ad5f441c11eb59874272b669",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/9daf6ecc7081fef3/out/oklch-9daf6ecc7081fef3",
+    "bytes": 1212064,
+    "sha256": "23552ca450523d286470df24e5aa10e72a91bf3efabc8630d1ba0f908c3b754a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/04fe2e89784ddd77/out/images-04fe2e89784ddd77",
+    "bytes": 1351984,
+    "sha256": "ebd9d78f9b387af7c7d0ed2fa27fb95bf40f2dce702f01e69b728d92eefd3908",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/7d88e365fb8520d3/out/caret_pair_measure",
+    "bytes": 6923792,
+    "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+    "bytes": 12048520,
+    "sha256": "d58da15d2f8d85092a7aa40784529d4b994ebda58784625db5d1e4e4239d76ee",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/df8fbe0afdb04b67/out/caret_pair_measure",
+    "bytes": 6954800,
+    "sha256": "2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1d61b0701b144f8b/out/text_shaping",
+    "bytes": 8037024,
+    "sha256": "8a314b22e1cc62aad2a68affd3ce991f475d1455cd9f3e853d300bcd5ba7fdd4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+    "bytes": 12907856,
+    "sha256": "d496fe7df203ddb909306762d547d765db0849bcee298276c54551a49a3e2d4f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+    "bytes": 1336968,
+    "sha256": "2f64d9696da803b644f52d63fc3510b784eb7337f880e0df8eab4b21ba20470e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/dc5086bcbc4ab0ff/out/color-dc5086bcbc4ab0ff",
+    "bytes": 1346152,
+    "sha256": "b577d93de5425908697f09d5e54d0e8a9b5dea50723334459fe164446d97ebb8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/df94f3b5799eeba9/out/clip_cost",
+    "bytes": 7847560,
+    "sha256": "dd9748989e8a3629429ad281f36405d21cd1ce6b9bfcea854e6fa9f77bc2b69a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3eee272fb23f9d81/out/cpu",
+    "bytes": 7998936,
+    "sha256": "6dac86e305146d3330d61228694cbffa51d785f1f173e627b3ec17f62802ec85",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/aa1e94a7d0b94507/out/text_cache-aa1e94a7d0b94507",
+    "bytes": 9186192,
+    "sha256": "e24d92da93b7527b6a6498baf1d3f56922d443286e9f103cb71368468048c475",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/48286f9c4c441df1/out/scroll_copy-48286f9c4c441df1",
+    "bytes": 10730832,
+    "sha256": "a74e1dbbdab3c213970d101bc4c59792f074cf7942d1bf209170e34470727c75",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/7b4981f002c284aa/out/literal_cow-7b4981f002c284aa",
+    "bytes": 1338600,
+    "sha256": "2e022546c36e02c6551844d3c082bbcd3b99afc016559834d37cad05a878b29b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1ed8d800b803a128/out/solid-1ed8d800b803a128",
+    "bytes": 1324216,
+    "sha256": "d8d351503460128ec7b75e1e6635b849b55c987a125da15e0ebc361449e285e3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+    "bytes": 1333360,
+    "sha256": "d7b5e9b80e882dfca33b6c88dd1a81e32f9d05036a483c56c7b85eec9d8e5f41",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/52684454f2eed9fd/out/text_oracle",
+    "bytes": 6967496,
+    "sha256": "0afd7090a36263babbc8bb36eda72baeb854a9764f865a49fbf117e149f359cb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+    "bytes": 1326528,
+    "sha256": "fd5ddd873303285c0221df76b326397986a7f72cf2ab6c257982a52d9f14473b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ac20a16148385938/out/render-ac20a16148385938",
+    "bytes": 12080000,
+    "sha256": "f2f53df6826bfae43b8ae6705ec45161977477a5963ac7b2ab823964d77d459d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ffefd78ac769fd9f/out/paint-ffefd78ac769fd9f",
+    "bytes": 8624280,
+    "sha256": "4a2e8223ea03f1d1affdde4f41d8d34a2329302629057c46724eeb600532240b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/de5d428c2d402045/out/sample_storage-de5d428c2d402045",
+    "bytes": 8590384,
+    "sha256": "a2b01c07003a76fec00dc6ce9d2e9bf5ebc96643133b893ffa63791a6dfc5dea",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3c86ff37841d37fa/out/text_oracle",
+    "bytes": 6970024,
+    "sha256": "22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/f1bdf6204dea9b1a/out/unicode-f1bdf6204dea9b1a",
+    "bytes": 11826544,
+    "sha256": "cd502250f635f77032d179c70e61d90c8693041baa28206db04ef5d20bea7f95",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/544c8d150bbd2667/out/prepared_scene-544c8d150bbd2667",
+    "bytes": 10661840,
+    "sha256": "ced488798e00d25ec7b42bb7add998ec35d4a1c78f54563acb635821bd7cb9e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/06bdece435b5986b/out/font_quality-06bdece435b5986b",
+    "bytes": 10774088,
+    "sha256": "e1de682be70e3ea64635b892e2c23211b3d469e2039ebe96a7efebfe51017889",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+    "bytes": 10632752,
+    "sha256": "2eaca9976d8d558bed1aa1fb7c138acd7a4db3c0bcb15f7f1886dac26bcaf169",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+    "bytes": 9948296,
+    "sha256": "28f120f32b012fbf3678e78a3576204980461cfb932ffd4726152a2d1a00cd8d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/04b7c6d39b1f1f06/out/default_font-04b7c6d39b1f1f06",
+    "bytes": 12938880,
+    "sha256": "427f7de0bcb99c4e02451f674b612b640dc4b5c3c3978d4ee7e3676ae53624ac",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+    "bytes": 8595232,
+    "sha256": "9187c087553200eaad614b2079125f311f0ba6a908e2eeb99b9b2b1779534c96",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ea1971b907539b40/out/retained_runs",
+    "bytes": 7883408,
+    "sha256": "daee3861c6d8c8a96c2f019a056c0edc46e58cd6fa9a433dcfec6cd2c66f7bb2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/879021c36e791478/out/line_height-879021c36e791478",
+    "bytes": 7586832,
+    "sha256": "8b3c366cef277237e1de626c0b8ffeb3102928c8de26d2eeb6b4d153afe072ed",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/68414e8845d14960/out/font_memory",
+    "bytes": 10153768,
+    "sha256": "6e3bb9ef4674d0009a8176ef62d958e49ebd1446f22a785a7b4b4da90629021f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a4edc6400ad84f19/out/text_cache_capacity",
+    "bytes": 7607512,
+    "sha256": "ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/17d7e2f30b976f5f/out/shaping-17d7e2f30b976f5f",
+    "bytes": 8239616,
+    "sha256": "06737c5f46d94e41c89dba82efb02dbddfc082ecfb09aaf1d34a8efcecef5c88",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b6a41ebf72f99cc0/out/damage_regions-b6a41ebf72f99cc0",
+    "bytes": 1231672,
+    "sha256": "c146ba078f513b5c055b3b0ccb884390cedecc13f9440d9290e7f0b1a1ac2831",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b647a5b046a8a488/out/text_cache-b647a5b046a8a488",
+    "bytes": 9186856,
+    "sha256": "6f7a6ae087961d64bdfb40ce451e0061eefc8184aec9493a37391594b67830cf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+    "bytes": 8605112,
+    "sha256": "cf0a47b9e5b773b3d80ecd1a5289c66af14513a2b0c13239b21bbcceeb27c12d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+    "bytes": 10625952,
+    "sha256": "48d8081248a25a899b79a3162befd2de80be0287f5d0549fee68c99536a3200b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+    "bytes": 8617144,
+    "sha256": "5610c7f66f110f413526dc99d3d86da38953c2e022579b6bd054cdc6ab3a143a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/70f4e27fbd0390d4/out/damage-70f4e27fbd0390d4",
+    "bytes": 8636624,
+    "sha256": "c070f8445512fae737e709320a4ade1b6565bd7e8d334223bdf19e799abf2c38",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3fd9f2d02876b933/out/line_height-3fd9f2d02876b933",
+    "bytes": 7589360,
+    "sha256": "88f97ba23b4d31b991cc059dcf65772c89a15d48ba14d72a8564d0fd7db7ac91",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+    "bytes": 8570352,
+    "sha256": "1e4487dbb416ea98dd37b16a81c7635c761da3b3ac224fbf81fcf1617fc69e65",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+    "bytes": 1206216,
+    "sha256": "fdca3879d7baab41fe5cd11d95a77d32fa36b3867f35fdd63336d571821da5c7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+    "bytes": 1298792,
+    "sha256": "d9071931a059946f66c0f2eb10f7a5f63f35165c869954affc6a8d93d980634c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3d349e54613ab355/out/font_memory",
+    "bytes": 10124696,
+    "sha256": "cf46cd3217ae16428182e2c385f195eedb6a44d70251810d0f9f7ba47cb7f9f5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/8d8d323333f848c4/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/77fe4fccfe1b613c/out/sample_storage-77fe4fccfe1b613c",
+    "bytes": 8587984,
+    "sha256": "305085d24e80fd6db4b1895b5e8dc94e893d3043842ec2203240822126142df2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/acfc39efdaa75683/out/font_memory",
+    "bytes": 10156224,
+    "sha256": "c27889b3f8fea648c7093d64e6618cf3e791d9cead414f0fdf328ac2859538e9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+    "bytes": 11797864,
+    "sha256": "a76cc938d8e2d0ff0e037a4b5c19abef6a0ad9eb62e3f848bbb8036ec8fcf467",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a512159eb6612c0c/out/external-a512159eb6612c0c",
+    "bytes": 8603520,
+    "sha256": "9691eac642401702c09aa1d75f784aebb05124c66c3096437de981cd902a4b8b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/4cdb957e696616c4/out/text_metric_scale_probe-4cdb957e696616c4",
+    "bytes": 8646224,
+    "sha256": "8bc6e9605d00ce5def356606c1202bca3673a643362b14714cb41519946cefb4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/37942a5794d59b19/out/text_interaction",
+    "bytes": 6968656,
+    "sha256": "8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/2b70914e16bf7f16/out/text_patch_damage-2b70914e16bf7f16",
+    "bytes": 8639752,
+    "sha256": "451d18f97f89b8d1a51509f4768b4a7d6442fd3917e83bc2e4a510c022943df1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/9e1cf6e1ce02959d/out/text_composition-9e1cf6e1ce02959d",
+    "bytes": 8647808,
+    "sha256": "3863b8f04dd8047c16e113c7b9382f54b22c9c7938f3b00510de5387c57d5c13",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3923d801533a9244/out/damage-3923d801533a9244",
+    "bytes": 8634200,
+    "sha256": "0dd83f2e873ca55789e56f2e563a3b90228222c478a9059f53bd6077ed7d6048",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+    "bytes": 8574488,
+    "sha256": "9575ed83db7f444f1e47cee271c020d3b44a8c49b50a8e2c2f1a21ef91d6616c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a66a56010281ed60/out/group_views",
+    "bytes": 7840896,
+    "sha256": "1e5d8574ac85bb43c40f0bac468d40e100cf129900797938ae4e23587d772d5d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0cf2e62b3c2a16cb/out/solid-0cf2e62b3c2a16cb",
+    "bytes": 1324616,
+    "sha256": "a910817056e1c5f61b1bb38183dd31434176c4502f73cd54745f4a75869e3d9e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/17d32df86ca9c9b9/out/bins-17d32df86ca9c9b9",
+    "bytes": 8656504,
+    "sha256": "10ca69d489c2e435cbebebe8a675d8816820cb97b66315d8ad1cd54235c61d7d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d30af859ad4a3017/out/rounded-d30af859ad4a3017",
+    "bytes": 1358800,
+    "sha256": "dc266aa7d55bad512c2a252c8d3297ddd0506bba4d9bf4aacb845255284f9460",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+    "bytes": 1331528,
+    "sha256": "006fa8dea45ab8e20d9a4d9be6447673f9fc6a12b5ef96dc6205217dee3d5bd8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/065be7fbdf5a91d8/out/selection_queries",
+    "bytes": 6924032,
+    "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/5b15ecc36801cc65/out/color_packing-5b15ecc36801cc65",
+    "bytes": 1356968,
+    "sha256": "6d7ec23c0dbbde807eb45a1dd78dc98487b8dfb9d4896e9e7c61c66194f2fbe6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/5c6934811c777283/out/text_metric_scale_probe-5c6934811c777283",
+    "bytes": 8648384,
+    "sha256": "27b0c319ef5461032ca48f7e9fe7d8992ac77faabd35a51e8e1e5da8804a53a0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d0ced4af83707f1a/out/oklch-d0ced4af83707f1a",
+    "bytes": 1212448,
+    "sha256": "1f4359ac292c9e6a90c001d3e524750248a46279229c53bb400e655a5a55325f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d7a53abed6c6185f/out/cpu",
+    "bytes": 8027992,
+    "sha256": "ceebebb7cf064548945907829e0996d9b598a4d7651b9c08b8f15cc5d9eeffc4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+    "bytes": 1171344,
+    "sha256": "1db192efc1621589d085fd1c9c04fa7ff5cef44daf7fdb87bd7ca69279262b87",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/178f390fce55515f/out/retained_runs",
+    "bytes": 7885800,
+    "sha256": "35d14d0252b693cec0182a2a762448f27b06b6c82137aef30a419260f6edfb71",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0df7d341745f4401/out/sample_clip-0df7d341745f4401",
+    "bytes": 1338536,
+    "sha256": "2672d561834e486aed0fa8ee4f0cd019696f8954fe898beb799c6d8c03d26725",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/625f4007908fee82/out/damage_regions-625f4007908fee82",
+    "bytes": 1232072,
+    "sha256": "6635df2a4f39bd652b6ca47a80432f3a64bb54c1dfe965714b47923846080c48",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/96f8cdc778d02d70/out/slots-96f8cdc778d02d70",
+    "bytes": 8627408,
+    "sha256": "860ff65dad597ffe317fa3530f7dd5983626ee05b4740770dc01ff1c2a098844",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/89e11f61f36cd9ed/out/caret_pair_measure",
+    "bytes": 6952288,
+    "sha256": "494d034afff69004ac1877221291a82fbb5bc6c342e79d5422ae61a493d1b444",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+    "bytes": 8613280,
+    "sha256": "cb27e28dd0d881e784796b0593d15b8461d8211c4d2d336a107baceb018ad95d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/11f8ef7a91cd341d/out/damage_workspace-11f8ef7a91cd341d",
+    "bytes": 1195608,
+    "sha256": "e7d8162b4cf795bbb004ed65858859a13173c586672eac0c85ea5d73bf0249ea",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+    "bytes": 1186608,
+    "sha256": "698b6a4bc345e60ffe2a7b1e13942b92a243dca9fc30d4adeafc2cf3f54906e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+    "bytes": 10701768,
+    "sha256": "b922c576d55aa643707c04516d8856edaee906aa3c7f9e7cec612c450321eead",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+    "bytes": 1342160,
+    "sha256": "40a57293e78b4de54b2172480950aa17ea1d34b271f133df6fdcf67de715c2ed",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d90c80377125583a/out/bins-d90c80377125583a",
+    "bytes": 8654104,
+    "sha256": "3a1ce1d8d477bfb365bf8545c6c5b49f5c9f91a1163dbe06a26ee0f0afb11e93",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3f7d5bfe3f5989d8/out/selection_queries",
+    "bytes": 6952560,
+    "sha256": "9cdaf3c15fae020831da6deadc7792d5ec838a0e926a6a3101d3da8adc3fd865",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/bc7cb9aa0e5283a5/out/external-bc7cb9aa0e5283a5",
+    "bytes": 8605944,
+    "sha256": "12d721a827108604e36f0f9364224eb1ee1f89a225c8884fa11766053def7dfd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1bb3750b8009d1e5/out/hdr-1bb3750b8009d1e5",
+    "bytes": 8618072,
+    "sha256": "835fe7dfe7eeb2c7a845767151697df2176bb82df07f4959475b346ef4ca33a7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/9ddd94c58151c6cb/out/rounded-9ddd94c58151c6cb",
+    "bytes": 1359192,
+    "sha256": "933910c74a85fc841deb798f0294d6fc7c0740f23f3e8011435f186d1eb836a0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d7b5685890d15b51/out/gpui_canvas-d7b5685890d15b51",
+    "bytes": 9979112,
+    "sha256": "a1be2cd9f95d569dee7390d3b074595765815c763a1343aeeeac5e52bb8f8eb4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+    "bytes": 8586616,
+    "sha256": "f48ecbfa28e133815c6628a174c8da77574460e01041d813e0e5d124332ced3e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/17f5cc96571f2615/out/text_transaction-17f5cc96571f2615",
+    "bytes": 10705008,
+    "sha256": "2f0fdc28d4b479b2d2ca7d1337743669bf1071049b6fb8f0178dde6a638e0941",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/4df74dd4ada5755b/out/images-4df74dd4ada5755b",
+    "bytes": 1352376,
+    "sha256": "35c74564dffec352d352f4bb1ef6cba567794784a3f63f99572bfaa550817947",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/aedbcdddc79c5cf6/out/retained_runs",
+    "bytes": 7854328,
+    "sha256": "bf8c9b61f2f7c91dea345c843efbd186a43207b60c7f35573a6a45b482a35cdf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e435347c265ff680/out/color-e435347c265ff680",
+    "bytes": 1345792,
+    "sha256": "b257a8379c7ee49c0bedd23d236c35d7a384a04f17b305af4271c3d684f6662e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+    "bytes": 9981304,
+    "sha256": "b2d622da3b966e8f3924654b2d0a4fe38cd3a585fefe48ee6df1b56d52fb8b94",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1aaa1655a279b57d/out/text_patch_damage-1aaa1655a279b57d",
+    "bytes": 8637336,
+    "sha256": "52cf70fb68d1449e263edbff2bbf6101a11bd6783b41ab490b79f8152d6db184",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1d04b27148650b17/out/gradients-1d04b27148650b17",
+    "bytes": 1362264,
+    "sha256": "044d9283a72b4b0b4a7efb1be8e7f69784ae3b3d9f866f30bd5ef269326d0fe9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+    "bytes": 7558312,
+    "sha256": "25b99c9dc2249a2a2836692df8c9ef08b2a0160112278b9221f1aa2bc0ba98a8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e104e893582978c9/out/clip_cost",
+    "bytes": 7879072,
+    "sha256": "d881753a9af54222f3611e0f80b8e612edfb7ce61c7a7bc439ee7a1f7dec00c1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/ebad0e4c90d15b6f/out/selection-ebad0e4c90d15b6f",
+    "bytes": 10145936,
+    "sha256": "c646675ae3cd4a16ca30dd39fefc31e52dacc3e6eb8eecd4db24b1454fc305eb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/6b33f43619313b70/out/text_capacity-6b33f43619313b70",
+    "bytes": 8476888,
+    "sha256": "d888b3322e623b7718b4a5324ce84937412cec21c31f4f695464d896406f53c3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/738fc609e37c02b5/out/clipping-738fc609e37c02b5",
+    "bytes": 1367608,
+    "sha256": "41c059c93406a5197953037adc049a31cb7a1eeb80e0bffab6964629687b4a2e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/20be24d7c1f313da/out/damage_workspace-20be24d7c1f313da",
+    "bytes": 1221448,
+    "sha256": "7e781f53aad6ce4f63b92b69dfb495cb156f68b3bd127ec30fb86ad7c2dcd9a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/74ccfcd13486a55d/out/text_run_probe-74ccfcd13486a55d",
+    "bytes": 8644536,
+    "sha256": "d590fce511bb1338b6929bb32ec2635f82483741d531fc50cfefa563f4a09d08",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0e4314433126726c/out/gradients-0e4314433126726c",
+    "bytes": 1362648,
+    "sha256": "b53aebcccec3717e4b46b65600088014622dedd71d6de79214f476e35ade2ab4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+    "bytes": 9157128,
+    "sha256": "0d83b79c45201304dd0535ecc8b92fcbe404248760915f2644e9afc7b202d4f9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e4b844e38d499dde/out/text_transaction-e4b844e38d499dde",
+    "bytes": 10702776,
+    "sha256": "fbe9e8fc5b2894b8fa94d93a23cb73b8fc81a9865a2f754dfbf51bd823aaea90",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/99a40fdcc8c45d96/out/prepared_scene-99a40fdcc8c45d96",
+    "bytes": 10664216,
+    "sha256": "c310ec7e21fdf4437435ce05c630e2205ae0bbe546255a6687025d37e815fbfe",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/c7eadced7b956270/out/clip_cost",
+    "bytes": 7876640,
+    "sha256": "1621480d5d89b2eea6908ece54695b8c9245ab56ffb46229ab3c2273a387acc7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/a05842ac6905f616/out/damage_workspace-a05842ac6905f616",
+    "bytes": 1221056,
+    "sha256": "4d9aa37bb924c447504cafdae5fbc53d5d8f5c5ebfc462850ffd3adf9d20e186",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/7afdbbc1c60aeb44/out/sample_clip-7afdbbc1c60aeb44",
+    "bytes": 1338936,
+    "sha256": "eb8d9c28bd9eb8fe2329a41c6573b1533b56fd218eaf7fdca37a24e484f859c9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/206cd6ebb91dd0c1/out/grouped-206cd6ebb91dd0c1",
+    "bytes": 10587520,
+    "sha256": "01db9ae99ccda3c73253230320aae2924f073453ce06775126cb22098585c4fa",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/f5e18d7f0e28468c/out/selection-f5e18d7f0e28468c",
+    "bytes": 10143368,
+    "sha256": "6cdad5b755a437cde9a1aaae076651e1e9ccbe2c7081cb85bb93aa5d20aa51e4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0478649b05f086b4/out/shaping-0478649b05f086b4",
+    "bytes": 8237432,
+    "sha256": "df1d113f7237f4bed350a64360895d6cd4c9d3d6f5c68a75fbd79eb0beb01786",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+    "bytes": 8618744,
+    "sha256": "73b87a492a48937aef6eceb86e21ba3692827da657ace185ae9ca58711093749",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/185af9af25042b7d/out/default_font-185af9af25042b7d",
+    "bytes": 12936064,
+    "sha256": "686e0c65756e765cdcb95b070e186f30605dd257630b40077df1e43f913b7ad2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/30b28007dcb33290/out/font_sharing-30b28007dcb33290",
+    "bytes": 10655040,
+    "sha256": "8361a70af67ad52987777420a299da2c9323845b4a85a521ee40fb0b3db5007a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/013f041d72fe4179/out/group_views",
+    "bytes": 7872368,
+    "sha256": "0ff3429f5b174eb158542549e93dd7f0c01c7af8b579dcc91f53708842551beb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+    "bytes": 10673736,
+    "sha256": "fd2e54802cc981a104150b4526c2ab848d0b4f79f857d9b19a4734041ee46db8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/fc3f401ad24f5844/out/hdr-fc3f401ad24f5844",
+    "bytes": 8615688,
+    "sha256": "04b151803cd7bef344610aa4a33972be1e38db69c45f3661db18a45342b2f9bf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+    "bytes": 8208328,
+    "sha256": "bc6c6c3ec565aee095cd0d14a8c2dc66818e97ad3ec0930b0d1297c7b2802511",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/d6851de84cd33556/out/parallel-d6851de84cd33556",
+    "bytes": 1075560,
+    "sha256": "1d002fc8163f675dda406a505717f903781a751d28b17c6e864dd245f814f810",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+    "bytes": 10745040,
+    "sha256": "a3480e2ee4615a27cc20194aa68042bf1bfd07aecefe7cdc20f74d5420db5fff",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/82210282371fce2b/out/text_interaction",
+    "bytes": 6937600,
+    "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/de6343e5fbdfe8d6/out/text_composition-de6343e5fbdfe8d6",
+    "bytes": 8650216,
+    "sha256": "1c260c5b1f6db93483746b461efc7fbc6cbaba34bd0a420bf6c65a0a973ffd05",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+    "bytes": 8447816,
+    "sha256": "09b5654415b9a0a1779800fa3bb99c9c108d05a70367eb0ba660ec8ed78fa4b5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/b9c33c87fe0eedd7/out/text_run_probe-b9c33c87fe0eedd7",
+    "bytes": 8642376,
+    "sha256": "9aba6141761cc693126154d4eb3e02c0595150cd0de9def99133ec8198c39b67",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/yoke-derive/735d941900fcb9b2/out/libyoke_derive-735d941900fcb9b2.so",
+    "bytes": 4179304,
+    "sha256": "a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+    "bytes": 4272112,
+    "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/yoke-derive/a6188276d4c4b61c/out/libyoke_derive-a6188276d4c4b61c.so",
+    "bytes": 4272168,
+    "sha256": "0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zbus-lockstep-macros/e62be710aa1b1fbd/out/libzbus_lockstep_macros-e62be710aa1b1fbd.so",
+    "bytes": 3868352,
+    "sha256": "70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+    "bytes": 4654504,
+    "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0d5f81483f9514fe/out/image_placement-0d5f81483f9514fe",
+    "bytes": 10670984,
+    "sha256": "62fcef29a98023d1f77537dac10cf0a360f8274f0c396a594c5802d32227723e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+    "bytes": 61399440,
+    "sha256": "3383fe53b623097932793af4defc0b47412f59e868a85c61d57fb470fd1bfef4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6a56eb2df78d3d63/out/inspector-6a56eb2df78d3d63",
+    "bytes": 13411840,
+    "sha256": "17a580e6c6a0c07d1f0aa0b191c4547b01d38e03cbb8b34c54187c4c9bcf8c7a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3c2cbc1cda7bd7d2/out/semantic_metadata-3c2cbc1cda7bd7d2",
+    "bytes": 12326112,
+    "sha256": "48568245836778714909ddcd26f6f9c512a36d0b839012a1b00a65033d0fc0de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/38c47abf9578a392/out/property_editor",
+    "bytes": 25342936,
+    "sha256": "ef86b6077cf2da69299ace67048039ea6554e18b9f896e60a6329130c6eb74a7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+    "bytes": 26389256,
+    "sha256": "5c97ecfb3c05316667fc61d59990d1333d0bdaf56b22c32e4e90db3ea57cd3fe",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fe52cfb471e3601b/out/handler_storage-fe52cfb471e3601b",
+    "bytes": 13531504,
+    "sha256": "db92941f58fe887b60c32d902f117ffad5b347091a423a317d571447e5079f40",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/71d46b9228103568/out/sparse_text-71d46b9228103568",
+    "bytes": 11978416,
+    "sha256": "269e7493cf89b58172ca4c3744a6aa6286dc676be92c7e9bcb4b87ab2cff936f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2a70ccf754472ae7/out/property_actions-2a70ccf754472ae7",
+    "bytes": 11228384,
+    "sha256": "a52f6304d5cd511f52d01f1e8f1b46f4cfbfc9cb75824a42c8b7164b8a93d045",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7521fba0ca5b8b52/out/queries-7521fba0ca5b8b52",
+    "bytes": 11888768,
+    "sha256": "4d987f7fbacb7252270ed7f0695c7132a7200f5f0ccab0e19b02db17d881be1c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6049a0ca722ce598/out/ime_cursor_cost",
+    "bytes": 9893432,
+    "sha256": "99d53eea60e715133f3f0fdfa3f61e4dd594a46248d1d2faa44d58326ca9eff9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3b2275b487a0606e/out/components-3b2275b487a0606e",
+    "bytes": 11900280,
+    "sha256": "50565219fb5e4adf451907a387d95018faa9077b2d298ef9f2ab0b5c74d8c022",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/482a0c4e2954663a/out/contained_owner_spike",
+    "bytes": 11309344,
+    "sha256": "b16db2bd286f1cba99dff69bc69ed6b47137f12fd3e128182eda3d56c170922e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/32358c155c3b4436/out/child_capacity-32358c155c3b4436",
+    "bytes": 11634816,
+    "sha256": "3139eeda5204f0b3fa424579bd9593a68b9584e346606c50a09348695d41341d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/991cc5eabc5df501/out/covers",
+    "bytes": 25230464,
+    "sha256": "f2edadf673abfdcd5f7822f9719d8305daf5b4b4d3c10f1ab571c5859b745837",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ba59208fe85d2370/out/unit_action_cost-ba59208fe85d2370",
+    "bytes": 10524272,
+    "sha256": "9b654ea983f1ce2d87d269bb949686e7bed4d1923dd4792ae18e557c97417777",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/596ec3deaa5df321/out/presentation-596ec3deaa5df321",
+    "bytes": 11918656,
+    "sha256": "762b8f29d4409b2c41a82c9e6aa965e4c19f0415f1fb0b13ad677f6761780b96",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3c29264f7344f4ab/out/immutable_text-3c29264f7344f4ab",
+    "bytes": 11657976,
+    "sha256": "b58c74c3a08af154af4f14e527923e7139da0fd748b88fde0f61017013c37e6c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fc3261afa7f1a06f/out/text_cache-fc3261afa7f1a06f",
+    "bytes": 12070384,
+    "sha256": "8600821f17805f4b5592257266ec329960d0b957a6f207abf8142fcd947fd4ec",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/bf108177487c5f47/out/workspace",
+    "bytes": 25348832,
+    "sha256": "5cd7da4deb5513f8cd103f06e2939f81eb444374b4ea44014ab3118b422b5865",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/47e50edb3c4ba12d/out/queries-47e50edb3c4ba12d",
+    "bytes": 10616488,
+    "sha256": "676244a932b3e8c3ed7dd1afa26a2dc2c1a74111d9911dbeac35ec144b06bc00",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/77807c94dfd7a485/out/source_inbox-77807c94dfd7a485",
+    "bytes": 13069792,
+    "sha256": "8dae7e5a56b70cf4e60dea0eea9f32b609ea9b6eed85b616a64403b3ae4d0c68",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f23d18b0a25ef922/out/unicode",
+    "bytes": 25235896,
+    "sha256": "aebdade1c602d938a88c7d83979540cb7e4efde12df04f99114d8156da241070",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b23ac8bfdb17f6d4/out/text_selection_compound-b23ac8bfdb17f6d4",
+    "bytes": 10646344,
+    "sha256": "1d704584cb2f0e97d55d8dbd3459c05223639c7737d5e22b616c76e5f971c7f6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c8e21b96cf06b594/out/images-c8e21b96cf06b594",
+    "bytes": 12219408,
+    "sha256": "b7ac02aaded30ebebe04f46dfbf5d41002206b03bbceb434644ab00dba3b32f8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c421775e9c15f6d3/out/mapped_paint-c421775e9c15f6d3",
+    "bytes": 10519128,
+    "sha256": "b237dc1cde850ccd2a75bc06efe33dbb198317f28029bb1af232410cb250240e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f368f9e328de61a9/out/presentation-f368f9e328de61a9",
+    "bytes": 10650912,
+    "sha256": "722cd3441ab84cc9f40635667ee34c8cd4491a7edf89a240568a903b445a37c0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06",
+    "bytes": 11214072,
+    "sha256": "450bb70ffde6c45e823cb187408a210244a215a8e1760dbc87a42e8f2345a62e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/76e0b36cf0b71ed8/out/pointer-76e0b36cf0b71ed8",
+    "bytes": 12350560,
+    "sha256": "c9b2bcef0f54819b7c87848aa43f2270c8752129f2a0b6ab382d52d3f9a9f438",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4ceb8ae38b2d7c29/out/clipping-4ceb8ae38b2d7c29",
+    "bytes": 11421144,
+    "sha256": "8764b4ad7e9318a506892fe368f1246bd0e3922b815b8fa0926425c78c811fd1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/25cf736ee8065a75/out/library-25cf736ee8065a75",
+    "bytes": 12083512,
+    "sha256": "7c8fa2c1113884edbf6cd1fbc51c9df8d9e20f85cb5b28f8454cfbb6f69102a6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1e0f5cef6f980cfa/out/paint_slot_rebind-1e0f5cef6f980cfa",
+    "bytes": 10498528,
+    "sha256": "a325e0e46dc510d5a13490346a418f95a4f3d5bd4d2fc3275323c1473e31f50f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/00ae86c2d370fe13/out/unicode_text-00ae86c2d370fe13",
+    "bytes": 11775240,
+    "sha256": "61e5a7b584d9bca24713e3bf52ddb91408a53c311d07bd813ec0bf76a0b65d8d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/49c5286c64be263e/out/text_selection-49c5286c64be263e",
+    "bytes": 11330832,
+    "sha256": "60ea1c04bcdeed8c161a47ca0becd97967649472a5280b1980b571e720b18d47",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/acd3f26cb8b6b48f/out/projected_sources-acd3f26cb8b6b48f",
+    "bytes": 12664448,
+    "sha256": "003c83ab56198fa5afb745fa136c293e2e2cc7c55d638ffc1404331b0425660d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d28715db297fa2e8/out/component_sources",
+    "bytes": 25386080,
+    "sha256": "9a8ffab5b80896b499cb60cfd070ab8e38ba77f34c056caa3baf25d9e593da2c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6cdf16e5f3673c9c/out/inspector-6cdf16e5f3673c9c",
+    "bytes": 12109160,
+    "sha256": "b61a29d2a29a706b6eddfb8364fc557c163accd39407f2d9766e20fe15b0aec9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/881cab0cccf50df2/out/text_selection_compound-881cab0cccf50df2",
+    "bytes": 11914008,
+    "sha256": "61b791199dd550a6158e599aec0dc6e244cb14ca72d7debb9b68d6dfd1803fb6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e0261b0ff00b7896/out/unit_action_cost_two-e0261b0ff00b7896",
+    "bytes": 10758232,
+    "sha256": "9c7650af8aefa77d1b4aa9d3cdf4603fdff025636ff9b2849c920abf922934b3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6018581ec8350bd1/out/retained_list",
+    "bytes": 11212816,
+    "sha256": "4ffb1fdc23d659c8013cf79860eded963227f25cea62955638451aaeea16862a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/8a7afc547f960b1f/out/inspector",
+    "bytes": 25235552,
+    "sha256": "4e1ccd53ad51c42f0702590d2e5c7c5ea87b8fa27d563f09ed5a10d7c7317c5f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f62811c55e9a21bc/out/dpi-f62811c55e9a21bc",
+    "bytes": 12079000,
+    "sha256": "ca9f2d75d5d36c7758689ff36c653511d33140aa582f3710f7beef9665f2187e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/62a074e2fe4edeeb/out/routes-62a074e2fe4edeeb",
+    "bytes": 10918568,
+    "sha256": "0425b56d7d4f82ca14f83ce5ff8c5e3c9aa036123d265efc0359b55b1ce63b79",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/a3dd2c315b8690e9/out/paint_slot_storage",
+    "bytes": 11060776,
+    "sha256": "581edbcc27bf98443d2e6b90bc42366dd7bf43dd443b986fdcfa8443b04c5adc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1d41104bd620b05b/out/focus-1d41104bd620b05b",
+    "bytes": 11667744,
+    "sha256": "5c74bbd1ea494e839f75ea481c88caa13a0fe60ca21d584e29e38620065b89ef",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d32128f191e42486/out/flex-d32128f191e42486",
+    "bytes": 11719712,
+    "sha256": "8921aa2b6fdab19a15167da20ed857c1c3d886f0c7bbcb05198716e1e442acac",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6a4f753821c95b59/out/todo_comparison",
+    "bytes": 25589904,
+    "sha256": "8078080d8da2840c2f2769a59b2e8ab25ab0fd3b606284459f18d6a46df9e55a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3b0e8a39945c4dcc/out/question_input_cost-3b0e8a39945c4dcc",
+    "bytes": 11746648,
+    "sha256": "a765ad1f6adf48385156c318053e19229f8ea9675c3be29f88128da181f6881c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/a714ebd197e979b4/out/todo_comparison_five",
+    "bytes": 25613496,
+    "sha256": "c967e48128bca60ef98706ef30d586d4f0dc583a7064cd2d4bc1ff1f3e574e43",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/da2acfce58b23a73/out/identity_recovery-da2acfce58b23a73",
+    "bytes": 10489608,
+    "sha256": "1371c77246a22ec63376bbbe57ed44dcd4af6b03b3ca34ddbf39572382b80d6c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0f2f8675a679d476/out/literal_dispatch-0f2f8675a679d476",
+    "bytes": 11855720,
+    "sha256": "616ab5a80fcac8e5f2feb4f71d1561d9942deaae36584212213c46c9521a9dff",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c06a5aa6bc19f81f/out/panes",
+    "bytes": 25217664,
+    "sha256": "e81d5bce782550682d50dd24b46006d3bd44b16bd72a4c2f7da219c8977527a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/161fa22cf9a294d1/out/first_frame",
+    "bytes": 11345944,
+    "sha256": "780aa9b8512332b0a5a2bd293ae43a0e7063809223c5c2d7a536a918d42d57be",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9104117e771f90dd/out/property_selection-9104117e771f90dd",
+    "bytes": 12894776,
+    "sha256": "7d7b6c4c0fb2cb63e976a8b529f03f37bce6cc688fc91866a43f2855089545b6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e9b8c773f9415c80/out/sheet_access_measure",
+    "bytes": 11009232,
+    "sha256": "9a7733e95c90caaf0602fadecb66ade3778f460adeb32381df0e59618232c782",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fbc81403c798a805/out/todo_comparison-fbc81403c798a805",
+    "bytes": 10897352,
+    "sha256": "28d10913f282211aceb087fa086af639567847f331c211dd997aac56cd6efdc7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/72244371117462be/out/child_capacity-72244371117462be",
+    "bytes": 10368744,
+    "sha256": "723a05fdd683f99372424f48861e099898c63a12fef73ac37438f0e1548cbcfb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4d4f873e56a5d4d5/out/unit_action_cost_two-4d4f873e56a5d4d5",
+    "bytes": 12034208,
+    "sha256": "261052e069d3836644e10aa7256417fc2fb3e9483caa6fad9b60911c02059b20",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1f8acc57a33744b8/out/text_lane_measure",
+    "bytes": 11230592,
+    "sha256": "ede67d626ce44db558b94aed6cb1e9c58d42ea399d591cb3e641c85b34356200",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0bc3a3be0e651757/out/zgx_native_lab-0bc3a3be0e651757",
+    "bytes": 13262016,
+    "sha256": "77e9b20005d1855e738fe8a49ed21f75d215c810ba8a893e76a61b6a0b7c8139",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0f7f89c96b5802e1/out/paint_patch-0f7f89c96b5802e1",
+    "bytes": 10798472,
+    "sha256": "73f630f4bc5db3280ba54f5bc200b1c9ad9a805b13efed67b924e934150fca2f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/162d5a51c65c626f/out/paint_slot_storage",
+    "bytes": 9793488,
+    "sha256": "fd85f6e5df099a21733fdc8910e9a8803221b43477cce5da811eb61db634f42b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0284aa51c6024501/out/source_inbox_reader_gate-0284aa51c6024501",
+    "bytes": 11822448,
+    "sha256": "358eeda7d065691fbce805490f7b9a3178b1b3301c6e5f6fdd5540928bd69289",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/28c2a85e159e0a89/out/checkbox-28c2a85e159e0a89",
+    "bytes": 11399880,
+    "sha256": "4186866eea4d52af1ebfaae82c3ea536575f4174b889558d051a9211ccf07ab6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/24a50e9fd443fcb7/out/local_publication-24a50e9fd443fcb7",
+    "bytes": 12493736,
+    "sha256": "bdb079d8d27f9f5e1a80afcca2626b371dadaddbdffd30976e3ae7fa44070d0d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/727ab5cd23552c01/out/unicode_text-727ab5cd23552c01",
+    "bytes": 10506464,
+    "sha256": "79a5a449b1f9bc25c72460746c98d05326d8a331fc7327d714050df37b7b4ae2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/91639c0bfb59a7d2/out/runtime-91639c0bfb59a7d2",
+    "bytes": 13056824,
+    "sha256": "a9b9726ba2a1878d2a20d09701e813e356605c1708a190f12e1cde01436a4e76",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c7028571d687eaef/out/todo_comparison_mapped",
+    "bytes": 25628488,
+    "sha256": "d74535d989ff69b54abb720a88f98e9cee020edea547b105e8d166e94289c2ba",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4395434129024bc3/out/immutable_text_measure",
+    "bytes": 11246232,
+    "sha256": "0cd5a28bfcd5edc09928516ec198e72965980a5f196aa9f59686a60444d550e0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1169161245756934/out/mapped_properties",
+    "bytes": 25282920,
+    "sha256": "d04ece96bdb285cfcade9e93a5f9f65f53c206a0a4d3c5fed79dae05b340fa1f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3aa5d815723c9375/out/ports-3aa5d815723c9375",
+    "bytes": 11285768,
+    "sha256": "687b2c207cbdbb8f7d88b4b8acef36264f5be4e85a0165654cb35db3fee81b95",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/082973e623b3b310/out/semantics-082973e623b3b310",
+    "bytes": 10945344,
+    "sha256": "1e784ba294dc81187ca4b80957fc022f6f32b7ef1198052557945b4ace7c74fc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c6fc1d17e326c893/out/remote_delivery_measure",
+    "bytes": 9905344,
+    "sha256": "c3e5c1b66b9246d65fe01196b5ee237567d98f4b9ae7a4f0025ed09d79a11a34",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d313a00f90425080/out/pointer_focus-d313a00f90425080",
+    "bytes": 10595072,
+    "sha256": "4f140bd0b3e49816f9d2e278d670c32048ab98e13c721f2ec85af767944aa3a8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9d86b43e11032505/out/application-9d86b43e11032505",
+    "bytes": 12307728,
+    "sha256": "b19bddb43ba8ab7609d9016101b7419d772e7dfa0046068575caec435749666d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/875c86739aeabbb2/out/source_value_isolation-875c86739aeabbb2",
+    "bytes": 10962216,
+    "sha256": "584f98befef83d9ed7f549690db92b23dfa121347c42bec413bb4fedf7ea4d25",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/397a52a6825a7205/out/rounded-397a52a6825a7205",
+    "bytes": 11452944,
+    "sha256": "b668d58c474b6b6e4b43d68dde699688b957088c5578a331bcca099279c5f26f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2b67107b0dc8425c/out/state_update_cost",
+    "bytes": 11196688,
+    "sha256": "f64c44138b85ed0a6d52e370820b5c15309c764eac5985463b28f4e1ee358a1a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/425a4ed6f5af56e8/out/ime-425a4ed6f5af56e8",
+    "bytes": 12589104,
+    "sha256": "c15c81a63ee3cbdcbecedd2550d40455cb1ffc46903873284a95234318542b32",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e7e0519243b95972/out/acceptance-e7e0519243b95972",
+    "bytes": 12856112,
+    "sha256": "b23348e4a1521e5211b486ae7d3440b2b1df2fb01b5408a8ea9483b612e1578a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/a5da4683b6ec948c/out/question_futures-a5da4683b6ec948c",
+    "bytes": 11431328,
+    "sha256": "a7fe2832446687c4334c034cacc486115885f2e86acc6fb13b8a19cda24cfa65",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/91cb70299684b5bb/out/empty",
+    "bytes": 25197816,
+    "sha256": "ab5f7c5e40876eb17e9743a3b1ced25722a741434c2b424f51e22e6fbbd70c57",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/094d17439faf1e62/out/reactive_styles",
+    "bytes": 10138176,
+    "sha256": "fac965658dd3b61784ef68af07d5cffa2a52dc3afe13cbe62e1ac0465b53f11e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7dd2b77bc38d0249/out/mapped_properties-7dd2b77bc38d0249",
+    "bytes": 11616744,
+    "sha256": "be3ca5aa83eaf6b3b762cfe345c16c34dd84aa4fef331c75938f232fac1a6804",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4b994ca0b288c549/out/retained_styles-4b994ca0b288c549",
+    "bytes": 10711664,
+    "sha256": "b5805c70581bf5bbaeeb7d6fe041b2a04b64d1e2abfd9b9afd386cf0e207ecad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/84282494aae85cac/out/style_ports-84282494aae85cac",
+    "bytes": 13216928,
+    "sha256": "63b55850c7e9113ca5c5dcf3074ece00ad0488de0d879a98ab28b887eb4bb667",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/efaf685b291d3268/out/sheet_access_measure",
+    "bytes": 9744600,
+    "sha256": "77b5b900c677bda982e726f3a47fc36a064438a2c7a6174a735e80d0b7ad81f8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4de949a74a3af0c8/out/state_update_cost",
+    "bytes": 9927296,
+    "sha256": "9dc92e8b6c02f47fbf78cbaf6b5b85dab674ca119f62d9e80c97d105e208b43b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ebacc24cbd443849/out/text_geometry-ebacc24cbd443849",
+    "bytes": 10644456,
+    "sha256": "e9949bc16c9b9d13d15175ca2b36d73b73542f8c1b830966f1af7c6a71452823",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0a19bea4c7e03934/out/sparse_text-0a19bea4c7e03934",
+    "bytes": 10704904,
+    "sha256": "91626c6e9672a452d77d023113a090ebead9101c4275f2b6d5ae240df35149c9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/00e2ebb65ffdd56a/out/intrinsic_text-00e2ebb65ffdd56a",
+    "bytes": 10537464,
+    "sha256": "deacd62511de628d6e5dbdfaf888a912474cdbe24a27c72aefdeee125badb360",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fc88cf01631561ba/out/handler_storage-fc88cf01631561ba",
+    "bytes": 12229728,
+    "sha256": "8b86235023f3f8515156b31ae96cfbb61be2f21bd4c3958e4713e7c82afe7f4d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b58c2fdffd75fa2b/out/immutable_text_measure",
+    "bytes": 9978688,
+    "sha256": "058a7f3f1382d76d9110a7a32290f8c1781e7e5bd5fd91fd6a6ae042d20234f5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4c6f5066a2f59e2c/out/sibling_reconciliation_cost-4c6f5066a2f59e2c",
+    "bytes": 10344800,
+    "sha256": "199ed9cb6cc3c76e6f7dc273ff8bccbf519c7c5f49e733fe7b32012915fb3976",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1e2d2117f6eebdce/out/list_source-1e2d2117f6eebdce",
+    "bytes": 11808560,
+    "sha256": "5c09fa9852a24195ae8d21424fa4bc439f19e62fc67937eea416c22e7e366577",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f163ab94d5c07933/out/projected_sources-f163ab94d5c07933",
+    "bytes": 11348896,
+    "sha256": "171843bad657f7d4bf32d54badb01de556332a8974b4dc63c9a7fa09f2096fd6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4a876268c9230fe9/out/property_outline_allocations-4a876268c9230fe9",
+    "bytes": 11762496,
+    "sha256": "817ca4563d6017dcf77df8b79aad8e52d6f8e4685f8c37d8bfb9cd1f2972fba4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/28ec0596afef4533/out/remote_delivery_measure",
+    "bytes": 11245024,
+    "sha256": "284372f85210857545ed3d940a863ff05d27b58c3e8eec07dc6690b7db075c50",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3c9e032b5bbb859f/out/zgx_native_lab",
+    "bytes": 26389136,
+    "sha256": "74d3ceb067188ed2b6450e5d69a7014c4535144b2be1b3cf48e9f56742c5c63e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/5cadf958b488b487/out/semantic_metadata-5cadf958b488b487",
+    "bytes": 13693880,
+    "sha256": "b69b86ce1f12f0d0f050580aea1bc455011adbd652cd4ff4ddac09deefd228b0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/50651dbf96a5a1f6/out/text_cache-50651dbf96a5a1f6",
+    "bytes": 10797288,
+    "sha256": "de6f6e1aed21984a93c950cbae631a306b31db9f52ba6be4880dc5cf62a205d3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/eb27aad74a158d03/out/source_inbox_reader_gate-eb27aad74a158d03",
+    "bytes": 10496736,
+    "sha256": "74e89f52972aeeaeefdd35101d303e0fe0d8b0314374044ba629b7be4e244936",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9c5e35e80e6957c0/out/retained_list",
+    "bytes": 9943040,
+    "sha256": "72791cdfb8a2467446f662f0a28fdc0824c7b9550148fdba5dfb71280e7a32e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/5317cf4813bea987/out/question_cost-5317cf4813bea987",
+    "bytes": 10675824,
+    "sha256": "d4a751d7be458d8ee2066179041da8236bfbd9cc653e4b9729faf5ea16cc820b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1123f8072dfd6d8b/out/first_frame",
+    "bytes": 10081000,
+    "sha256": "c27a0e90711a01e4fa3bfc7cdc0483be7032fa6896eb6f6b2e6b47e57a2842fc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c5442202f6108a32/out/gradient_backgrounds",
+    "bytes": 9870848,
+    "sha256": "f5bd7de7e81a3f12478ad0a1deccbdd6c0a52c6e7eefdee3a0187953dfb8f711",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/35da27f71a9f6858/out/lists-35da27f71a9f6858",
+    "bytes": 14978360,
+    "sha256": "3a2d97c7bbbd7581ca2bc6001b54e386cdba969a24187fec6bf33d984549e2cc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/781df80dd9b88197/out/paint_slot_rebind-781df80dd9b88197",
+    "bytes": 11766080,
+    "sha256": "5f0e05f5b2b28aab4e448ad56ea65b2642b93d6317ec5da0ec7ab8b44d590316",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b01a19ea112bf043/out/source_values-b01a19ea112bf043",
+    "bytes": 10714984,
+    "sha256": "084ee9b060f78acf9207f2d0e9fe323c69772560505affa4a1131a2bf7c285ea",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/27a2a348ac1c24bb/out/property_selection-27a2a348ac1c24bb",
+    "bytes": 11590944,
+    "sha256": "f3f5b81255340cc49a5fe32e98081af34fea6f34cd9988cebe8186abffd3f877",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/90653f31efc3e71e/out/todo_recording_cost",
+    "bytes": 11578176,
+    "sha256": "81c8c478572848290bfbfc1db7253db15a8bef9f287b05ed0fac54235fc414d1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b6cf5aae9ab11d1a/out/clipping-b6cf5aae9ab11d1a",
+    "bytes": 12764752,
+    "sha256": "51268fff39969cfecde775fa67242b780118878fd38381315f2d3d505501b467",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/abf4557d4519714b/out/scroll-abf4557d4519714b",
+    "bytes": 13402552,
+    "sha256": "258f7774a9fa6756b395d27f62d65bb77615bdce936b2e2dbb9809669d30aabb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9da783d82655d556/out/identity_recovery-9da783d82655d556",
+    "bytes": 11756648,
+    "sha256": "b600dca04aa0d1489ccdc963c0d99f4f5f984e3285e5b86ed3611393cc11c749",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/4f905e1a8d9bbf7d/out/sibling_reconciliation_cost-4f905e1a8d9bbf7d",
+    "bytes": 11610144,
+    "sha256": "40a81f702d4efba9cd6f57dd6daa12b2025d3998e14766e97893fab7c064d794",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b361f1a195bf26b6/out/workbench",
+    "bytes": 25253504,
+    "sha256": "76db196b9d64a8dc11997125028e7853fa96ef3c8afeb54e96f2e80ffe0ded48",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9071ccbe7c556bcd/out/paint_slots-9071ccbe7c556bcd",
+    "bytes": 10955680,
+    "sha256": "ce76499a3ac037266a88a511516764007947f1cee234afcc3c373b46b2bca003",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/bdbb1658fa2a0355/out/questions-bdbb1658fa2a0355",
+    "bytes": 12478312,
+    "sha256": "4698bd68fe892a3956b45ac99c9b4dbe797d512a6fb08fe3a58c4928fe34db7c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6899c20dfded3251/out/unit_action_cost-6899c20dfded3251",
+    "bytes": 11792768,
+    "sha256": "d1223fe0b414f5e0709978e285902a484cda63bca36b45f0c7736933197b0f67",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d08da48bea53ec16/out/question_futures-d08da48bea53ec16",
+    "bytes": 12767720,
+    "sha256": "62348da77721143b6154988fc9fc47ae84a3bb038276b6ba70d96a1093896bcd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1d2880ed6a310b92/out/pointer-1d2880ed6a310b92",
+    "bytes": 11074864,
+    "sha256": "ec67489c22b4f9e67ce804c31a5806bbffc983e863b57546d20c8f264538eb85",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c522b5456588469a/out/remote-c522b5456588469a",
+    "bytes": 12738856,
+    "sha256": "63b9ac17cb3116e6dec620367acf27cc6dbc45d2beed07d847c93ef509077cad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b679951ce70ea73d/out/rounded-b679951ce70ea73d",
+    "bytes": 12728544,
+    "sha256": "14bdadc01d731113a185e2257ab0bf6f193b8ed3702df118e647ff34d7eebb1c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2f1683949d1a10eb/out/property_change_union-2f1683949d1a10eb",
+    "bytes": 12238072,
+    "sha256": "52e57d1a280fc30f5d788f5e8e860b2d3cd3a81ebf2976777be754a4ea39e2a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b4e45d0f2cdbd700/out/question_storage-b4e45d0f2cdbd700",
+    "bytes": 11059520,
+    "sha256": "fdb6dbc9d7819d20b97fbec9c294e93e5581a54a83226b343ac38217edb20a5b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/42d089f4500c8f7b/out/field_identity-42d089f4500c8f7b",
+    "bytes": 10402296,
+    "sha256": "5032f822d31588ea53897431313322c8096d374379191c93e99d702386a3ddfd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/08162f31ce83cde7/out/property_state_shell-08162f31ce83cde7",
+    "bytes": 11721760,
+    "sha256": "1e9658d5467c889228e63035333a33ca0e874932fc3cd9afaf5c9afbebe6e756",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+    "bytes": 42346312,
+    "sha256": "a4be1f517d43e21fab4d6485e7d66599748979cce5ad882fe51cea9abed23481",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/9e2fa26b6c0cd5dd/out/color_cost",
+    "bytes": 11043048,
+    "sha256": "9ff499fecb1f4669b5ae8384876051152bef1bbe6823cf5a5c13d6c696d0513f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/cf3131d0887d02ed/out/pointer_focus-cf3131d0887d02ed",
+    "bytes": 11863360,
+    "sha256": "22d063cdc63193244c81288ba53d1daf71fcb23c10f70b4d09fb3422e83f4d43",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/8590f5709781423c/out/color_packing-8590f5709781423c",
+    "bytes": 10548920,
+    "sha256": "68693d15e1daf810ecd03392f750a0fa843cc50343af8d5fe363ab5eb8510aa9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/294bb55adebf8642/out/checkbox-294bb55adebf8642",
+    "bytes": 12679840,
+    "sha256": "db4bf6165b0e5d49776ef4522056c69382a7ba7abd275505377510de97e1ea73",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/52a88496b452f225/out/library",
+    "bytes": 25850000,
+    "sha256": "9d9fd59a1f2b811755ba4d741753968ca436120e15f2f758e02150ed7ec24b76",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/bd860d0800f686ae/out/flex-bd860d0800f686ae",
+    "bytes": 13014312,
+    "sha256": "f8881743ddc261f664e761cae03e302a9814195fb2d0d86665f7f65f708fab8c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/83f70a8c59d409a0/out/field_identity-83f70a8c59d409a0",
+    "bytes": 11671224,
+    "sha256": "62d126a026215f7aa5082a5c6a098b9bd4152996881c8d20674b10ee6579e3cf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b829c525f1a2c81d/out/retained_styles-b829c525f1a2c81d",
+    "bytes": 11982536,
+    "sha256": "2bf8da2c7dde22baf8605e4a7b50d1ff638ff6786b623f32ded693ba2843aaae",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/bda25668dba5654e/out/remote-bda25668dba5654e",
+    "bytes": 11397312,
+    "sha256": "c8f919498a2b1b56d7689efa1479b37a947d9ac3812813810a1d8c22f521aa51",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e35b0bb69b32b90c/out/contained_owner_spike",
+    "bytes": 10041792,
+    "sha256": "9726abea241f49bbaebafdcdfbfb544f38f40863733dc9cc8107f37c9d95c343",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c0d46962e72e94c3/out/source_values-c0d46962e72e94c3",
+    "bytes": 12039552,
+    "sha256": "f552edaa16ae8ef9c2ee744f492294bd9d3acf03105a06b92106751328225871",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fa69ccf170b01ebc/out/state_update_allocations",
+    "bytes": 11141736,
+    "sha256": "3ead91583a54841a6febf5cafc8c18cb404f3416c62c5b129dddda9757f9da48",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fb7a7ad5360a0799/out/frontier-fb7a7ad5360a0799",
+    "bytes": 11079008,
+    "sha256": "7f215dee882b2c165692065246b868fc2745b1db70c058e042a7f68f0d141b46",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/99fa3aed56977a64/out/question_input_cost-99fa3aed56977a64",
+    "bytes": 10424640,
+    "sha256": "d96906de6933c62394a3fec12f55bbe0195044b1a741631606a12e4c1d7d9ce0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1021025fbd317f73/out/color_packing-1021025fbd317f73",
+    "bytes": 11817464,
+    "sha256": "90c1654d5c31a0691d9c48f4683c7fbe5728b279c47c4126444dbceef836d3e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/5bc09cb6d9b84a06/out/intrinsic_text-5bc09cb6d9b84a06",
+    "bytes": 11808504,
+    "sha256": "83db1490db83c8aaca4a3ba19048b5bc428cd1796b1093f34d59ef2df93838fa",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7754c2ef4ddb7ffe/out/question_inputs-7754c2ef4ddb7ffe",
+    "bytes": 10822624,
+    "sha256": "a694ae51977bd4549700508433cf6e026a86342b3661396867e82c349414c01c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/a4b7c3db3325f2ce/out/dpi-a4b7c3db3325f2ce",
+    "bytes": 10804656,
+    "sha256": "6d8742c29309ccd2ed432752dad46403e1abc948d759e656ea12831a36cfab2f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/eef67738bdadee03/out/luna_bench",
+    "bytes": 25225816,
+    "sha256": "0f52881ad227007818523b067f4161fd3b9e0682ec2e907fe0819daa2b8cb781",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/a1e0b719f6083c12/out/style_ports-a1e0b719f6083c12",
+    "bytes": 14550040,
+    "sha256": "1e8479f2326627ea10b0d7c57189bc6108e6bbbb48dfec4690023dca3f096bb4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7a5005b4be8fb41f/out/mapped_paint-7a5005b4be8fb41f",
+    "bytes": 11786936,
+    "sha256": "f923a10ed238add741df5d7ac220fb6f4dbc336127dbe89917810f981a45920b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ac45737c8525d234/out/search_library-ac45737c8525d234",
+    "bytes": 12390944,
+    "sha256": "41bd7afeb55daf26cb4f0df2eb9b8f12c7880348e0baf2e18f051472d42d4fd2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/007344fa2ac73cf3/out/line_height-007344fa2ac73cf3",
+    "bytes": 10652800,
+    "sha256": "496015e65060038d383f7a6bd492fce11e504a938f9fff97fba3ab47dbb9216a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/97abd88ec60c2195/out/scroll-97abd88ec60c2195",
+    "bytes": 14744880,
+    "sha256": "085abc09cb3b2689ab62b860c3fa5daa1a3cc56ba3a9364c8eca358c60596c4a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/cd54427c35092445/out/state_update_allocations",
+    "bytes": 9871288,
+    "sha256": "b8391132243e1c4f5f4e19debbee04b0e150804be464f1ca5cf88e8620c26dcc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d15f0715e8cf05a6/out/source_value_isolation-d15f0715e8cf05a6",
+    "bytes": 12300464,
+    "sha256": "e748313a1bb7a8442101ba970c9d5d10b814e3442145ad4b48ca110eb0a1b602",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/3f62f61af5738340/out/ime-3f62f61af5738340",
+    "bytes": 11319672,
+    "sha256": "4772b31cf027e5cf03feb4fc3e28b63790d0c01ae4efc385509b8fbd418f93a1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1f5a8d9295f96434/out/semantic_serialization-1f5a8d9295f96434",
+    "bytes": 11248568,
+    "sha256": "4e7fcfc3a3a0ee9cec7b1a1b85d89c9e2599ef614e96b4e20fe58bd206ade2a5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/35408f61549e6322/out/question_cost-35408f61549e6322",
+    "bytes": 11983136,
+    "sha256": "9f467f95febbdc4fea18725265419dd99a8fda5c0f86a545aedc4594d849467e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d1eb068bc7dfb01f/out/property_state_shell-d1eb068bc7dfb01f",
+    "bytes": 10453856,
+    "sha256": "74ceae611ea131f39ab15de0e93b8b040b5365c0a6c92ea688307f22b1fab7b6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f87a302d6033f89e/out/unicode_text_measure",
+    "bytes": 9917624,
+    "sha256": "0b06d561b1289f1e5b9171c9a69a1f8b4ee6277c8113776aa646c522bd33c547",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/0a5003cfb0914bde/out/reactive_styles",
+    "bytes": 25279072,
+    "sha256": "60a85d9aa277bf2ff57861a5231ada94493cca639def338424336f1a95df121c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f9ace2238d99f16c/out/runtime-f9ace2238d99f16c",
+    "bytes": 14390944,
+    "sha256": "fb3a695b97ba6fe991f625eac93992b459fb37bb1e55101ea9c248e73830ac68",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1842e4171f6ac085/out/property_change_union-1842e4171f6ac085",
+    "bytes": 10959480,
+    "sha256": "3506e66dbbe634fb46f506dc57cd817ded677141177d65a1b6d804c113a5417a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b09fc796078f36a8/out/counter",
+    "bytes": 10061952,
+    "sha256": "ad9389f8435f50ff789f1ab245084c2cd4dd3278436c136b3bf7883e1c129801",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/990d465b64b302ab/out/mapped_properties-990d465b64b302ab",
+    "bytes": 12951344,
+    "sha256": "bdf0889081be9e51f242815d42950b8c284da965866594bd8ec485765b5a4403",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/8339d896fb9316bf/out/text_selection-8339d896fb9316bf",
+    "bytes": 12609080,
+    "sha256": "b9318c93c79f28928f8011b88d5fa61174fd407e6d03fb83c8f54ecc7e2db096",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/5262375a6eb42115/out/search_library-5262375a6eb42115",
+    "bytes": 11084224,
+    "sha256": "f2596be580a73d62d4f8d2b295a9d373e3e174aa5ccefe60b1e8d7e9e6366faa",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c38a34faf451a9e3/out/inbox_storage-c38a34faf451a9e3",
+    "bytes": 12160624,
+    "sha256": "6c204a9116dabd42f99f6d32284da249f8d392b6176f6dc02f9b11065f55fef0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ae4e0a797c6fd8e9/out/ime_cursor_cost",
+    "bytes": 11161472,
+    "sha256": "5b617def7eaa05198e4084278e8eab113ac69572f0366c1d139215b5d7a55839",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ff2d848159eae878/out/patch_workspace-ff2d848159eae878",
+    "bytes": 10500864,
+    "sha256": "f0ee276c293d6829c479b4f80f3b540433ac09351bd6bb05d45245c507d60ce3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2293829421503d63/out/inbox_storage-2293829421503d63",
+    "bytes": 10830960,
+    "sha256": "50c7d3d15b9a479f581aab68c5eeaf3405bb2147ab17df60e32c1f0757a42fad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/c8994679d452e5f7/out/property_outline_allocations-c8994679d452e5f7",
+    "bytes": 10493904,
+    "sha256": "a73c7c7d1212b3fa16ab783b22a2790da9904da1765dcffcdeb6dbeb13e50360",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/997b31099a54df36/out/color_cost",
+    "bytes": 9776160,
+    "sha256": "597ac8a3c8fd4b4d936fcdeb9c29a6087fbc3c83793e75a980bd6d9e9581811e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/680ace63029476ca/out/list_source-680ace63029476ca",
+    "bytes": 13102208,
+    "sha256": "3d4bc3c08823542a46aa9587769438e0c69e788fa61735440c8cc05e4df05377",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/773a39663a7e26e4/out/paint_patch-773a39663a7e26e4",
+    "bytes": 12071328,
+    "sha256": "a3e251534aa1a8d431886752dad9ebc36b90ec0c1d9c0fbe648d3a34e4b07983",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7430519933ffc7ad/out/routes-7430519933ffc7ad",
+    "bytes": 12195888,
+    "sha256": "aebea5f734ede376e3800a809a78e1400a0f04dc2d63c8ac5cb3b0f716920618",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/b3306ec02d579123/out/question_inputs-b3306ec02d579123",
+    "bytes": 12134888,
+    "sha256": "69f8afe2c2265c5dabeb757c2fb7c1fbc16058d44217b2befb00ff2c6fc35ada",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/dac8483f6351d3ce/out/paint_slots-dac8483f6351d3ce",
+    "bytes": 12235240,
+    "sha256": "21ab143e754bf0e96a72ce52ab39dfcb164e04907978dbfd41e3398bf063aaa8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/795a4834b499c000/out/images-795a4834b499c000",
+    "bytes": 10939352,
+    "sha256": "ff4e1b30defad6720f56e5a6d85946946dabbea8bb07564fdc99fdc42e788241",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/167b6e90168c7611/out/todo_recording_cost",
+    "bytes": 10309216,
+    "sha256": "a6b90e08608351d879edf9c88edea7d559011659ca46ad69bb414a8c4e5e78a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d0e307232fb7c8be/out/todo_comparison-d0e307232fb7c8be",
+    "bytes": 12213520,
+    "sha256": "425690afc193618ad4511ac295c63832a9348174e3a077aff3d7ec52e34e4dc2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/f998b6d8936e5317/out/text_lane_measure",
+    "bytes": 9963960,
+    "sha256": "8f2e8b38c517a5c80bbbbe9dbd9499454e7079f2f78c4f1a9f917c3765ce489b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e7a777b6e981b6ca/out/frontier-e7a777b6e981b6ca",
+    "bytes": 12359936,
+    "sha256": "7e745e1bf7df6aa7f5695c3a22bae6f47e0a1c2e770cce574acceb1852e2afbb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/8f3d188aea895a6f/out/graphics",
+    "bytes": 25249552,
+    "sha256": "909e6f8162847c5e92a9865e980d9dea1af6e046d9824f1f429bcd5e32f701a6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/fa0b66ab8c1105a8/out/question_mailbox-fa0b66ab8c1105a8",
+    "bytes": 11845352,
+    "sha256": "e3da7eece93287846cacb2a57a680a7af5d41d2d86b58b62aa716d246d92b0cf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/77d7cc39b29df63d/out/property_actions-77d7cc39b29df63d",
+    "bytes": 12503736,
+    "sha256": "fac7b2dd59dae2e9872e95084fe679651fc693cbab6d7105648fcb728d122737",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/e58039c86bb27a3d/out/lists-e58039c86bb27a3d",
+    "bytes": 13634432,
+    "sha256": "79d5d8eabd39c25aad03813fc43dd1f08b6007b58cfbc92ada7a47dde950af8c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/ee57e14be5d6cb97/out/acceptance-ee57e14be5d6cb97",
+    "bytes": 11561472,
+    "sha256": "0fd894b8a614ef4bf055c1e6de21ddc3b354fc0086fe1b6eece5d7ae2d406bf5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/1b0151eadcf3311a/out/literal_dispatch-1b0151eadcf3311a",
+    "bytes": 10587448,
+    "sha256": "3236c7e04e559c86f203d0388bc9dbc11b0fa2a485a8e2fbfd1392651e64924d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/14c57fb3ab757005/out/gradient_backgrounds",
+    "bytes": 25293664,
+    "sha256": "a47d408bd1ded6393c8f60131e856af3e8c71bd22d9a78b7b1d4690c4b6e18c8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/91cd306ca0667996/out/library-91cd306ca0667996",
+    "bytes": 10812584,
+    "sha256": "bb8b47c0e88ea5c22830091f6830101943770ed5e2c6d258e1f4a11dec1271de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7d48d6dd92859e55/out/application-7d48d6dd92859e55",
+    "bytes": 11042248,
+    "sha256": "898990b089e0a3ecd0e3224053c8806e7049891b4e37d1307253150fe2d70539",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6784f0c15fc2b051/out/components-6784f0c15fc2b051",
+    "bytes": 13198768,
+    "sha256": "6ed3fe8086d49929a7c7d0c7d738a00c102a3477d40b3908cefa61ab66c590e8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2929cede69b83001/out/text_geometry-2929cede69b83001",
+    "bytes": 11913864,
+    "sha256": "f6b82efbc504bc4620e6070159f0d5796c38610e596340ff283d8b172a8c1041",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/8e2a6b49283c86f0/out/semantic_serialization-8e2a6b49283c86f0",
+    "bytes": 12527256,
+    "sha256": "7d0f6a3cb1c31865a7f9a980100d71de2c78f4d41bff70a01848ad57a2bc9b24",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/86e1e6e9714f119f/out/ports-86e1e6e9714f119f",
+    "bytes": 12561832,
+    "sha256": "1ed97b6e7c6081458ffd73bf0b4d369575407ed6db76375161573d057e6e6e79",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6",
+    "bytes": 14015008,
+    "sha256": "a41129da675e6334dd492e1017a84e45b5830d3a047a10f8486eb81a5b164252",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/62bb6aad7e40b147/out/counter",
+    "bytes": 25226864,
+    "sha256": "03faa7ea377de96a152f041375cf3a876de6d8ad531374559be2a61af949ec2c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/937604c28d1c7aaf/out/unicode_text_measure",
+    "bytes": 11183440,
+    "sha256": "55c206189401d88a57cf8549dd62e2ef95c89537084704a40249abe3a46a327c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/2c8886562b0fe027/out/semantics-2c8886562b0fe027",
+    "bytes": 12221560,
+    "sha256": "2c382f5542c83e2f5575383a01f92609decded7438439cf6515cbeb2ee403fde",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/03465d1254d7c9f0/out/immutable_text-03465d1254d7c9f0",
+    "bytes": 10389728,
+    "sha256": "24d50819ca41a2c5a5760a22e493932e049288941ba8fc96c8881f1331e1b32d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d1e27bd8bef2163a/out/question_storage-d1e27bd8bef2163a",
+    "bytes": 12411472,
+    "sha256": "f92fc0fa9959a570048ea4fbcff34d47df366235d0977c88b03fc85f9a2ced9d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/cc781fd087fa61f1/out/questions-cc781fd087fa61f1",
+    "bytes": 11154832,
+    "sha256": "d7d32be17f2c862510e3dacaec522823935cdf8f1349bae637e14d87b60a01d1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7e6598937b2fe273/out/focus-7e6598937b2fe273",
+    "bytes": 12952328,
+    "sha256": "5e60e8c65f80b1f7f1d6a712d317aec85c917f4be1369117d99f88ba7e538028",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/d68a4942d125e3a3/out/patch_workspace-d68a4942d125e3a3",
+    "bytes": 11769200,
+    "sha256": "b6b0c15605d677c1572eaa1c5eae8949d9dd6fe833d5e4d1031dd39088885774",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/db0678e9a0ba0465/out/gpui-db0678e9a0ba0465",
+    "bytes": 23716472,
+    "sha256": "128370e611139d574caa7bf41085023199f736d121ab51f47ecd6a70c7415042",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/5ec78bb80a8272a5/out/source_inbox-5ec78bb80a8272a5",
+    "bytes": 11724832,
+    "sha256": "9abd3d23da0b300d166bbefc5b7bcb2075ea4def82fa328d3bb13ce3d0c87a2e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6e3cc75fef76709d/out/question_mailbox-6e3cc75fef76709d",
+    "bytes": 10523552,
+    "sha256": "a4b6ee559c57cd8d386648aff04b9089615108cf57264d0e9f4537320584acca",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/6c876ad3b287ac82/out/line_height-6c876ad3b287ac82",
+    "bytes": 11919696,
+    "sha256": "c26ce3163c18dec73b8660c286db0db670ff9bccdba5f3a2386f4eabe8c67841",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui/7cdc550dbfca6dcb/out/image_placement-7cdc550dbfca6dcb",
+    "bytes": 11946696,
+    "sha256": "d5da838bab35d87a9c497c81924f033e06fdf468716cc6c1d74d359445ae4207",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/8d28cb085757f051/out/gpui_gpu-8d28cb085757f051",
+    "bytes": 17344008,
+    "sha256": "59c0be0be55c9dabf92d99b43df1e9618f2d485134828f1852d9b8fc2fa89515",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/e5714bf407155627/out/build_script_build",
+    "bytes": 8199248,
+    "sha256": "3b893a6924bb63ae4ad0ddba61e581ea2cf91b9faaac230ae4dc6df113671c47",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/6cc55d1770954a81/out/build_script_build",
+    "bytes": 8199368,
+    "sha256": "60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/5eb8255352d33eb6/out/images",
+    "bytes": 7981288,
+    "sha256": "47960a41ba87e077203851301f9399d1696672fee75b3b12ac0417cf6ab6c637",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+    "bytes": 17104312,
+    "sha256": "2c7050fa9a713c4cdc8b3c8ff757b04eca854d420baa2a3cbe5fa05ee70cd803",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/87adcc02d297289a/out/build_script_build",
+    "bytes": 11781896,
+    "sha256": "6b44bb3a397bf691f659956bce6551053da49608c624bdd91d2979aa3c5d1468",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+    "bytes": 16851824,
+    "sha256": "5d9ad8360f5f71fb550defe63ec9dc7f6b5fa317cb1ae6de4c0cbea7a393ff0f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/127c56e0680b27d0/out/build_script_build",
+    "bytes": 11781176,
+    "sha256": "eeff0acb7753266a9ddd7c5834d67f67581134d9d8b36c0709d9c1941cb049a6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/4b5035a6a615ec17/out/tiles",
+    "bytes": 15205520,
+    "sha256": "002954086fd988cff9f042ddeb7e0ad50c6219d560d13e015a71f02378b10edd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/df133191a45f40c0/out/images",
+    "bytes": 8219592,
+    "sha256": "f627719f43d1821510534ff5619b3611febd99aaf08c7b1d50645410dc3233de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/d66c2755bbc7fa5d/out/build_script_build",
+    "bytes": 8199208,
+    "sha256": "4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/ec6ca10d95eaa12c/out/build_script_build",
+    "bytes": 8199000,
+    "sha256": "420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/58ea720b9d42b54c/out/render-58ea720b9d42b54c",
+    "bytes": 17075160,
+    "sha256": "ca677f5e30652023a323a74869b8db616d723a0671fc1aa09f47bc0e70adf1da",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/37e56359c66dc042/out/build_script_build",
+    "bytes": 8199408,
+    "sha256": "82abc8ad3e4d5b3bc96542b84ea4a3d59f71c8d2ab01c5f444fe4bbdc15dbd7f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+    "bytes": 1472560,
+    "sha256": "d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/a7e285389186b836/out/build_script_build",
+    "bytes": 8199160,
+    "sha256": "8edc5c5001223c53d6a44c226a5211b6df3d4d8bed8e608ba3651e3c29cb973e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/a611e7a2a5a95c98/out/presentation-a611e7a2a5a95c98",
+    "bytes": 1473336,
+    "sha256": "60120f584dc8fd4a90062b9caabcd091d65bcf8105fa7ba29e5927ad72574ffe",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/a921ebb1ae215beb/out/retained",
+    "bytes": 15532296,
+    "sha256": "de864e0c30f1f2dc3c78719cf4b7eea4acdf6590df5cbbe2c906dd9824689820",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/61e90e2a0f130778/out/groups",
+    "bytes": 15201880,
+    "sha256": "dec99b5b936d2a0755c4e7c65711204578deae64e25cc92144d272386ffff346",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/319c8e7fcd007d5f/out/tiles",
+    "bytes": 15443176,
+    "sha256": "c2d5c31a220c3d8bff8fa33a2dfdf1df1d8a3115a1a69bc4134b7012e916ebad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/efb7c5a21eba989c/out/retained",
+    "bytes": 15294280,
+    "sha256": "c12d72941d151f04f733d0cd9f214ce7f1ac8f57d5d73e3fc4134436fc4cfc70",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/gpui_gpu/886201065ed8d3a7/out/groups",
+    "bytes": 15439136,
+    "sha256": "f8e97b1b0cebd965e2aa60aa5650ef1c27bbe4ceccc7bc9564996dc1c9a2ff61",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+    "bytes": 8497136,
+    "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/async-recursion/1d902ec430c7881d/out/libasync_recursion-1d902ec430c7881d.so",
+    "bytes": 3232624,
+    "sha256": "3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/async-trait/5d5285f3f6da7d4b/out/libasync_trait-5d5285f3f6da7d4b.so",
+    "bytes": 4095312,
+    "sha256": "75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/async-trait/198df58b0a520edc/out/libasync_trait-198df58b0a520edc.so",
+    "bytes": 4001800,
+    "sha256": "98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/displaydoc/cc8ded37579c4ef3/out/libdisplaydoc-cc8ded37579c4ef3.so",
+    "bytes": 3504880,
+    "sha256": "ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+    "bytes": 3596296,
+    "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/displaydoc/6ea497f2d7ba32f6/out/libdisplaydoc-6ea497f2d7ba32f6.so",
+    "bytes": 3596368,
+    "sha256": "34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zvariant_derive/235208ea6e2662d5/out/libzvariant_derive-235208ea6e2662d5.so",
+    "bytes": 5214448,
+    "sha256": "7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/futures-macro/6a87b6d12b95cf0f/out/libfutures_macro-6a87b6d12b95cf0f.so",
+    "bytes": 3178584,
+    "sha256": "4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/serde_derive/f0da3669146572c5/out/libserde_derive-f0da3669146572c5.so",
+    "bytes": 4901928,
+    "sha256": "ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/serde_derive/ca1f631bf857e0d4/out/libserde_derive-ca1f631bf857e0d4.so",
+    "bytes": 4992560,
+    "sha256": "75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zbus_macros/50b900a0efd3f786/out/libzbus_macros-50b900a0efd3f786.so",
+    "bytes": 6585760,
+    "sha256": "2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zbus_macros/426bec16249cb392/out/libzbus_macros-426bec16249cb392.so",
+    "bytes": 5981312,
+    "sha256": "2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zbus_macros/7e17f05691789c81/out/libzbus_macros-7e17f05691789c81.so",
+    "bytes": 5862896,
+    "sha256": "2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/tracing-attributes/686b882ab798a6c6/out/libtracing_attributes-686b882ab798a6c6.so",
+    "bytes": 4356528,
+    "sha256": "4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+    "bytes": 4519104,
+    "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+    "bytes": 4651960,
+    "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerofrom-derive/7ffc4abaee99a20a/out/libzerofrom_derive-7ffc4abaee99a20a.so",
+    "bytes": 4549096,
+    "sha256": "e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/zerofrom-derive/c5aea22dacc86f50/out/libzerofrom_derive-c5aea22dacc86f50.so",
+    "bytes": 4652008,
+    "sha256": "35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/tiles",
+    "bytes": 15443176,
+    "sha256": "c2d5c31a220c3d8bff8fa33a2dfdf1df1d8a3115a1a69bc4134b7012e916ebad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/immutable_text_measure",
+    "bytes": 9978688,
+    "sha256": "058a7f3f1382d76d9110a7a32290f8c1781e7e5bd5fd91fd6a6ae042d20234f5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/component_sources",
+    "bytes": 25386080,
+    "sha256": "9a8ffab5b80896b499cb60cfd070ab8e38ba77f34c056caa3baf25d9e593da2c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/state_update_cost",
+    "bytes": 9927296,
+    "sha256": "9dc92e8b6c02f47fbf78cbaf6b5b85dab674ca119f62d9e80c97d105e208b43b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/mapped_properties",
+    "bytes": 25282920,
+    "sha256": "d04ece96bdb285cfcade9e93a5f9f65f53c206a0a4d3c5fed79dae05b340fa1f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/first_frame",
+    "bytes": 10081000,
+    "sha256": "c27a0e90711a01e4fa3bfc7cdc0483be7032fa6896eb6f6b2e6b47e57a2842fc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/todo_comparison_mapped",
+    "bytes": 25628488,
+    "sha256": "d74535d989ff69b54abb720a88f98e9cee020edea547b105e8d166e94289c2ba",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/reactive_styles",
+    "bytes": 10138176,
+    "sha256": "fac965658dd3b61784ef68af07d5cffa2a52dc3afe13cbe62e1ac0465b53f11e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/unicode",
+    "bytes": 25235896,
+    "sha256": "aebdade1c602d938a88c7d83979540cb7e4efde12df04f99114d8156da241070",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/color_cost",
+    "bytes": 9776160,
+    "sha256": "597ac8a3c8fd4b4d936fcdeb9c29a6087fbc3c83793e75a980bd6d9e9581811e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/panes",
+    "bytes": 25217664,
+    "sha256": "e81d5bce782550682d50dd24b46006d3bd44b16bd72a4c2f7da219c8977527a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/retained",
+    "bytes": 15532296,
+    "sha256": "de864e0c30f1f2dc3c78719cf4b7eea4acdf6590df5cbbe2c906dd9824689820",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/library",
+    "bytes": 25850000,
+    "sha256": "9d9fd59a1f2b811755ba4d741753968ca436120e15f2f758e02150ed7ec24b76",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/text_interaction",
+    "bytes": 6968656,
+    "sha256": "8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/graphics",
+    "bytes": 25249552,
+    "sha256": "909e6f8162847c5e92a9865e980d9dea1af6e046d9824f1f429bcd5e32f701a6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/covers",
+    "bytes": 25230464,
+    "sha256": "f2edadf673abfdcd5f7822f9719d8305daf5b4b4d3c10f1ab571c5859b745837",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/unicode_text_measure",
+    "bytes": 9917624,
+    "sha256": "0b06d561b1289f1e5b9171c9a69a1f8b4ee6277c8113776aa646c522bd33c547",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/counter",
+    "bytes": 10061952,
+    "sha256": "ad9389f8435f50ff789f1ab245084c2cd4dd3278436c136b3bf7883e1c129801",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/retained_runs",
+    "bytes": 7885800,
+    "sha256": "35d14d0252b693cec0182a2a762448f27b06b6c82137aef30a419260f6edfb71",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/empty",
+    "bytes": 25197816,
+    "sha256": "ab5f7c5e40876eb17e9743a3b1ced25722a741434c2b424f51e22e6fbbd70c57",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/state_update_allocations",
+    "bytes": 9871288,
+    "sha256": "b8391132243e1c4f5f4e19debbee04b0e150804be464f1ca5cf88e8620c26dcc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/text_cache_capacity",
+    "bytes": 7607512,
+    "sha256": "ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/remote_delivery_measure",
+    "bytes": 9905344,
+    "sha256": "c3e5c1b66b9246d65fe01196b5ee237567d98f4b9ae7a4f0025ed09d79a11a34",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/text_oracle",
+    "bytes": 6970024,
+    "sha256": "22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/coverage_table",
+    "bytes": 1434632,
+    "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/retained_list",
+    "bytes": 9943040,
+    "sha256": "72791cdfb8a2467446f662f0a28fdc0824c7b9550148fdba5dfb71280e7a32e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/text_lane_measure",
+    "bytes": 9963960,
+    "sha256": "8f2e8b38c517a5c80bbbbe9dbd9499454e7079f2f78c4f1a9f917c3765ce489b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/images",
+    "bytes": 8219592,
+    "sha256": "f627719f43d1821510534ff5619b3611febd99aaf08c7b1d50645410dc3233de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/luna_bench",
+    "bytes": 25225816,
+    "sha256": "0f52881ad227007818523b067f4161fd3b9e0682ec2e907fe0819daa2b8cb781",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/selection_queries",
+    "bytes": 6955088,
+    "sha256": "f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/workbench",
+    "bytes": 25253504,
+    "sha256": "76db196b9d64a8dc11997125028e7853fa96ef3c8afeb54e96f2e80ffe0ded48",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/group_views",
+    "bytes": 7872368,
+    "sha256": "0ff3429f5b174eb158542549e93dd7f0c01c7af8b579dcc91f53708842551beb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/zgx_native_lab",
+    "bytes": 26389136,
+    "sha256": "74d3ceb067188ed2b6450e5d69a7014c4535144b2be1b3cf48e9f56742c5c63e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/todo_recording_cost",
+    "bytes": 10309216,
+    "sha256": "a6b90e08608351d879edf9c88edea7d559011659ca46ad69bb414a8c4e5e78a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/workspace",
+    "bytes": 25348832,
+    "sha256": "5cd7da4deb5513f8cd103f06e2939f81eb444374b4ea44014ab3118b422b5865",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/inspector",
+    "bytes": 25235552,
+    "sha256": "4e1ccd53ad51c42f0702590d2e5c7c5ea87b8fa27d563f09ed5a10d7c7317c5f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/todo_comparison_five",
+    "bytes": 25613496,
+    "sha256": "c967e48128bca60ef98706ef30d586d4f0dc583a7064cd2d4bc1ff1f3e574e43",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/contained_owner_spike",
+    "bytes": 10041792,
+    "sha256": "9726abea241f49bbaebafdcdfbfb544f38f40863733dc9cc8107f37c9d95c343",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/cpu",
+    "bytes": 8030384,
+    "sha256": "d5a00970eecef31507d5d4a11e200231e6327fc9da82f710f53608bdc092361f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/ime_cursor_cost",
+    "bytes": 9893432,
+    "sha256": "99d53eea60e715133f3f0fdfa3f61e4dd594a46248d1d2faa44d58326ca9eff9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/groups",
+    "bytes": 15439136,
+    "sha256": "f8e97b1b0cebd965e2aa60aa5650ef1c27bbe4ceccc7bc9564996dc1c9a2ff61",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/caret_pair_measure",
+    "bytes": 6954800,
+    "sha256": "2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/text_shaping",
+    "bytes": 8040240,
+    "sha256": "9a96bf6d01d4d535ec5e3e4e459060bc980cc57760a36c74dcf13ef19fd94ee9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/font_memory",
+    "bytes": 10156224,
+    "sha256": "c27889b3f8fea648c7093d64e6618cf3e791d9cead414f0fdf328ac2859538e9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/property_editor",
+    "bytes": 25342936,
+    "sha256": "ef86b6077cf2da69299ace67048039ea6554e18b9f896e60a6329130c6eb74a7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/todo_comparison",
+    "bytes": 25589904,
+    "sha256": "8078080d8da2840c2f2769a59b2e8ab25ab0fd3b606284459f18d6a46df9e55a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/gradient_backgrounds",
+    "bytes": 9870848,
+    "sha256": "f5bd7de7e81a3f12478ad0a1deccbdd6c0a52c6e7eefdee3a0187953dfb8f711",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/clip_cost",
+    "bytes": 7879072,
+    "sha256": "d881753a9af54222f3611e0f80b8e612edfb7ce61c7a7bc439ee7a1f7dec00c1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/paint_slot_storage",
+    "bytes": 9793488,
+    "sha256": "fd85f6e5df099a21733fdc8910e9a8803221b43477cce5da811eb61db634f42b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/examples/sheet_access_measure",
+    "bytes": 9744600,
+    "sha256": "77b5b900c677bda982e726f3a47fc36a064438a2c7a6174a735e80d0b7ad81f8",
+    "mode": 493
+  }
+]

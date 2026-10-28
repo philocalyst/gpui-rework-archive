@@ -1,0 +1,10 @@
+[
+  {
+    "path": "/home/user/gpui-patch-workspace-target/release/build/enumflags2_derive/9b66556ac39f4dc8/out/libenumflags2_derive-9b66556ac39f4dc8.so",
+    "bytes": 3087248,
+    "sha256": "5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d.gz",
+    "archive_kind": "gzip"
+  }
+]

@@ -1,0 +1,12 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-glyph-damage-control-lab/reactivity/crates/gpui)
+warning: function `visit_scroll_frames` is never used
+   --> crates/gpui/examples/zgx_native_lab.rs:371:15
+    |
+371 | pub(crate) fn visit_scroll_frames(mut visit: impl FnMut(&mut gpui::Win<Lab>, usize)) {
+    |               ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `gpui` (example "zgx_native_lab" test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 4.39s
+     Running unittests examples/zgx_native_lab.rs (/home/user/gpui-glyph-damage-control-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6)

@@ -1,0 +1,54 @@
+   Compiling syn v3.0.9
+   Compiling bitflags v2.13.2
+   Compiling indexmap v2.14.2
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-region-bounds-lab/reactivity/crates/core)
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling thiserror-impl v2.0.21
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck v1.25.2
+   Compiling thiserror v2.0.21
+   Compiling naga-types v30.0.1
+   Compiling font-types v0.12.7
+   Compiling naga v30.0.1
+   Compiling zerotrie v0.2.5
+   Compiling zerovec v0.11.8
+   Compiling read-fonts v0.41.0
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling wgpu-types v30.0.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling gpu-allocator v0.28.0
+   Compiling parley_data v0.12.0
+   Compiling icu_segmenter v2.3.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling wgpu-hal v30.0.1 (/home/user/gpui-region-bounds-lab/reactivity/vendor/wgpu-hal)
+   Compiling skrifa v0.49.0
+   Compiling fontique v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling icu_normalizer v2.3.0
+   Compiling parley_engine v0.12.0 (/home/user/gpui-region-bounds-lab/reactivity/vendor/parley_engine)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/home/user/gpui-region-bounds-lab/reactivity/vendor/wgpu-core)
+   Compiling parley v0.12.0 (/home/user/gpui-region-bounds-lab/reactivity/vendor/parley)
+   Compiling fearless_simd_macros v0.1.0
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-region-bounds-lab/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-region-bounds-lab/reactivity/crates/gpu)
+   Compiling wgpu v30.0.1 (/home/user/gpui-region-bounds-lab/reactivity/vendor/wgpu)
+    Finished `release` profile [optimized] target(s) in 42.19s
+     Running unittests src/lib.rs (/home/user/gpui-region-bounds-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a)
+     Running tests/presentation.rs (/home/user/gpui-region-bounds-target/release/build/gpui_gpu/37104c559201aed5/out/presentation-37104c559201aed5)
+     Running tests/render.rs (/home/user/gpui-region-bounds-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97)
+   Doc-tests gpui_gpu

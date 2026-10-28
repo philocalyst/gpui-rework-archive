@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-patch-workspace-evidence/archive_completed_prior_caches.py", line 43, in <module>
+    assert shutil.disk_usage('/home/user').free>8*1024**3
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

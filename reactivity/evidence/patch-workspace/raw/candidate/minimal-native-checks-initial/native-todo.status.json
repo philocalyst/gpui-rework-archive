@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/a4be1f517d43e21fab4d6485e7d66599748979cce5ad882fe51cea9abed23481", "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection", "--ignored", "--exact", "--nocapture", "--test-threads=1"], "exit": 0}

@@ -1,0 +1,156 @@
+warning: output filename collision at /home/user/gpui-patch-workspace-target/release/examples/images
+  |
+  = note: the example target `images` in package `gpui_gpu v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/gpu)` has the same output filename as the example target `images` in package `gpui_canvas v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/canvas)`
+  = note: this may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>
+  = help: consider changing their names to be unique or compiling them separately
+warning: output filename collision at /home/user/gpui-patch-workspace-target/release/examples/images.dwp
+  |
+  = note: the example target `images` in package `gpui_gpu v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/gpu)` has the same output filename as the example target `images` in package `gpui_canvas v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/canvas)`
+  = note: this may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>
+  = help: consider changing their names to be unique or compiling them separately
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling libm v0.2.16
+   Compiling foldhash v0.2.0
+   Compiling stable_deref_trait v1.2.1
+   Compiling once_cell v1.21.4
+   Compiling smallvec v1.16.3
+   Compiling hashbrown v0.17.1
+   Compiling libc v0.2.191
+   Compiling equivalent v1.0.3
+   Compiling bitflags v2.13.2
+   Compiling syn v3.0.9
+   Compiling writeable v0.6.4
+   Compiling log v0.4.34
+   Compiling litemap v0.8.3
+   Compiling utf8_iter v1.0.4
+   Compiling allocator-api2 v0.2.21
+   Compiling icu_locale_fallback_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_segmenter_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling memmap2 v0.9.12
+   Compiling core_maths v0.1.1
+   Compiling parlance v0.1.1
+   Compiling linebender_resource_handle v0.1.1
+   Compiling ttf-parser v0.25.1
+   Compiling parley_emoji v0.12.0
+   Compiling zeno v0.3.3
+   Compiling fearless_simd v1.1.0
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/core)
+   Compiling synstructure v0.14.0
+   Compiling ecow v0.3.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerofrom v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling bytemuck v1.25.2
+   Compiling zerovec-derive v0.11.6
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling font-types v0.12.7
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling read-fonts v0.41.0
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling icu_locale_fallback v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling parley_data v0.12.0
+   Compiling icu_segmenter v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling triomphe v0.1.17
+   Compiling foldhash v0.1.5
+   Compiling hashbrown v0.15.5
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling unicode-script v0.5.8
+   Compiling harfrust v0.12.0
+   Compiling fontique v0.12.0
+   Compiling skrifa v0.44.0
+   Compiling skrifa v0.49.0
+   Compiling unicode-ccc v0.4.0
+   Compiling unicode-properties v0.1.4
+   Compiling yazi v0.2.1
+   Compiling swash v0.2.10
+   Compiling parley_engine v0.12.0 (/home/user/gpui-patch-workspace-lab/reactivity/vendor/parley_engine)
+   Compiling parley v0.12.0 (/home/user/gpui-patch-workspace-lab/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/canvas)
+   Compiling rustybuzz v0.20.1
+   Compiling fontdue v0.9.5
+   Compiling allocation-counter v0.8.1
+   Compiling cfg_aliases v0.2.2
+   Compiling syn v2.0.119
+   Compiling thiserror v2.0.21
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling thiserror-impl v2.0.21
+   Compiling zerocopy v0.8.63
+   Compiling cfg-if v1.0.5
+   Compiling zerocopy-derive v0.8.63
+   Compiling libloading v0.8.9
+   Compiling indexmap v2.14.2
+   Compiling rustc-hash v1.1.0
+   Compiling naga-types v30.0.1
+   Compiling naga v30.0.1
+   Compiling bit-vec v0.9.1
+   Compiling heck v0.5.0
+   Compiling unicode-width v0.2.2
+   Compiling codespan-reporting v0.13.1
+   Compiling snafu-derive v0.8.9
+   Compiling bit-set v0.10.0
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling arrayvec v0.7.8
+   Compiling parking_lot_core v0.9.12
+   Compiling pkg-config v0.3.34
+   Compiling ash v0.38.0+1.3.281
+   Compiling half v2.7.1
+   Compiling wayland-sys v0.31.11
+   Compiling khronos-egl v6.0.0
+   Compiling scopeguard v1.2.0
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+   Compiling static_assertions v1.1.0
+   Compiling raw-window-handle v0.6.2
+   Compiling either v1.19.0
+   Compiling paste v1.0.15
+   Compiling itertools v0.14.0
+   Compiling wgpu-types v30.0.1
+   Compiling lock_api v0.4.14
+   Compiling snafu v0.8.9
+   Compiling dlib v0.5.3
+   Compiling wgpu-hal v30.0.1 (/home/user/gpui-patch-workspace-lab/reactivity/vendor/wgpu-hal)
+   Compiling hashbrown v0.16.1
+   Compiling wgsl-rs-ir v0.1.0-beta.6
+   Compiling presser v0.3.1
+   Compiling parking_lot v0.12.5
+   Compiling ordered-float v5.5.0
+   Compiling profiling v1.0.18
+   Compiling renderdoc-sys v1.1.0
+   Compiling glow v0.17.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling gpu-allocator v0.28.0
+   Compiling wgpu-core v30.0.1 (/home/user/gpui-patch-workspace-lab/reactivity/vendor/wgpu-core)
+   Compiling litrs v1.0.1
+   Compiling glam v0.30.10
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling document-features v0.2.12
+   Compiling wgpu v30.0.1 (/home/user/gpui-patch-workspace-lab/reactivity/vendor/wgpu)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-patch-workspace-lab/reactivity/crates/gpu)
+   Compiling pollster v1.0.1
+    Finished `release` profile [optimized] target(s) in 1m 08s
+     Running unittests src/lib.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080)
+     Running tests/bins.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9)
+     Running tests/clipping.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d)
+     Running tests/color.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd)
+     Running tests/color_authoring.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c)
+     Running tests/color_packing.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0)
+     Running tests/damage.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad)
+     Running tests/damage_regions.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3)
+     Running tests/damage_workspace.rs (/home/user/gpui-patch-workspace-target/release/build/gpui_canvas/11f8ef7a91cd341d/out/damage_workspace-11f8ef7a91cd341d)
+error: test failed, to rerun pass `-p gpui_canvas --test damage_workspace`

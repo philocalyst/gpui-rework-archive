@@ -1,0 +1,14 @@
+{
+  "checkpoint": {
+    "source": "41a67473a0177fbb17df1f7b8e2f2f36dd6940f6",
+    "checkpoint": "e106b788863e7ed8a6cad97a4130322b5264ce46",
+    "checkpoint_worktree": "/home/user/gpui-patch-workspace-checkpoint-lab",
+    "verified_files": 2054,
+    "manifest_sha256": "2111a328556173116499630f98d6f380bfce2f0e6eb115402c3f83eed688a473"
+  },
+  "files": 1597,
+  "bytes": 1781617524,
+  "free_before": 8577683456,
+  "free_after": 10361679872,
+  "scope": "Completed inactive regenerable library caches only, after qualification evidence commit. All source, evidence, exact ELF files, fingerprints, generated shaders and canonical raw/archive stores retained. The initial ELF-cache archive stopped at its reserve check after preserving/removing one cache copy; no build/test/timing was active."
+}

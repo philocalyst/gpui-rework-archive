@@ -1,0 +1,37 @@
+{
+  "control": {
+    "canonical_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "unit_elf_offset": 2919188,
+    "native_elf_offset": 1568255,
+    "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+  },
+  "bounds": {
+    "canonical_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "unit_elf_offset": 2946673,
+    "native_elf_offset": 1567472,
+    "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+  },
+  "predecessor": {
+    "canonical_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "unit_elf_offset": 3081864,
+    "native_elf_offset": 2317673,
+    "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+  },
+  "scroll_precise": {
+    "canonical_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "unit_elf_offset": 4688598,
+    "native_elf_offset": 1558733,
+    "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+  },
+  "candidate": {
+    "canonical_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "unit_elf_offset": 3009174,
+    "native_elf_offset": 1559597,
+    "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+  }
+}

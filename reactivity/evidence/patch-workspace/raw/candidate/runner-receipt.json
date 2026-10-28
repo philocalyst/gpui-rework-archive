@@ -1,0 +1,13 @@
+{
+  "source": "41a67473a0177fbb17df1f7b8e2f2f36dd6940f6",
+  "preregistration": "bc6d01564477a0c8b5710b338a29119d991fadaf",
+  "timing_sha256": "33a3718c1e3aa88e0b1b491979b6a406934a9fbbc2a339c6c29ffa90b3acf271",
+  "analysis_sha256": "123b0e582461cba09b9dfd72476667f34474b010411f161fcf3d717d9fab78cd",
+  "verifier_sha256": "ec9583c49eef951bafb54fc8058d4c11bdadf6e4861bf618ecd49990b8904f8d",
+  "process_manifest_sha256": "ccb119489bb10a1db8b93ac98b014e80e94bb9fa8c19fb00ac7f688372eebd84",
+  "cost_definition_sha256": "bd9861af847e42da89e00c0362a93afcdca7aca0d9bf67e548f0e432f6f511fe",
+  "allocation_gate_sha256": "8a11d15c2a5143fdd6b6e22478dbc3f732666f6a5109f9e50071ed592b6ad21d",
+  "preflight_sha256": "62560e7b1c1124a9bbcb82288385d81626293d76762863984bb64f925175040b",
+  "frozen_utc": "2026-10-28T09:09:08.279927+00:00",
+  "scope": "Frozen after all functional/work/header/negative gates, before any timing process. Fixed 10400 process schedule, 16 warm plus 64 measured updates. No builds, tests, allocation probes, edits, analysis or cleanup overlap timing."
+}

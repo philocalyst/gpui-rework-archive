@@ -1,0 +1,43 @@
+[
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/gpui/126c48c63c561836/out/patch_workspace-126c48c63c561836",
+    "sha256": "f8589e75533d4e97784a8f183260922b0d2fb777f0c66ea4f4fe29baa3394240",
+    "preserved": "/home/user/gpui-preserved-test-binaries/f8589e75533d4e97784a8f183260922b0d2fb777f0c66ea4f4fe29baa3394240",
+    "bytes": 10500880,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-patch-workspace-retire-lab/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/home/user/gpui-patch-workspace-retire-lab/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "patch_workspace",
+        "src_path": "/home/user/gpui-patch-workspace-retire-lab/reactivity/crates/gpui/tests/patch_workspace.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-patch-workspace-retire-target/release/build/gpui/126c48c63c561836/out/patch_workspace-126c48c63c561836"
+      ],
+      "executable": "/home/user/gpui-patch-workspace-retire-target/release/build/gpui/126c48c63c561836/out/patch_workspace-126c48c63c561836",
+      "fresh": false
+    }
+  }
+]
