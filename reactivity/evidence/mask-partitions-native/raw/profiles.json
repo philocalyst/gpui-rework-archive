@@ -1,0 +1,22 @@
+{
+  "baseline": {
+    "CARGO_PROFILE_RELEASE_OPT_LEVEL": "3",
+    "CARGO_PROFILE_RELEASE_LTO": "fat",
+    "CARGO_PROFILE_RELEASE_CODEGEN_UNITS": "1",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0",
+    "CARGO_PROFILE_RELEASE_STRIP": "none",
+    "CARGO_PROFILE_RELEASE_PANIC": "unwind",
+    "CARGO_PROFILE_RELEASE_INCREMENTAL": "false",
+    "RUSTFLAGS": "-C symbol-mangling-version=v0 --cfg tokio_unstable"
+  },
+  "candidate": {
+    "CARGO_PROFILE_RELEASE_OPT_LEVEL": "3",
+    "CARGO_PROFILE_RELEASE_LTO": "fat",
+    "CARGO_PROFILE_RELEASE_CODEGEN_UNITS": "1",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0",
+    "CARGO_PROFILE_RELEASE_STRIP": "none",
+    "CARGO_PROFILE_RELEASE_PANIC": "unwind",
+    "CARGO_PROFILE_RELEASE_INCREMENTAL": "false",
+    "RUSTFLAGS": "-C symbol-mangling-version=v0 --cfg tokio_unstable"
+  }
+}

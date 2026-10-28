@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\"files\": 734, \"executable_identities\": 64, \"gpu_canvas_tests\": 354, \"ignored_tests\": 3, \"exact_frames\": 336, \"mutant_differing_bytes\": 3855, \"admission_correctness_passes\": true, \"scope\": \"Early partition admission; inherited host selection only, native performance/full qualification pending.\"}\n",
+  "stderr": ""
+}

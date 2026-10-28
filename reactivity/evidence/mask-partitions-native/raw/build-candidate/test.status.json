@@ -1,0 +1,28 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "gpui",
+    "--example",
+    "zgx_native_lab",
+    "--message-format=json",
+    "--features",
+    "x11",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "seconds": 30.00297932801186,
+  "minimum_free_bytes": 8717770752,
+  "storage_stop": false
+}

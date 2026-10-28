@@ -1,0 +1,3104 @@
+{
+  "rows": [
+    {
+      "mode": "idle",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.321481755003333,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21340271801454946,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2284745759970974,
+        "interval_end": 6.198225502012065,
+        "interval_seconds": 4.969750926014967,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144494592,
+        "max_rss_bytes": 144494592,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.353220908000367,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21293241399689578,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.228253502980806,
+        "interval_end": 6.211150375980651,
+        "interval_seconds": 4.982896872999845,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157618176,
+        "max_rss_bytes": 157618176,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.341897392005194,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21287280999240465,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2270358059904538,
+        "interval_end": 6.194436816003872,
+        "interval_seconds": 4.967401010013418,
+        "cpu_seconds": 2.88,
+        "cpu_cores": 0.579780048801057,
+        "mean_rss_bytes": 164859904,
+        "max_rss_bytes": 164859904,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.323771922994638,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21218387299450114,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2265038059849758,
+        "interval_end": 6.195636596996337,
+        "interval_seconds": 4.969132791011361,
+        "cpu_seconds": 3.2399999999999998,
+        "cpu_cores": 0.6520252398689805,
+        "mean_rss_bytes": 151814144,
+        "max_rss_bytes": 151814144,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.32471191798686,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21367314000963233,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2290100069949403,
+        "interval_end": 6.195058534009149,
+        "interval_seconds": 4.966048527014209,
+        "cpu_seconds": 4.1899999999999995,
+        "cpu_cores": 0.8437291696219485,
+        "mean_rss_bytes": 151879680,
+        "max_rss_bytes": 151879680,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.343335969984764,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21328432898735628,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.226203223981429,
+        "interval_end": 6.199513234983897,
+        "interval_seconds": 4.973310011002468,
+        "cpu_seconds": 3.3899999999999997,
+        "cpu_cores": 0.6816385852682204,
+        "mean_rss_bytes": 164790272,
+        "max_rss_bytes": 164790272,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.337395870010369,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21492583400686271,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.230205570027465,
+        "interval_end": 6.2004098140168935,
+        "interval_seconds": 4.9702042439894285,
+        "cpu_seconds": 2.86,
+        "cpu_cores": 0.5754290688272333,
+        "mean_rss_bytes": 164950016,
+        "max_rss_bytes": 164950016,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.321394533006242,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2143721200118307,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2305829510150943,
+        "interval_end": 6.197252796002431,
+        "interval_seconds": 4.9666698449873365,
+        "cpu_seconds": 3.2600000000000007,
+        "cpu_cores": 0.6563754188916321,
+        "mean_rss_bytes": 151766490.53658536,
+        "max_rss_bytes": 151859200,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.324505666008918,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 481,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21259699200163595,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2296696460107341,
+        "interval_end": 6.200556563999271,
+        "interval_seconds": 4.970886917988537,
+        "cpu_seconds": 4.31,
+        "cpu_cores": 0.8670484907639049,
+        "mean_rss_bytes": 151928832,
+        "max_rss_bytes": 151928832,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.336525464983424,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21176507798372768,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2277661199914292,
+        "interval_end": 6.211484945000848,
+        "interval_seconds": 4.983718825009419,
+        "cpu_seconds": 3.4299999999999997,
+        "cpu_cores": 0.6882410746744962,
+        "mean_rss_bytes": 164700160,
+        "max_rss_bytes": 164700160,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.319729122013086,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21252434299094602,
+        "samples": 403,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2275556770036928,
+        "interval_end": 6.202875791001134,
+        "interval_seconds": 4.975320113997441,
+        "cpu_seconds": 4.94,
+        "cpu_cores": 0.9929009363843602,
+        "mean_rss_bytes": 151572480,
+        "max_rss_bytes": 151572480,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": false,
+        "later_gaps_over25ms": 2,
+        "total_gaps_over25ms": 3
+      },
+      "execution_pass": true,
+      "work_pass": false
+    },
+    {
+      "mode": "both",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.38385771101457,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2154761590063572,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2338066450029146,
+        "interval_end": 6.209076102997642,
+        "interval_seconds": 4.975269457994727,
+        "cpu_seconds": 3.8699999999999997,
+        "cpu_cores": 0.7778473171500937,
+        "mean_rss_bytes": 164527328.7804878,
+        "max_rss_bytes": 164626432,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.369709015998524,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.216531019017566,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2170664629957173,
+        "interval_end": 6.207050008000806,
+        "interval_seconds": 4.989983545005089,
+        "cpu_seconds": 2.5,
+        "cpu_cores": 0.5010036561147518,
+        "mean_rss_bytes": 163540992,
+        "max_rss_bytes": 163540992,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.317282715986948,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21537426501163282,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2302568719896954,
+        "interval_end": 6.213423167006113,
+        "interval_seconds": 4.983166295016417,
+        "cpu_seconds": 2.81,
+        "cpu_cores": 0.5638985001986057,
+        "mean_rss_bytes": 149979136,
+        "max_rss_bytes": 149979136,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.335828485985985,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21068093398935162,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2212047549837735,
+        "interval_end": 6.197366951993899,
+        "interval_seconds": 4.976162197010126,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157679616,
+        "max_rss_bytes": 157679616,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.328282161994139,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21090406298753805,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2255397159897257,
+        "interval_end": 6.191877653996926,
+        "interval_seconds": 4.9663379380072,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144601088,
+        "max_rss_bytes": 144601088,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.311863733979408,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21233953000046313,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.226024838979356,
+        "interval_end": 6.2113855149946176,
+        "interval_seconds": 4.985360676015262,
+        "cpu_seconds": 2.83,
+        "cpu_cores": 0.5676620376967358,
+        "mean_rss_bytes": 150224896,
+        "max_rss_bytes": 150224896,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.337790805991972,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21175927901640534,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2261295590142254,
+        "interval_end": 6.1939601589983795,
+        "interval_seconds": 4.967830599984154,
+        "cpu_seconds": 2.47,
+        "cpu_cores": 0.49719891817725803,
+        "mean_rss_bytes": 163128095.2195122,
+        "max_rss_bytes": 163160064,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.30711467997753,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2141462319996208,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2328320870001335,
+        "interval_end": 6.202192522992846,
+        "interval_seconds": 4.969360435992712,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144703488,
+        "max_rss_bytes": 144703488,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.332461963000242,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21280597199802287,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2268114470061846,
+        "interval_end": 6.1986191750038415,
+        "interval_seconds": 4.971807727997657,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157294592,
+        "max_rss_bytes": 157294592,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.346768613992026,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21344885899452493,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2254702009959146,
+        "interval_end": 6.209661264001625,
+        "interval_seconds": 4.98419106300571,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157687808,
+        "max_rss_bytes": 157687808,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.3336352930055,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21140428498620167,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.224778953997884,
+        "interval_end": 6.208261369989486,
+        "interval_seconds": 4.9834824159916025,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144814080,
+        "max_rss_bytes": 144814080,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.361222285981057,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21196471800794825,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2239229200058617,
+        "interval_end": 6.208436746994266,
+        "interval_seconds": 4.984513826988405,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157876224,
+        "max_rss_bytes": 157876224,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.340990987984696,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2154477699950803,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.230484899977455,
+        "interval_end": 6.211577685986413,
+        "interval_seconds": 4.981092786008958,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144506880,
+        "max_rss_bytes": 144506880,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.354628592991503,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 481,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21467406599549577,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.231377383985091,
+        "interval_end": 6.210045107000042,
+        "interval_seconds": 4.978667723014951,
+        "cpu_seconds": 3.11,
+        "cpu_cores": 0.6246651058120154,
+        "mean_rss_bytes": 164593664,
+        "max_rss_bytes": 164593664,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.326863363996381,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 481,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2132838130055461,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2294623100024182,
+        "interval_end": 6.207255437009735,
+        "interval_seconds": 4.977793127007317,
+        "cpu_seconds": 3.5399999999999996,
+        "cpu_cores": 0.7111585213924452,
+        "mean_rss_bytes": 151691264,
+        "max_rss_bytes": 151691264,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.323172049014829,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21295484498841688,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2291648949903902,
+        "interval_end": 6.200971879996359,
+        "interval_seconds": 4.971806985005969,
+        "cpu_seconds": 3.37,
+        "cpu_cores": 0.6778219689869868,
+        "mean_rss_bytes": 151597056,
+        "max_rss_bytes": 151597056,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.35434753500158,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21319731802213937,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2295070720138028,
+        "interval_end": 6.201823080016766,
+        "interval_seconds": 4.972316008002963,
+        "cpu_seconds": 2.9,
+        "cpu_cores": 0.583229222626325,
+        "mean_rss_bytes": 164884480,
+        "max_rss_bytes": 164884480,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.341383358987514,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21263899799669161,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2255679759837221,
+        "interval_end": 6.193610310001532,
+        "interval_seconds": 4.9680423340178095,
+        "cpu_seconds": 2.43,
+        "cpu_cores": 0.48912626677131876,
+        "mean_rss_bytes": 163520512,
+        "max_rss_bytes": 163520512,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.317026574979536,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21249858400551602,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2266126019821968,
+        "interval_end": 6.192629458004376,
+        "interval_seconds": 4.966016856022179,
+        "cpu_seconds": 2.92,
+        "cpu_cores": 0.5879963932178321,
+        "mean_rss_bytes": 150806361.49593496,
+        "max_rss_bytes": 150810624,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.305966438987525,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21283988398499787,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2271051720017567,
+        "interval_end": 6.196980477980105,
+        "interval_seconds": 4.9698753059783485,
+        "cpu_seconds": 3.5999999999999996,
+        "cpu_cores": 0.7243642502799814,
+        "mean_rss_bytes": 151642112,
+        "max_rss_bytes": 151642112,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.341277741012163,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21477455901913345,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2296426750253886,
+        "interval_end": 6.2034580309991725,
+        "interval_seconds": 4.973815355973784,
+        "cpu_seconds": 2.64,
+        "cpu_cores": 0.5307796552658991,
+        "mean_rss_bytes": 164552936.16194332,
+        "max_rss_bytes": 164560896,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.317293920001248,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 481,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2103478110220749,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2209275650093332,
+        "interval_end": 6.194091597018996,
+        "interval_seconds": 4.973164032009663,
+        "cpu_seconds": 3.1900000000000004,
+        "cpu_cores": 0.6414427474074119,
+        "mean_rss_bytes": 165122048,
+        "max_rss_bytes": 165122048,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.320470873994054,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21130944701144472,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2259149710007478,
+        "interval_end": 6.198210558010032,
+        "interval_seconds": 4.972295587009285,
+        "cpu_seconds": 4.32,
+        "cpu_cores": 0.8688139963534178,
+        "mean_rss_bytes": 151658496,
+        "max_rss_bytes": 151658496,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31658710501506,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21355780900921673,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2286078660108615,
+        "interval_end": 6.194772324000951,
+        "interval_seconds": 4.966164457990089,
+        "cpu_seconds": 2.88,
+        "cpu_cores": 0.5799244113566058,
+        "mean_rss_bytes": 150659072,
+        "max_rss_bytes": 150659072,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.343199805007316,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21229147902340628,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2257444999995641,
+        "interval_end": 6.212047439999878,
+        "interval_seconds": 4.986302940000314,
+        "cpu_seconds": 2.39,
+        "cpu_cores": 0.47931303588222207,
+        "mean_rss_bytes": 163631104,
+        "max_rss_bytes": 163631104,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.361934621992987,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2152243599994108,
+        "samples": 408,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2307357450190466,
+        "interval_end": 6.200792546005687,
+        "interval_seconds": 4.97005680098664,
+        "cpu_seconds": 2.18,
+        "cpu_cores": 0.4386267777799307,
+        "mean_rss_bytes": 163196928,
+        "max_rss_bytes": 163196928,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.308247275999747,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21071816098992713,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2213571979955304,
+        "interval_end": 6.210669839987531,
+        "interval_seconds": 4.989312641992001,
+        "cpu_seconds": 2.46,
+        "cpu_cores": 0.4930538886851228,
+        "mean_rss_bytes": 150646784,
+        "max_rss_bytes": 150646784,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31338948602206,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21149688301375136,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2237555590108968,
+        "interval_end": 6.197642479004571,
+        "interval_seconds": 4.973886919993674,
+        "cpu_seconds": 2.5599999999999996,
+        "cpu_cores": 0.5146880178778281,
+        "mean_rss_bytes": 150566091.14170042,
+        "max_rss_bytes": 150589440,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.316078244009987,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2098820309911389,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2216872080171015,
+        "interval_end": 6.198005646991078,
+        "interval_seconds": 4.976318438973976,
+        "cpu_seconds": 2.1799999999999997,
+        "cpu_cores": 0.4380748593029097,
+        "mean_rss_bytes": 163500032,
+        "max_rss_bytes": 163500032,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.330968360998668,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21109768300084397,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2264547910017427,
+        "interval_end": 6.208795907994499,
+        "interval_seconds": 4.982341116992757,
+        "cpu_seconds": 3.22,
+        "cpu_cores": 0.6462825255014913,
+        "mean_rss_bytes": 165195776,
+        "max_rss_bytes": 165195776,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.298813434987096,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.20980872999643907,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2219820829923265,
+        "interval_end": 6.1983833120029885,
+        "interval_seconds": 4.976401229010662,
+        "cpu_seconds": 3.96,
+        "cpu_cores": 0.7957557716436927,
+        "mean_rss_bytes": 151740416,
+        "max_rss_bytes": 151740416,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.320209583005635,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 481,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21205095201730728,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2283498629985843,
+        "interval_end": 6.205136987002334,
+        "interval_seconds": 4.976787124003749,
+        "cpu_seconds": 3.12,
+        "cpu_cores": 0.6269104790421511,
+        "mean_rss_bytes": 150343680,
+        "max_rss_bytes": 150343680,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.380150518991286,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21632442099507898,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2186443129903637,
+        "interval_end": 6.212774846993852,
+        "interval_seconds": 4.994130534003489,
+        "cpu_seconds": 3.1799999999999997,
+        "cpu_cores": 0.6367474735288483,
+        "mean_rss_bytes": 163385344,
+        "max_rss_bytes": 163385344,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.379167475010036,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.3226474200200755,
+        "samples": 409,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.3384439000219572,
+        "interval_end": 6.307792816020083,
+        "interval_seconds": 4.9693489159981254,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157601792,
+        "max_rss_bytes": 157601792,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.310035011993023,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21086095401551574,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2239893669902813,
+        "interval_end": 6.19169863400748,
+        "interval_seconds": 4.967709267017199,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144543744,
+        "max_rss_bytes": 144543744,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.331827108020661,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2133201340038795,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2232394550228491,
+        "interval_end": 6.195948507025605,
+        "interval_seconds": 4.972709052002756,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144646144,
+        "max_rss_bytes": 144646144,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.329712306003785,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.211946891999105,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2286889489914756,
+        "interval_end": 6.20731394100585,
+        "interval_seconds": 4.978624992014375,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 157618176,
+        "max_rss_bytes": 157618176,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.32126449700445,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2114275869971607,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2246286869922187,
+        "interval_end": 6.2105794660164975,
+        "interval_seconds": 4.985950779024279,
+        "cpu_seconds": 4.27,
+        "cpu_cores": 0.8564063684631106,
+        "mean_rss_bytes": 151715840,
+        "max_rss_bytes": 151715840,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.386642497993307,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.2146245519979857,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2147814799973276,
+        "interval_end": 6.204135027976008,
+        "interval_seconds": 4.989353547978681,
+        "cpu_seconds": 3.9,
+        "cpu_cores": 0.7816643904860167,
+        "mean_rss_bytes": 164630528,
+        "max_rss_bytes": 164630528,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.335071264009457,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21189703501295298,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.226016475004144,
+        "interval_end": 6.202943106996827,
+        "interval_seconds": 4.976926631992683,
+        "cpu_seconds": 3.55,
+        "cpu_cores": 0.7132916079533678,
+        "mean_rss_bytes": 151658496,
+        "max_rss_bytes": 151658496,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.379376702010632,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21212047501467168,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2299535979982466,
+        "interval_end": 6.210978265007725,
+        "interval_seconds": 4.981024667009478,
+        "cpu_seconds": 3.16,
+        "cpu_cores": 0.6344076191650763,
+        "mean_rss_bytes": 164835328,
+        "max_rss_bytes": 164835328,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.33323494400247,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 1,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21327855202252977,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2281466819986235,
+        "interval_end": 6.194807445019251,
+        "interval_seconds": 4.966660763020627,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 144609280,
+        "max_rss_bytes": 144609280,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "idle",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.3533402220055,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "idle",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 0,
+        "native_acknowledgements": 2,
+        "reference_or_model_final": {
+          "total_ticks": 0,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21399453599588014,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2252253879851196,
+        "interval_end": 6.206519300991204,
+        "interval_seconds": 4.981293913006084,
+        "cpu_seconds": 0.0,
+        "cpu_cores": 0.0,
+        "mean_rss_bytes": 160309248,
+        "max_rss_bytes": 160309248,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.350822487002006,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21057054298580624,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2215618119807914,
+        "interval_end": 6.208120399998734,
+        "interval_seconds": 4.986558588017942,
+        "cpu_seconds": 2.29,
+        "cpu_cores": 0.4592345521624021,
+        "mean_rss_bytes": 163725312,
+        "max_rss_bytes": 163725312,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "stream",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31025837699417,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21053690899861977,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2230257769988384,
+        "interval_end": 6.193138711008942,
+        "interval_seconds": 4.970112934010103,
+        "cpu_seconds": 2.44,
+        "cpu_cores": 0.4909345184700465,
+        "mean_rss_bytes": 150274048,
+        "max_rss_bytes": 150274048,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.315518824994797,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21144992299377918,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2240626319835428,
+        "interval_end": 6.200712813995779,
+        "interval_seconds": 4.976650182012236,
+        "cpu_seconds": 3.06,
+        "cpu_cores": 0.6148714271821158,
+        "mean_rss_bytes": 165175296,
+        "max_rss_bytes": 165175296,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.295666523015825,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21035766100976616,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2229178679990582,
+        "interval_end": 6.196775649994379,
+        "interval_seconds": 4.973857781995321,
+        "cpu_seconds": 3.88,
+        "cpu_cores": 0.7800785969484421,
+        "mean_rss_bytes": 151728128,
+        "max_rss_bytes": 151728128,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.316134043998318,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21033933601574972,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2246485070209019,
+        "interval_end": 6.197669371002121,
+        "interval_seconds": 4.973020863981219,
+        "cpu_seconds": 3.1300000000000003,
+        "cpu_cores": 0.6293961126666653,
+        "mean_rss_bytes": 164727588.27530363,
+        "max_rss_bytes": 164806656,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "both",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.308233917981852,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "both",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21009248099289834,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2205753400048707,
+        "interval_end": 6.1936350429896265,
+        "interval_seconds": 4.973059702984756,
+        "cpu_seconds": 3.9400000000000004,
+        "cpu_cores": 0.7922687913107642,
+        "mean_rss_bytes": 151924736,
+        "max_rss_bytes": 151924736,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.313597715023207,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21183686901349574,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2262244209996425,
+        "interval_end": 6.206648678024067,
+        "interval_seconds": 4.980424257024424,
+        "cpu_seconds": 3.1799999999999997,
+        "cpu_cores": 0.638499821679831,
+        "mean_rss_bytes": 151992726.2834008,
+        "max_rss_bytes": 152039424,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.351931845012587,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21322621899889782,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2279511009983253,
+        "interval_end": 6.205517154012341,
+        "interval_seconds": 4.977566053014016,
+        "cpu_seconds": 2.66,
+        "cpu_cores": 0.5343977300691604,
+        "mean_rss_bytes": 164524032,
+        "max_rss_bytes": 164524032,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.346169226017082,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21389201801503077,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2319812900095712,
+        "interval_end": 6.211406732007163,
+        "interval_seconds": 4.979425441997591,
+        "cpu_seconds": 2.6900000000000004,
+        "cpu_cores": 0.5402229697651333,
+        "mean_rss_bytes": 164589568,
+        "max_rss_bytes": 164589568,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    },
+    {
+      "mode": "scroll",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.310798641003203,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "scroll",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 6706.0
+        },
+        "visible_seconds": 0.21135960100218654,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2227357369847596,
+        "interval_end": 6.195861221989617,
+        "interval_seconds": 4.973125485004857,
+        "cpu_seconds": 2.9099999999999997,
+        "cpu_cores": 0.585145098142875,
+        "mean_rss_bytes": 151465984,
+        "max_rss_bytes": 151465984,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 0,
+        "gap_gate_pass": true,
+        "later_gaps_over25ms": 0,
+        "total_gaps_over25ms": 0
+      },
+      "execution_pass": true,
+      "work_pass": true
+    }
+  ],
+  "aggregates": {
+    "idle": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "first_second_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu_cores_median": 0.0,
+        "mean_rss_bytes_median": 144605184.0,
+        "max_rss_bytes_median": 144605184.0,
+        "visible_seconds_median": 0.21329934301320463
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "first_second_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu_cores_median": 0.0,
+        "mean_rss_bytes_median": 157648896.0,
+        "max_rss_bytes_median": 157648896.0,
+        "visible_seconds_median": 0.21286919299745932
+      }
+    },
+    "scroll": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu_cores_median": 0.6670986939393094,
+        "mean_rss_bytes_median": 151674880.0,
+        "max_rss_bytes_median": 151674880.0,
+        "visible_seconds_median": 0.2125118784897495
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu_cores_median": 0.5776045588141452,
+        "mean_rss_bytes_median": 164714496.0,
+        "max_rss_bytes_median": 164714496.0,
+        "visible_seconds_median": 0.2135591185069643
+      }
+    },
+    "stream": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.5657802689476708,
+        "mean_rss_bytes_median": 150454885.5708502,
+        "max_rss_bytes_median": 150466560.0,
+        "visible_seconds_median": 0.2121952410088852
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.4842196513267704,
+        "mean_rss_bytes_median": 163510272.0,
+        "max_rss_bytes_median": 163510272.0,
+        "visible_seconds_median": 0.21246523851004895
+      }
+    },
+    "both": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 7,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.8500677690425296,
+        "mean_rss_bytes_median": 151734272.0,
+        "max_rss_bytes_median": 151734272.0,
+        "visible_seconds_median": 0.2113685170043027
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "work_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "later_gaps_over25ms": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "total_gaps_over25ms": [
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        "cpu_cores_median": 0.6639605553848559,
+        "mean_rss_bytes_median": 164758930.1376518,
+        "max_rss_bytes_median": 164798464.0,
+        "visible_seconds_median": 0.21160750048875343
+      }
+    }
+  },
+  "comparisons": {
+    "idle": {
+      "eligible": true,
+      "baseline_cpu": 0.0,
+      "candidate_cpu": 0.0,
+      "passed": true,
+      "ratio": null,
+      "rule": "zero updates and median observed CPU no greater than baseline; no ratio at zero"
+    },
+    "scroll": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.638499821679831,
+          "candidate_cpu": 0.5343977300691604,
+          "ratio": 0.8369583074639111
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.7111585213924452,
+          "candidate_cpu": 0.6246651058120154,
+          "ratio": 0.8783767430486862
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.7132916079533678,
+          "candidate_cpu": 0.6344076191650763,
+          "ratio": 0.8894085001018985
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.585145098142875,
+          "candidate_cpu": 0.5402229697651333,
+          "ratio": 0.9232290785305818
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.7243642502799814,
+          "candidate_cpu": 0.5307796552658991,
+          "ratio": 0.7327524171171369
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.6520252398689805,
+          "candidate_cpu": 0.579780048801057,
+          "ratio": 0.8891987815035495
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.6778219689869868,
+          "candidate_cpu": 0.583229222626325,
+          "ratio": 0.8604460305380309
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.6563754188916321,
+          "candidate_cpu": 0.5754290688272333,
+          "ratio": 0.8766767497157552
+        }
+      ],
+      "median_paired_cpu_ratio": 0.8775267463822207,
+      "paired_bootstrap_95": [
+        0.8369583074639111,
+        0.8894085001018985
+      ],
+      "limit": 1.05,
+      "passed": true
+    },
+    "stream": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.5676620376967358,
+          "candidate_cpu": 0.49719891817725803,
+          "ratio": 0.875871355066513
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.5879963932178321,
+          "candidate_cpu": 0.48912626677131876,
+          "ratio": 0.831852495037524
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.5799244113566058,
+          "candidate_cpu": 0.47931303588222207,
+          "ratio": 0.8265095010588958
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.4909345184700465,
+          "candidate_cpu": 0.4592345521624021,
+          "ratio": 0.9354293391174968
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.5146880178778281,
+          "candidate_cpu": 0.4380748593029097,
+          "ratio": 0.8511464111971921
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.4930538886851228,
+          "candidate_cpu": 0.4386267777799307,
+          "ratio": 0.8896122469486278
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.6269104790421511,
+          "candidate_cpu": 0.6367474735288483,
+          "ratio": 1.0156912267629137
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.5638985001986057,
+          "candidate_cpu": 0.5010036561147518,
+          "ratio": 0.8884642465590843
+        }
+      ],
+      "median_paired_cpu_ratio": 0.8821678008127987,
+      "paired_bootstrap_95": [
+        0.831852495037524,
+        0.9354293391174968
+      ],
+      "limit": 0.8,
+      "passed": false
+    },
+    "both": {
+      "eligible": false,
+      "passed": false,
+      "reason": "Execution/work/cadence gate failed; comparative CPU ratio suppressed."
+    }
+  },
+  "all_execution_pass": true,
+  "candidate_passes": false,
+  "scope": "Fixed visible+1..6 process CPU interval; cadence-qualified cohort only. Whole-run counts do not prove identical interval work. Software Vulkan, no ZGX/hardware/scanout or quality victory."
+}
