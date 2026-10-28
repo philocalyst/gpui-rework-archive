@@ -217,3 +217,37 @@ and its observable scheduling/close/capacity semantics. This follows SCHEDULING.
 requirement to stop microbenchmark refinement until a representative native
 comparison can test complete application work. Hardware, wheel resampling, render
 quality and equal-profile gates remain open; no ZGX or cache-hit claim follows.
+
+
+## Deferred native workload controls qualified
+
+Dossier6a3ae55a05a25fd12b53304d795fc1e0136af73f (local/native-task-parity)
+closes the synchronous-control mismatch against pinned ZGX. Preregistered7478ef16;
+implementation8de61164 on corrected originalbb83c5d8. Only the workload example
+changes, with no library/API/dependency/shader change. UI-owned FIFO operations
+use one coalesced wake and two frozen deliveries: first yield, then apply. Third
+control999 stays immediate; pending work is canceled on close. This specializes
+two finite workload operations, not a general executor or a cache-hit claim.
+
+Independent verifier111 files/385 preserved ELF and compiler-module identities.
+All17 public port tests, full/minimal actual-window scripts, X11 all-target Clippy
+and minimal example Clippy pass. Synchronous and skip-yield mutants fail the two
+separate intermediate-state witnesses. Model128B/new Controls48B; wake allocation
+120B;64 queued2B operations retain128B after248B/5 allocation requests. A yield-only
+delivery costs one owner rerun/description and103 destination compares, with no
+layout/paint/presentation in that test. Shipping core36956 lines unchanged; full
+native ELF26339472B (+33088 against corrected original). Costs remain charged.
+
+Preserved failures: native harness close/visibility races, corrected using the
+same frozen ELF; verifier's nested-path diff bug; temporary7.6G free-space dip in
+the first synchronous-mutant build. Its exact ELF fails the intended assertion
+again above8GiB. Verified inactive compiler-module archives restore>12GiB before
+the independent skip-yield build. No timings occurred in this prerequisite.
+
+Next remaining input-equivalence gap is default display-paced wheel behavior:
+ZGX normalizes line notches with40 logical pixels and resamples/eases motion at
+display refreshes; GPUI currently applies32-scaled line deltas on arrival. Do not
+silently disable the reference's default smoothing or change existing GPUI defaults
+to claim equivalence. Investigate an explicit, narrowly scoped native input policy
+and deterministic timing/gesture/close tests before another comparative claim.
+Render-quality, equal-profile and physical-hardware gates also remain open.
