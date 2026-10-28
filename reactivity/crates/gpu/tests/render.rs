@@ -7,6 +7,50 @@ use gpui_gpu::{Renderer, Stats, wgpu};
 mod scroll_outside;
 
 #[test]
+fn complete_scene_regions_match_full_gpu_for_all_formats_and_materials() {
+    use gpui_gpu::RetainedRenderer;
+    use scroll_outside::{CASES, SIZE, stage};
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let inner = renderer(format).await;
+            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
+                .await
+                .unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let hdr = format == wgpu::TextureFormat::Rgba16Float;
+            let config = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for case in 0..CASES {
+                let mut canvas = Canvas::recording(SIZE[0], SIZE[1], config).unwrap();
+                let mut text = TextSystem::bundled().unwrap();
+                stage(&mut canvas, &mut text, case, 0, hdr).commit();
+                let target = output_texture(&gpu, &canvas);
+                let view = target.create_view(&Default::default());
+                gpu.render(canvas.prepared_scene(), &view, None).unwrap();
+                for tick in 1..6 {
+                    let regions =
+                        stage(&mut canvas, &mut text, case, tick, hdr).commit_with_damage_regions();
+                    gpu.render_regions(canvas.prepared_scene(), &view, &regions)
+                        .unwrap();
+                    assert!(
+                        read_texture(&gpu, &target) == readback(&mut oracle, &canvas),
+                        "complete support case={case}, tick={tick}, format={format:?}"
+                    );
+                    assert_eq!(gpu.retained_stats().composited_pixels, regions.pixels());
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn retained_scroll_outside_changes_match_full_gpu_in_all_formats() {
     use gpui_gpu::RetainedRenderer;
     use scroll_outside::{CASES, SIZE, VIEW, offset, stage};

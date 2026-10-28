@@ -35,6 +35,7 @@ mod rounded;
 pub use rounded::rounded_rect_contains;
 mod samples;
 mod scroll;
+mod support;
 pub use scroll::ScrollCopy;
 #[cfg(test)]
 mod simd_tests;

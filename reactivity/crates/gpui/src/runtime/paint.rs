@@ -170,6 +170,29 @@ pub(crate) struct ScrollTransition {
     pub(crate) copy: gpui_canvas::ScrollCopy,
 }
 
+/// Cold optional complete-scene repair; one slot serves both alternatives.
+#[cfg(feature = "native-core")]
+pub(crate) enum SceneRepair {
+    Regions(TextRepair),
+    Scroll(ScrollTransition),
+}
+
+#[cfg(feature = "native-core")]
+impl SceneRepair {
+    pub(super) fn regions(&self) -> Option<&TextRepair> {
+        match self {
+            Self::Regions(repair) => Some(repair),
+            Self::Scroll(_) => None,
+        }
+    }
+    pub(super) fn scroll(&self) -> Option<&ScrollTransition> {
+        match self {
+            Self::Scroll(scroll) => Some(scroll),
+            Self::Regions(_) => None,
+        }
+    }
+}
+
 /// Damage relative to the exact acknowledged image, including unbound changes.
 #[cfg(feature = "native-core")]
 #[derive(Clone, Copy)]
@@ -202,14 +225,23 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 scroll: runtime
                     .metadata
                     .as_ref()
-                    .and_then(|metadata| metadata.scroll_copy.as_deref())
+                    .and_then(|metadata| metadata.scene_repair.as_deref())
+                    .and_then(SceneRepair::scroll)
                     .filter(|scroll| scroll.to == token),
                 repair: runtime
                     .text
                     .as_ref()
                     .and_then(|text| text.patch.as_ref())
                     .map(|patch| &patch.repair)
-                    .filter(|repair| repair.to == token),
+                    .filter(|repair| repair.to == token)
+                    .or_else(|| {
+                        runtime
+                            .metadata
+                            .as_ref()
+                            .and_then(|metadata| metadata.scene_repair.as_deref())
+                            .and_then(SceneRepair::regions)
+                            .filter(|repair| repair.to == token)
+                    }),
                 base: (!runtime.automatic_presentation && runtime.presentation_valid)
                     .then_some(runtime.presented_sequence)
                     .flatten()

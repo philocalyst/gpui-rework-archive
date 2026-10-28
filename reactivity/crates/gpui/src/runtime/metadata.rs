@@ -199,7 +199,7 @@ pub(super) struct Metadata {
     pub candidate: Option<Sheet>,
     pub geometry: Option<Box<super::geometry::Geometry>>,
     #[cfg(feature = "native-core")]
-    pub scroll_copy: Option<Box<super::paint::ScrollTransition>>,
+    pub scene_repair: Option<Box<super::paint::SceneRepair>>,
 }
 impl Metadata {
     pub fn base(&self, identity: u64) -> Option<&Declared> {

@@ -1,5 +1,7 @@
 //! The actual private native packet bridge, with offscreen readback oracles.
 use super::*;
+#[path = "scene_support_tests.rs"]
+mod scene_support_tests;
 #[path = "scroll_copy_tests.rs"]
 mod scroll_copy_tests;
 use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
@@ -266,4 +268,5 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         gpu.packet_token = None;
     }
     scroll_copy_tests::run(gpu);
+    scene_support_tests::run(gpu);
 }

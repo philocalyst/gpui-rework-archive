@@ -3933,7 +3933,7 @@ impl<M: View + 'static> Runtime<M> {
             })
             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
         #[cfg(feature = "native-core")]
-        let mut scroll_copy = None;
+        let mut scene_repair = None;
         let damage = if self.automatic_presentation {
             // Automatic headless acknowledgement retains no external surface
             // to repair. Do not compare commands for an unused capability.
@@ -3943,7 +3943,61 @@ impl<M: View + 'static> Runtime<M> {
             #[cfg(feature = "native-core")]
             let damage = if let Some((viewport, delta)) = scroll_proposal {
                 let (damage, copy) = scene.commit_with_scroll_damage(viewport, delta);
-                scroll_copy = copy;
+                scene_repair = copy.map(|copy| {
+                    paint::SceneRepair::Scroll(paint::ScrollTransition {
+                        from: self.latest_token.expect("acknowledged predecessor"),
+                        to: token,
+                        copy,
+                    })
+                });
+                damage
+            } else if self.presentation_valid
+                && size == self.presentation_size
+                && scale_factor == self.presentation_scale_factor
+            {
+                let mut regions = scene.commit_with_damage_regions();
+                let from = PresentationToken {
+                    window: self.sites.namespace(),
+                    sequence: self.presented_sequence.expect("valid presented image"),
+                };
+                if let Some(prepared) = &self.prepared {
+                    // The canvas is C while the external image is still P.
+                    // Preserve D(P,C) before replacing it with D(P,N).
+                    let prior = self
+                        .text
+                        .as_ref()
+                        .and_then(|text| text.patch.as_ref())
+                        .map(|patch| &patch.repair)
+                        .filter(|repair| {
+                            repair.from == from && Some(repair.to) == self.latest_token
+                        })
+                        .or_else(|| {
+                            self.metadata
+                                .as_ref()
+                                .and_then(|metadata| metadata.scene_repair.as_deref())
+                                .and_then(paint::SceneRepair::regions)
+                                .filter(|repair| {
+                                    repair.from == from && Some(repair.to) == self.latest_token
+                                })
+                        });
+                    if let Some(prior) = prior {
+                        for &support in prior.regions.regions() {
+                            regions.include(support);
+                        }
+                    } else {
+                        // A prior scroll/paint/full scene still has complete
+                        // conservative support, even without sparse regions.
+                        regions.include(prepared.damage);
+                    }
+                }
+                let damage = regions.bounds();
+                if regions.regions().len() > 1 {
+                    scene_repair = Some(paint::SceneRepair::Regions(paint::TextRepair {
+                        from,
+                        to: token,
+                        regions,
+                    }));
+                }
                 damage
             } else {
                 scene.commit_with_damage()
@@ -3957,21 +4011,15 @@ impl<M: View + 'static> Runtime<M> {
             )
         };
         #[cfg(feature = "native-core")]
-        if let Some(copy) = scroll_copy {
-            let transition = paint::ScrollTransition {
-                from: self.latest_token.expect("acknowledged predecessor"),
-                to: token,
-                copy,
-            };
+        if let Some(repair) = scene_repair {
             let slot = &mut self
                 .metadata
-                .as_mut()
-                .expect("viewport metadata")
-                .scroll_copy;
+                .get_or_insert_with(Default::default)
+                .scene_repair;
             if let Some(storage) = slot {
-                **storage = transition;
+                **storage = repair;
             } else {
-                *slot = Some(Box::new(transition));
+                *slot = Some(Box::new(repair));
             }
         }
         for (&key, state) in &mut self.viewports {
