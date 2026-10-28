@@ -251,3 +251,26 @@ silently disable the reference's default smoothing or change existing GPUI defau
 to claim equivalence. Investigate an explicit, narrowly scoped native input policy
 and deterministic timing/gesture/close tests before another comparative claim.
 Render-quality, equal-profile and physical-hardware gates also remain open.
+
+## Matched-profile native diagnosis before further optimization
+
+Read-only wheel investigation confirms that implementing a resampler also requires
+frame pacing, captured input position, visibility/gesture lifetime and platform
+wheel normalization. No wheel worktree, implementation or public API was created.
+The reference's automatic workloads do not inject wheel events. We can therefore
+diagnose those modes now while retaining manual wheel equivalence as an open gate;
+this does not waive any previous qualification or failed performance comparison.
+
+Protocol20919cb160f6fcc5ab85eca607b97d4173739409 on local/native-profile-control
+registers equal fat-LTO/one-codegen-unit native diagnostics of baseline, failed
+static sparse repair and pinned ZGX. The sparse composition copies the exact
+qualified deferred-control example (c965a893364b46f965c83d10e2cf94a46dac1304);
+no production libraries change. Separate worktrees/targets and preserved artifacts
+remain mandatory. Software Vulkan CPU/RSS and automatic ticks can identify the
+next measurement target, but cannot establish display latency or a framework win.
+
+The renewed upstream BBTree study is recorded in
+[UPSTREAM-2026-10-28.md](../bbtree-transfer/UPSTREAM-2026-10-28.md). Its new value-only
+update change preserves the last-leaf append proof and tests removed work with
+comparison counts. This strengthens the hypothesis of preserving valid dependency
+facts across unrelated updates, without adding a coroutine runtime by analogy.
