@@ -1,7 +1,0 @@
-81df707b233717f6dd69ae65e6567ea7c5f8baf9 baseline=final reactivity/evidence/typed-catalog/client-fixture/src/lib.rs
-5c344d067f7351efcb8beccb62063c362f34ab94 baseline=final reactivity/evidence/typed-catalog/client-fixture/src/bin/one.rs
-93022ec497ada77aa20dc5d5b61f6ce6d0bdea07 baseline=final reactivity/evidence/typed-catalog/client-fixture/src/bin/two.rs
-8626fe6cc7d5bd54c5b5bf328e31185cf03a53ae baseline=final reactivity/evidence/typed-catalog/client-fixture/libraries/action-button/src/lib.rs
-7de3cb1238c641bf9399325cdc30f6fdc4da6e2b baseline=final reactivity/evidence/typed-catalog/client-fixture/libraries/filter-chip/src/lib.rs
-a50cec829f051ac6b527b4afb0b39fbd89ac99d8 baseline=final reactivity/evidence/typed-catalog/client-fixture/Cargo.lock
-69fdd4445d7c4bc45924856789d91ded215691aa baseline=final reactivity/evidence/typed-catalog/client-fixture/Cargo.toml

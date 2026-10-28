@@ -1,7 +1,0 @@
-{
-  "utc": "2026-10-22T00:48:27.440975+00:00",
-  "cpu_pressure": "some avg10=0.00 avg60=0.00 avg300=0.08 total=3879020965\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
-  "io_pressure": "some avg10=1.72 avg60=3.09 avg300=4.62 total=34930146889\nfull avg10=1.72 avg60=3.04 avg300=4.36 total=33489196660\n",
-  "processes": [],
-  "runnable": []
-}

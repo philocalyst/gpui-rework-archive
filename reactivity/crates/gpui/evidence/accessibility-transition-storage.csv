@@ -1,5 +1,0 @@
-p_nodes,active,runtime_header_bytes,observer_box_bytes,index_capacity_bytes,index_count
-1000,false,2344,0,0,0
-1000,true,2344,80,4096,999
-10000,false,2344,0,0,0
-10000,true,2344,80,16384,0

@@ -1,8 +1,0 @@
-
-running 3 tests
-test callback_panics_quarantine_the_owner_and_explicit_close_releases_it_once ... ok
-test reactive_hdr_colors_use_the_ordinary_application_and_property_interface ... ok
-test typed_windows_use_exclusive_production_owners_and_the_same_input_barrier ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
-

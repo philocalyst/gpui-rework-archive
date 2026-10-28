@@ -1,3 +1,0 @@
-a9a1f9c5ebea9d53e955b4707ad973ab2f0010e91c4ed0b38ccd84b02b2a7030  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-nanoui-recapture-20261021/nanoui-eager-0.raw
-2f65f09c7958fa32402fc51b08421db3d2832b1ba729afdaa2f98c348fb43a55  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-nanoui-recapture-20261021/nanoui-eager-1000.raw
-cca1b4a0b3f955fc8105a05b574716475fa238f9d87f038c3429489b76bd65c6  benchmarks/nanoui-mygo-gpui/native-default-724ece73/captures/native-default-nanoui-recapture-20261021/nanoui-virtual-250000.raw

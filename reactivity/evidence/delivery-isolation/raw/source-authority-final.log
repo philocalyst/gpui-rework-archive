@@ -1,5 +1,0 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.90s
-     Running tests/inbox_storage.rs (/tmp/gpui-delivery-isolation-target/debug/build/gpui/17a68acd41c5f015/out/inbox_storage-17a68acd41c5f015)
-     Running tests/source_inbox.rs (/tmp/gpui-delivery-isolation-target/debug/build/gpui/2a094fe55767ce30/out/source_inbox-2a094fe55767ce30)
-     Running tests/source_value_isolation.rs (/tmp/gpui-delivery-isolation-target/debug/build/gpui/334539a9eabe05a9/out/source_value_isolation-334539a9eabe05a9)
-     Running tests/source_values.rs (/tmp/gpui-delivery-isolation-target/debug/build/gpui/bcaf3cd2bd21d69e/out/source_values-bcaf3cd2bd21d69e)

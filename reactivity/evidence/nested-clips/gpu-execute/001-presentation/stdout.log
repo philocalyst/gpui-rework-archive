@@ -1,9 +1,0 @@
-
-running 4 tests
-test an_explicit_hdr_pair_does_not_require_an_auto_sdr_format ... ok
-test exact_surface_requirements_reject_each_unsupported_mode_before_device_work ... ok
-test native_target_classification_retains_backend_and_lease_preparation_order ... ok
-test same_hwnd_software_recovery_is_rejected_without_a_graphics_instance ... ok
-
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-

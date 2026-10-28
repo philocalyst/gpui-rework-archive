@@ -1,1 +1,0 @@
-Evidence replay failed before archive copying: FileNotFoundError cost-a2-field_control.selected-analysis.json. The selector unintentionally included its prior *.selected.asm outputs. First successful archive1287c072a7 is preserved; idempotent successor skips selected outputs and corrects fixture support count179 to180. No compiler/test/source-production input changed.

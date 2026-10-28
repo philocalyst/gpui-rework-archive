@@ -1,5 +1,0 @@
-{
-  "vendor/cephal/src/compute/leaf.rs": "6a1198e8d436b762b67131d118e3bfeed67b810089afba23cda0edb8c107e772",
-  "vendor/cephal/src/tree/layout.rs": "bf9e06771440007bad0a5839cbe9d46e67fb763e03558f13cad0fba45292182c",
-  "crates/gpui/tests/intrinsic_text.rs": "8f0060dad4a89044b0e4dbf228f23ff0aa179f3dede1d49e718498cdf914e267"
-}

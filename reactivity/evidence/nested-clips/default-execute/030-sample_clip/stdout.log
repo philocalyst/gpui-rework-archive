@@ -1,8 +1,0 @@
-
-running 3 tests
-test nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing ... ok
-test prepared_inverse_lowering_preserves_canonical_ties_without_forward_roundtrip ... ok
-test sampled_clips_match_independent_ordinary_canvas_for_signs_ties_and_extreme_inverse ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
-

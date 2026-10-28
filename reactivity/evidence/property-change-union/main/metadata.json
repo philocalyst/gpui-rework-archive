@@ -1,7 +1,0 @@
-{
-  "source": "1d5bc3061c",
-  "command": "cargo test --offline --locked -p gpui --test property_change_union --message-format=json",
-  "passed": 11,
-  "failed": 0,
-  "scope": "Public count-union suite on combined main, not broad native/desktop qualification"
-}

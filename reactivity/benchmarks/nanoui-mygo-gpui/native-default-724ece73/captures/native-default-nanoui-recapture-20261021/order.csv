@@ -1,7 +1,0 @@
-cell,elapsed_seconds
-RUN,nanoui,eager,0
-DONE,nanoui,eager,0,25
-RUN,nanoui,eager,1000
-DONE,nanoui,eager,1000,26
-RUN,nanoui,virtual,250000
-DONE,nanoui,virtual,250000,26

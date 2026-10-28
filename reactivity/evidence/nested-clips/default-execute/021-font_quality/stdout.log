@@ -1,8 +1,0 @@
-
-running 3 tests
-test empty_glyphs_do_not_create_masks_and_clearing_cache_preserves_scene_leases ... ok
-test immutable_font_admission_has_no_eager_outline_heap ... ok
-test requested_outline_masks_have_real_coverage_and_preserve_placement ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
-

@@ -1,8 +1,0 @@
-{
-  "reactivity/Cargo.lock": "10cbf59a874b3fa8c1120f9363457731f57052b597d8e4b3af40aafb13b75383",
-  "reactivity/crates/gpui/Cargo.toml": "62133468a25b4866342dbb570261c5b7fa78c413c7b5aa6ea2c3d914973d5a44",
-  "reactivity/crates/gpui/src/native/accessibility/linux_tests.rs": "d7d49726a60eff54d2e513a8674a1590e038396fefcc8018f01014f89fbf18fd",
-  "reactivity/crates/gpui/src/native/accessibility/linux_tests/lifecycle.rs": "80eec81cc0b8986a221fc1c58549446ccbe867438f851eadd7fb7988044847a7",
-  "reactivity/vendor/accesskit_unix/Cargo.toml": "e046eb9e0b1d8fa61838f3e6005523ccf7681d349af2dee9e2fd64c67489b242",
-  "reactivity/vendor/accesskit_unix/src/adapter.rs": "0d09b3944a98998c7e7138e1077fbcd4e0ff19d1d2e09e665d14daa9273640e3"
-}

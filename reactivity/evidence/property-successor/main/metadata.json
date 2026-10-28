@@ -1,7 +1,0 @@
-{
-  "source": "06b15c1835291b40b6bbc426b8a5eee72cc2a35a",
-  "producer": "49707a4a4afc07e204133183ed3d548b065f66ed",
-  "guarded_files": 1966,
-  "source_unchanged": true,
-  "scope": "Merged bounded property/union/shell/allocation regressions plus strict alltarget checks. Full parent main651/native/cross campaign remains c717; exact outlined producer carries native/cross qualification."
-}

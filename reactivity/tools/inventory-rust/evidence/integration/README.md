@@ -1,1 +1,0 @@
-The unchanged source of `489533572f` was integrated onto `36921e2c42`. All 14 standalone tool tests and strict CLI Clippy passed; the source proof and upstream fixtures remain qualified in the adjacent frozen report. No runtime dependency or UI source is part of this command.

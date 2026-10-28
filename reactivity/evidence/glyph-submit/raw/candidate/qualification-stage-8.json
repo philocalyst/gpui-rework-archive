@@ -1,7 +1,0 @@
-{
-  "command": [
-    "python3",
-    "/home/user/gpui-glyph-submit-evidence/freeze_matrix.py"
-  ],
-  "exit": 0
-}

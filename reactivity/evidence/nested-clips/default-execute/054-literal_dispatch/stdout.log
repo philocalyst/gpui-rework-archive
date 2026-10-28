@@ -1,7 +1,0 @@
-
-running 2 tests
-test erased_numeric_failure_preserves_every_sink_and_the_pending_cohort ... ok
-test erased_size_keeps_two_sinks_latest_inspector_base_and_literal_edge_removal ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
-

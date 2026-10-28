@@ -1,7 +1,0 @@
-
-running 2 tests
-test repeated_authored_styles_keep_profile_and_signed_channel_bits ... ok
-test typed_edits_and_style_mode_changes_keep_pending_and_displayed_geometry_independent ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
-

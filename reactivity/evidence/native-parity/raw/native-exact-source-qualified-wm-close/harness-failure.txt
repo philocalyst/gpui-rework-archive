@@ -1,1 +1,0 @@
-Both-mode native trace repeats initial ACK epoch0 during re-exposure. Re-presenting the same token is valid; strict monotonic epoch assertion was incorrect. Correct rule is nondecreasing epochs, record unique epochs separately from total ACKs. Retain/revalidate existing four completed runs, run only missing idle case; no performance acceptance or timing rerun.

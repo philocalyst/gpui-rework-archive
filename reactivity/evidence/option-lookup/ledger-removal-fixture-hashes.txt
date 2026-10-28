@@ -1,2 +1,0 @@
-52aecb98462de54c32e3c255ddfa3509a7bbed7c6a060852339e4ce8c4837262  /tmp/gpui-option-lookup-target/release/examples/identity_index
-52aecb98462de54c32e3c255ddfa3509a7bbed7c6a060852339e4ce8c4837262  /tmp/gpui-option-lookup-target/release/examples/identity_index

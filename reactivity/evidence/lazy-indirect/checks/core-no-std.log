@@ -1,8 +1,0 @@
-   Compiling naga v30.0.1
-   Compiling wgpu-hal v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-hal)
-    Checking smallvec v1.15.2
-    Checking parking_lot_core v0.9.12
-   Compiling wgpu-core v30.0.1 (/tmp/gpui-lazy-indirect-sol/reactivity/vendor/wgpu-core)
-    Checking parking_lot v0.12.5
-    Checking wgpu-naga-bridge v30.0.1
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.42s

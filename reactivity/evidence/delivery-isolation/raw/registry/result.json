@@ -1,4 +1,0 @@
-{
-  "exit": 0,
-  "test": "native::accessibility::linux_tests::failure::native_atspi_failed_source_keeps_old_p_and_public_action_repairs"
-}

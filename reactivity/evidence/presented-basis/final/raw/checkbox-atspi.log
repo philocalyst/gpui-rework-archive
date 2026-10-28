@@ -1,9 +1,0 @@
-
-running 1 test
-test native::accessibility::linux_tests::checkbox::native_atspi_checkbox_action_state_and_events ... GPUI_NATIVE_LIFECYCLE late service initial=true
-GPUI_NATIVE_CHECKBOX role=7 action=DoAction(0) checked=true StateChanged:checked=1
-GPUI_NATIVE_CHECKBOX role=7 action=DoAction(0) checked=false StateChanged:checked=0
-ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 225 filtered out; finished in 0.06s
-

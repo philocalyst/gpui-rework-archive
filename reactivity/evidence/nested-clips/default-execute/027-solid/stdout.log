@@ -1,8 +1,0 @@
-
-running 3 tests
-test public_scene_metadata_edits_cannot_certify_invalid_content ... ok
-test solid_certificate_uses_exact_output_quantizer_without_rendering_or_allocating ... ok
-test unsupported_and_nonempty_scenes_use_normal_renderer ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-

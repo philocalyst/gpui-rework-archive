@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/gpui-resume-shorttext-miri-tools.py", line 13, in <module>
-    assert raw == original.read_bytes(), binary
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: /tmp/gpui-shorttext-miri-tools/bin/cargo-miri

@@ -1,7 +1,0 @@
-
-running 1 test
-test hit_test_shape::sparse_shape_clone_clear_and_headers ... ACCESSKIT_CLIP_HEADERS node=128 properties=112 indices=88 property_value=40 shape=72
-ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 361 filtered out; finished in 0.00s
-

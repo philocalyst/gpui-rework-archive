@@ -1,6 +1,0 @@
-    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/core)
-   Compiling gpui_gpu v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpu)
-    Checking gpui_canvas v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/canvas)
-    Checking gpui_reactivity_host v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/host)
-    Checking gpui v0.1.0 (/tmp/gpui-delivery-integration-sol/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 20.56s

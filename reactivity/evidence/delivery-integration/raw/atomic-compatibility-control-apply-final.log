@@ -1,9 +1,0 @@
-Applied patch to 'reactivity/crates/algebra-lab/src/lib.rs' cleanly.
-Applied patch to 'reactivity/crates/canvas/src/image.rs' cleanly.
-Applied patch to 'reactivity/crates/canvas/src/text.rs' cleanly.
-Applied patch to 'reactivity/crates/core/src/tree.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/identity.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/native/accessibility.rs' cleanly.
-Applied patch to 'reactivity/crates/host/src/lib.rs' cleanly.
-Applied patch to 'reactivity/crates/template-lab/src/lib.rs' cleanly.
-Applied patch to 'reactivity/ports/hummingbird/src/queue_playback.rs' cleanly.

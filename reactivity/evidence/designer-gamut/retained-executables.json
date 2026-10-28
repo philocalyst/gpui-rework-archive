@@ -1,8 +1,0 @@
-{
-  "failed_bare_tangent_executable": {
-    "path": "/tmp/gpui-gamut-bare-horner/unit-executable",
-    "sha256": "fd838abe0c482bb3075c3b088c329fc9931890f7351671715b92e1d7eebffb7c",
-    "bytes": 11857064
-  },
-  "note": "Executables remain at the recorded absolute paths; no binaries are committed. Capture pins identify each frozen final/reconstructed consumer and linked rlib."
-}

@@ -1,7 +1,0 @@
-
-running 2 tests
-test rejection_and_panicking_observer_preserve_the_complete_scene ... ok
-test precise_support_repairs_every_pixel_and_identical_runs_are_empty ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
-

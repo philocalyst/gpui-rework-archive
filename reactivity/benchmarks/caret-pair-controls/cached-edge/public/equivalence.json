@@ -1,9 +1,0 @@
-{
-  "cases": 83,
-  "bytes": 2678729,
-  "sha256": "1d529192f8bce827403feb865c800d20054ef98b96fa8043e29edce018f69a4f",
-  "byte_equal": true,
-  "reference_source": "recorded intrinsic-text-measure public baseline; source qualification retained there",
-  "candidate_source": "db7281e1cd76d130952cdbb6f3ea5d062b69af9f",
-  "scope": "Scene geometry/color/masks, acknowledged JSON, every source byte and both affinities/line indexes. Dev gpui/x11 behavior, no performance attribution."
-}

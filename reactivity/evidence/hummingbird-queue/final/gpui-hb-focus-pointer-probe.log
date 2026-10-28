@@ -1,7 +1,0 @@
-ACK Ok(Commit { source_epoch: 0, presentation_epoch: 0, presentation_valid: true, prepared_epoch: None, changed_nodes: 3 })
-FOCUS_INPUT Ok(Commit { source_epoch: 1, presentation_epoch: 0, presentation_valid: true, prepared_epoch: Some(1), changed_nodes: 1 })
-ACK Ok(Commit { source_epoch: 1, presentation_epoch: 1, presentation_valid: true, prepared_epoch: None, changed_nodes: 1 })
-PRESS Ok(Commit { source_epoch: 2, presentation_epoch: 1, presentation_valid: true, prepared_epoch: Some(2), changed_nodes: 0 }) focused=Ok(Some(Target { window: 1, identity: 3 }))
-RELEASE Err(PresentationStale) checked=false
-ACK Ok(Commit { source_epoch: 2, presentation_epoch: 2, presentation_valid: true, prepared_epoch: None, changed_nodes: 0 })
-FRESH_RELEASE Ok(Commit { source_epoch: 3, presentation_epoch: 2, presentation_valid: true, prepared_epoch: Some(3), changed_nodes: 1 })

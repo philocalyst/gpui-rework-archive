@@ -1,9 +1,0 @@
-   Compiling gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.31s
-     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui_canvas-3c502a0c35f4b432)
-
-running 1 test
-test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.00s
-

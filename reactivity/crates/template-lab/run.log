@@ -1,6 +1,0 @@
-   Compiling gpui_reactivity_template_lab v0.1.0 (/root/gpui-reactivity-templates/reactivity/crates/template-lab)
-    Finished `release` profile [optimized] target(s) in 0.37s
-     Running `reactivity/target/release/examples/sweep`
-navigation nodes=16 bp_bytes=8 index_bytes=12 parent+sibling+subtree_ns=49.40
-navigation nodes=128 bp_bytes=32 index_bytes=48 parent+sibling+subtree_ns=100.68
-navigation nodes=1024 bp_bytes=256 index_bytes=384 parent+sibling+subtree_ns=105.04

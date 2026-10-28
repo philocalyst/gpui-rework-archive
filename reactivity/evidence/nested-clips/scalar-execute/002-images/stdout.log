@@ -1,9 +1,0 @@
-
-running 4 tests
-test constant_images_match_independent_solid_geometry_for_every_sample ... ok
-test distinct_payload_budget_is_checked_before_publishing_a_new_resource_or_draw ... ok
-test image_identity_filter_and_removal_damage_repair_preserved_pixels ... ok
-test nearest_packed_texels_match_independent_color_rectangles ... ok
-
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
-

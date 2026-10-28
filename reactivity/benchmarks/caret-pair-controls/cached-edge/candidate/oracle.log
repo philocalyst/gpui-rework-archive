@@ -1,7 +1,0 @@
-
-running 1 test
-cursor_pairs,accepted=94176,snapped=41760,distinct=11096
-test text::planner::cursor_pair_tests::indexed_affinity_pairs_preserve_every_direct_geometry_bit ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 1.42s
-

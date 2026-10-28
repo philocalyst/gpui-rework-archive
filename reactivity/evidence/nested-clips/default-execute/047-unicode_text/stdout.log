@@ -1,7 +1,0 @@
-
-running 2 tests
-test absent_font_coverage_preserves_old_pixels_and_recovers_without_retargeting ... ok
-test mixed_bidi_and_crlf_ports_match_a_fresh_owner_after_exact_edit ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
-

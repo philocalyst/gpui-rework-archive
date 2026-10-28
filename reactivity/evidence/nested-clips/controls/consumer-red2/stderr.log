@@ -1,8 +1,0 @@
-   Compiling accesskit_consumer v0.39.1 (/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
-     Running unittests src/lib.rs (/root/target-clips-sol-nightly/debug/build/accesskit_consumer/5dad7e4f2028637d/out/accesskit_consumer-5dad7e4f2028637d)
-
-thread 'node::tests::child_clip_prunes_descendants_without_excluding_parent' (1703745) panicked at vendor/accesskit_consumer/src/node.rs:1448:50:
-called `Option::unwrap()` on a `None` value
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: test failed, to rerun pass `-p accesskit_consumer --lib`

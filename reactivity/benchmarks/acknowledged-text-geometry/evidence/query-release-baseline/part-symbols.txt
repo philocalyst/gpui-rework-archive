@@ -1,4 +1,0 @@
-0000000000a14ad0 0000000000000692 t <gpui::runtime::query::SemanticSheet>::visit::<<gpui::native::accessibility::text::Cohort>::refresh<ack_query_control::Page, ()>::{closure#2}>
-0000000000a5b4e0 000000000000014e t <gpui::runtime::query::SemanticSheet>::visit::<gpui::native::accessibility::project::{closure#0}>
-0000000000a5b630 00000000000003e4 t <gpui::runtime::query::SemanticSheet>::visit::<gpui::native::accessibility::project::{closure#1}>
-0000000000a5bbc0 000000000000002b T <gpui::runtime::query::Part>::target

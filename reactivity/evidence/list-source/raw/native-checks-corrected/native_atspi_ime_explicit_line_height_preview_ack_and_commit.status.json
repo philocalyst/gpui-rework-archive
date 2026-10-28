@@ -1,1 +1,0 @@
-{"command": ["dbus-run-session", "--", "/home/user/gpui-list-source-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521", "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit", "--ignored", "--exact", "--nocapture", "--test-threads=1"], "exit": 0}

@@ -1,6 +1,0 @@
-
-thread 'text::bundled_coverage::tests::every_unicode_scalar_matches_original_font_coverage' (589629) panicked at /tmp/gpui-coverage-certificate-fault-root/certificate.rs:55:13:
-assertion `left == right` failed: U+003B
-  left: 0
- right: 1
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

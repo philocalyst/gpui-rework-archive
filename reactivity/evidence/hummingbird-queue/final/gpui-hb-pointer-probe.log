@@ -1,2 +1,0 @@
-target=Target { window: 1, identity: 18 } click=Ok(Commit { source_epoch: 1, presentation_epoch: 1, presentation_valid: true, prepared_epoch: None, changed_nodes: 1 })
-selected=[EntryKey(1)]

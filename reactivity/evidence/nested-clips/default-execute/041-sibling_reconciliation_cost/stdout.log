@@ -1,7 +1,0 @@
-
-running 2 tests
-test ordinary_redescription_release_samples ... ignored, explicit matched release measurement
-test ordinary_redescription_requested_allocation_rows ... ok
-
-test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.44s
-

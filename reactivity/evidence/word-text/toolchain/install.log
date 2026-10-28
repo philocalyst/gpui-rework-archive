@@ -1,5 +1,0 @@
-install: creating uninstall script at /tmp/gpui-shorttext-miri-tools/lib/rustlib/uninstall.sh
-install: installing component 'miri-preview'
-
-    miri installed.
-

@@ -1,9 +1,0 @@
-error: reactivity/crates/algebra-lab/src/lib.rs: does not exist in index
-error: reactivity/crates/canvas/src/image.rs: does not exist in index
-error: reactivity/crates/canvas/src/text.rs: does not exist in index
-error: reactivity/crates/core/src/tree.rs: does not exist in index
-error: reactivity/crates/gpui/src/identity.rs: does not exist in index
-error: reactivity/crates/gpui/src/native/accessibility.rs: does not exist in index
-error: reactivity/crates/host/src/lib.rs: does not exist in index
-error: reactivity/crates/template-lab/src/lib.rs: does not exist in index
-error: reactivity/ports/hummingbird/src/queue_playback.rs: does not exist in index

@@ -1,2 +1,0 @@
-   Compiling gpui-gpu-owner-fixture v0.0.0 (/tmp/gpui-offline-shader-sol/reactivity/benchmarks/gpu-owner)
-    Finished `release` profile [optimized] target(s) in 9.15s

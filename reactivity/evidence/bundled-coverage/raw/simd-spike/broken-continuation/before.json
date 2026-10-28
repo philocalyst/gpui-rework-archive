@@ -1,6 +1,0 @@
-{
-  "Cargo.lock": "6804e05ac1d12e10f0adf0514e9cdabf75068b6250fe5e09c421ce40e6890612",
-  "Cargo.toml": "2afc8f7081e16de70e71ebd0190c6017a405c2c2a92b9f7c86c1ce166b3e648d",
-  "src/bin/coverage-events.rs": "595e093bbdc73af5bebed7c951670ec085691bda5ad7dd2115a9b40ef158d3d0",
-  "src/lib.rs": "fdf602981301e0ab1fdb0a33ee1df4e810ec05da542459f90669c0ba8aa65c9f"
-}

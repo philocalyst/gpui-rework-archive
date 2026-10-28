@@ -1,9 +1,0 @@
-[package]
-name = "luna-channel-generation-probe"
-version = "0.1.0"
-edition = "2021"
-
-[workspace]
-
-[dependencies]
-async-channel = "=2.5.0"

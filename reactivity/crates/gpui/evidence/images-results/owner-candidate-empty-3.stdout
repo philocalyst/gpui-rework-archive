@@ -1,2 +1,0 @@
-labels,image_handle_bytes,mount_us,mount_allocs,retained_bytes,peak_bytes,turn_p50_us,turn_p95_us,turn_p99_us,digest
-false,8,754.027,42,407028,407028,435.490,443.990,454.851,8966408657874976768

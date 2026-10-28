@@ -1,7 +1,0 @@
-initial-map MapNotify
-initial-map VisibilityNotify state=0
-initial-map Expose x=0 y=0 w=320 h=200 count=0
-unmap UnmapNotify
-remap MapNotify
-remap VisibilityNotify state=0
-remap Expose x=0 y=0 w=320 h=200 count=0

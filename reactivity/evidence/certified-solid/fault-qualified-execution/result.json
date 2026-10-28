@@ -1,9 +1,0 @@
-{
-  "source": "6b730a0edfa335aed7685b2df877224d5ed2c207",
-  "exit": 101,
-  "expected_pixel_failure": true,
-  "binary_sha256_matches": true,
-  "unconditional_generated_wgsl_asserted_before_execution": true,
-  "mismatch": "SDR banked=false, shear c=0.125, edge=8.124999: GPU23 CPU92",
-  "scope": "Actual Vulkan llvmpipe pixel negative; no synthetic flag or compile-failure control"
-}

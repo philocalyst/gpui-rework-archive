@@ -1,9 +1,0 @@
-Unified exec reported outer login-shell exit 127 after capture completed.
-Exact stdout/stderr tail:
-
-CAPTURE_STATUS=0 FINAL_HASH_STATUS=0
-DONE 2026-10-23 10:38:22 UTC
-/etc/bash_logout: line 4: __ETC_BASHLOGOUT_SOURCED: unbound variable
-
-The final ps guard printed no audio-clock/capture child. All 13 test child
-statuses are retained separately as exit=0 in candidate.log. No retry occurred.

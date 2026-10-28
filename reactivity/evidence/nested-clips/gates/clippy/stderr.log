@@ -1,9 +1,0 @@
-   Compiling gpui_gpu v0.1.0 (/root/gpui-clips-sol/reactivity/crates/gpu)
-    Checking accesskit_consumer v0.39.1 (/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer)
-    Checking accesskit_atspi_common v0.21.0 (/root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common)
-    Checking accesskit_unix v0.24.0 (/root/gpui-clips-sol/reactivity/vendor/accesskit_unix)
-    Checking accesskit_winit v0.34.1
-    Checking gpui_reactivity_host v0.1.0 (/root/gpui-clips-sol/reactivity/crates/host)
-    Checking gpui v0.1.0 (/root/gpui-clips-sol/reactivity/crates/gpui)
-    Checking gpui_canvas v0.1.0 (/root/gpui-clips-sol/reactivity/crates/canvas)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 21.82s

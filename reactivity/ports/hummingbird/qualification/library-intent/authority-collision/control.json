@@ -1,9 +1,0 @@
-{
-  "commit": "a357cc3c2d10813dfa56d71925bb5c06610ac9ea",
-  "test_source_sha256": "3bb2bf50a6b5deb9e23453eba37437c4362098072e0a8364b0aca4713a92c3b8",
-  "binary_sha256": "4d0bdbd71aafdecd9f09608873af8c04cc3efd89788fbafe7d6c515db259c264",
-  "command": "cargo test --manifest-path reactivity/ports/hummingbird/Cargo.toml --offline --locked --test preparation_authority_probe",
-  "expected": "recording44",
-  "observed": "recording90",
-  "exit": 101
-}

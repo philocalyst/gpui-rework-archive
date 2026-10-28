@@ -1,1 +1,0 @@
-{"command": ["/home/user/gpui-preserved-test-binaries/97fa65451d0c48c29f19a4df7dc41db8f8926279463cfb4cd38ff367f413a334", "runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger", "--exact", "--nocapture", "--test-threads=1"], "exit": 0}

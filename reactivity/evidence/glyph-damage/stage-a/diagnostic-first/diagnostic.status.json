@@ -1,1 +1,0 @@
-{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui", "--features", "x11", "--lib", "runtime::sparse_text::tests::representative_workload_local_publication_admission", "--", "--exact", "--nocapture"], "exit": 0}

@@ -1,4 +1,0 @@
-{
-  "status": "INVALIDFAULT",
-  "reason": "Copied ELF execution omitted the required Vulkan loader/driver environment and failed adapter discovery before pixels."
-}

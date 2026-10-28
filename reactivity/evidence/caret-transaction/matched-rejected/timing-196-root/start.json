@@ -1,9 +1,0 @@
-{
-  "config_sha256": "5be49fe94296f15a97eeeca1bb527121ab557be967539f3b1295999a918eb4b6",
-  "runner_sha256": "908460525c546a8df39606bc2c7d102200fe0cc612fd48240dfc4df21651452c",
-  "start_unix": 1792728626.075902,
-  "guard_before": {
-    "count": 868,
-    "all_passed": true
-  }
-}

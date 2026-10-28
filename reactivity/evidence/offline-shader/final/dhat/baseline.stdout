@@ -1,3 +1,0 @@
-enabled_features=Features { features_wgpu: FeaturesWGPU(PASSTHROUGH_SHADERS), features_webgpu: FeaturesWebGPU(0x0) }; mode=renderer
-construct=AllocationInfo { count_total: 7891, count_current: 960, count_max: 2407, bytes_total: 2194752, bytes_current: 370323, bytes_max: 741089 }; owner=888,holder=888
-release=AllocationInfo { count_total: 10, count_current: -930, count_max: 1, bytes_total: 304, bytes_current: -364639, bytes_max: 32 }

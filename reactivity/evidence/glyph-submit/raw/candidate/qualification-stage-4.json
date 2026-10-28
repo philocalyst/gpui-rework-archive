@@ -1,8 +1,0 @@
-{
-  "command": [
-    "python3",
-    "/home/user/gpui-glyph-submit-evidence/preserve_gate.py",
-    "/home/user/gpui-glyph-submit-evidence/minimal-library"
-  ],
-  "exit": 0
-}

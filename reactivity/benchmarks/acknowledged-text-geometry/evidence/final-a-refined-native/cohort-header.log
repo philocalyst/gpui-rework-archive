@@ -1,7 +1,0 @@
-
-running 1 test
-test native::accessibility::text::native_input_authority_memory_budget ... NATIVE_TEXT_AUTHORITY input=56 cohort_production=40
-ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 203 filtered out; finished in 0.00s
-

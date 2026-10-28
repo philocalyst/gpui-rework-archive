@@ -1,9 +1,0 @@
-
-running 4 tests
-test catalogue_reorder_and_prepend_preserve_key_routes_and_anchor ... ok
-test far_tail_geometry_stays_local_and_borrowed_queries_do_not_allocate ... ok
-test quarter_million_catalogue_uses_bounded_visible_rows_and_real_actions ... ok
-test the_same_library_component_routes_to_its_exclusive_parent_field ... ok
-
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
-

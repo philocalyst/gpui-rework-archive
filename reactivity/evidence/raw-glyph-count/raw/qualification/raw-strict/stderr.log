@@ -1,6 +1,0 @@
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Checking parley v0.12.0 (/tmp/gpui-coverage-integration-root/reactivity/vendor/parley)
-    Checking gpui_canvas v0.1.0 (/tmp/gpui-coverage-integration-root/reactivity/crates/canvas)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 20s

@@ -1,1 +1,0 @@
-ALTER TABLE album ADD COLUMN vinyl_numbering INTEGER DEFAULT 0 NOT NULL;

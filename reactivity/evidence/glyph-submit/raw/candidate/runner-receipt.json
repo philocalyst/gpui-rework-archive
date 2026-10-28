@@ -1,4 +1,0 @@
-{
-  "timing_sha256": "dd77e2af8e8ede770029a2fa828e6ca5c5a18609db607bcb5399cfb88ea85d11",
-  "note": "Same journaled runner as sealed glyph-damage, manifest path changed to glyph-submit; seed read from preregistered definition. Frozen before qualification/allocation/timing."
-}

@@ -1,2 +1,0 @@
-   text	   data	    bss	    dec	    hex	filename
-12553910	 293520	   4292	12851722	 c41a0a	/home/user/gpui-target-release/release/examples/retained

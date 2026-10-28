@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/gpui-delivery-isolation-captures/native_three.py", line 21, in <module>
-    assert number, 'Xvfb startup watchdog'
-           ^^^^^^
-AssertionError: Xvfb startup watchdog

@@ -1,7 +1,0 @@
-   Compiling gpui_canvas v0.1.0 (/root/gpui-clips-sol/reactivity/crates/canvas)
-   Compiling accesskit_consumer v0.39.1 (/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer)
-   Compiling skrifa v0.44.0
-   Compiling gpui v0.1.0 (/root/gpui-clips-sol/reactivity/crates/gpui)
-   Compiling swash v0.2.10
-   Compiling rustybuzz v0.20.1
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 3m 22s

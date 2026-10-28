@@ -1,7 +1,0 @@
-{
-  "source": "/tmp/gpui-hummingbird-main-eos-target/debug/examples/native_service",
-  "frozen_binary": "/tmp/gpui-hummingbird-main-source-authority-frozen-20261023/native_service",
-  "sha256": "10a3a3b9562d327a7aa9833267270c3e2347f772ec013b84f1e8e465253a6494",
-  "bytes": 466935944,
-  "runtime": "9f83f23288bbb364142ff2a82d059b6d99670a7e"
-}

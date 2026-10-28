@@ -1,6 +1,0 @@
-{
-  "source": "eb763b6399c360c8a64999bbf54c1af138813481",
-  "sha256": "fac03acb574f956b45025ca132cdd10ef881d440b2bb506403fa03d649ea016a",
-  "exit": 101,
-  "expected_allocation_failure": true
-}

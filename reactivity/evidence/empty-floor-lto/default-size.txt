@@ -1,2 +1,0 @@
-   text	   data	    bss	    dec	    hex	filename
-19079607	 478064	  10580	19568251	12a967b	/root/gpui-empty-floor-target-default/release/examples/empty

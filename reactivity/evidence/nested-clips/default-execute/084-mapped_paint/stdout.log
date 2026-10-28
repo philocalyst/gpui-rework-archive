@@ -1,8 +1,0 @@
-
-running 3 tests
-test alpha_changes_and_two_changed_slots_preserve_complete_pixels ... ok
-test mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn ... ok
-test one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_scene ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.83s
-

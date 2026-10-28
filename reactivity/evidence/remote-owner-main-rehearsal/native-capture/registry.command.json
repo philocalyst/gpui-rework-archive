@@ -1,9 +1,0 @@
-{
-  "argv": [
-    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
-    "/tmp/gpui-remote-owner-main-qualification/native-capture/registry.py"
-  ],
-  "display": ":0",
-  "timeout_seconds": 110,
-  "scope": "functional integration; watchdogs detect failure, no timing comparison"
-}

@@ -1,6 +1,0 @@
-   Compiling accesskit_consumer v0.39.1 (/root/gpui-clips-sol/reactivity/vendor/accesskit_consumer)
-   Compiling accesskit_atspi_common v0.21.0 (/root/gpui-clips-sol/reactivity/vendor/accesskit_atspi_common)
-   Compiling accesskit_unix v0.24.0 (/root/gpui-clips-sol/reactivity/vendor/accesskit_unix)
-   Compiling accesskit_winit v0.34.1
-   Compiling gpui v0.1.0 (/root/gpui-clips-sol/reactivity/crates/gpui)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 42.97s

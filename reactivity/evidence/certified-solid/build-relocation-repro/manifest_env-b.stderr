@@ -1,3 +1,0 @@
-   Compiling gpui_relocation_probe v0.1.0 (/tmp/gpui-build-relocation-repro/manifest_env/b/crates/probe)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
-     Running `/tmp/gpui-build-relocation-repro/manifest_env/target/debug/gpui_relocation_probe`

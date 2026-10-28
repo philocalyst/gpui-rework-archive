@@ -1,9 +1,0 @@
-   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
-error[E0433]: cannot find type `CoordinateSpace` in this scope
-   --> crates/gpui/src/runtime/query.rs:238:37
-    |
-238 |                     .and_then(|map| CoordinateSpace::new(map).bounds(node.rect))
-    |                                     ^^^^^^^^^^^^^^^ use of undeclared type `CoordinateSpace`
-
-For more information about this error, try `rustc --explain E0433`.
-error: could not compile `gpui` (lib test) due to 1 previous error

@@ -1,4 +1,0 @@
-adapter=AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }; counters=false
-enabled_features=Features { features_wgpu: FeaturesWGPU(PASSTHROUGH_SHADERS), features_webgpu: FeaturesWebGPU(0x0) }; mode=context
-construct=AllocationInfo { count_total: 66, count_current: 41, count_max: 45, bytes_total: 9508, bytes_current: 7874, bytes_max: 7986 }; owner=48,holder=48
-release=AllocationInfo { count_total: 3, count_current: -28, count_max: 1, bytes_total: 80, bytes_current: -5234, bytes_max: 32 }

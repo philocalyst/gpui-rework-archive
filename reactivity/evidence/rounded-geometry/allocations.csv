@@ -1,9 +1,0 @@
-operation,allocations,requested_bytes,note
-construct_plain_div,0,0,no extra payload
-construct_rounded_div,1,56,cold ElementExtra
-construct_named_div,1,56,unchanged semantic-only path
-construct_rounded_named_div,2,104,both builder orders
-first_plain_canvas_rectangle,3,448,command lanes
-first_rounded_canvas_solid,3,448,same command lanes
-additional_rounded_existing_image,0,0,pre-reserved placement and shared existing pixels
-prototype_first_rounded_existing_image,2,56,rejected radius table implementation at 90ac1f3291

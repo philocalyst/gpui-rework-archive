@@ -1,3 +1,0 @@
-2097154 "GPUI canonical text native control"
-attributes GetWindowAttributesReply { .. }; protocols GetPropertyReply { .. }; delete 237
-checked close request sent

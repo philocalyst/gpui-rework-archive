@@ -1,6 +1,0 @@
-Pinned reference a3678578980ef239058c557338ef9c544d356b0c, clean checkout.
-crates/zgx-desktop/src/scrollers.rs:step(None) returns40; wheel_step scales for Linux desktop settings.
-crates/zgx-desktop/src/scroll_resample.rs:enabled() defaults true; ZGX_SCROLL_RESAMPLE=0 documented raw-input path.
-crates/zgx-desktop/src/application.rs:3425..3450 converts input with wheel_step and queues resampling.
-crates/zgx-desktop/examples/component_workload.rs:ROW_HEIGHT28 is passed to virtual_list; no wheel28 override.
-Earlier wheel28 notes confused row pitch with native conversion. Superseded, no measured input result changes.

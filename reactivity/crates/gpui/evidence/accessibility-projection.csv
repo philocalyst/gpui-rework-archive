@@ -1,7 +1,0 @@
-implementation,buttons,projected_nodes,allocations,requested_retained_bytes,requested_peak_bytes,p50_ns,p95_ns,p99_ns,samples,profile
-geometric_vec,100,102,220,35206,37417,15120,16020,16811,31,release
-exact_two_pass,100,102,214,31670,31766,14521,14850,15360,31,release
-geometric_vec,1000,1002,2026,311830,311926,136714,169024,169394,31,release
-exact_two_pass,1000,1002,2017,308838,308934,132802,136363,142773,31,release
-geometric_vec,10000,10002,20034,3999670,4751657,1379251,1399162,1409402,31,release
-exact_two_pass,10000,10002,20021,3131718,3131814,1364561,1564405,1646077,31,release

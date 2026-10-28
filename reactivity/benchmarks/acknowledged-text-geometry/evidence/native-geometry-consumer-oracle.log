@@ -1,9 +1,0 @@
-   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
-error[E0425]: cannot find function `scroll_view` in the crate root
-  --> crates/gpui/src/native/accessibility/geometry_tests.rs:23:20
-   |
-23 |             crate::scroll_view(
-   |                    ^^^^^^^^^^^ not found in the crate root
-
-For more information about this error, try `rustc --explain E0425`.
-error: could not compile `gpui` (lib test) due to 1 previous error

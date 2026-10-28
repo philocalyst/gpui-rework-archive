@@ -1,8 +1,0 @@
-{
-  "source": "3ae5b7c0be0c07fbc02d4405d0b829e866428a37",
-  "binary": "/tmp/gpui-delivery-isolation-target/debug/build/gpui/af5e71188c24e155/out/gpui-af5e71188c24e155",
-  "sha256": "05cde3eaad6fdfb84059d37a81bc4ca5a5c83c17c648f138eb636f52e8db6e4a",
-  "bytes": 692530448,
-  "first_external_attempt": "Xvfb5s readiness failure; no application case started; display reaped",
-  "note": "hash recorded after failed readiness; historical6474 executable was never used or overwritten"
-}

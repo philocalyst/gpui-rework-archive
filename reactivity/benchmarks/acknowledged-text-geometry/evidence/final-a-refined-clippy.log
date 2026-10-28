@@ -1,5 +1,0 @@
-    Checking gpui_reactivity_core v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/core)
-    Checking gpui_canvas v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/canvas)
-    Checking gpui_gpu v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpu)
-    Checking gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 16.67s

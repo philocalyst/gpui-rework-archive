@@ -1,5 +1,0 @@
-{
-  "actual_exit": 101,
-  "source_sha256": "4bb6e094ceb9dc47d3c7a6108585237a429da75bfadc028a195b067cf55c9736",
-  "fault": "incorrect sparse residency after failed prepare"
-}

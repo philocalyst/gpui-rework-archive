@@ -1,7 +1,0 @@
-
-running 1 test
-SOURCE_HEADERS handle=8 producer=40 producer_arc_allocation=56 version=16
-test worker::authority_tests::failed_import_does_not_publish_a_new_version_and_header_bill_is_explicit ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.06s
-

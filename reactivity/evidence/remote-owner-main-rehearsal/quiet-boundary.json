@@ -1,8 +1,0 @@
-{
-  "supervisor_pid": 3121654,
-  "current_cargo_pid": 3153425,
-  "action": "Paused wrapper only to prevent queued Clippy. Current native Cargo continues; preserve actual exit before terminating wrapper. No new phases permitted until quiet end.",
-  "cargo_raw_wait_status": 0,
-  "cargo_exit": 0,
-  "exit_source": "Linux /proc stat field52 while exited Cargo remains unreaped by stopped wrapper"
-}

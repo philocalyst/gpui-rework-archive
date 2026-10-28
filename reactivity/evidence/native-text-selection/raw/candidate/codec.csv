@@ -1,4 +1,0 @@
-case,units,escapes,source_bytes,construct_allocations,construct_retained,construct_peak,construct_total,clone_allocations,clone_retained,u32_payload_allocations,u32_payload_retained
-ordinary,1024,0,1024,8,1024,1536,2040,3,2128,1,4096
-mixed,1024,1,1424,10,1028,2060,3076,3,2532,1,4096
-huge,1,1,8193,3,5,21,21,3,8278,1,4

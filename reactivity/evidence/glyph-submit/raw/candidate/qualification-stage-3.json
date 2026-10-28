@@ -1,9 +1,0 @@
-{
-  "command": [
-    "python3",
-    "/home/user/gpui-glyph-submit-evidence/minimal_gate.py",
-    "minimal-library",
-    "native-units"
-  ],
-  "exit": 0
-}

@@ -1,9 +1,0 @@
-    Checking parley_engine v0.12.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/parley_engine)
-    Checking cephal v0.1.1 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/cephal)
-    Checking gpui_reactivity_core v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/core)
-    Checking parley v0.12.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/vendor/parley)
-    Checking gpui_canvas v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/canvas)
-    Checking gpui_reactivity_state v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/state)
-    Checking gpui v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/crates/gpui)
-    Checking hummingbird-gpui-port v0.1.0 (/root/gpui-hummingbird-eos-authority-sol/reactivity/ports/hummingbird)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 36.15s

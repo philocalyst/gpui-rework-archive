@@ -1,8 +1,0 @@
-Applied patch to 'reactivity/crates/gpui/src/native.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/native/remote_tests.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/reader/question.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/remote.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/runtime/delivery.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/runtime/turn.rs' cleanly.
-Applied patch to 'reactivity/crates/gpui/src/source.rs' cleanly.
-Falling back to direct application...

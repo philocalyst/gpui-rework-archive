@@ -1,7 +1,0 @@
-{
-  "producer": "680adc1c16365ee4f03d3b036162fbeaadb1a6e7",
-  "production": "d198075bbc604a06ac75c1f84261f9601687c90b",
-  "verified_evidence_files": 68,
-  "byte_identical_rust_wgsl_manifests_and_config_files_excluding_docs_evidence": 1168,
-  "scope": "Exact reviewed transport only; no Hummingbird application patch or source-path experiment. Initial coordinator verifier traversed an uncopied evidence probe and stopped before evidence/docs/commit; source verification repeated with docs/evidence excluded."
-}

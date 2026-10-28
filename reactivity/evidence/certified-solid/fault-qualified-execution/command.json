@@ -1,7 +1,0 @@
-[
-  "/tmp/gpui-lowered-solid-evidence/fault-qualified-execution/render-unconditional",
-  "axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties",
-  "--exact",
-  "--nocapture",
-  "--test-threads=1"
-]

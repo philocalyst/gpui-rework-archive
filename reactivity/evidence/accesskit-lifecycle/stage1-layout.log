@@ -1,9 +1,0 @@
-   Compiling accesskit_unix v0.24.0 (/root/gpui-a11y-lifecycle/reactivity/vendor/accesskit_unix)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.35s
-     Running unittests src/lib.rs (gpui-a11y-target/debug/deps/accesskit_unix-b3ceddec36dc2842)
-
-running 1 test
-lifecycle bytes: Message=72 AdapterState=88 Callback=8 AdapterEntry=48
-test context::lifecycle_type_layout ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s

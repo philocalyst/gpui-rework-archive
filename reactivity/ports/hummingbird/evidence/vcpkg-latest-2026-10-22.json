@@ -1,6 +1,0 @@
-{
-  "latest_stable": "0.2.15",
-  "checksum": "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426",
-  "url": "https://crates.io/api/v1/crates/vcpkg",
-  "rust_version": null
-}

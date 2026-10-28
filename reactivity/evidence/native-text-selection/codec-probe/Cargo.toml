@@ -1,8 +1,0 @@
-[package]
-name = "gpui-a11y-codec-probe-final"
-version = "0.0.0"
-edition = "2024"
-[workspace]
-[dependencies]
-accesskit = { path = "../../../vendor/accesskit" }
-allocation-counter = "=0.8.1"

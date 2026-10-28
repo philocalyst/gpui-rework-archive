@@ -1,8 +1,0 @@
-   Compiling parley_engine v0.12.0 (/tmp/gpui-text-capacity-root/reactivity/vendor/parley_engine)
-   Compiling skrifa v0.44.0
-   Compiling parley v0.12.0 (/tmp/gpui-text-capacity-root/reactivity/vendor/parley)
-   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-text-capacity-root/reactivity/crates/core)
-   Compiling rustybuzz v0.20.1
-   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-capacity-root/reactivity/crates/canvas)
-   Compiling swash v0.2.10
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.04s

@@ -1,8 +1,0 @@
-gpui_canvas v0.1.0 (/tmp/gpui-gamut-expansion-source/reactivity/crates/canvas)
-└── gamut_consumer v0.1.0 (/tmp/gpui-gamut-expansion-consumer)
-    ├── gamut_consumer feature "default" (command-line)
-    ├── gamut_consumer feature "primitive" (command-line)
-    └── gamut_consumer feature "simd"
-        └── gamut_consumer feature "default" (command-line)
-└── gpui_canvas feature "simd"
-    └── gamut_consumer feature "simd" (*)

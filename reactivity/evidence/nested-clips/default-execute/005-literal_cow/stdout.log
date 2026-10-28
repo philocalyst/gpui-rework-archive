@@ -1,7 +1,0 @@
-
-running 2 tests
-test dropped_and_rejected_transactions_preserve_all_aliases_and_future_source_updates ... ok
-test equal_and_changed_positional_writes_detach_locally_without_mutating_literal_peers ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-

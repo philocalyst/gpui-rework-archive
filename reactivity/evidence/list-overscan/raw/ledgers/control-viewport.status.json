@@ -1,1 +1,0 @@
-{"command": ["/home/user/gpui-line-height-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521", "runtime::scroll::tests::viewport_storage_and_allocation_ledger", "--exact", "--nocapture", "--test-threads=1", "--ignored"], "exit": 0}

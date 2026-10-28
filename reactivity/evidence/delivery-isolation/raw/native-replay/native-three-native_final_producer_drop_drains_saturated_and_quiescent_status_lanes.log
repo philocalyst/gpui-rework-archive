@@ -1,6 +1,0 @@
-
-running 1 test
-test native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 246 filtered out; finished in 0.27s
-

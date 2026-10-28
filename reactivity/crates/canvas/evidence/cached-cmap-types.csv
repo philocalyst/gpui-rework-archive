@@ -1,6 +1,0 @@
-type,baseline_bytes,candidate_bytes,alignment
-Planner,2240,2344,8
-Cmap,,32,8
-TextShaper,16,16,8
-TextLayout,56,56,8
-ttf_parser::Face,2776,2776,8

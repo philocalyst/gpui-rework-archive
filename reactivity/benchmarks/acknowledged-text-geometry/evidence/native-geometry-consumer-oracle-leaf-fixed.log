@@ -1,9 +1,0 @@
-   Compiling gpui v0.1.0 (/root/gpui-acknowledged-text-geometry/reactivity/crates/gpui)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 28.93s
-     Running unittests src/lib.rs (/tmp/gpui-acknowledged-text-target/debug/deps/gpui-570045ec564061e7)
-
-running 1 test
-test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 0.02s
-

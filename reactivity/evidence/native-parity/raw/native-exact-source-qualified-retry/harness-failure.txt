@@ -1,1 +1,0 @@
-First close attempt left modifier state in private X display; immediate retry exited with zero ticks. Release Alt/F4 before later run. Source unchanged; no timing verdict.

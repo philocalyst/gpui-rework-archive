@@ -1,5 +1,0 @@
-00000000009b2330 0000000000000142 t <gpui::runtime::Win<ack_query_control::Page>>::visit::<ack_query_control::query_visit_control::{closure#0}>
-0000000000a05be0 0000000000000e80 t <gpui::runtime::query::SemanticSheet>::visit::<<gpui::native::accessibility::text::Cohort>::refresh<ack_query_control::Page, ()>::{closure#2}>
-0000000000a7b8c0 0000000000000450 t <gpui::runtime::query::SemanticSheet>::visit::<gpui::native::accessibility::project::{closure#1}>
-0000000000a7c3f0 0000000000000064 T <gpui::runtime::query::Part>::text_geometry_lease
-0000000000a7c590 0000000000000054 T <gpui::runtime::query::Part>::target

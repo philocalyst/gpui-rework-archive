@@ -1,7 +1,0 @@
-{
-  "sha256": "bbf1697891460e3c33c56bad101a5d1acf4ae5cd2508aa360175cdce4065bb49",
-  "bytes": 8490746,
-  "members": 905,
-  "all_payload_hashes_reverified": true,
-  "scope": "Commands, source guards, logs, ELF identities, shaders, public outputs and focused disassembly. Large executable/full-disassembly payloads remain at hashed external paths."
-}

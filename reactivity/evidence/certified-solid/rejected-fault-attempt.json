@@ -1,7 +1,0 @@
-{
-  "attempt_source": "6b730a0edfa335aed7685b2df877224d5ed2c207",
-  "target": "/tmp/gpui-lowered-solid-target",
-  "attempt_result": "/tmp/gpui-lowered-solid-fault-gate/result.json",
-  "rejected": true,
-  "reason": "Shared target across worktrees reused the candidate generated ui.wgsl from the previous build script. Mutant source said if true, but every generated ui.wgsl still had the guarded tag test. The passing pixel test is not an actual mutant result. Captured binaries in rejected-shared-target-fault-binaries are not assigned to the original positive gate."
-}

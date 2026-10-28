@@ -1,4 +1,0 @@
-clang version 21.1.8
-Target: x86_64-unknown-linux-gnu
-Thread model: posix
-InstalledDir: /nix/store/kfhjmd11ml2i4kpn57577k89ag4makaw-clang-21.1.8/bin

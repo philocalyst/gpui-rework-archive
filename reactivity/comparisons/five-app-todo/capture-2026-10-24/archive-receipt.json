@@ -1,8 +1,0 @@
-{
-  "archive": "raw-evidence.tar.gz",
-  "sha256": "dd938aabca196808085cb803fbbb4341b97018f2f9d1a190aeeab413803ae982",
-  "bytes": 16550096,
-  "members": 987,
-  "every_member_sha256_verified_after_write": true,
-  "inventory_sha256": "69ec99f4eea16136fec2a29fcb5a9d0423d9317b62de8b7e8b9b55066b2c779d"
-}

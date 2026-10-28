@@ -1,9 +1,0 @@
-    Checking ash v0.38.0+1.3.281
-    Checking khronos-egl v6.0.0
-    Checking gpu-allocator v0.28.0
-    Checking wgpu-hal v30.0.1 (/home/user/gpui-architecture-local/reactivity/vendor/wgpu-hal)
-    Checking wgpu-core-deps-windows-linux-android v30.0.1
-    Checking wgpu-core v30.0.1 (/home/user/gpui-architecture-local/reactivity/vendor/wgpu-core)
-    Checking wgpu v30.0.1 (/home/user/gpui-architecture-local/reactivity/vendor/wgpu)
-    Checking gpui_gpu v0.1.0 (/home/user/gpui-architecture-local/reactivity/crates/gpu)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 51.58s

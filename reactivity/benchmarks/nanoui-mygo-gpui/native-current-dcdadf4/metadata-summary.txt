@@ -1,6 +1,0 @@
-workspace_root=/root/gpui-current-main-bench/reactivity
-package_id=path+file:///root/gpui-current-main-bench/reactivity/crates/gpui#0.1.0
-manifest_path=/root/gpui-current-main-bench/reactivity/crates/gpui/Cargo.toml
-fixture_source_sha256=a2c7b0a4992efa06719127cba59978aff62536d8d61994ca8c4c7dceb4f67c29
-archive_sha256=44b159f600161982195d30a8d876e0df35665feeb460561faccc846052b0824b
-source_tree_diff=clean

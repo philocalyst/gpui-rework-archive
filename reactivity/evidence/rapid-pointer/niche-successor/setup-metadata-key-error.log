@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/tmp/gpui-pointer-niche-runner.py", line 7, in <module>
-    keys=json.loads((root/'reactivity/evidence/rapid-pointer/baseline-4d/controls/before.json').read_text())['files']
-         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-KeyError: 'files'

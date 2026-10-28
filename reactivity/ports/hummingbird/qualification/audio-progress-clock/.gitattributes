@@ -1,2 +1,0 @@
-# Preserve console captures byte-for-byte, including test-harness whitespace.
-*.log -whitespace

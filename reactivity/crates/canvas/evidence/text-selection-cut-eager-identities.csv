@@ -1,7 +1,0 @@
-path,sha256
-/root/gpui-text-query-baseline-target/release/examples/selection_queries,f84aa17679942db12c3f168f632e4b160f8fd4981a61b72cdb860f07d29c3120
-/root/gpui-text-selection-cut-target/release/examples/selection_queries,e4b5dc494b5580d980772607774a82f0742840ad360c3b2139a4b1cb287b9da4
-/root/gpui-text-query-baseline/reactivity/crates/canvas/src/text/layout/interaction.rs,55da870fe055d5b40d00eb30b48d0393c551626cbbcad868d8f01df4da11f28a
-/root/gpui-text-selection-cut/reactivity/crates/canvas/src/text/layout/interaction.rs,440b3440a83c80b378c22baf94aed5443d429c5879dd708522d48ce595c4f0d4
-/root/gpui-text-query-baseline/reactivity/crates/canvas/examples/selection_queries.rs,4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7
-/root/gpui-text-selection-cut/reactivity/crates/canvas/examples/selection_queries.rs,4eb5b738d1cbcb06e94ef24832ff48fa689674e86eb3200bc96fb0263664b0b7

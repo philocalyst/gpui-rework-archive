@@ -1,3 +1,0 @@
-error: no test target named `query` in `gpui` package
-
-help: a target with a similar name exists: `queries`

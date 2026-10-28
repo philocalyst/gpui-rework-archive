@@ -1,1 +1,0 @@
-Failed to get property IsEnabled on interface org.a11y.Status: The name is not activatable

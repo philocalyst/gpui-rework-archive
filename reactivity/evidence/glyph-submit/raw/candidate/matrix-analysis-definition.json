@@ -1,7 +1,0 @@
-{
-  "analysis_sha256": "57d6151b699b58fd22af2d15a594cfe9181eb0ef3af77746c6cc510a70512d79",
-  "run_driver_sha256": "dd77e2af8e8ede770029a2fa828e6ca5c5a18609db607bcb5399cfb88ea85d11",
-  "seed": 20261031,
-  "resamples": 10000,
-  "estimator": "median of 24 paired process-p50 ratios, type-7 tail/interval quantiles; unchanged thresholds in protocol"
-}

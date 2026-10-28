@@ -1,8 +1,0 @@
-
-running 3 tests
-test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes
-test shared_face_accepts_cross_service_layouts_but_caches_are_independent ... ok
-test supplied_font_bytes_are_owned_once_by_the_shared_face ... ok
-
-test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
-

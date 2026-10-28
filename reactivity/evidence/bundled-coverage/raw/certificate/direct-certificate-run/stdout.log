@@ -1,7 +1,0 @@
-
-running 2 tests
-test text::bundled_coverage::tests::certificate_is_a_complete_maximal_partition ... ok
-test text::bundled_coverage::tests::every_unicode_scalar_matches_original_font_coverage ... ok
-
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
-

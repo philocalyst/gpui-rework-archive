@@ -1,8 +1,0 @@
-{
-  "source": "f0bd5335aeb831523f5c52777911b6052c7cabac",
-  "features": "desktop,x11,wayland,gpui_canvas/parallel,cephal/verify-cache,gpui_gpu/offline-shader,gpui_gpu/vulkan-tests",
-  "source_unchanged": null,
-  "owned_display_stopped": null,
-  "executables": {},
-  "limits": "Combined behavior and allocator/geometry accounting, not timing, RSS, native HDR, hardware conformance or foreign-OS runtime."
-}

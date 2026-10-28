@@ -1,3 +1,0 @@
-gpui_canvas v0.1.0 (/root/gpui-designer-gamut/reactivity/crates/canvas)
-└── gamut_consumer v0.1.0 (/tmp/gpui-gamut-consumer)
-    └── gamut_consumer feature "primitive" (command-line)

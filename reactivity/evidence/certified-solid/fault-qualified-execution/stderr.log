@@ -1,5 +1,0 @@
-adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
-
-thread 'axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties' (1346400) panicked at crates/gpu/tests/render.rs:3353:33:
-SDR bankedfalse Affine { a: 1.0, b: 0.0, c: 0.125, d: 1.0, tx: 0.0, ty: 0.0 } edge8.124999: GPU23 CPU92
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,5 +1,0 @@
-{
-  "copied_frozen_fixture": "/tmp/gpui-delivery-integration-captures/field_control.rs",
-  "sha256": "74b55ad51543f176746cc55065c34b9cb7ab77ed90e1df4e45461a5cf2108d0a",
-  "only_changed_path": "reactivity/crates/gpui/examples/field_control.rs"
-}

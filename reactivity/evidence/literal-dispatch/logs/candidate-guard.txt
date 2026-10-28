@@ -1,7 +1,0 @@
-pin,literal-dispatch,582bca7cd0a2836a86c21f82e52cd55515e14d88
-guard,builder,width,allocations=0
-guard,builder,fields,allocations=0
-guard,builder,recipe,allocations=0
-guard,pixels,1,digest=4f62c02429f093a5
-guard,pixels,60,digest=6e3d8fbd724e3c61
-guard,pixels,139,digest=6e3d8fbd724e3c61

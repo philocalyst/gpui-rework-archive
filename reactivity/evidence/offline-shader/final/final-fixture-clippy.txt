@@ -1,9 +1,0 @@
-    Checking wgpu-types v30.0.1
-    Checking wgpu-naga-bridge v30.0.1
-    Checking wgpu-hal v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu-hal)
-    Checking wgpu-core-deps-windows-linux-android v30.0.1
-    Checking wgpu-core v30.0.1
-    Checking wgpu v30.0.1 (/tmp/gpui-offline-shader-sol/reactivity/vendor/wgpu)
-    Checking gpui_gpu v0.1.0 (/tmp/gpui-offline-shader-sol/reactivity/crates/gpu)
-    Checking gpui-gpu-owner-fixture v0.0.0 (/tmp/gpui-offline-shader-sol/reactivity/benchmarks/gpu-owner)
-    Finished `release` profile [optimized] target(s) in 14.76s

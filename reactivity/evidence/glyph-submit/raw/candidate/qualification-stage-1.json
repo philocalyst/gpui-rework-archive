@@ -1,8 +1,0 @@
-{
-  "command": [
-    "python3",
-    "/home/user/gpui-glyph-submit-evidence/preserve_unit.py",
-    "/home/user/gpui-glyph-submit-evidence/full-native"
-  ],
-  "exit": 0
-}

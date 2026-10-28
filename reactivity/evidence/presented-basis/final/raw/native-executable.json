@@ -1,8 +1,0 @@
-{
-  "source": "9c1dbdf1e0a8ca15be8624cb68d295db9fcb36b3",
-  "built_path": "/tmp/gpui-presented-basis-target/debug/deps/gpui-bc29ffeac34bc65f",
-  "frozen_path": "/tmp/gpui-presented-basis-native-9c1d-frozen",
-  "bytes": 716049416,
-  "sha256": "5a574b88676f3da694db360ecea6ad5ecb6485d9b2d0cf1c0092abbaafe0241b",
-  "kind": "unstripped debug native test executable; not a shipping binary"
-}

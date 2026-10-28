@@ -1,4 +1,0 @@
-_RNvMsg_NtCs9S44gUqPSHd_11gpui_canvas6canvasNtB5_11CanvasScene11create_clip:
-	.cfi_startproc
-	jmpq	*_RNvMs5_NtNtCs9S44gUqPSHd_11gpui_canvas6canvas5clipsNtB7_6Canvas11create_clip@GOTPCREL(%rip)
-.Lfunc_end400:

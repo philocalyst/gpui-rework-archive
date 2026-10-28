@@ -1,7 +1,0 @@
-{
-  "reviewer": "root",
-  "source_commit": "724ece73cb665a1f6d83e97ae7d431eee11a887a",
-  "scope": "Previously accepted 724 native-default preflight approved by root for the 724-versus-current GPUI capture.",
-  "paired_comparison": "same fixture SHA, native-default Auto policy, and three reviewed workloads",
-  "not_timing_evidence": true
-}

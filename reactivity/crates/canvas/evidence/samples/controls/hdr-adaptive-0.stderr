@@ -1,1 +1,0 @@
-output=ColorConfig { profile: Srgb, format: Rgba16Float, mapping: Clip, reference_white_nits: 203.0 }

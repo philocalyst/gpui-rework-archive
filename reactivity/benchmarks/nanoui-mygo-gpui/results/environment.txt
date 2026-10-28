@@ -1,9 +1,0 @@
-GPUI_WORKTREE_COMMIT=78824355bc4ceb1523bdbd21404b8380a50d9e7d
-NANOUI_COMPARATOR_COMMIT=dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
-MYGO_COMPARATOR_COMMIT=ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
-rustc 1.97.1 (8bab26f4f 2026-07-14)
-cargo 1.97.1 (c980f4866 2026-06-30)
-0.17.0
-go version go1.27.1 linux/amd64
-Linux ilo-prod 6.18.54 #1-NixOS SMP PREEMPT_DYNAMIC Fri Sep 25 14:35:54 UTC 2026 x86_64 GNU/Linux
-DISPLAY=:94 Xvfb=1280x800x24 (persistent server, observer connection warm per cell)

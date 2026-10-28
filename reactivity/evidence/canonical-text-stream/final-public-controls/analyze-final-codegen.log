@@ -1,4 +1,0 @@
-baseline canonical-text-public-control {'.rodata': 6533440, '.eh_frame': 223208, '.text': 3519479, '.data.rel.ro': 132432, '.stack_sizes': 33503} selected unique 82356
-baseline canonical-text-native-control {'.rodata': 7211432, '.eh_frame': 988472, '.text': 11664279, '.data.rel.ro': 399160, '.stack_sizes': 154608} selected unique 160460
-candidate canonical-text-public-control {'.rodata': 6533440, '.eh_frame': 222956, '.text': 3515015, '.data.rel.ro': 132432, '.stack_sizes': 33458} selected unique 77334
-candidate canonical-text-native-control {'.rodata': 7211304, '.eh_frame': 988172, '.text': 11661175, '.data.rel.ro': 399152, '.stack_sizes': 154562} selected unique 156821

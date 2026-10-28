@@ -1,8 +1,0 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
-     Running unittests src/lib.rs (/tmp/gpui-hummingbird-audio-target/debug/deps/hummingbird_gpui_port-83171c4a06793006)
-
-running 1 test
-test audio::pipeline::resource_tests::complete_pipeline_matches_rubato_across_packet_splits_join_and_partial_acceptance ... ok
-
-test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 0.53s
-

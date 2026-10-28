@@ -1,4 +1,0 @@
-
-thread 'axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties' (1346273) panicked at crates/gpu/tests/render.rs:130:10:
-Vulkan test adapter is required: NotFound { active_backends: Backends(0x0), requested_backends: Backends(VULKAN), supported_backends: Backends(VULKAN | GL), no_fallback_backends: Backends(0x0), no_adapter_backends: Backends(0x0), incompatible_surface_backends: Backends(0x0) }
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

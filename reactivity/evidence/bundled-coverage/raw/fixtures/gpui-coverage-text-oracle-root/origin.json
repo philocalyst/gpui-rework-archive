@@ -1,9 +1,0 @@
-{
-  "original_fixture_pin": "54a1d2781529a8327bb035d2621b632d444be9d5",
-  "source_before": "2b52030aed8344ed9c5f6dcf54b2ba19acf8ddf4",
-  "source_path": "/tmp/gpui-coverage-integration-root",
-  "main_original_sha256": "c7dcea9813a30ae9e2c977afd4e34034d8c6b4c27eea10f084fac01a22250c10",
-  "main_change": "Only include_bytes font path points to copied identical local asset. No input, loop, oracle or formatter change.",
-  "font_sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d",
-  "measurement_api": "disabled; this baseline supports the existing shape and shape_interactive APIs only"
-}

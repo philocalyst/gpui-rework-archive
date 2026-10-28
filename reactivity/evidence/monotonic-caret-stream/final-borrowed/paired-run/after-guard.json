@@ -1,9 +1,0 @@
-{
-  "source_and_binary_guards_passed": true,
-  "variant_guards": {
-    "baseline": 421,
-    "final": 421
-  },
-  "runner_sha256": "bf6762663c55fe242030292323190fae5d18c86f20a509242f135b4ca8e51bec",
-  "metadata_sha256": "e6bc0efa1d2fae23d93fd0569d342519e07ca5f14807d4882abba419e84add0a"
-}

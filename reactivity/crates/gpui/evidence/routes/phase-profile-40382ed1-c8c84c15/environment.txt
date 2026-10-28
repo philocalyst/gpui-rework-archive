@@ -1,6 +1,0 @@
-OS: Linux ilo-prod x86_64, kernel 6.18.54, NixOS
-Rust: rustc 1.97.1 (8bab26f4f 2026-07-14), LLVM 22.1.6
-target: x86_64-unknown-linux-gnu
-capture: 11 fresh-process alternating pairs; candidate-first on even round, baseline-first on odd round
-workload: route_storage_measure --case=4096,1,true
-strace: not run

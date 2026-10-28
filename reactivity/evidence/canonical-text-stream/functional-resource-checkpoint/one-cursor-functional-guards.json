@@ -1,8 +1,0 @@
-{
-  "source_head": "9f934e85b5b6211a3985b830ce4dcc672a1ffe16",
-  "source_files_unchanged": 1983,
-  "public_canvas_tests": 25,
-  "public_gpui_tests": 57,
-  "native_tests": 32,
-  "native_resource_pass": true
-}

@@ -1,3 +1,0 @@
-ad442f58ee04714aaa0ba0a2768c1ea1935b29507bb22ddece8cbbc76db02932  /root/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/accesskit-0.25.1.crate
-8a45e2bb300bea6d5f33a82c3e051c3ddc6f41c209750f68a0acbe991a284344  /root/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/accesskit_consumer-0.39.1.crate
-5701624bf6a11efb6d4c8e922bf44126ed96250e5faa9a7a0468c979635839a4  /root/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/accesskit_macos-0.27.1.crate

@@ -1,8 +1,0 @@
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-    Checking gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.11s

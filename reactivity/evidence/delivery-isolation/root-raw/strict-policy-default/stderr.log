@@ -1,5 +1,0 @@
-    Checking gpui_reactivity_core v0.1.0 (/tmp/gpui-delivery-adoption-root/reactivity/crates/core)
-    Checking gpui_canvas v0.1.0 (/tmp/gpui-delivery-adoption-root/reactivity/crates/canvas)
-    Checking gpui_reactivity_state v0.1.0 (/tmp/gpui-delivery-adoption-root/reactivity/crates/state)
-    Checking gpui v0.1.0 (/tmp/gpui-delivery-adoption-root/reactivity/crates/gpui)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 42.62s

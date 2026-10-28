@@ -1,6 +1,0 @@
-stage,retained,total,peak,calls,measured,computed,cached,changed,contexts,cache_heap
-compute,960776,1127624,977288,2047,3000,4003,0,2004,3,720720
-text,0,868,804,7,4,5,3,3,3,720720
-style,0,944,880,6,0,2,1003,1,3,720720
-placement,16,960,864,7,0,2,1,1,3,720720
-reparent,0,2368,192,11,0,5,1004,1,3,720720

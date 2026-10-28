@@ -1,9 +1,0 @@
-
-running 4 tests
-test a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once ... ok
-test an_old_sheet_cannot_restore_a_replaced_or_removed_current_callback ... ok
-test current_routes_follow_replaced_captures_across_dense_sparse_and_empty_branches ... ok
-test rejected_description_drops_new_captures_and_retires_old_authority_before_recovery ... ok
-
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
-
