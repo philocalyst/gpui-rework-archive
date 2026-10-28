@@ -917,7 +917,7 @@ not another indefinite correctness-only series or a production performance claim
 
 Independent mechanism A correctness is sealed **d40381fa539f2b58b400785b386fe8477bba0954**
 (local/display-hot):5749 CPU checks,208 hot GPU frames,33 cold controls,254
-independent replay frames. Six48-byte-per-key version slots preserve old semantic
+independent replay frames. Six8-byte version slots (48B/key) preserve old semantic
 values; one paint edit stages104B (108B with actual audit-count argument), without
 cold page/directory rewrite. Full traversal is unchanged. Round-robin eviction
 corrupts4 decoded color bytes while stale-protected pixels stay correct. Dense
