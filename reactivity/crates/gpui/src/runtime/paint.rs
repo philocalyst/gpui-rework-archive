@@ -208,6 +208,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                     .text
                     .as_ref()
                     .and_then(|text| text.patch.as_ref())
+                    .filter(|patch| patch.content.is_some())
                     .map(|patch| &patch.repair)
                     .filter(|repair| repair.to == token),
                 base: (!runtime.automatic_presentation && runtime.presentation_valid)

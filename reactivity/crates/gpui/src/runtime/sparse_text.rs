@@ -109,15 +109,30 @@ impl<M: View + 'static> Runtime<M> {
             window: self.sites.namespace(),
             sequence,
         };
-        let patch = Box::new(text_geometry::TextPatch {
+        let mut patch = self.text.as_mut().unwrap().patch.take().unwrap_or_else(|| {
+            Box::new(text_geometry::TextPatch {
+                content: None,
+                #[cfg(feature = "native-core")]
+                repair: paint::TextRepair {
+                    from: self.latest_token.expect("complete predecessor has a token"),
+                    to: token,
+                    regions: Default::default(),
+                },
+            })
+        });
+        debug_assert!(
+            patch.content.is_none(),
+            "an acknowledged predecessor has no live patch"
+        );
+        #[cfg(feature = "native-core")]
+        {
+            patch.repair.from = self.latest_token.expect("complete predecessor has a token");
+            patch.repair.to = token;
+            patch.repair.regions.clear();
+        }
+        patch.content = Some(text_geometry::TextUpdate {
             row,
             value,
-            #[cfg(feature = "native-core")]
-            repair: paint::TextRepair {
-                from: self.latest_token.expect("complete predecessor has a token"),
-                to: token,
-                regions: Default::default(),
-            },
             geometry: text_geometry::Entry {
                 row: row as u32,
                 run: Some(run),
@@ -126,9 +141,7 @@ impl<M: View + 'static> Runtime<M> {
             },
         });
         let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
-        #[cfg(feature = "native-core")]
-        let mut patch = patch;
-        let Some(damage) = self.canvas.try_patch_text_observed(
+        let result = self.canvas.try_patch_text_observed(
             run,
             service,
             shape,
@@ -143,9 +156,14 @@ impl<M: View + 'static> Runtime<M> {
                 #[cfg(not(feature = "native-core"))]
                 let _ = support;
             },
-        )?
-        else {
-            return Ok(false);
+        );
+        let damage = match result {
+            Ok(Some(damage)) => damage,
+            result => {
+                patch.content = None;
+                self.text.as_mut().unwrap().patch = Some(patch);
+                return result.map(|_| false).map_err(Error::Canvas);
+            }
         };
         self.text.as_mut().unwrap().patch = Some(patch);
         self.text.as_mut().unwrap().dirty_text = None;
@@ -258,9 +276,19 @@ mod tests {
                 }
                 unchanged_layout +=
                     usize::from(runtime.layout.stats().changed_layout_writes == writes);
-                patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
+                patches += usize::from(
+                    runtime
+                        .text
+                        .as_ref()
+                        .is_some_and(|t| t.patch.as_ref().is_some_and(|p| p.content.is_some())),
+                );
                 full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
-                if let Some(patch) = runtime.text.as_ref().and_then(|t| t.patch.as_ref()) {
+                if let Some(patch) = runtime
+                    .text
+                    .as_ref()
+                    .and_then(|t| t.patch.as_ref())
+                    .filter(|p| p.content.is_some())
+                {
                     let mut pixels = std::collections::BTreeSet::new();
                     let mut tiles = std::collections::BTreeSet::new();
                     let mut union = gpui_canvas::DamageRegion::default();
@@ -352,7 +380,17 @@ mod tests {
                 .count()
         );
         assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
-        assert!(runtime.text.as_ref().unwrap().patch.is_some());
+        assert!(
+            runtime
+                .text
+                .as_ref()
+                .unwrap()
+                .patch
+                .as_ref()
+                .unwrap()
+                .content
+                .is_some()
+        );
         assert!(runtime.text.as_ref().unwrap().candidate.is_none());
         assert!(runtime.prepared.as_ref().unwrap().nodes.is_empty());
         assert!(

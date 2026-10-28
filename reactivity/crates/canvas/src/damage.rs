@@ -56,6 +56,17 @@ impl Default for DamageRegions {
     }
 }
 impl DamageRegions {
+    /// Retire the previous operation while retaining bounded region capacity.
+    /// The empty view matches a fresh collection; overflow applies per operation.
+    pub fn clear(&mut self) {
+        match &mut self.0 {
+            Regions::Many(regions) => {
+                regions.clear();
+                regions.push(DamageRegion::default());
+            }
+            Regions::One(_) | Regions::Dense(_) => *self = Self::default(),
+        }
+    }
     pub fn regions(&self) -> &[DamageRegion] {
         match &self.0 {
             Regions::One(region) | Regions::Dense(region) => std::slice::from_ref(region),
@@ -96,6 +107,12 @@ impl DamageRegions {
                 self.0 = Regions::Many(regions);
             }
             Regions::Many(regions) => {
+                if let [old] = regions.as_mut_slice()
+                    && old.is_empty()
+                {
+                    *old = region;
+                    return;
+                }
                 let mut index = 0;
                 while index < regions.len() {
                     if touches(regions[index], region) {

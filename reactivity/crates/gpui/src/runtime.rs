@@ -47,6 +47,8 @@ mod editing;
 pub(crate) mod ime;
 pub use ime::{ImeEvent, ImeSession, MarkedText};
 mod frontier;
+#[cfg(test)]
+mod patch_workspace_tests;
 mod text_geometry;
 use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
@@ -4021,7 +4023,9 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(text) = &mut self.text {
             text.candidate = Some(text_geometry);
-            text.patch = None;
+            if let Some(patch) = &mut text.patch {
+                patch.content = None;
+            }
             text.dirty_text = None;
         }
         self.prepared = Some(Prepared {

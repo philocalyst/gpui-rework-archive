@@ -4605,6 +4605,7 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
                     u64::from(size[0] * size[1])
                 );
                 assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+                let mut regions = DamageRegions::default();
                 for (index, value) in [
                     "000001 000002\n000003 000004",
                     "000001 000002\n000003 000004",
@@ -4615,7 +4616,7 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
                 .enumerate()
                 {
                     let layout = text.shape(value, 16., None).unwrap();
-                    let mut regions = DamageRegions::default();
+                    regions.clear();
                     canvas
                         .try_patch_text_observed(
                             slot,

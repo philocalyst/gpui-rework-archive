@@ -18,12 +18,16 @@ pub(super) struct TextResources {
     pub dirty_text: Option<(u64, usize)>,
     pub patch: Option<Box<TextPatch>>,
 }
+/// The allocation is reusable; only Some(content) denotes a live candidate.
 pub(super) struct TextPatch {
+    pub content: Option<TextUpdate>,
+    #[cfg(feature = "native-core")]
+    pub repair: paint::TextRepair,
+}
+pub(super) struct TextUpdate {
     pub row: usize,
     pub value: SharedText,
     pub geometry: Entry,
-    #[cfg(feature = "native-core")]
-    pub repair: paint::TextRepair,
 }
 impl TextResources {
     pub fn unused(&self) -> bool {
@@ -36,7 +40,7 @@ impl TextResources {
         if let Some(column) = self.candidate.take() {
             self.presented = column;
         }
-        if let Some(patch) = self.patch.take() {
+        if let Some(patch) = self.patch.as_mut().and_then(|patch| patch.content.take()) {
             rows[patch.row].text = Some(patch.value);
             let index = self
                 .presented
