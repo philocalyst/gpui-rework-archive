@@ -274,3 +274,39 @@ The renewed upstream BBTree study is recorded in
 update change preserves the last-leaf append proof and tests removed work with
 comparison counts. This strengthens the hypothesis of preserving valid dependency
 facts across unrelated updates, without adding a coroutine runtime by analogy.
+
+## Native diagnostics complete: rendering work is the immediate bottleneck
+
+Matched-profile dossier a7fbf5e2fe5807d1eb87021918d210e9d65a693e verifies887 files,
+72 fresh timed processes,15 native preflights,35 application tests and six
+preserved executables. No production library/API change. All36 active GPUI
+observations fail the fixed58–61 updates/second gate; ZGX completes479 updates
+in every eight-second active run. Baseline/sparse/ZGX median streaming admissions
+are330.5/453/479; scroll243.5/241/479; mixed144.5/144.5/479. CPU cores are
+3.667/.575/.128,3.850/3.859/.075,3.889/3.890/.147 respectively. The sampling and
+whole-workload intervals differ, so these are not per-update costs. No qualifying
+paired speedup can be inferred. Both earlier sparse complete-cost verdicts stay
+failed. Source, harness, shader and executable guards pass.
+
+The two GPUI native images at tick190 are pixel-identical. ZGX content/geometry
+match visibly but glyph rasterization/blending differ. Same font,960x720,scale1,
+fat LTO/one codegen unit; llvmpipe only, no /dev/dri. Linux presentation policy
+also differs: GPUI FIFO/maximum frame latency1, reference AutoVsync/default2.
+No claim of equivalent physical presentation or rendering quality is made.
+
+Attribution dossier ba1d3122a896679cea0a39ea25ccb75b7a756e52 independently verifies
+313 files and27 native observations with the same three ELFs. In scroll/mixed,
+GPUI main-thread CPU is about.02–.03 cores while named llvmpipe workers consume
+3.79–3.86 cores. Sparse streaming uses about.058 main/.487 raster cores versus
+baseline.044/3.613. All other thread names and sampling residuals remain recorded;
+no source-stack, hardware-GPU, cache-hit or blocked-wait claim follows. This is
+strong evidence against expecting a traversal-only change to remove the dominant
+CPU cost on this VM.
+
+The next local hypothesis is batching certified disjoint repair rectangles into
+one instanced draw, preserving the exact current fragment program and image-token
+authority. Current code issues one draw/scissor per region. This transfers
+independent-operation batching to the measured rendering path, with pipeline,
+vertex-upload, retained storage and full unaffected controls charged. It is not
+yet implemented and does not solve mixed scroll+text certification. No general
+async executor or application API change is proposed.
