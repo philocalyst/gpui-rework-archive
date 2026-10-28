@@ -590,6 +590,64 @@ pub mod ui {
         exposed / (vec3f(1.0, 1.0, 1.0) + exposed)
     }
 
+    // Certified mask origins are quarter-grid values. Across this pixel's
+    // odd-eighth samples, each axis reaches at most two adjacent mask cells.
+    // Fetch only the allocation's cells; invalid membership is still literal
+    // zero, while valid zero coverage keeps the original color multiplication.
+    pub fn mask_cell_coverage(draw: Draw, cell: Vec2f) -> f32 {
+        if cell.x < 0.0 || cell.y < 0.0 || cell.x >= draw.local.z || cell.y >= draw.local.w {
+            return 0.0;
+        }
+        texture_load(
+            MASKS,
+            vec2i(
+                (draw.atlas.x & 0x0fffffff) as i32 + cell.x as i32,
+                draw.atlas.y as i32 + cell.y as i32,
+            ),
+            0,
+        )
+        .x
+    }
+    pub fn mask_pixel_inside_clip(draw: Draw, position: Vec2f) -> bool {
+        if bitcast_u32(draw.clip.x) == 0x7fc00003 {
+            return false;
+        }
+        let first = position - vec2f(0.375, 0.375);
+        let last = position + vec2f(0.375, 0.375);
+        first.x >= draw.clip.x
+            && first.y >= draw.clip.y
+            && !outside_clip_max(last.x, draw.clip.x, draw.clip.z, draw.atlas.w, false)
+            && !outside_clip_max(last.y, draw.clip.y, draw.clip.w, draw.atlas.w, true)
+    }
+    pub fn mask_pixel_coverage(draw: Draw, first: Vec2f, last: Vec2f) -> Vec4f {
+        let a = mask_cell_coverage(draw, first);
+        let mut b = a;
+        let mut c = a;
+        if last.x != first.x {
+            b = mask_cell_coverage(draw, vec2f(last.x, first.y));
+        }
+        if last.y != first.y {
+            c = mask_cell_coverage(draw, vec2f(first.x, last.y));
+        }
+        let mut d = c;
+        if last.x != first.x {
+            d = b;
+            if last.y != first.y {
+                d = mask_cell_coverage(draw, last);
+            }
+        }
+        vec4f(a, b, c, d)
+    }
+    pub fn cached_mask_sample(draw: Draw, point: Vec2f, first: Vec2f, coverage: Vec4f) -> Vec4f {
+        let cell = floor(point - draw.local.xy());
+        if cell.x < 0.0 || cell.y < 0.0 || cell.x >= draw.local.z || cell.y >= draw.local.w {
+            return vec4f(0.0, 0.0, 0.0, 0.0);
+        }
+        let offset = cell - first;
+        let index = offset.y as u32 * 2 + offset.x as u32;
+        draw.color * coverage[index as usize]
+    }
+
     // Banked scenes decode a draw and its working paint once before the
     // sixteen sample operations. This deliberately trades sixteen local colors
     // for the ordinary sample-major path's repeated record/bank loads; it is
@@ -602,11 +660,25 @@ pub mod ui {
         #[wgsl_allow(non_literal_loop_bounds)]
         for cursor in range.x..range.y {
             let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
+            let cached =
+                (draw.atlas.x & 0xf0000000) == 0x10000000 && mask_pixel_inside_clip(draw, position);
+            let mut first = vec2f(0.0, 0.0);
+            let mut coverage = vec4f(0.0, 0.0, 0.0, 0.0);
+            if cached {
+                first = floor(position - vec2f(0.375, 0.375) - draw.local.xy());
+                let last = floor(position + vec2f(0.375, 0.375) - draw.local.xy());
+                coverage = mask_pixel_coverage(draw, first, last);
+            }
             for y in 0..4 {
                 for x in 0..4 {
                     let point = position
                         + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let source = sample_draw(draw, point);
+                    let mut source = vec4f(0.0, 0.0, 0.0, 0.0);
+                    if cached {
+                        source = cached_mask_sample(draw, point, first, coverage);
+                    } else {
+                        source = sample_draw(draw, point);
+                    }
                     let index = (y * 4 + x) as usize;
                     colors[index] = source + colors[index] * (1.0 - source.w);
                 }
