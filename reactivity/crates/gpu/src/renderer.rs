@@ -28,6 +28,9 @@ const MAX_ATLAS_SIDE: u32 = 2048;
 const ROUNDED_SOURCE: u32 = 1 << 30;
 const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
 const UNIFORM_TILE: u32 = 1 << 31;
+// Traversal choice is independent of paint-bank representation.
+const MASK_TILE: u32 = 1 << 30;
+const _: () = assert!(MAX_REFERENCES < MASK_TILE as usize);
 const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
 const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
 
@@ -978,7 +981,7 @@ impl RendererState {
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
-        for (tile, range) in self.ranges.iter().enumerate() {
+        for (tile, range) in self.ranges.iter_mut().enumerate() {
             if range[1] == UNIFORM_TILE {
                 uniform_tiles += 1;
             } else if range[0] != range[1] {
@@ -987,6 +990,18 @@ impl RendererState {
                 let samples = u64::from((right - left) * (bottom - top)) * 16;
                 sample_evaluations += samples;
                 sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
+                if self.tile_proofs
+                    && bank_count == 0
+                    && self.references[range[0] as usize..range[1] as usize]
+                        .iter()
+                        .any(|&address| {
+                            let base = (address & !INLINE_RECORD) as usize;
+                            let atlas = base + if address & INLINE_RECORD != 0 { 5 } else { 1 };
+                            self.records[atlas][0] & LOWERED_MASK != 0
+                        })
+                {
+                    range[1] |= MASK_TILE;
+                }
             }
         }
         let (tone, exposure) = match scene.color_config.mapping {

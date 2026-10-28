@@ -648,7 +648,7 @@ pub mod ui {
         draw.color * coverage[index as usize]
     }
 
-    pub fn sample_banked_mask_or_draw(
+    pub fn sample_cached_or_draw(
         draw: Draw,
         point: Vec2f,
         first: Vec2f,
@@ -661,11 +661,11 @@ pub mod ui {
         sample_draw(draw, point)
     }
 
-    // Banked scenes decode a draw and its working paint once before the
-    // sixteen sample operations. This deliberately trades sixteen local colors
+    // Banked scenes and certified literal mask tiles decode each draw once
+    // before the sixteen sample operations. This deliberately trades sixteen local colors
     // for the ordinary sample-major path's repeated record/bank loads; it is
     // not a claim of lower register pressure or universally faster shading.
-    pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
+    pub fn ordered_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
         let mut colors: [Vec4f; 16] = [
             clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
             clear, clear, clear, clear,
@@ -686,7 +686,7 @@ pub mod ui {
                 for x in 0..4 {
                     let point = position
                         + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let source = sample_banked_mask_or_draw(draw, point, first, coverage, cached);
+                    let source = sample_cached_or_draw(draw, point, first, coverage, cached);
                     let index = (y * 4 + x) as usize;
                     colors[index] = source + colors[index] * (1.0 - source.w);
                 }
@@ -714,8 +714,12 @@ pub mod ui {
         if range.x == range.y {
             return output(globals.clear);
         }
-        if (globals.viewport.w & 8) != 0 {
-            return banked_fragment(position.xy(), range, globals.clear);
+        if (globals.viewport.w & 8) != 0 || (range.y & 0x40000000) != 0 {
+            return ordered_fragment(
+                position.xy(),
+                vec2u(range.x, range.y & 0x3fffffff),
+                globals.clear,
+            );
         }
         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);

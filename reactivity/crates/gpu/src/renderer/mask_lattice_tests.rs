@@ -147,7 +147,10 @@ fn certificate_rejects_nonunit_and_unbounded_or_unresolved_maps() {
 #[cfg(feature = "gpu-tests")]
 #[test]
 fn placement_tags_survive_inline_compact_and_banked_packets() {
-    use super::super::{LOWERED_MASK, Renderer, compact_group, slots};
+    use super::super::{
+        INLINE_RECORD, LOWERED_MASK, MASK_TILE, Renderer, UNIFORM_TILE, compact_group, slots,
+        tile_bounds,
+    };
     pollster::block_on(async {
         let (_, adapter) = crate::test_adapter::request().await;
         let mut gpu = Renderer::request(&adapter, crate::wgpu::TextureFormat::Rgba8UnormSrgb)
@@ -250,6 +253,42 @@ fn placement_tags_survive_inline_compact_and_banked_packets() {
                     }
                 }
                 assert!(admitted >= 5 && fallback >= 4);
+                let mut marked = 0;
+                let mut planned = 0_u64;
+                for (tile, range) in gpu.state.ranges.iter().enumerate() {
+                    if range[1] == UNIFORM_TILE {
+                        continue;
+                    }
+                    let end = range[1] & !MASK_TILE;
+                    assert!(range[0] <= end && end as usize <= gpu.state.references.len());
+                    let [left, top, right, bottom] = tile_bounds(tile, 6, 96, 72);
+                    planned +=
+                        u64::from((right - left) * (bottom - top)) * 16 * u64::from(end - range[0]);
+                    if range[1] & MASK_TILE != 0 {
+                        marked += 1;
+                        assert!(
+                            gpu.state.references[range[0] as usize..end as usize]
+                                .iter()
+                                .any(|&address| {
+                                    let base = (address & !INLINE_RECORD) as usize;
+                                    let atlas =
+                                        base + if address & INLINE_RECORD != 0 { 5 } else { 1 };
+                                    gpu.state.records[atlas][0] & LOWERED_MASK != 0
+                                })
+                        );
+                    }
+                }
+                assert_eq!(planned, gpu.stats().sample_draw_evaluations);
+                assert_eq!(marked > 0, !banked);
+                eprintln!("MASK_TILE_PACKET banked={banked} grouped={grouped} marked={marked}");
+                gpu.set_tile_proofs(false);
+                gpu.render(
+                    canvas.prepared_scene(),
+                    &target.create_view(&Default::default()),
+                )
+                .unwrap();
+                assert!(gpu.state.ranges.iter().all(|r| r[1] & MASK_TILE == 0));
+                gpu.set_tile_proofs(true);
                 eprintln!(
                     "MASK_LATTICE_PACKET banked={banked} grouped={grouped} admitted={admitted} fallback={fallback}"
                 );
