@@ -1,0 +1,83 @@
+[
+  {
+    "mode": "stream",
+    "group": 2,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 0,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 0,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 2,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 2,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 0,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  }
+]

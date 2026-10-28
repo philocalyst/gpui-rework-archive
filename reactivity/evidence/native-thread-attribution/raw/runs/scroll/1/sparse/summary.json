@@ -1,0 +1,20 @@
+{
+  "name": "sparse",
+  "mode": "scroll",
+  "ticks": 187,
+  "native_acknowledgements": 172,
+  "reference_or_model_final": {
+    "total_ticks": 187,
+    "scroll_offset": 2618.0
+  },
+  "visible_seconds": 0.21395633499196265,
+  "samples": 122,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.24341498198919,
+  "interval_end": 4.18094824498985,
+  "interval_seconds": 2.9375332630006596,
+  "cpu_seconds": 11.25,
+  "cpu_cores": 3.829743867651814,
+  "mean_rss_bytes": 150028288,
+  "max_rss_bytes": 150028288
+}

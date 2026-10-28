@@ -1,0 +1,28 @@
+{
+  "utc": "2026-10-28T01:25:59.324009+00:00",
+  "source_guards": {
+    "control": {
+      "frozen_source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+      "current_source": "a7fbf5e2fe5807d1eb87021918d210e9d65a693e",
+      "changed_build_paths": []
+    },
+    "sparse": {
+      "frozen_source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+      "current_source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+      "changed_build_paths": []
+    },
+    "zgx": {
+      "frozen_source": "a3678578980ef239058c557338ef9c544d356b0c",
+      "current_source": "a3678578980ef239058c557338ef9c544d356b0c",
+      "changed_build_paths": []
+    }
+  },
+  "scripts": {
+    "run.py": "30358521d51095325a5f6424df7328e14aacd90e1d70e80eb16aea642cc5a6bc",
+    "freeze.py": "1d6030bfa396418c30c666408949fed4d3075a903ebd1fe06f02099da6f9392d"
+  },
+  "driver_files": {
+    "/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so": "9d69cae2004b16572acca424741109be37c4ffc759c2461af69d75f7d1c6c139",
+    "/usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275": "e833b010f814b72c6aca0300c8b5f19b6106ffa06c24ddc95a293970c7d6058e"
+  }
+}

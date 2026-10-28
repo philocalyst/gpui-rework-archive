@@ -1,0 +1,3640 @@
+{
+  "rows": [
+    {
+      "mode": "stream",
+      "group": 0,
+      "name": "control",
+      "interval_seconds": 2.9369679990049917,
+      "process_cpu_seconds": 10.81,
+      "process_cores": 3.6806665934604306,
+      "task_seconds": {
+        "main": 0.12,
+        "raster": 10.61,
+        "other": 0.07
+      },
+      "task_cores": {
+        "main": 0.04085846357217869,
+        "raster": 3.6125691541734657,
+        "other": 0.023834103750437572
+      },
+      "residual_seconds": 0.010000000000001563,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791863:8519769": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 12
+        },
+        "2791865:8519770": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791867:8519771": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791868:8519772": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791869:8519772": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791870:8519772": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791871:8519772": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791872:8519772": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791873:8519772": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791874:8519772": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791875:8519772": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791876:8519772": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791877:8519772": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2791878:8519773": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 263
+        },
+        "2791879:8519773": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 265
+        },
+        "2791880:8519773": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 265
+        },
+        "2791881:8519773": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 268
+        },
+        "2791882:8519773": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791883:8519773": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791884:8519773": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791885:8519773": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791886:8519773": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791890:8519783": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2791891:8519783": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 241,
+      "native_acks": 241
+    },
+    {
+      "mode": "stream",
+      "group": 0,
+      "name": "sparse",
+      "interval_seconds": 2.9356535469996743,
+      "process_cpu_seconds": 1.6799999999999997,
+      "process_cores": 0.5722746138477444,
+      "task_seconds": {
+        "main": 0.16,
+        "raster": 1.41,
+        "other": 0.09
+      },
+      "task_cores": {
+        "main": 0.054502344175975666,
+        "raster": 0.48030190805078554,
+        "other": 0.03065756859898631
+      },
+      "residual_seconds": 0.019999999999999796,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791939:8520409": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 16
+        },
+        "2791941:8520410": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791943:8520411": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791944:8520412": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791945:8520412": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791946:8520412": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791947:8520412": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791948:8520412": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791949:8520412": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791950:8520412": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791951:8520412": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791952:8520412": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791953:8520413": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2791954:8520413": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 35
+        },
+        "2791955:8520413": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 35
+        },
+        "2791956:8520413": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 36
+        },
+        "2791957:8520413": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 35
+        },
+        "2791958:8520413": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791959:8520413": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791960:8520413": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791961:8520413": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791962:8520413": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791966:8520423": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2791967:8520423": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 334,
+      "native_acks": 336
+    },
+    {
+      "mode": "stream",
+      "group": 0,
+      "name": "zgx",
+      "interval_seconds": 2.9588061469985405,
+      "process_cpu_seconds": 0.37000000000000005,
+      "process_cores": 0.1250504364320501,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 0.16,
+        "other": 0.13
+      },
+      "task_cores": {
+        "main": 0.0236581906763338,
+        "raster": 0.05407586440304868,
+        "other": 0.04393663982747705
+      },
+      "residual_seconds": 0.010000000000000064,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792045:8521048": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2792047:8521049": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792050:8521050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 8
+        },
+        "2792051:8521050": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2792052:8521050": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2792053:8521050": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2792054:8521050": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2792055:8521050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792056:8521050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792057:8521050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792058:8521050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792059:8521051": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792060:8521051": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 5
+        },
+        "2792061:8521051": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "stream",
+      "group": 1,
+      "name": "control",
+      "interval_seconds": 2.9437351890082937,
+      "process_cpu_seconds": 10.73,
+      "process_cores": 3.645028955072144,
+      "task_seconds": {
+        "main": 0.13,
+        "raster": 10.5,
+        "other": 0.07
+      },
+      "task_cores": {
+        "main": 0.044161581002737996,
+        "raster": 3.5668969271442226,
+        "other": 0.023779312847628152
+      },
+      "residual_seconds": 0.030000000000001137,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2794025:8530551": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 13
+        },
+        "2794027:8530552": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794029:8530553": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794030:8530554": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2794031:8530554": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2794032:8530554": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2794033:8530554": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2794034:8530554": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794035:8530554": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794036:8530554": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794037:8530554": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794038:8530554": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794039:8530555": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2794040:8530555": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 265
+        },
+        "2794041:8530555": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 262
+        },
+        "2794042:8530555": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 261
+        },
+        "2794043:8530555": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 262
+        },
+        "2794044:8530555": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794045:8530555": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794046:8530555": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794047:8530555": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794048:8530555": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2794052:8530565": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2794053:8530565": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 243,
+      "native_acks": 235
+    },
+    {
+      "mode": "stream",
+      "group": 1,
+      "name": "sparse",
+      "interval_seconds": 2.9393283130048076,
+      "process_cpu_seconds": 1.85,
+      "process_cores": 0.6293954954997143,
+      "task_seconds": {
+        "main": 0.19,
+        "raster": 1.54,
+        "other": 0.1
+      },
+      "task_cores": {
+        "main": 0.0646406184567274,
+        "raster": 0.5239292232808432,
+        "other": 0.03402137813511969
+      },
+      "residual_seconds": 0.020000000000000018,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793459:8529296": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 19
+        },
+        "2793461:8529296": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793463:8529297": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793464:8529298": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793465:8529298": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793466:8529298": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793467:8529298": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793468:8529298": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793469:8529298": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793470:8529298": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793471:8529298": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793472:8529298": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793473:8529299": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2793474:8529299": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 38
+        },
+        "2793475:8529299": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 39
+        },
+        "2793476:8529299": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 39
+        },
+        "2793477:8529299": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 38
+        },
+        "2793478:8529299": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793479:8529299": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793480:8529299": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793481:8529299": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793482:8529299": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793486:8529310": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2793487:8529310": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 333,
+      "native_acks": 334
+    },
+    {
+      "mode": "stream",
+      "group": 1,
+      "name": "zgx",
+      "interval_seconds": 2.9570034650096204,
+      "process_cpu_seconds": 0.32999999999999996,
+      "process_cores": 0.11159946341115509,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 0.12,
+        "other": 0.12000000000000001
+      },
+      "task_cores": {
+        "main": 0.023672613450851084,
+        "raster": 0.04058162305860186,
+        "other": 0.04058162305860186
+      },
+      "residual_seconds": 0.019999999999999962,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793947:8529935": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2793949:8529936": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793952:8529937": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 7
+        },
+        "2793953:8529937": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 3
+        },
+        "2793954:8529937": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 3
+        },
+        "2793955:8529937": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 3
+        },
+        "2793956:8529937": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 3
+        },
+        "2793957:8529937": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793958:8529937": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793959:8529937": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793960:8529937": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793961:8529937": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793962:8529938": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 5
+        },
+        "2793963:8529938": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "stream",
+      "group": 2,
+      "name": "control",
+      "interval_seconds": 2.9366486630024156,
+      "process_cpu_seconds": 10.82,
+      "process_cores": 3.684472077411427,
+      "task_seconds": {
+        "main": 0.13,
+        "raster": 10.61,
+        "other": 0.06
+      },
+      "task_cores": {
+        "main": 0.04426814880438868,
+        "raster": 3.6129619908812605,
+        "other": 0.020431453294333237
+      },
+      "residual_seconds": 0.02000000000000135,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2790823:8514667": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 13
+        },
+        "2790825:8514667": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790827:8514668": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790828:8514670": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790829:8514670": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790830:8514670": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790831:8514670": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790832:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790833:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790834:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790835:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790836:8514670": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790837:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2790838:8514670": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 266
+        },
+        "2790839:8514670": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 267
+        },
+        "2790840:8514670": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 263
+        },
+        "2790841:8514670": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 265
+        },
+        "2790842:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790843:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790844:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790845:8514670": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790846:8514670": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790850:8514681": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2790851:8514681": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 246,
+      "native_acks": 245
+    },
+    {
+      "mode": "stream",
+      "group": 2,
+      "name": "sparse",
+      "interval_seconds": 2.9347732180031016,
+      "process_cpu_seconds": 1.6799999999999997,
+      "process_cores": 0.5724462761531934,
+      "task_seconds": {
+        "main": 0.17,
+        "raster": 1.43,
+        "other": 0.07
+      },
+      "task_cores": {
+        "main": 0.057926111277406496,
+        "raster": 0.4872608183923016,
+        "other": 0.023851928173049732
+      },
+      "residual_seconds": 0.009999999999999787,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2790877:8515312": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 17
+        },
+        "2790879:8515312": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790881:8515313": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790882:8515314": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790883:8515314": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790884:8515314": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790885:8515314": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790886:8515314": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790887:8515314": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790888:8515314": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790889:8515314": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790890:8515314": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790891:8515315": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2790892:8515315": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 35
+        },
+        "2790893:8515315": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 36
+        },
+        "2790894:8515315": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 36
+        },
+        "2790895:8515315": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 36
+        },
+        "2790896:8515315": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790897:8515315": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790898:8515315": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790899:8515315": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790900:8515315": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790906:8515326": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2790907:8515326": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 334,
+      "native_acks": 335
+    },
+    {
+      "mode": "stream",
+      "group": 2,
+      "name": "zgx",
+      "interval_seconds": 2.956673510998371,
+      "process_cpu_seconds": 0.36000000000000004,
+      "process_cores": 0.12175845546045425,
+      "task_seconds": {
+        "main": 0.06,
+        "raster": 0.16,
+        "other": 0.13
+      },
+      "task_cores": {
+        "main": 0.020293075910075703,
+        "raster": 0.05411486909353522,
+        "other": 0.043968331138497366
+      },
+      "residual_seconds": 0.010000000000000064,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2790727:8514049": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 6
+        },
+        "2790729:8514050": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790732:8514052": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 7
+        },
+        "2790733:8514052": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2790734:8514052": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2790735:8514052": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2790736:8514052": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 4
+        },
+        "2790737:8514052": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790738:8514052": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790739:8514052": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790740:8514052": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790741:8514052": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790742:8514053": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2790743:8514053": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "scroll",
+      "group": 0,
+      "name": "control",
+      "interval_seconds": 2.936177540002973,
+      "process_cpu_seconds": 11.3,
+      "process_cores": 3.8485411205715305,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 11.17,
+        "other": 0.05
+      },
+      "task_cores": {
+        "main": 0.023840520215929837,
+        "raster": 3.8042658687419464,
+        "other": 0.01702894301137845
+      },
+      "residual_seconds": 0.010000000000001563,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2790969:8515956": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2790971:8515956": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790973:8515958": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790974:8515959": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790975:8515959": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790976:8515959": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790977:8515959": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2790978:8515959": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790979:8515959": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790980:8515959": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790981:8515959": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790982:8515959": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790983:8515960": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2790984:8515960": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2790985:8515960": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2790986:8515960": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2790987:8515960": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2790988:8515960": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790989:8515960": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790990:8515960": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790991:8515960": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790992:8515960": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2790996:8515970": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2790997:8515971": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 183,
+      "native_acks": 174
+    },
+    {
+      "mode": "scroll",
+      "group": 0,
+      "name": "sparse",
+      "interval_seconds": 2.934843049995834,
+      "process_cpu_seconds": 11.29,
+      "process_cores": 3.8468837371102436,
+      "task_seconds": {
+        "main": 0.08,
+        "raster": 11.129999999999999,
+        "other": 0.05
+      },
+      "task_cores": {
+        "main": 0.0272586978714632,
+        "raster": 3.792366341367317,
+        "other": 0.0170366861696645
+      },
+      "residual_seconds": 0.02999999999999936,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791050:8516601": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 8
+        },
+        "2791052:8516601": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791054:8516603": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791055:8516604": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791056:8516604": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791057:8516604": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791058:8516604": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791059:8516604": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791060:8516604": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791061:8516604": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791062:8516604": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791063:8516604": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791064:8516605": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2791065:8516605": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791066:8516605": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791067:8516605": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791068:8516605": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2791069:8516605": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791070:8516605": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791071:8516605": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791072:8516605": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791073:8516605": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791077:8516615": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2791078:8516615": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 183,
+      "native_acks": 174
+    },
+    {
+      "mode": "scroll",
+      "group": 0,
+      "name": "zgx",
+      "interval_seconds": 2.9595555910054827,
+      "process_cpu_seconds": 0.26,
+      "process_cores": 0.08785102763069483,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 0.04,
+        "other": 0.15
+      },
+      "task_cores": {
+        "main": 0.02365219974672553,
+        "raster": 0.013515542712414588,
+        "other": 0.0506832851715547
+      },
+      "residual_seconds": 0.0,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791114:8517246": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2791116:8517246": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791119:8517248": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 9
+        },
+        "2791120:8517248": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791121:8517248": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791122:8517248": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791123:8517248": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791124:8517248": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791125:8517248": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791126:8517248": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791127:8517248": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791128:8517248": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791129:8517248": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2791130:8517248": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "scroll",
+      "group": 1,
+      "name": "control",
+      "interval_seconds": 2.934422762991744,
+      "process_cpu_seconds": 11.309999999999999,
+      "process_cores": 3.8542503631852516,
+      "task_seconds": {
+        "main": 0.08,
+        "raster": 11.18,
+        "other": 0.05
+      },
+      "task_cores": {
+        "main": 0.027262602038445636,
+        "raster": 3.809948634872778,
+        "other": 0.017039126274028524
+      },
+      "residual_seconds": -1.7763568394002505e-15,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791803:8519125": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 8
+        },
+        "2791805:8519125": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791807:8519126": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791808:8519127": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791809:8519127": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791810:8519127": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791811:8519127": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791812:8519127": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791813:8519127": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791814:8519127": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791815:8519127": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791816:8519127": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791817:8519128": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2791818:8519128": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2791819:8519128": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2791820:8519128": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 279
+        },
+        "2791821:8519128": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2791822:8519128": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791823:8519128": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791824:8519128": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791825:8519128": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791826:8519128": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791830:8519139": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 3
+        },
+        "2791831:8519139": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 181,
+      "native_acks": 174
+    },
+    {
+      "mode": "scroll",
+      "group": 1,
+      "name": "sparse",
+      "interval_seconds": 2.9375332630006596,
+      "process_cpu_seconds": 11.25,
+      "process_cores": 3.829743867651814,
+      "task_seconds": {
+        "main": 0.08,
+        "raster": 11.12,
+        "other": 0.06
+      },
+      "task_cores": {
+        "main": 0.027233734169968455,
+        "raster": 3.7854890496256153,
+        "other": 0.020425300627476342
+      },
+      "residual_seconds": -0.009999999999999787,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791611:8517862": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 8
+        },
+        "2791613:8517863": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791615:8517864": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791616:8517865": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791617:8517865": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791618:8517865": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791619:8517865": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791620:8517865": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791621:8517865": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791622:8517865": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791623:8517865": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791624:8517865": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791625:8517866": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2791626:8517866": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791627:8517866": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791628:8517866": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791629:8517866": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 278
+        },
+        "2791630:8517866": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791631:8517866": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791632:8517866": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791633:8517866": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791634:8517866": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791638:8517876": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 4
+        },
+        "2791639:8517876": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 187,
+      "native_acks": 172
+    },
+    {
+      "mode": "scroll",
+      "group": 1,
+      "name": "zgx",
+      "interval_seconds": 2.962297200996545,
+      "process_cpu_seconds": 0.27999999999999997,
+      "process_cores": 0.09452123841787559,
+      "task_seconds": {
+        "main": 0.08,
+        "raster": 0.03,
+        "other": 0.15
+      },
+      "task_cores": {
+        "main": 0.027006068119393028,
+        "raster": 0.010127275544772385,
+        "other": 0.050636377723861925
+      },
+      "residual_seconds": 0.019999999999999962,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2791712:8518507": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 8
+        },
+        "2791714:8518508": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791717:8518509": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 9
+        },
+        "2791718:8518509": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791719:8518509": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791720:8518509": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2791721:8518509": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2791722:8518509": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791723:8518509": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791724:8518509": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791725:8518509": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791726:8518509": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2791727:8518510": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2791728:8518510": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "scroll",
+      "group": 2,
+      "name": "control",
+      "interval_seconds": 2.9290909500123234,
+      "process_cpu_seconds": 11.33,
+      "process_cores": 3.8680942972946375,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 11.219999999999999,
+        "other": 0.04
+      },
+      "task_cores": {
+        "main": 0.023898199541979227,
+        "raster": 3.8305399837286696,
+        "other": 0.013656114023988128
+      },
+      "residual_seconds": 1.7763568394002505e-15,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793059:8526101": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2793061:8526101": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793063:8526102": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793064:8526104": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793065:8526104": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793066:8526104": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793067:8526104": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793068:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793069:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793070:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793071:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793072:8526104": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793073:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793074:8526104": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 281
+        },
+        "2793075:8526104": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 281
+        },
+        "2793076:8526104": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2793077:8526104": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2793078:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793079:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793080:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793081:8526104": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793082:8526104": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793086:8526114": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793087:8526114": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 181,
+      "native_acks": 178
+    },
+    {
+      "mode": "scroll",
+      "group": 2,
+      "name": "sparse",
+      "interval_seconds": 2.93382266300614,
+      "process_cpu_seconds": 11.32,
+      "process_cores": 3.8584472547502133,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 11.209999999999999,
+        "other": 0.04
+      },
+      "task_cores": {
+        "main": 0.023859656168950083,
+        "raster": 3.8209535093418627,
+        "other": 0.013634089239400047
+      },
+      "residual_seconds": 1.7763568394002505e-15,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793141:8526744": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2793143:8526745": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793145:8526746": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793146:8526747": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793147:8526747": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793148:8526747": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793149:8526747": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793150:8526747": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793151:8526747": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793152:8526747": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793153:8526747": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793154:8526747": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793155:8526748": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793156:8526748": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2793157:8526748": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2793158:8526748": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 281
+        },
+        "2793159:8526748": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 280
+        },
+        "2793160:8526748": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793161:8526748": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793162:8526748": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793163:8526748": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793164:8526748": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793168:8526758": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793169:8526758": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 180,
+      "native_acks": 175
+    },
+    {
+      "mode": "scroll",
+      "group": 2,
+      "name": "zgx",
+      "interval_seconds": 2.958049517998006,
+      "process_cpu_seconds": 0.21,
+      "process_cores": 0.0709927263631905,
+      "task_seconds": {
+        "main": 0.05,
+        "raster": 0.04,
+        "other": 0.13
+      },
+      "task_cores": {
+        "main": 0.016903030086473928,
+        "raster": 0.013522424069179143,
+        "other": 0.04394787822483221
+      },
+      "residual_seconds": -0.010000000000000009,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792980:8525484": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 5
+        },
+        "2792982:8525485": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792985:8525487": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 7
+        },
+        "2792986:8525487": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2792987:8525487": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2792988:8525487": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2792989:8525487": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 1
+        },
+        "2792990:8525487": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792991:8525487": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792992:8525487": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792993:8525487": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792994:8525487": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792995:8525488": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2792996:8525488": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "both",
+      "group": 0,
+      "name": "control",
+      "interval_seconds": 2.9387803500139853,
+      "process_cpu_seconds": 11.43,
+      "process_cores": 3.8893685946775864,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 11.32,
+        "other": 0.04
+      },
+      "task_cores": {
+        "main": 0.023819405216748128,
+        "raster": 3.8519381007655538,
+        "other": 0.013611088695284643
+      },
+      "residual_seconds": 0.0,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793193:8527388": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2793195:8527388": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793197:8527389": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793198:8527391": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793199:8527391": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793200:8527391": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793201:8527391": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793202:8527391": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793203:8527391": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793204:8527391": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793205:8527391": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793206:8527391": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793207:8527392": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793208:8527392": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793209:8527392": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793210:8527392": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793211:8527392": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793212:8527392": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793213:8527392": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793214:8527392": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793215:8527392": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793216:8527392": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793220:8527404": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793221:8527404": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 110,
+      "native_acks": 111
+    },
+    {
+      "mode": "both",
+      "group": 0,
+      "name": "sparse",
+      "interval_seconds": 2.9355592140054796,
+      "process_cpu_seconds": 11.43,
+      "process_cores": 3.893636328460947,
+      "task_seconds": {
+        "main": 0.07,
+        "raster": 11.32,
+        "other": 0.03
+      },
+      "task_cores": {
+        "main": 0.023845541819095917,
+        "raster": 3.8561647627452253,
+        "other": 0.010219517922469678
+      },
+      "residual_seconds": 0.009999999999999787,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793278:8528034": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 7
+        },
+        "2793280:8528034": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793282:8528035": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793283:8528037": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793284:8528037": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793285:8528037": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793286:8528037": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2793287:8528037": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793288:8528037": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793289:8528037": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793290:8528037": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793291:8528037": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793292:8528038": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 1
+        },
+        "2793293:8528038": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793294:8528038": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793295:8528038": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793296:8528038": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2793297:8528038": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793298:8528038": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793299:8528038": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793300:8528038": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793301:8528038": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793305:8528049": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2793306:8528049": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 110,
+      "native_acks": 111
+    },
+    {
+      "mode": "both",
+      "group": 0,
+      "name": "zgx",
+      "interval_seconds": 2.9616086760070175,
+      "process_cpu_seconds": 0.45,
+      "process_cores": 0.1519444495302842,
+      "task_seconds": {
+        "main": 0.1,
+        "raster": 0.2,
+        "other": 0.16
+      },
+      "task_cores": {
+        "main": 0.03376543322895204,
+        "raster": 0.06753086645790408,
+        "other": 0.05402469316632326
+      },
+      "residual_seconds": -0.010000000000000009,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2793379:8528678": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 10
+        },
+        "2793381:8528679": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793384:8528681": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 10
+        },
+        "2793385:8528681": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2793386:8528681": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2793387:8528681": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2793388:8528681": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2793389:8528681": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793390:8528681": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793391:8528681": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793392:8528681": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793393:8528681": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2793394:8528681": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2793395:8528681": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "both",
+      "group": 1,
+      "name": "control",
+      "interval_seconds": 2.9397494419972645,
+      "process_cpu_seconds": 11.43,
+      "process_cores": 3.8880864595842777,
+      "task_seconds": {
+        "main": 0.06,
+        "raster": 11.32,
+        "other": 0.03
+      },
+      "task_cores": {
+        "main": 0.020409902674983084,
+        "raster": 3.850668304680142,
+        "other": 0.010204951337491542
+      },
+      "residual_seconds": 0.019999999999999574,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792903:8524839": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 6
+        },
+        "2792905:8524839": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792907:8524840": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792908:8524842": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792909:8524842": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792910:8524842": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792911:8524842": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792912:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792913:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792914:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792915:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792916:8524842": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792917:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 1
+        },
+        "2792918:8524842": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792919:8524842": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792920:8524842": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792921:8524842": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792922:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792923:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792924:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792925:8524842": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792926:8524842": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792930:8524854": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2792931:8524854": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 110,
+      "native_acks": 111
+    },
+    {
+      "mode": "both",
+      "group": 1,
+      "name": "sparse",
+      "interval_seconds": 2.932029102012166,
+      "process_cpu_seconds": 11.4,
+      "process_cores": 3.88809237676956,
+      "task_seconds": {
+        "main": 0.06,
+        "raster": 11.3,
+        "other": 0.03
+      },
+      "task_cores": {
+        "main": 0.02046364408826084,
+        "raster": 3.8539863032891253,
+        "other": 0.01023182204413042
+      },
+      "residual_seconds": 0.009999999999999787,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792780:8523576": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 6
+        },
+        "2792782:8523576": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792784:8523577": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792785:8523579": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792786:8523579": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792787:8523579": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792788:8523579": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792789:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792790:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792791:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792792:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792793:8523579": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792794:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 1
+        },
+        "2792795:8523579": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792796:8523579": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792797:8523579": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792798:8523579": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792799:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792800:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792801:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792802:8523579": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792803:8523579": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792807:8523590": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2792808:8523590": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 110,
+      "native_acks": 111
+    },
+    {
+      "mode": "both",
+      "group": 1,
+      "name": "zgx",
+      "interval_seconds": 2.9573365219985135,
+      "process_cpu_seconds": 0.43999999999999995,
+      "process_cores": 0.14878252668473999,
+      "task_seconds": {
+        "main": 0.09,
+        "raster": 0.2,
+        "other": 0.16999999999999998
+      },
+      "task_cores": {
+        "main": 0.03043278954915136,
+        "raster": 0.06762842122033637,
+        "other": 0.057484158037285904
+      },
+      "residual_seconds": -0.020000000000000018,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792851:8524221": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 9
+        },
+        "2792853:8524222": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792856:8524224": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 11
+        },
+        "2792857:8524224": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792858:8524224": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792859:8524224": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792860:8524224": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792861:8524224": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792862:8524224": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792863:8524224": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792864:8524224": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792865:8524224": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792866:8524224": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2792867:8524224": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    },
+    {
+      "mode": "both",
+      "group": 2,
+      "name": "control",
+      "interval_seconds": 2.936743997997837,
+      "process_cpu_seconds": 11.42,
+      "process_cores": 3.8886603693702044,
+      "task_seconds": {
+        "main": 0.06,
+        "raster": 11.32,
+        "other": 0.04
+      },
+      "task_cores": {
+        "main": 0.02043079003171736,
+        "raster": 3.8546090526506753,
+        "other": 0.013620526687811574
+      },
+      "residual_seconds": 0.0,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792162:8522283": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "main",
+          "cpu_ticks": 6
+        },
+        "2792164:8522283": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792166:8522284": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792167:8522285": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792168:8522285": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792169:8522285": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792170:8522285": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792171:8522285": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792172:8522285": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792173:8522285": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792174:8522285": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792175:8522285": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792176:8522286": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2792177:8522286": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792178:8522286": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792179:8522286": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792180:8522286": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 283
+        },
+        "2792181:8522286": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792182:8522286": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792183:8522286": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792184:8522286": {
+          "name": "19fddf48f6e8fa2",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792185:8522286": {
+          "name": "19fddf4:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792189:8522297": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 2
+        },
+        "2792190:8522297": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 110,
+      "native_acks": 111
+    },
+    {
+      "mode": "both",
+      "group": 2,
+      "name": "sparse",
+      "interval_seconds": 2.9225576360040577,
+      "process_cpu_seconds": 11.4,
+      "process_cores": 3.900692961383969,
+      "task_seconds": {
+        "main": 0.06,
+        "raster": 11.28,
+        "other": 0.02
+      },
+      "task_cores": {
+        "main": 0.020529962954652467,
+        "raster": 3.859633035474664,
+        "other": 0.006843320984884157
+      },
+      "residual_seconds": 0.040000000000000924,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792228:8522928": {
+          "name": "1c4c52ba4b82000",
+          "kind": "main",
+          "cpu_ticks": 6
+        },
+        "2792230:8522928": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792232:8522929": {
+          "name": "blocking-1",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792233:8522931": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792234:8522931": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792235:8522931": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792236:8522931": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 0
+        },
+        "2792237:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792238:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792239:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792240:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792241:8522931": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792242:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 1
+        },
+        "2792243:8522931": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792244:8522931": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792245:8522931": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792246:8522931": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 282
+        },
+        "2792247:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792248:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792249:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792250:8522931": {
+          "name": "1c4c52ba4b82000",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792251:8522932": {
+          "name": "1c4c52b:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792255:8522943": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 1
+        },
+        "2792256:8522943": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 111,
+      "native_acks": 112
+    },
+    {
+      "mode": "both",
+      "group": 2,
+      "name": "zgx",
+      "interval_seconds": 2.959070958997472,
+      "process_cpu_seconds": 0.44000000000000006,
+      "process_cores": 0.1486953189351942,
+      "task_seconds": {
+        "main": 0.09,
+        "raster": 0.2,
+        "other": 0.16
+      },
+      "task_cores": {
+        "main": 0.030414951600380626,
+        "raster": 0.06758878133417917,
+        "other": 0.054071025067343334
+      },
+      "residual_seconds": -0.009999999999999953,
+      "new_tasks": [],
+      "disappeared_tasks": [],
+      "tasks": {
+        "2792097:8521666": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "main",
+          "cpu_ticks": 9
+        },
+        "2792099:8521666": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792102:8521668": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 10
+        },
+        "2792103:8521668": {
+          "name": "llvmpipe-0",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792104:8521668": {
+          "name": "llvmpipe-1",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792105:8521668": {
+          "name": "llvmpipe-2",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792106:8521668": {
+          "name": "llvmpipe-3",
+          "kind": "raster",
+          "cpu_ticks": 5
+        },
+        "2792107:8521668": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792108:8521668": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792109:8521668": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792110:8521668": {
+          "name": "5f89c6a5e2f4b2b",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792111:8521668": {
+          "name": "5f89c6a:disk$0",
+          "kind": "other",
+          "cpu_ticks": 0
+        },
+        "2792112:8521669": {
+          "name": "WSI swapchain q",
+          "kind": "other",
+          "cpu_ticks": 6
+        },
+        "2792113:8521669": {
+          "name": "WSI swapchain e",
+          "kind": "other",
+          "cpu_ticks": 0
+        }
+      },
+      "ticks": 359,
+      "native_acks": null
+    }
+  ],
+  "aggregates": {
+    "stream": {
+      "control": {
+        "task_cores_median": {
+          "main": 0.044161581002737996,
+          "raster": 3.6125691541734657,
+          "other": 0.023779312847628152
+        },
+        "process_cores_median": 3.6806665934604306,
+        "ticks": [
+          241,
+          243,
+          246
+        ],
+        "residual_seconds": [
+          0.010000000000001563,
+          0.030000000000001137,
+          0.02000000000000135
+        ]
+      },
+      "sparse": {
+        "task_cores_median": {
+          "main": 0.057926111277406496,
+          "raster": 0.4872608183923016,
+          "other": 0.03065756859898631
+        },
+        "process_cores_median": 0.5724462761531934,
+        "ticks": [
+          334,
+          333,
+          334
+        ],
+        "residual_seconds": [
+          0.019999999999999796,
+          0.020000000000000018,
+          0.009999999999999787
+        ]
+      },
+      "zgx": {
+        "task_cores_median": {
+          "main": 0.0236581906763338,
+          "raster": 0.05407586440304868,
+          "other": 0.04393663982747705
+        },
+        "process_cores_median": 0.12175845546045425,
+        "ticks": [
+          359,
+          359,
+          359
+        ],
+        "residual_seconds": [
+          0.010000000000000064,
+          0.019999999999999962,
+          0.010000000000000064
+        ]
+      }
+    },
+    "scroll": {
+      "control": {
+        "task_cores_median": {
+          "main": 0.023898199541979227,
+          "raster": 3.809948634872778,
+          "other": 0.01702894301137845
+        },
+        "process_cores_median": 3.8542503631852516,
+        "ticks": [
+          183,
+          181,
+          181
+        ],
+        "residual_seconds": [
+          0.010000000000001563,
+          -1.7763568394002505e-15,
+          1.7763568394002505e-15
+        ]
+      },
+      "sparse": {
+        "task_cores_median": {
+          "main": 0.027233734169968455,
+          "raster": 3.792366341367317,
+          "other": 0.0170366861696645
+        },
+        "process_cores_median": 3.8468837371102436,
+        "ticks": [
+          183,
+          187,
+          180
+        ],
+        "residual_seconds": [
+          0.02999999999999936,
+          -0.009999999999999787,
+          1.7763568394002505e-15
+        ]
+      },
+      "zgx": {
+        "task_cores_median": {
+          "main": 0.02365219974672553,
+          "raster": 0.013515542712414588,
+          "other": 0.050636377723861925
+        },
+        "process_cores_median": 0.08785102763069483,
+        "ticks": [
+          359,
+          359,
+          359
+        ],
+        "residual_seconds": [
+          0.0,
+          0.019999999999999962,
+          -0.010000000000000009
+        ]
+      }
+    },
+    "both": {
+      "control": {
+        "task_cores_median": {
+          "main": 0.02043079003171736,
+          "raster": 3.8519381007655538,
+          "other": 0.013611088695284643
+        },
+        "process_cores_median": 3.8886603693702044,
+        "ticks": [
+          110,
+          110,
+          110
+        ],
+        "residual_seconds": [
+          0.0,
+          0.019999999999999574,
+          0.0
+        ]
+      },
+      "sparse": {
+        "task_cores_median": {
+          "main": 0.020529962954652467,
+          "raster": 3.8561647627452253,
+          "other": 0.010219517922469678
+        },
+        "process_cores_median": 3.893636328460947,
+        "ticks": [
+          110,
+          110,
+          111
+        ],
+        "residual_seconds": [
+          0.009999999999999787,
+          0.009999999999999787,
+          0.040000000000000924
+        ]
+      },
+      "zgx": {
+        "task_cores_median": {
+          "main": 0.03043278954915136,
+          "raster": 0.06758878133417917,
+          "other": 0.054071025067343334
+        },
+        "process_cores_median": 0.14878252668473999,
+        "ticks": [
+          359,
+          359,
+          359
+        ],
+        "residual_seconds": [
+          -0.010000000000000009,
+          -0.020000000000000018,
+          -0.009999999999999953
+        ]
+      }
+    }
+  },
+  "note": "CPU attribution only; task names do not identify source stacks or blocked waits"
+}
