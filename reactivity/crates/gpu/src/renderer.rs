@@ -1152,11 +1152,11 @@ impl RendererState {
             for cursor in range[0]..range[1] {
                 let address = self.references[cursor as usize];
                 let base = (address & !INLINE_RECORD) as usize;
-                let material =
-                    self.records[base + if address & INLINE_RECORD != 0 { 5 } else { 1 }][0];
+                let atlas = self.records[base + if address & INLINE_RECORD != 0 { 5 } else { 1 }];
+                let material = atlas[0];
                 references += 1;
                 samples += weight;
-                if material & 0xe0000000 == 0 {
+                if material & 0xe0000000 == 0 && atlas[2] != 0 {
                     mask_references += 1;
                     mask_samples += weight;
                     if material & LOWERED_MASK != 0 {
