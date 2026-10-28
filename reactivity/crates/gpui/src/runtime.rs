@@ -4023,9 +4023,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(text) = &mut self.text {
             text.candidate = Some(text_geometry);
-            if let Some(patch) = &mut text.patch {
-                patch.content = None;
-            }
+            // Bounded negative control: retain the superseded sparse payload.
             text.dirty_text = None;
         }
         self.prepared = Some(Prepared {
