@@ -29,13 +29,26 @@ fn retained_scroll_outside_changes_match_full_gpu_in_all_formats() {
             for case in 0..CASES {
                 let mut canvas = Canvas::recording(SIZE[0], SIZE[1], config).unwrap();
                 let mut text = TextSystem::bundled().unwrap();
-                stage(&mut canvas, &mut text, case, 0).commit();
+                stage(
+                    &mut canvas,
+                    &mut text,
+                    case,
+                    0,
+                    format == wgpu::TextureFormat::Rgba16Float,
+                )
+                .commit();
                 let target = output_texture(&gpu, &canvas);
                 let view = target.create_view(&Default::default());
                 gpu.render(canvas.prepared_scene(), &view, None).unwrap();
                 for tick in 1..6 {
-                    let (damage, plan) = stage(&mut canvas, &mut text, case, tick)
-                        .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
+                    let (damage, plan) = stage(
+                        &mut canvas,
+                        &mut text,
+                        case,
+                        tick,
+                        format == wgpu::TextureFormat::Rgba16Float,
+                    )
+                    .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
                     gpu.render_with_scroll(
                         canvas.prepared_scene(),
                         &view,

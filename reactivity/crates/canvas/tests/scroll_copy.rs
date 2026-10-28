@@ -9,10 +9,10 @@ fn copied_overlap_and_outside_insert_remove_material_order_and_overflow_are_exac
     for case in 0..CASES {
         let mut canvas = Canvas::recording(SIZE[0], SIZE[1], Default::default()).unwrap();
         let mut text = TextSystem::bundled().unwrap();
-        stage(&mut canvas, &mut text, case, 0).commit();
+        stage(&mut canvas, &mut text, case, 0, true).commit();
         let mut pixels = canvas.pixels().to_vec();
         for tick in 1..6 {
-            let (damage, plan) = stage(&mut canvas, &mut text, case, tick)
+            let (damage, plan) = stage(&mut canvas, &mut text, case, tick, true)
                 .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
             let expected = canvas.pixels().to_vec();
             if let Some(plan) = &plan {

@@ -15,14 +15,17 @@ pub fn stage<'a>(
     text: &mut TextSystem,
     case: usize,
     tick: usize,
+    transparent: bool,
 ) -> CanvasScene<'a> {
     let mut s = canvas.stage();
     let clip = Rect::new(0., 0., 192., 160.);
     let changed = tick % 2 != 0;
     s.clear(if case == 8 && changed {
         Color::WHITE
-    } else {
+    } else if transparent {
         Color::TRANSPARENT
+    } else {
+        Color::BLACK
     });
     s.fill_rect(clip, Affine::IDENTITY, clip, Color::rgba(20, 40, 60, 60))
         .unwrap();
