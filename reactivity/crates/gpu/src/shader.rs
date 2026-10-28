@@ -731,7 +731,7 @@ pub mod ui {
     #[fragment]
     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
         let globals = get!(GLOBALS);
-        let mut edge = 16;
+        let mut edge: u32 = 16;
         if (globals.viewport.w & 16) != 0 {
             edge = 8;
         }
