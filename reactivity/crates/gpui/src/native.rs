@@ -358,6 +358,12 @@ impl GpuSurface {
         {
             self.renderer
                 .render_regions(scene, target, &repair.regions)?
+        } else if let Some(scroll) = valid_transition
+            .and_then(|d| d.scroll)
+            .filter(|scroll| previous == Some(scroll.from) && token == scroll.to)
+        {
+            self.renderer
+                .render_with_scroll(scene, target, damage, Some(&scroll.copy))?
         } else {
             self.renderer.render(scene, target, damage)?
         };

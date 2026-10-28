@@ -3894,6 +3894,29 @@ impl<M: View + 'static> Runtime<M> {
             );
         }
         let logical_indices = &self.by_identity;
+        #[cfg(feature = "native-core")]
+        let scroll_proposal = if list_mode
+            && !self.automatic_presentation
+            && self.prepared.is_none()
+            && self.presentation_valid
+            && size == self.presentation_size
+            && scale_factor == self.presentation_scale_factor
+        {
+            self.metadata.as_deref().and_then(|metadata| {
+                let old_geometry = metadata
+                    .geometry
+                    .as_deref()
+                    .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view);
+                viewport_geometry.scroll_copy_proposal(
+                    &metadata.presented.viewports,
+                    (&self.presented, old_geometry.bases()),
+                    (&presented, geometry::Bases::new(&geometry_records)),
+                    |identity| logical_indices.get(identity).and_then(|i| published.get(i)),
+                )
+            })
+        } else {
+            None
+        };
         let geometry_sheet = self
             .metadata
             .as_ref()
@@ -3909,18 +3932,48 @@ impl<M: View + 'static> Runtime<M> {
                 })
             })
             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
+        #[cfg(feature = "native-core")]
+        let mut scroll_copy = None;
         let damage = if self.automatic_presentation {
             // Automatic headless acknowledgement retains no external surface
             // to repair. Do not compare commands for an unused capability.
             scene.commit();
             DamageRegion::default()
         } else {
-            scene.commit_with_damage().union(
+            #[cfg(feature = "native-core")]
+            let damage = if let Some((viewport, delta)) = scroll_proposal {
+                let (damage, copy) = scene.commit_with_scroll_damage(viewport, delta);
+                scroll_copy = copy;
+                damage
+            } else {
+                scene.commit_with_damage()
+            };
+            #[cfg(not(feature = "native-core"))]
+            let damage = scene.commit_with_damage();
+            damage.union(
                 self.prepared
                     .as_ref()
                     .map_or(DamageRegion::default(), |prepared| prepared.damage),
             )
         };
+        #[cfg(feature = "native-core")]
+        if let Some(copy) = scroll_copy {
+            let transition = paint::ScrollTransition {
+                from: self.latest_token.expect("acknowledged predecessor"),
+                to: token,
+                copy,
+            };
+            let slot = &mut self
+                .metadata
+                .as_mut()
+                .expect("viewport metadata")
+                .scroll_copy;
+            if let Some(storage) = slot {
+                **storage = transition;
+            } else {
+                *slot = Some(Box::new(transition));
+            }
+        }
         for (&key, state) in &mut self.viewports {
             if let (ViewportKey::Scroll(identity), ViewportState::Scroll(state)) = (key, state)
                 && let Some(offset) = viewport_geometry.offset(identity)

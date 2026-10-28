@@ -163,6 +163,13 @@ pub(crate) struct TextRepair {
     pub(crate) regions: gpui_canvas::DamageRegions,
 }
 
+#[cfg(feature = "native-core")]
+pub(crate) struct ScrollTransition {
+    pub(crate) from: PresentationToken,
+    pub(crate) to: PresentationToken,
+    pub(crate) copy: gpui_canvas::ScrollCopy,
+}
+
 /// Damage relative to the exact acknowledged image, including unbound changes.
 #[cfg(feature = "native-core")]
 #[derive(Clone, Copy)]
@@ -170,6 +177,7 @@ pub(crate) struct SceneDamage<'a> {
     pub(crate) base: Option<PresentationToken>,
     pub(crate) region: gpui_canvas::DamageRegion,
     pub(crate) repair: Option<&'a TextRepair>,
+    pub(crate) scroll: Option<&'a ScrollTransition>,
 }
 
 #[cfg(feature = "native-core")]
@@ -191,6 +199,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             token,
             runtime.styles.slot_transition(),
             SceneDamage {
+                scroll: runtime
+                    .metadata
+                    .as_ref()
+                    .and_then(|metadata| metadata.scroll_copy.as_deref())
+                    .filter(|scroll| scroll.to == token),
                 repair: runtime
                     .text
                     .as_ref()
