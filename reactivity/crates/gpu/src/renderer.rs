@@ -816,7 +816,7 @@ impl RendererState {
                 for p in group.placements() {
                     let draw = prepared(group, p);
                     has_masks |= draw.source.mask().is_some();
-                    let mask_rect = lowered_mask_rect(&draw);
+                    let mask_rect = lowered_mask_rect(&draw, error);
                     let r = if lower_solid {
                         sampled_solid_rect(&draw, [scene.width, scene.height])?
                     } else {
@@ -846,7 +846,7 @@ impl RendererState {
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
                     let mut packet_draw = draw;
-                    let mask_rect = lowered_mask_rect(&draw);
+                    let mask_rect = lowered_mask_rect(&draw, error);
                     if let Some(rect) = mask_rect {
                         packet_draw.local_rect = rect;
                     }
