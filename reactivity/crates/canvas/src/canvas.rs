@@ -1275,9 +1275,7 @@ impl Canvas {
                 let old = previous.next_back().unwrap();
                 let new = next.next_back().unwrap();
                 if !old.unchanged(new) {
-                    damage = damage
-                        .union(DamageRegion::checked_canvas_bounds(old.bounds))
-                        .union(DamageRegion::checked_canvas_bounds(new.bounds));
+                    // Deliberate fault: consumed reverse mismatch loses support.
                     break;
                 }
             }
