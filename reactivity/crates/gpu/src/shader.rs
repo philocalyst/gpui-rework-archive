@@ -644,7 +644,7 @@ pub mod ui {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
         let offset = cell - first;
-        let index = offset.y as u32 * 2 + offset.x as u32;
+        let index = offset.x as u32;
         draw.color * coverage[index as usize]
     }
 
