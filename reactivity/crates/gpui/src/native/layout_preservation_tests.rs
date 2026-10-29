@@ -40,16 +40,24 @@ fn run<M: View + 'static>(
             let capture_allocation =
                 allocation_counter::measure(|| capture = Some(owner.layout_capture()));
             let capture = capture.unwrap();
-            capture.assert_equivalent(&expected_layout);
-            let comparison = previous.as_ref().map(|old| capture.compare(old));
-            let retired = previous.as_ref().map(|old| old.assert_retired(owner));
+            let mut comparison = None;
+            let mut retired = None;
+            let mut layout_report = None;
+            let mut producer_report = None;
+            let diagnostic = allocation_counter::measure(|| {
+                capture.assert_equivalent(&expected_layout);
+                comparison = previous.as_ref().map(|old| capture.compare(old));
+                retired = previous.as_ref().map(|old| old.assert_retired(owner));
+                layout_report = Some(capture.report());
+                producer_report = Some(owner.structural_observation());
+            });
             let actual = owner.with_pixels(|p, _, _| p.to_vec()).unwrap();
             assert_eq!(
                 actual, expected,
                 "{case} {mode:?} step {step}: fresh CPU oracle"
             );
             std::fs::write(output.join(format!("{case}-{mode:?}-{step}.rgba")), &actual).unwrap();
-            frames.push(json!({"step":step,"mode":format!("{mode:?}"),"source_allocation":allocation(source),"diagnostic_capture_allocation":allocation(capture_allocation),"layout":capture.report(),"comparison":comparison,"retired_handles_checked":retired,"preservation":report,"producer":owner.structural_observation(),"fresh_cpu_wrong_bytes":0}));
+            frames.push(json!({"step":step,"mode":format!("{mode:?}"),"source_allocation":allocation(source),"diagnostic_capture_allocation":allocation(capture_allocation),"diagnostic_comparison_report_allocation":allocation(diagnostic),"layout":layout_report,"comparison":comparison,"retired_handles_checked":retired,"preservation":report,"producer":producer_report,"fresh_cpu_wrong_bytes":0}));
             *previous = Some(capture);
         }
     }

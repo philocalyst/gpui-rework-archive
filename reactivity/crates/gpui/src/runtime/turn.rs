@@ -124,6 +124,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         })) {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
+                #[cfg(feature = "layout-preservation-lab")]
+                {
+                    self.layout_preservation.invalidate();
+                    self.rebuild_layout = true;
+                }
                 // A rejected presentation-only scroll has not edited the model
                 // or reached reconciliation; its acknowledged cohort stays live.
                 self.logical_valid = !scroll.is_empty() && was_valid;
