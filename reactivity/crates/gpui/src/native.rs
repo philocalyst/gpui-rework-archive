@@ -2229,3 +2229,6 @@ mod scroll_bench;
 #[allow(dead_code)]
 #[path = "../examples/zgx_native_lab.rs"]
 pub(crate) mod workload_port;
+
+#[cfg(test)]
+mod structural_trace_tests;

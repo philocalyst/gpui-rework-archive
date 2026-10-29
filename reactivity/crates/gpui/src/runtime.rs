@@ -1185,7 +1185,11 @@ impl SurfaceDamage {
         self.known = (self.known + 1).min(4);
     }
 }
+#[cfg(test)]
+mod structural_trace;
 struct Runtime<M> {
+    #[cfg(test)]
+    structural_work: structural_trace::Work,
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
@@ -1433,6 +1437,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             by_identity: IdentityIndex::default(),
             fanout: BTreeMap::new(),
             next_identity: 1,
+            #[cfg(test)]
+            structural_work: Default::default(),
             focused: None,
             sites,
             overrides: Overrides::default(),
@@ -2370,6 +2376,10 @@ impl<M: View + 'static> Runtime<M> {
         let mut changed = 0;
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
+            #[cfg(test)]
+            {
+                self.structural_work.reconciled += 1;
+            }
             let parent = draft.parent.map(|parent| parent as usize);
             // Only a boundary can change ownership. Reminting that root also
             // prevents descendant reuse: every match includes parent identity.
@@ -2429,6 +2439,13 @@ impl<M: View + 'static> Runtime<M> {
                     }
                     retained
                 });
+            #[cfg(test)]
+            {
+                self.structural_work.survived += usize::from(previous.is_some());
+                self.structural_work.minted += usize::from(previous.is_none());
+                self.structural_work.relocated +=
+                    usize::from(previous.is_some() && previous_index != Some(index));
+            }
             let previous_handler = previous.as_ref().and_then(Node::handler_slot);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
@@ -2615,6 +2632,10 @@ impl<M: View + 'static> Runtime<M> {
             changed += usize::from(node_changed);
             nodes.push(node);
         }
+        #[cfg(test)]
+        {
+            self.structural_work.image_reconcile_entries += image_resources.len();
+        }
         image::reconcile(&mut self.images, image_resources);
         changed += old.iter().filter(|node| node.is_some()).count();
         // A previous site can be consumed before its component scope rejects
@@ -2797,6 +2818,10 @@ impl<M: View + 'static> Runtime<M> {
                         && old.description == new.description
                 });
             metadata.base = base;
+        }
+        #[cfg(test)]
+        {
+            self.structural_work.identity_index_input += nodes.len();
         }
         let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
         // Enter the material bank only for declared paint or an existing cold
@@ -3247,6 +3272,10 @@ impl<M: View + 'static> Runtime<M> {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for (index, node) in self.nodes.iter().enumerate() {
+                #[cfg(test)]
+                {
+                    self.structural_work.layout_insertions += 1;
+                }
                 let parent = node
                     .parent()
                     .index()
@@ -3423,6 +3452,10 @@ impl<M: View + 'static> Runtime<M> {
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
+            #[cfg(test)]
+            {
+                self.structural_work.paint_nodes += 1;
+            }
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
