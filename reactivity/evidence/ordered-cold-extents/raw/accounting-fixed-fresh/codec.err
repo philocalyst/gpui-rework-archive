@@ -1,0 +1,6 @@
+
+thread 'runtime::cold_correspondence::tests::false_identity_correspondence_is_rejected' (1121453) panicked at crates/gpui/src/runtime/cold_correspondence.rs:242:13:
+assertion `left == right` failed: correspondence identity must survive reconciliation
+  left: 2
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

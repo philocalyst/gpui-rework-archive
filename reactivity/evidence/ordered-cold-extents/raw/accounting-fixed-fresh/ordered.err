@@ -1,0 +1,6 @@
+
+thread 'runtime::ordered_cold_extents::tests::false_identity_extent_reuse_is_rejected' (1121449) panicked at crates/gpui/src/runtime/ordered_cold_extents.rs:271:13:
+assertion `left == right` failed: surviving identity required
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

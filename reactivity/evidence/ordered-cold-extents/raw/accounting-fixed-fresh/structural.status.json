@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/b4016e0dba907c5129f1ca14a9e77d56f8bac4abf40d08e260611a78a105de2b",
+    "native::structural_trace_tests::live_structural_boundary",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 2.109475612640381
+}

@@ -1,0 +1,5 @@
+{
+  "reason": "free disk below 8GiB before any build/test or guard started",
+  "source": "b6ed2130e6124279417c45f0741aa113861124a2",
+  "free": 8426213376
+}
