@@ -3,14 +3,14 @@ use super::structural_trace_tests::{capture, scene, submit, texture};
 use super::*;
 use crate::prelude::*;
 use serde_json::json;
-struct Variety {
+pub(super) struct Variety {
     more: Signal<bool>,
     picture: crate::Image,
 }
 impl Variety {
-    const MORE: Source<Self, bool> =
+    pub(super) const MORE: Source<Self, bool> =
         Source::new(FieldId::new(1), "more", |m| &m.more, |m| &mut m.more);
-    fn new(more: bool) -> Self {
+    pub(super) fn new(more: bool) -> Self {
         Self {
             more: Signal::new(more),
             picture: crate::Image::rgba8(

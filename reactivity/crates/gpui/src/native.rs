@@ -2234,3 +2234,6 @@ pub(crate) mod workload_port;
 mod semantic_emission_tests;
 #[cfg(test)]
 mod structural_trace_tests;
+
+#[cfg(test)]
+mod packet_relocation_tests;

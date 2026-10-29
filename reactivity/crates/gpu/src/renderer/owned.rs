@@ -3,6 +3,13 @@ use super::*;
 use gpui_canvas::SlotEdit;
 
 impl Renderer {
+    /// Snapshot staging arrays after a successful full preparation only.
+    /// This does not describe later slot patches or uncompleted GPU reads.
+    #[cfg(feature = "packet-trace")]
+    pub fn trace_packet(&self) -> PacketTrace {
+        self.state.trace_packet()
+    }
+
     pub async fn request(
         adapter: &wgpu::Adapter,
         format: wgpu::TextureFormat,

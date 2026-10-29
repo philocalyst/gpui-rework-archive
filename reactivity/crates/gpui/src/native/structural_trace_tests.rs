@@ -2,7 +2,7 @@
 use super::*;
 use crate::prelude::*;
 use serde_json::json;
-struct Tree {
+pub(super) struct Tree {
     keys: Signal<Vec<u64>>,
     keyed: bool,
     fillers: usize,
@@ -11,9 +11,9 @@ struct Tree {
 impl Tree {
     const BAD: Source<Self, Affine> =
         Source::new(FieldId::new(2), "bad", |m| &m.bad, |m| &mut m.bad);
-    const KEYS: Source<Self, Vec<u64>> =
+    pub(super) const KEYS: Source<Self, Vec<u64>> =
         Source::new(FieldId::new(1), "keys", |m| &m.keys, |m| &mut m.keys);
-    fn new(keyed: bool, fillers: usize, keys: Vec<u64>) -> Self {
+    pub(super) fn new(keyed: bool, fillers: usize, keys: Vec<u64>) -> Self {
         Self {
             keys: Signal::new(keys),
             keyed,

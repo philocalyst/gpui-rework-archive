@@ -134,6 +134,21 @@ const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
 // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
 const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
 type Word = [u32; 4];
+/// Diagnostic CPU staging snapshot, not a GPU readback or publication journal.
+#[cfg(feature = "packet-trace")]
+#[derive(Debug)]
+pub struct PacketTrace {
+    pub records: Vec<[u32; 4]>,
+    /// First ordinal, placement count, physical start word, compact flag.
+    pub groups: Vec<[usize; 4]>,
+    pub ranges: Vec<[u32; 2]>,
+    pub references: Vec<u32>,
+    pub corrections: Vec<[u32; 8]>,
+    pub image_addresses: Vec<(String, [u32; 2])>,
+    pub observer_capacity_bytes: usize,
+    pub observer_header_bytes: usize,
+}
+
 fn float_word(value: [f32; 4]) -> Word {
     value.map(f32::to_bits)
 }
@@ -402,6 +417,8 @@ pub struct RendererState {
     atlas: Atlas,
     images: Option<Box<images::Images>>,
     records: Vec<Word>,
+    #[cfg(feature = "packet-trace")]
+    trace_groups: Vec<[usize; 4]>,
     ranges: Vec<[u32; 2]>,
     references: Vec<u32>,
     cursors: Vec<u32>,
@@ -634,6 +651,8 @@ impl RendererState {
             atlas,
             images: None,
             records: Vec::new(),
+            #[cfg(feature = "packet-trace")]
+            trace_groups: Vec::new(),
             ranges: Vec::new(),
             references: Vec::new(),
             cursors: Vec::new(),
@@ -643,6 +662,22 @@ impl RendererState {
             grouped_records: true,
             stats: Stats::default(),
             packet: None,
+        }
+    }
+    #[cfg(feature = "packet-trace")]
+    fn trace_packet(&self) -> PacketTrace {
+        PacketTrace {
+            records: self.records.clone(),
+            groups: self.trace_groups.clone(),
+            ranges: self.ranges.clone(),
+            references: self.references.clone(),
+            corrections: self.residuals.iter().map(|r| bytemuck::cast(*r)).collect(),
+            image_addresses: self
+                .images
+                .as_ref()
+                .map_or_else(Vec::new, |i| i.trace_addresses()),
+            observer_capacity_bytes: self.trace_groups.capacity() * size_of::<[usize; 4]>(),
+            observer_header_bytes: size_of::<Vec<[usize; 4]>>(),
         }
     }
     fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
@@ -739,6 +774,8 @@ impl RendererState {
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
         self.records.clear();
+        #[cfg(feature = "packet-trace")]
+        self.trace_groups.clear();
         let bank_count = scene.paint_bank().len();
         if bank_count > MAX_DRAWS * 2 {
             return Err(Error::ResourceLimit);
@@ -782,6 +819,13 @@ impl RendererState {
             // Ordinary render's empty observer specializes away. Inline
             // multi-placement diagnostic groups decline color-only patching.
             group_ready(ordinal, group, self.records.len(), compact);
+            #[cfg(feature = "packet-trace")]
+            self.trace_groups.push([
+                ordinal,
+                group.bounds().len(),
+                self.records.len(),
+                usize::from(compact),
+            ]);
             if compact {
                 let mut error = [0.0_f32; 2];
                 for (offset, p) in group.placements().enumerate() {

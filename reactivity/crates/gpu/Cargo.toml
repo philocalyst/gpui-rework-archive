@@ -11,6 +11,8 @@ default = ["simd"]
 simd = ["gpui_canvas/simd"]
 # Hardware oracle on the native backend; software Vulkan remains explicit.
 gpu-tests = []
+# Read-only diagnostic snapshots; never enabled by the shipping GPUI dependency.
+packet-trace = []
 vulkan-tests = ["gpu-tests"]
 offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
 

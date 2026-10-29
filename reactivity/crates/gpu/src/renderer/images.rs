@@ -41,6 +41,26 @@ pub(super) struct Images {
     stats: ImageStats,
 }
 impl Images {
+    #[cfg(feature = "packet-trace")]
+    pub(super) fn trace_addresses(&self) -> Vec<(String, [u32; 2])> {
+        let mut rows: Vec<_> = self
+            .keys
+            .iter()
+            .map(|key| {
+                let e = self.entries[key];
+                (format!("{key:?}"), [IMAGE | e.word, e.flags])
+            })
+            .collect();
+        if let Some(g) = &self.gradients {
+            rows.extend(
+                g.keys
+                    .iter()
+                    .map(|key| (format!("{key:?}"), [GRADIENT | g.entries[key], 0])),
+            );
+        }
+        rows
+    }
+
     pub(super) fn stats(&self) -> ImageStats {
         self.stats
     }

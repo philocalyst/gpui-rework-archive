@@ -13,3 +13,6 @@ pub use wgpu;
 #[cfg(all(test, feature = "gpu-tests"))]
 #[path = "../tests/support/adapter.rs"]
 mod test_adapter;
+
+#[cfg(feature = "packet-trace")]
+pub use renderer::PacketTrace;
