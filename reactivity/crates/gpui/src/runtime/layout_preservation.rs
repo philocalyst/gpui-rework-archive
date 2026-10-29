@@ -12,7 +12,7 @@ pub(crate) enum Mode {
     Forced,
 }
 #[derive(Clone, Copy, Debug, Default, Serialize)]
-pub(super) struct Work {
+pub(crate) struct Work {
     pub correspondence_checks: usize,
     pub prefix_materialized: usize,
     pub plan_allocations: usize,
@@ -436,5 +436,38 @@ impl<M: View + 'static> Win<M> {
         let r = self.runtime().unwrap();
         let state = &r.layout_preservation;
         serde_json::json!({"mode":format!("{:?}",state.mode),"work":state.work,"committed":state.committed.map(|a|format!("{:?}",a.token)),"working":state.working,"pending_bytes":state.pending.as_ref().map_or(0,|p|p.bytes()),"state_header_bytes":size_of::<State>(),"route_active":state.route_active,"route_rows":state.route.len(),"route_capacity_bytes":state.route.capacity()*size_of::<(NodeId,u32)>(),"qualified_route":state.route.iter().map(|(id,rank)|(format!("{id:?}"),rank)).collect::<Vec<_>>()})
+    }
+}
+
+#[cfg(test)]
+#[derive(Serialize)]
+pub(crate) struct CostSnapshot {
+    pub known_layout_bytes: usize,
+    pub state_bytes: usize,
+    pub route_bytes: usize,
+    pub work: Work,
+    pub producer: structural_trace::Work,
+}
+#[cfg(test)]
+impl<M: View + 'static> Win<M> {
+    pub(crate) fn layout_cost_snapshot(&self) -> CostSnapshot {
+        let r = self.runtime().unwrap();
+        let s = r.layout.storage();
+        let state = &r.layout_preservation;
+        let route = state.route.capacity() * size_of::<(NodeId, u32)>();
+        CostSnapshot {
+            known_layout_bytes: size_of::<LayoutTree>()
+                + r.layout.tree().allocated_bytes()
+                + s.lane_capacity_bytes
+                + s.cache_heap_bytes
+                + r.layout_nodes.capacity() * size_of::<NodeId>()
+                + size_of::<State>()
+                + route
+                + state.pending.as_ref().map_or(0, |p| p.bytes()),
+            state_bytes: size_of::<State>(),
+            route_bytes: route,
+            work: state.work,
+            producer: r.structural_work,
+        }
     }
 }

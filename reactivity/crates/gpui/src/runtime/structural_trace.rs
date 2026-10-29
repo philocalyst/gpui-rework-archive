@@ -2,7 +2,7 @@
 use super::*;
 use serde_json::json;
 #[derive(Default, Clone, Copy, serde::Serialize)]
-pub(super) struct Work {
+pub(crate) struct Work {
     pub reconciled: usize,
     pub survived: usize,
     pub minted: usize,

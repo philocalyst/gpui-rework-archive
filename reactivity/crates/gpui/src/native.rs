@@ -2243,3 +2243,6 @@ mod layout_handle_tests;
 
 #[cfg(all(test, feature = "layout-preservation-lab"))]
 mod layout_preservation_tests;
+
+#[cfg(all(test, feature = "layout-preservation-lab"))]
+mod layout_cost_tests;

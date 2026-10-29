@@ -63,13 +63,13 @@ fn run<M: View + 'static>(
     }
     json!({"case":case,"frames":frames})
 }
-struct Measured {
+pub(super) struct Measured {
     values: Signal<Vec<(u64, String)>>,
 }
 impl Measured {
-    const VALUES: Source<Self, Vec<(u64, String)>> =
+    pub(super) const VALUES: Source<Self, Vec<(u64, String)>> =
         Source::new(FieldId::new(1), "values", |m| &m.values, |m| &mut m.values);
-    fn values(step: usize) -> Vec<(u64, String)> {
+    pub(super) fn values(step: usize) -> Vec<(u64, String)> {
         let keys = if step == 0 { [1, 2, 3] } else { [3, 1, 2] };
         keys.into_iter()
             .map(|k| {
@@ -90,7 +90,7 @@ impl Measured {
             })
             .collect()
     }
-    fn new(step: usize) -> Self {
+    pub(super) fn new(step: usize) -> Self {
         Self {
             values: Signal::new(Self::values(step)),
         }
