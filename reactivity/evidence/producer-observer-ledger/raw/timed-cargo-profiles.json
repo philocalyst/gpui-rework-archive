@@ -1,0 +1,202 @@
+[
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_reactivity_core",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/core/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "layout"
+    ],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_canvas",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/canvas/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "emission-trace"
+    ],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/host#gpui_reactivity_host@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_reactivity_host",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/host/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_reactivity_state",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/state/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "serde"
+    ],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_inline_call",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/inline-call/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_gpu",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/gpu/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "packet-trace"
+    ],
+    "fresh": false
+  },
+  {
+    "package_id": "path+file:///home/user/gpui-layout-cost-lab/reactivity/crates/gpui#0.1.0",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/home/user/gpui-layout-cost-lab/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "layout-preservation-lab",
+      "native-core",
+      "x11-minimal"
+    ],
+    "fresh": false
+  }
+]
