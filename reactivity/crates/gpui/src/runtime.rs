@@ -1190,8 +1190,6 @@ mod cold_correspondence;
 #[cfg(test)]
 mod ordered_cold_extents;
 #[cfg(test)]
-mod semantic_emission;
-#[cfg(test)]
 mod structural_trace;
 struct Runtime<M> {
     #[cfg(test)]
@@ -1200,8 +1198,6 @@ struct Runtime<M> {
     cold_correspondence: cold_correspondence::Trials,
     #[cfg(test)]
     ordered_cold_extents: ordered_cold_extents::Trials,
-    #[cfg(test)]
-    semantic_emission: semantic_emission::Store,
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
@@ -1455,8 +1451,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             cold_correspondence: Default::default(),
             #[cfg(test)]
             ordered_cold_extents: Default::default(),
-            #[cfg(test)]
-            semantic_emission: Default::default(),
             focused: None,
             sites,
             overrides: Overrides::default(),
@@ -3495,21 +3489,12 @@ impl<M: View + 'static> Runtime<M> {
             .map_or(usize::MAX, |captions| captions.panel);
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
-        #[cfg(test)]
-        let mut emission = semantic_emission::Builder::new(
-            token,
-            self.source_epoch,
-            self.nodes.len(),
-            usize::from(self.layout_depth),
-        );
         self.counters.paint_passes += 1;
         for index in 0..self.nodes.len() {
             #[cfg(test)]
             {
                 self.structural_work.paint_nodes += 1;
             }
-            #[cfg(test)]
-            let emission_start = scene.trace_command_count();
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
@@ -3869,25 +3854,6 @@ impl<M: View + 'static> Runtime<M> {
                     },
                 )?;
             }
-            #[cfg(test)]
-            {
-                let (end, support) = scene.trace_support_since(emission_start);
-                emission.push(
-                    node.identity(),
-                    emission_start..end,
-                    semantic_emission::Dependency {
-                        parent: node.parent().index().map_or(u32::MAX, |i| i as u32),
-                        parent_space: parent.coefficients(),
-                        transform,
-                        inherited: inherited.chain.map_or(
-                            gpui_canvas::Clip::Rect(inherited.clip),
-                            gpui_canvas::Clip::Chain,
-                        ),
-                        used: clip,
-                        support,
-                    },
-                );
-            }
             if omitted {
                 published.record(index, presented.len(), false);
                 continue;
@@ -4144,8 +4110,6 @@ impl<M: View + 'static> Runtime<M> {
         // candidate. Keep interaction focus at the same revocation boundary.
         self.prune_focus();
         self.latest_token = Some(token);
-        #[cfg(test)]
-        self.semantic_emission.install(emission);
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
         drop(shaper);
