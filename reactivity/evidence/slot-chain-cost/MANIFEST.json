@@ -1,0 +1,17 @@
+{
+  "PROTOCOL.md": "aa5b4ec94aa036547b9e2b5019d74bda9b59409052d727ba60f7d77387cc9446",
+  "RAW_MANIFEST.json": "22d3032a866fb4e642ce4f91e351c7143168090734fd3a17f9d04460b0610389",
+  "README.md": "aa2b857de9109988621b8caae6f8fa4c1700b771cb424ae7ae9ca810fa0f466e",
+  "analysis.json": "3e27f6ec9524f5d90aaa5f91b8d0877ddb7b8c67a6b55800b5bcf86d2dabf583",
+  "analyze.py": "9bff2a3d7c77d11d9f865b4641154ba0c4910e101ace631a218b31152d7e35ec",
+  "build_gate.py": "f204dca94881a306cfb1a61541b55bd84b06a26e3b8833dabebc94d36e73d850",
+  "campaign.py": "5813c4f69ff40b757350c0d378a278bdaff5b420eeb5a36a8156d6badf1fb074",
+  "frozen/candidate-harness.rs": "f1938a37269810b2710fa6efdeda56494513d01c7da548f0eaf23ac9d50d64b8",
+  "frozen/candidate-source.txt": "edaa9928a6de582cfe37f67ca803dc75bc9168bb183fd6cb59f3abdfb4278996",
+  "frozen/control-harness.rs": "f1938a37269810b2710fa6efdeda56494513d01c7da548f0eaf23ac9d50d64b8",
+  "frozen/control-source.txt": "0965e211081e68dcb5c16cc57c0414a2ccec322cc498a0e65a69ea93ba52587c",
+  "frozen/shipping.diff": "f612afb58d9f533ec91982fc1303228e7a84684748b145f2023bcc3fde0b342a",
+  "qualify.py": "10335fcc01d2a096ce0bac6a30a6b3937af4c5d6025ac7c5cd82da68a6dbc977",
+  "raw.tar.gz": "572f122ee0d88a5c43d72bd64e9775c20a69a75fe84bb0097484a02122a807f1",
+  "verify.py": "8b149e672420a66fabe068f5241f415a8ac6bb46d039a88347364825479dad87"
+}
