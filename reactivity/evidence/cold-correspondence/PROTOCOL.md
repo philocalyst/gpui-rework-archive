@@ -60,3 +60,11 @@ payload comparison, not actual staged/uploaded bytes. All new encoded producer
 bytes are counted separately. The raw mirror and three alternative stores are
 all live in this diagnostic build; complete production memory reduction cannot
 be claimed while that shadow exists.
+
+After the first correctness gate, diagnostic accounting is tightened without
+changing codec/workload/representation decisions: store fixed-size numeric
+statistics instead of retaining serde JSON inside the live producer. JSON is
+created only by the post-update observation method. Report pending candidate
+heap and revoke correspondence reporting after incomplete description, while
+retaining prior codec stores. This makes every retained experiment metadata
+field countable; the first gate remains preserved. No latency observations exist.

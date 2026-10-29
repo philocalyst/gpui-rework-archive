@@ -173,6 +173,28 @@ impl Store {
         }
     }
 }
+#[derive(Default, Clone, Copy, serde::Serialize)]
+struct Stats {
+    mode: &'static str,
+    records: usize,
+    changed_records: usize,
+    old_point_decodes: usize,
+    validation_decodes: usize,
+    encoded_payload_bytes: usize,
+    store_header_bytes: usize,
+    directory_capacity_bytes: usize,
+    retained_bytes: usize,
+    old_retained_bytes: usize,
+    known_old_new_plus_builder_scratch_peak_bytes: usize,
+    builder_header_bytes: usize,
+    encoder_base_width_stack_bytes: usize,
+    encoder_field_reads: usize,
+    bounded_scratch_capacity_peak_bytes: usize,
+    encoded_bytes_produced: usize,
+    ordinal_block_rewrite_payload_bytes: usize,
+    new_directory_bytes_written: usize,
+    raw_storage: bool,
+}
 struct Builder {
     mode: Mode,
     len: usize,
@@ -256,7 +278,7 @@ impl Builder {
         self.blocks.push(encoded);
         self.scratch.clear();
     }
-    fn finish(mut self, old: &Store) -> (Store, serde_json::Value) {
+    fn finish(mut self, old: &Store) -> (Store, Stats) {
         let store = if matches!(self.mode, Mode::Raw) {
             Store::Raw(std::mem::take(&mut self.raw))
         } else if self.len <= TINY {
@@ -279,7 +301,39 @@ impl Builder {
                 blocks: std::mem::take(&mut self.blocks),
             }
         };
-        let stats = json!({"mode":format!("{:?}",self.mode),"records":self.len,"changed_records":self.changed,"old_point_decodes":self.old_decodes,"validation_decodes":self.validation_decodes,"encoded_payload_bytes":store.payload(),"store_header_bytes":size_of::<Store>(),"directory_capacity_bytes":store.directory(),"retained_bytes":store.retained(),"old_retained_bytes":old.retained(),"known_old_new_plus_builder_scratch_peak_bytes":old.retained()+store.retained()+size_of::<Builder>()+self.scratch_peak,"builder_header_bytes":size_of::<Builder>(),"encoder_base_width_stack_bytes":size_of::<[u64;4]>()+size_of::<[u8;4]>(),"encoder_field_reads":self.len*if matches!(self.mode,Mode::Raw)||self.len<=TINY {4}else{12},"bounded_scratch_capacity_peak_bytes":self.scratch_peak,"encoded_bytes_produced":store.payload(),"ordinal_block_rewrite_payload_bytes":store.rewrite(old),"new_directory_bytes_written":store.directory(),"raw_tiny":matches!(&store,Store::Raw(_))});
+        let stats = Stats {
+            mode: match self.mode {
+                Mode::Raw => "Raw",
+                Mode::Absolute => "Absolute",
+                Mode::Relative => "Relative",
+            },
+            records: self.len,
+            changed_records: self.changed,
+            old_point_decodes: self.old_decodes,
+            validation_decodes: self.validation_decodes,
+            encoded_payload_bytes: store.payload(),
+            store_header_bytes: size_of::<Store>(),
+            directory_capacity_bytes: store.directory(),
+            retained_bytes: store.retained(),
+            old_retained_bytes: old.retained(),
+            known_old_new_plus_builder_scratch_peak_bytes: old.retained()
+                + store.retained()
+                + size_of::<Builder>()
+                + self.scratch_peak,
+            builder_header_bytes: size_of::<Builder>(),
+            encoder_base_width_stack_bytes: size_of::<[u64; 4]>() + size_of::<[u8; 4]>(),
+            encoder_field_reads: self.len
+                * if matches!(self.mode, Mode::Raw) || self.len <= TINY {
+                    4
+                } else {
+                    12
+                },
+            bounded_scratch_capacity_peak_bytes: self.scratch_peak,
+            encoded_bytes_produced: store.payload(),
+            ordinal_block_rewrite_payload_bytes: store.rewrite(old),
+            new_directory_bytes_written: store.directory(),
+            raw_storage: matches!(&store, Store::Raw(_)),
+        };
         (store, stats)
     }
 }
@@ -307,7 +361,10 @@ pub(super) struct Trials {
     runs: Vec<Run>,
     base: Stamp,
     next: Stamp,
-    report: serde_json::Value,
+    stats: [Stats; 3],
+    last_from: Stamp,
+    last_to: Stamp,
+    old_combined: usize,
 }
 impl Trials {
     pub(super) fn begin(&mut self, namespace: u64, epoch: u64) {
@@ -349,11 +406,14 @@ impl Trials {
     pub(super) fn finish(&mut self) {
         let builders = self.pending.take().unwrap();
         let old_bytes: usize = self.stores.iter().map(Store::retained).sum();
-        let mut reports = Vec::new();
-        for (builder, old) in builders.into_iter().zip(&mut self.stores) {
+        for ((builder, old), stats) in builders
+            .into_iter()
+            .zip(&mut self.stores)
+            .zip(&mut self.stats)
+        {
             let (new, report) = builder.finish(old);
             *old = new;
-            reports.push(report);
+            *stats = report;
         }
         let len = self.stores[0].len();
         for i in 0..len {
@@ -361,14 +421,27 @@ impl Trials {
             assert_eq!(raw, self.stores[1].record(i));
             assert_eq!(raw, self.stores[2].record(i));
         }
-        self.report = json!({"scope":"test-only shadow cold stores; no layout/paint/resource/GPU authority","from_namespace":self.base.namespace,"from_source_epoch":self.base.epoch,"to_namespace":self.next.namespace,"to_source_epoch":self.next.epoch,"runs":self.runs,"run_count":self.runs.len(),"run_header_bytes":size_of::<Vec<Run>>(),"run_capacity_bytes":self.runs.capacity()*size_of::<Run>(),"run_payload_bytes":self.runs.len()*size_of::<Run>(),"raw_canonical_literal_bytes":self.runs.iter().filter(|r|r.old_start==NONE).map(|r|r.len as usize*ROW).sum::<usize>(),"alternatives":reports,"combined_control_store_retained_bytes":self.stores.iter().map(Store::retained).sum::<usize>(),"old_combined_control_store_retained_bytes":old_bytes,"trial_header_bytes":size_of::<Self>(),"combined_store_run_trial_retained_excluding_diagnostic_json_bytes":size_of::<Self>()+self.stores.iter().map(|s|s.retained()-size_of::<Store>()).sum::<usize>()+self.runs.capacity()*size_of::<Run>(),"additional_whole_decoder_verification_records":len*3,"producer_records":len});
+        self.last_from = self.base;
+        self.last_to = self.next;
+        self.old_combined = old_bytes;
         self.base = self.next;
     }
     pub(super) fn report(&self) -> serde_json::Value {
-        self.report.clone()
+        let pending_heap = self.pending.as_ref().map_or(0, |builders| {
+            builders
+                .iter()
+                .map(|b| {
+                    b.raw.capacity()
+                        + b.scratch.capacity() * size_of::<Wire>()
+                        + b.blocks.capacity() * size_of::<Vec<u8>>()
+                        + b.blocks.iter().map(Vec::capacity).sum::<usize>()
+                })
+                .sum::<usize>()
+        });
+        json!({"scope":"test-only shadow cold stores; no layout/paint/resource/GPU authority","status":if self.pending.is_none(){"complete logical correspondence"}else{"incomplete; correspondence revoked; old codec stores retained"},"from_namespace":self.last_from.namespace,"from_source_epoch":self.last_from.epoch,"to_namespace":self.last_to.namespace,"to_source_epoch":self.last_to.epoch,"runs":self.runs,"run_count":self.runs.len(),"run_header_bytes":size_of::<Vec<Run>>(),"run_capacity_bytes":self.runs.capacity()*size_of::<Run>(),"run_payload_bytes":self.runs.len()*size_of::<Run>(),"raw_canonical_literal_bytes":self.runs.iter().filter(|r|r.old_start==NONE).map(|r|r.len as usize*ROW).sum::<usize>(),"alternatives":self.stats,"combined_control_store_retained_bytes":self.stores.iter().map(Store::retained).sum::<usize>(),"old_combined_control_store_retained_bytes":self.old_combined,"trial_header_bytes":size_of::<Self>(),"pending_heap_bytes":pending_heap,"combined_store_run_trial_retained_bytes":size_of::<Self>()+self.stores.iter().map(|s|s.retained()-size_of::<Store>()).sum::<usize>()+self.runs.capacity()*size_of::<Run>()+pending_heap,"additional_whole_decoder_verification_records":self.stores[0].len()*3,"producer_records":self.stores[0].len()})
     }
     fn accepts(&self, base: Stamp) -> bool {
-        self.base.matches(base)
+        self.pending.is_none() && self.base.matches(base)
     }
 }
 #[cfg(test)]
@@ -450,6 +523,7 @@ mod tests {
             ..previous
         }));
         t.begin(7, 2);
+        assert!(!t.accepts(previous));
         t.reserve(32);
         for i in 0..32 {
             let old = (i * 17) % 32;
