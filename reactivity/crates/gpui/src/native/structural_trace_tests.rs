@@ -48,7 +48,7 @@ impl crate::ItemSource for Tree {
 }
 impl View for Tree {
     fn sources() -> Sources<Self> {
-        Sources::new().direct(Self::KEYS)
+        Sources::new().field(Self::KEYS)
     }
     fn view(&self) -> El<'_> {
         let group = if self.keyed {

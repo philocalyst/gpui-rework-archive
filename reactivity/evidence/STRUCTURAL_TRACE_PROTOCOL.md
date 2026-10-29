@@ -37,3 +37,10 @@ leases from rectangle pixels. Trace source resource reconciliation and existing
 Canvas/renderer boundaries before choosing the smallest subsequent experiment.
 Keep original raw renderer/full preparation paths. No adoption, benchmark rerun,
 shipping claim or publication. All work stays local.
+
+Fixture correction after first gate: the structural Vec source must be registered
+with `Sources::field`, whose documented owner dependency re-describes ordinary
+Deref/branch reads. `direct` explicitly excludes those dependencies; the first
+fixture incorrectly used it, produced no structural candidate, and correctly
+accepted the unchanged token. Preserve that failed harness attempt. No runtime
+authority rule or acceptance requirement changes.
