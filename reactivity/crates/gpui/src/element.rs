@@ -386,6 +386,8 @@ pub struct El<'a> {
     style: Style,
     on_click: Option<Handler>,
     components: ComponentBoundaries,
+    #[cfg(feature = "component-replay-lab")]
+    local_recipe: usize,
     extra: Option<Box<crate::semantic::ElementExtra<'a>>>,
 }
 
@@ -497,6 +499,8 @@ impl<'a> El<'a> {
             style: Style::default(),
             on_click: None,
             components: ComponentBoundaries::default(),
+            #[cfg(feature = "component-replay-lab")]
+            local_recipe: 0,
             extra: None,
         }
     }
@@ -623,6 +627,18 @@ impl<'a> El<'a> {
             .annotations_mut()
     }
 
+    /// Non-shipping research insertion; see the explicit independence contract.
+    #[cfg(feature = "component-replay-lab")]
+    pub fn child_local<P: 'static, C: crate::View + 'static>(
+        self,
+        local: &'static crate::local_component::LocalComponent<P, C>,
+        parent: &'a P,
+    ) -> Self {
+        use crate::local_component::Replay;
+        let mut child = local.render(parent);
+        child.local_recipe = local.key();
+        self.child(child)
+    }
     pub fn child<C, S>(mut self, children: C) -> Self
     where
         C: ChildSeq<'a, S>,
@@ -1089,6 +1105,10 @@ impl<'a> El<'a> {
                 text: element.text.take(),
                 style: element.style,
                 on_click: element.on_click.take(),
+                #[cfg(feature = "component-replay-lab")]
+                component_depth: element.components.depth(),
+                #[cfg(feature = "component-replay-lab")]
+                local_recipe: element.local_recipe,
                 components: std::mem::take(&mut element.components),
             });
         }
@@ -1119,6 +1139,10 @@ enum BoundaryState {
     Scope(u32),
 }
 impl ComponentBoundaries {
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) fn depth(&self) -> usize {
+        std::iter::successors(self.0.as_deref(), |b| b.next.0.as_deref()).count()
+    }
     pub(crate) fn admit(&mut self, receiver: &dyn Any, sources: &dyn Any) -> Result<(), BindError> {
         let mut scope = 0;
         for boundary in std::iter::successors(self.0.as_deref(), |item| item.next.0.as_deref()) {
@@ -1171,6 +1195,10 @@ pub(crate) struct DraftNode<'a> {
     pub(crate) style: Style,
     pub(crate) on_click: Option<Handler>,
     pub(crate) components: ComponentBoundaries,
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) local_recipe: usize,
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) component_depth: usize,
 }
 
 pub fn div<'a>() -> El<'a> {

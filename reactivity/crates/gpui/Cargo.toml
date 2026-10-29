@@ -27,6 +27,8 @@ accesskit = { version = "=0.25.1", optional = true }
 accesskit_winit = { version = "=0.34.1", default-features = false, features = ["accesskit_unix", "async-io", "rwh_06"], optional = true }
 
 [features]
+# Isolated non-shipping structural-description research.
+component-replay-lab = []
 default = ["simd"]
 simd = ["gpui_canvas/simd", "gpui_gpu?/simd"]
 accessibility = ["native-core", "dep:accesskit", "dep:accesskit_winit"]

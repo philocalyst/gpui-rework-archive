@@ -88,6 +88,10 @@ impl<M, T> Source<M, T> {
             write,
         }
     }
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) fn local_recipe_read<'a>(&self, model: &'a M) -> &'a Signal<T> {
+        (self.read)(model)
+    }
     pub const fn id(&self) -> FieldId {
         self.id
     }
@@ -603,6 +607,8 @@ impl<M, T: 'static> Field<M> for Source<M, T> {
 // A component owns one child schema. Field and method routing recurse through
 // typed projection tables, never through retained child addresses or refcounts.
 trait ComponentSchema<M> {
+    #[cfg(feature = "component-replay-lab")]
+    fn local_replay(&self) -> Option<&dyn crate::local_component::Replay<M>>;
     fn as_any(&self) -> &dyn Any;
     fn id(&self) -> FieldId;
     fn name(&self) -> &'static str;
@@ -631,6 +637,8 @@ pub(crate) struct ComponentEntry<M, C> {
     start: u32,
     end: u32,
     parent_dependency: bool,
+    #[cfg(feature = "component-replay-lab")]
+    local_replay: Option<&'static dyn crate::local_component::Replay<M>>,
 }
 impl<M, C> ComponentEntry<M, C> {
     pub(crate) fn qualify_scope(&self, scope: u32) -> u32 {
@@ -644,6 +652,10 @@ impl<M, C> ComponentEntry<M, C> {
     }
 }
 impl<M: 'static, C: 'static> ComponentSchema<M> for ComponentEntry<M, C> {
+    #[cfg(feature = "component-replay-lab")]
+    fn local_replay(&self) -> Option<&dyn crate::local_component::Replay<M>> {
+        self.local_replay
+    }
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -817,10 +829,53 @@ impl<M> Sources<M> {
     {
         self.register_component(component, false)
     }
+    #[cfg(feature = "component-replay-lab")]
+    pub fn local_component<C: View + 'static>(
+        self,
+        local: &'static crate::local_component::LocalComponent<M, C>,
+    ) -> Self
+    where
+        M: 'static,
+    {
+        self.register_component_recipe(local.component, true, Some(local))
+    }
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) fn local_replays(
+        &self,
+    ) -> impl Iterator<Item = &dyn crate::local_component::Replay<M>> {
+        self.components
+            .iter()
+            .filter_map(|entry| entry.local_replay())
+    }
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) fn validate_local_recipes(&self, model: &M) -> Result<(), crate::Error> {
+        for recipe in self.local_replays() {
+            recipe.stamp(model, self)?;
+        }
+        Ok(())
+    }
     fn register_component<C: View + 'static>(
+        self,
+        component: Component<M, C>,
+        parent_dependency: bool,
+    ) -> Self
+    where
+        M: 'static,
+    {
+        self.register_component_recipe(
+            component,
+            parent_dependency,
+            #[cfg(feature = "component-replay-lab")]
+            None,
+        )
+    }
+    fn register_component_recipe<C: View + 'static>(
         mut self,
         component: Component<M, C>,
         parent_dependency: bool,
+        #[cfg(feature = "component-replay-lab")] local_replay: Option<
+            &'static dyn crate::local_component::Replay<M>,
+        >,
     ) -> Self
     where
         M: 'static,
@@ -868,6 +923,8 @@ impl<M> Sources<M> {
             start,
             end,
             parent_dependency,
+            #[cfg(feature = "component-replay-lab")]
+            local_replay,
         }));
         self
     }

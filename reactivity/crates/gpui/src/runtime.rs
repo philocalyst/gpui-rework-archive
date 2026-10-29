@@ -1187,6 +1187,8 @@ impl SurfaceDamage {
 }
 #[cfg(test)]
 mod cold_correspondence;
+#[cfg(feature = "component-replay-lab")]
+mod local_replay;
 #[cfg(test)]
 mod ordered_cold_extents;
 #[cfg(test)]
@@ -1194,6 +1196,8 @@ mod semantic_emission;
 #[cfg(test)]
 mod structural_trace;
 struct Runtime<M> {
+    #[cfg(feature = "component-replay-lab")]
+    local: local_replay::State,
     #[cfg(test)]
     structural_work: structural_trace::Work,
     #[cfg(test)]
@@ -1439,6 +1443,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let sites = Sites::new();
         let layout = LayoutTree::new();
         let runtime = Runtime {
+            #[cfg(feature = "component-replay-lab")]
+            local: Default::default(),
             model: pending.model,
             sources,
             nodes: Vec::new(),
@@ -2083,6 +2089,8 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
+        #[cfg(feature = "component-replay-lab")]
+        self.local.revoke();
         if let Some(metadata) = &mut self.metadata {
             metadata.editing = None;
         }
@@ -2174,6 +2182,14 @@ impl<M: View + 'static> Runtime<M> {
                 Ok(plan)
             },
         )?;
+        #[cfg(feature = "component-replay-lab")]
+        let local_plain_columns = viewport_drafts.is_empty()
+            && annotation_drafts.is_empty()
+            && image_drafts.is_empty()
+            && geometry_drafts.is_empty()
+            && background_drafts.is_empty()
+            && style_ports.is_empty()
+            && mapped_ports.is_empty();
         let mut scroll_drafts = Vec::new();
         let list_drafts: Vec<_> = viewport_drafts
             .into_iter()
@@ -2254,6 +2270,14 @@ impl<M: View + 'static> Runtime<M> {
             }
             fields.push(field);
         }
+        #[cfg(feature = "component-replay-lab")]
+        let local_seed = local_replay::probe(
+            &self.sources,
+            &self.model,
+            &drafts,
+            local_plain_columns,
+            &mut self.local,
+        )?;
         for &(node, geometry) in &geometry_drafts {
             crate::property::CORNER_RADIUS
                 .validate(&geometry.corner_radius)
@@ -2907,6 +2931,8 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
         }
+        #[cfg(feature = "component-replay-lab")]
+        self.local.pending(local_seed);
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
@@ -3129,15 +3155,26 @@ impl<M: View + 'static> Runtime<M> {
             if self.prepared.is_none() && self.presentation_valid {
                 self.presentation_epoch = self.source_epoch;
             }
+            #[cfg(feature = "component-replay-lab")]
+            self.local.commit(
+                &self.nodes,
+                self.sites.namespace(),
+                self.latest_token,
+                self.complete_epoch,
+            );
             return Ok(self.commit());
         }
         match catch_unwind(AssertUnwindSafe(|| self.present_inner())) {
             Ok(Ok(())) => Ok(self.commit()),
             Ok(Err(error)) => {
+                #[cfg(feature = "component-replay-lab")]
+                self.local.revoke();
                 self.rebuild_layout = true;
                 Err(error)
             }
             Err(_) => {
+                #[cfg(feature = "component-replay-lab")]
+                self.local.revoke();
                 self.rebuild_layout = true;
                 if let Some(text) = &mut self.text {
                     text.system = None;
@@ -4175,6 +4212,13 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(test)]
         self.semantic_emission.install(emission);
         self.complete_epoch = self.source_epoch;
+        #[cfg(feature = "component-replay-lab")]
+        self.local.commit(
+            &self.nodes,
+            self.sites.namespace(),
+            self.latest_token,
+            self.complete_epoch,
+        );
         self.next_presentation = next_sequence;
         drop(shaper);
         if let Some(text) = &mut self.text {

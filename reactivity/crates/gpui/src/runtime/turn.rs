@@ -108,6 +108,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
             self.runtime.sources.validate(&mut self.runtime.model)?;
+            #[cfg(feature = "component-replay-lab")]
+            {
+                self.runtime.local.report.source_schema_validations += 1;
+                self.runtime
+                    .sources
+                    .validate_local_recipes(&self.runtime.model)?;
+            }
             if mount {
                 self.lanes
                     .validate(&self.runtime.model, &self.runtime.sources)?;
@@ -128,6 +135,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 // or reached reconciliation; its acknowledged cohort stays live.
                 self.logical_valid = !scroll.is_empty() && was_valid;
                 if !self.logical_valid {
+                    #[cfg(feature = "component-replay-lab")]
+                    self.runtime.local.revoke();
                     self.focused = None;
                 }
                 Err(error)
@@ -316,12 +325,37 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         editing: EditingIntent,
         property_changed: Option<NonZeroU64>,
     ) -> Result<Commit, Error> {
+        #[cfg(feature = "component-replay-lab")]
+        self.runtime.local.reset_report();
         let ime_changed = self.runtime.reconcile_ime();
         // A bank-only candidate cannot include changed caret visibility.
         // Disable that early publication before patching, then combine both
         // effects in the one ordinary full preparation below.
         if matches!(editing, EditingIntent::Focus) {
             self.runtime.dirty = true;
+        }
+        #[cfg(feature = "component-replay-lab")]
+        if let Some(field) = exact
+            && !questions_changed
+            && property_changed.is_none()
+            && matches!(editing, EditingIntent::None)
+            && !ime_changed
+        {
+            match catch_unwind(AssertUnwindSafe(|| self.runtime.try_local_replay(field))) {
+                Ok(Ok(true)) => return self.runtime.present(),
+                Ok(Ok(false)) => {}
+                Ok(Err(error)) => {
+                    self.runtime.local.revoke();
+                    self.runtime.logical_valid = false;
+                    self.runtime.clear_editing();
+                    self.runtime.focused = None;
+                    return Err(error);
+                }
+                Err(_) => {
+                    self.runtime.poison();
+                    return Err(Error::OwnerPanicked);
+                }
+            }
         }
         let exact = match exact {
             Some(field)

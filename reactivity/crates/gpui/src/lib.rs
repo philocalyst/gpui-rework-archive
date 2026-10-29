@@ -18,6 +18,8 @@ mod element;
 mod identity;
 mod image;
 mod list;
+#[cfg(feature = "component-replay-lab")]
+pub mod local_component;
 #[cfg(feature = "native-core")]
 mod native;
 pub mod property;
