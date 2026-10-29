@@ -1016,3 +1016,10 @@ This supplies a narrow transition-composition certificate, not semantic subtree
 identity or structural/dependency/resource closure. After its one bounded cost
 decision, return to those journal/storage requirements. Cold compression stays
 separate; B's failed overall gate and A's withheld verdict remain unchanged.
+
+
+## Bounded live chain cost — 86cbdf638d45f79fe9d6b156cc7185a601a60042
+
+NOT ADMITTED: the fixed median-of-six paired p95 gate fails single1024 (1.103170 > 1.05), despite passing coalesced256/1024 (.738192/.432918) and return-original256/1024 (.647135/.356892). Geometry fallback passes. All 408 processes / 208,896 measured samples / exact pixel and provenance gates pass. This measures actual public Source through offscreen GPU completion and ack, without Python/IPC inside the interval; it does not measure WSI/scanout or hardware/ZGX superiority. State +8B and identical raw renderer capacities remain explicit. No rerun, retuned gate, shipping adoption, A/B combination or additional paint campaign follows.
+
+Next work returns to semantic subtree identity, old/new ordered extents, structural/dependency/resource closure and storage. Exact predecessor/namespace/unchanged interpretation can generalize as certificate invariants; PaintSlot cannot supply those extents or dependencies. Existing CPU preorder/identity mapping is rebuilt at full description. Preserve semantic identity rules and charge that live boundary; do not conceal it behind a snapshot adapter. Complete local dossier: /home/user/gpui-slot-chain-cost-lab/reactivity/evidence/slot-chain-cost/README.md.
