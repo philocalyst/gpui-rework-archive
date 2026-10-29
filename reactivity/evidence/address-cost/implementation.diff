@@ -1,0 +1,429 @@
+diff --git a/reactivity/crates/gpui/src/native/address_publication_tests.rs b/reactivity/crates/gpui/src/native/address_publication_tests.rs
+index f0af04c351..38ad458dcb 100644
+--- a/reactivity/crates/gpui/src/native/address_publication_tests.rs
++++ b/reactivity/crates/gpui/src/native/address_publication_tests.rs
+@@ -543,3 +543,5 @@ fn private_versions_and_addresses() {
+         arena_bound(&raw, &lab, &output);
+     });
+ }
++
++mod cost;
+diff --git a/reactivity/crates/gpui/src/native/address_publication_tests/cost.rs b/reactivity/crates/gpui/src/native/address_publication_tests/cost.rs
+new file mode 100644
+index 0000000000..04819398a5
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/address_publication_tests/cost.rs
+@@ -0,0 +1,413 @@
++//! Frozen complete endpoint, not production native frame or cross-backend parity.
++use super::*;
++use serde::Serialize;
++use std::time::Instant;
++
++const WARM: usize = 32;
++const MEASURED: usize = 384;
++#[derive(Serialize)]
++struct Sample {
++    step: usize,
++    measured: bool,
++    direction: usize,
++    total_ns: u64,
++    source_ns: u64,
++    prepare_submit_ns: u64,
++    completion_ack_retire_ns: u64,
++    peak_known_cpu_bytes: usize,
++    peak_renderer_gpu_bytes: u64,
++    current_known_cpu_bytes: usize,
++    current_renderer_gpu_bytes: u64,
++    handles_bytes: usize,
++    instance_staged_bytes: usize,
++    image_staged_bytes: usize,
++    mask_staged_bytes: usize,
++    gpu_copy_bytes: u64,
++    cpu_copy_bytes: usize,
++    scan_bytes: usize,
++    directory_staged_bytes: usize,
++    directory_rows: usize,
++    directory_entries_written: usize,
++    tile_rows_examined: usize,
++    tile_comparisons: usize,
++    reused_tiles: usize,
++    appended_indices: usize,
++    resident_indices: usize,
++    compactions: usize,
++    fallback: bool,
++    superseded_buffer_bytes: u64,
++    key_comparisons: usize,
++    key_insertions: usize,
++    key_moved_bytes: usize,
++    resource_keys_examined: usize,
++    resource_map_cloned_capacity: usize,
++    copy_commands: usize,
++    instance_write_calls: Option<usize>,
++    submissions: usize,
++    validated_draws: usize,
++    bin_visits: usize,
++    staged_domains: Option<[usize; 5]>,
++}
++fn version_cpu(v: &Version) -> usize {
++    size_of::<Version>()
++        + v.adapter_retained_bytes()
++        + v.stats().cpu_index_capacity_bytes
++        + v.observer_retained_bytes()
++        - size_of::<Vec<[usize; 4]>>() // Header is already embedded in RendererState.
++}
++fn raw_cpu(r: &RendererState) -> usize {
++    size_of::<RendererState>() + r.stats().cpu_index_capacity_bytes + r.address_observer_bytes()
++        - size_of::<Vec<[usize; 4]>>()
++}
++fn memory() -> String {
++    std::fs::read_to_string("/proc/self/status")
++        .unwrap()
++        .lines()
++        .filter(|s| s.starts_with("VmRSS:") || s.starts_with("VmHWM:"))
++        .collect::<Vec<_>>()
++        .join("\n")
++}
++struct Engine<'a> {
++    context: &'a GpuContext,
++    target: wgpu::TextureView,
++    mode: Option<Mode>,
++    handles: Handles,
++    raw: Option<RendererState>,
++    versions: Vec<Version>,
++}
++impl Engine<'_> {
++    fn frame<M: View + 'static>(
++        &mut self,
++        owner: &mut Win<M>,
++        step: usize,
++        update: impl FnOnce(&mut Win<M>),
++    ) -> Sample {
++        owner.structural_reset();
++        let start = Instant::now();
++        update(owner);
++        let source_ns = start.elapsed().as_nanos() as u64;
++        let (token, stamp, keys) = owner.packet_keys();
++        if let Some(mode) = self.mode {
++            let next = owner
++                .with_scene(|scene, current| {
++                    assert_eq!(current, token);
++                    Version::prepare(
++                        self.context,
++                        scene,
++                        &self.target,
++                        stamp,
++                        keys,
++                        &mut self.handles,
++                        mode,
++                        self.versions.last(),
++                        Fault::None,
++                    )
++                    .unwrap()
++                })
++                .unwrap();
++            self.versions.push(next);
++            self.versions
++                .last_mut()
++                .unwrap()
++                .submit(self.context, &self.target)
++                .unwrap();
++        } else {
++            owner
++                .with_scene(|scene, current| {
++                    assert_eq!(current, token);
++                    self.raw
++                        .as_mut()
++                        .unwrap()
++                        .render(self.context, scene, &self.target)
++                        .unwrap();
++                })
++                .unwrap();
++        }
++        // O(1) accounting while both versions are alive. Both lanes charge this
++        // scalar ledger in prepare/submit, not a post-retirement estimate.
++        let (peak_known_cpu_bytes, peak_renderer_gpu_bytes) = if self.mode.is_some() {
++            (
++                self.versions.iter().map(version_cpu).sum::<usize>()
++                    + self.handles.retained_bytes(),
++                Version::unique_gpu_storage_bytes(&self.versions),
++            )
++        } else {
++            let raw = self.raw.as_ref().unwrap();
++            (
++                raw_cpu(raw),
++                raw.stats().gpu_buffer_bytes + raw.stats().atlas_bytes,
++            )
++        };
++        let submitted_ns = start.elapsed().as_nanos() as u64;
++        self.context
++            .device()
++            .poll(wgpu::PollType::wait_indefinitely())
++            .unwrap();
++        owner.presented(token).unwrap();
++        if self.versions.len() == 2 {
++            // Actual submitted reads have completed before old buffers/maps drop.
++            self.versions.remove(0);
++        }
++        let total_ns = start.elapsed().as_nanos() as u64;
++        let (stats, images, work, current_cpu, current_gpu, directory, indices, orphan) =
++            if let Some(v) = self.versions.last() {
++                (
++                    v.stats(),
++                    v.images(),
++                    v.work(),
++                    version_cpu(v) + self.handles.retained_bytes(),
++                    v.gpu_storage_bytes(),
++                    v.directory_rows(),
++                    v.index_entries(),
++                    v.orphan_copy_bytes(),
++                )
++            } else {
++                let r = self.raw.as_ref().unwrap();
++                (
++                    r.stats(),
++                    r.image_stats(),
++                    gpui_gpu::address_lab::Work::default(),
++                    raw_cpu(r),
++                    r.stats().gpu_buffer_bytes + r.stats().atlas_bytes,
++                    0,
++                    r.stats().tile_references,
++                    0,
++                )
++            };
++        assert!(
++            !work.fallback,
++            "timed fixture must stay inside frozen format/handle bounds"
++        );
++        if self.mode.is_some() {
++            assert_eq!(
++                work.staged_bytes,
++                work.staged_by_domain.iter().sum::<usize>()
++            );
++        }
++        Sample {
++            step,
++            measured: step > WARM,
++            direction: usize::from(step.is_multiple_of(2)),
++            total_ns,
++            source_ns,
++            prepare_submit_ns: submitted_ns - source_ns,
++            completion_ack_retire_ns: total_ns - submitted_ns,
++            peak_known_cpu_bytes,
++            peak_renderer_gpu_bytes,
++            current_known_cpu_bytes: current_cpu,
++            current_renderer_gpu_bytes: current_gpu,
++            handles_bytes: if self.mode.is_some() {
++                self.handles.retained_bytes()
++            } else {
++                0
++            },
++            instance_staged_bytes: stats.instance_upload_bytes,
++            image_staged_bytes: images.map_or(0, |i| i.uploaded_bytes),
++            mask_staged_bytes: stats.mask_upload_bytes,
++            gpu_copy_bytes: work.gpu_copy_bytes,
++            cpu_copy_bytes: work.cpu_copy_bytes,
++            scan_bytes: work.scanned_bytes,
++            directory_staged_bytes: work.directory_staged_bytes,
++            directory_rows: directory,
++            directory_entries_written: work.directory_entries,
++            tile_rows_examined: work.tile_rows_examined,
++            tile_comparisons: work.tile_comparisons,
++            reused_tiles: work.tile_reused,
++            appended_indices: work.tile_appended_entries,
++            resident_indices: indices,
++            compactions: work.arena_compactions,
++            fallback: work.fallback,
++            superseded_buffer_bytes: orphan,
++            key_comparisons: work.key_comparisons,
++            key_insertions: work.key_insertions,
++            key_moved_bytes: work.key_moved_bytes,
++            resource_keys_examined: work.resource_keys_examined,
++            resource_map_cloned_capacity: work.resource_index_cloned_capacity,
++            copy_commands: work.gpu_copy_calls,
++            instance_write_calls: self.mode.map(|_| work.write_calls),
++            submissions: if self.mode.is_none() {
++                1
++            } else if step == 0 {
++                2
++            } else {
++                3
++            },
++            validated_draws: stats.validated_draws,
++            bin_visits: stats.binning_tile_visits,
++            staged_domains: self.mode.map(|_| work.staged_by_domain),
++        }
++    }
++}
++fn run<M: View + 'static>(
++    model: M,
++    context: &GpuContext,
++    mode: Option<Mode>,
++    mut update: impl FnMut(&mut Win<M>, bool),
++    output: &std::path::Path,
++) -> Value {
++    let setup = Instant::now();
++    let mut owner = Win::recording(
++        model,
++        WindowOptions {
++            size: [64, 64],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let owner_setup_ns = setup.elapsed().as_nanos() as u64;
++    let (_, stamp, _) = owner.packet_keys();
++    let target = texture(context.device());
++    let mut engine = Engine {
++        context,
++        target: target.create_view(&Default::default()),
++        mode,
++        handles: Handles::new(stamp[0]),
++        raw: mode.is_none().then(|| RendererState::new(context)),
++        versions: Vec::with_capacity(2),
++    };
++    let mut samples = Vec::with_capacity(WARM + MEASURED);
++    let initial = engine.frame(&mut owner, 0, |_| {});
++    let initial_producer = owner.structural_observation();
++    let memory_initial = memory();
++    let mut memory_warm = String::new();
++    for step in 1..=WARM + MEASURED {
++        let sample = engine.frame(&mut owner, step, |owner| update(owner, step % 2 == 1));
++        samples.push(sample);
++        if step == WARM {
++            memory_warm = memory();
++        }
++    }
++    let memory_end = memory();
++    let final_producer = owner.structural_observation();
++    // No readback/oracle construction in the measured endpoint.
++    let actual = read(context, &target);
++    let oracle = pollster::block_on(GpuContext::new(
++        context.device().clone(),
++        context.queue().clone(),
++        wgpu::TextureFormat::Rgba8UnormSrgb,
++    ))
++    .unwrap();
++    let oracle_target = texture(context.device());
++    let mut original = RendererState::new(&oracle);
++    owner
++        .with_scene(|scene, _| {
++            original
++                .render(
++                    &oracle,
++                    scene,
++                    &oracle_target.create_view(&Default::default()),
++                )
++                .unwrap();
++        })
++        .unwrap();
++    let expected = read(&oracle, &oracle_target);
++    let wrong = actual.iter().zip(&expected).filter(|(a, b)| a != b).count();
++    std::fs::write(output.join("final.rgba"), &actual).unwrap();
++    std::fs::write(output.join("oracle.rgba"), &expected).unwrap();
++    // Preserve timing even if a final encoding gate fails; controller seals it.
++    json!({"warm":WARM,"measured":MEASURED,"owner_setup_ns":owner_setup_ns,"initial":initial,"samples":samples,"initial_producer":initial_producer,"final_producer":final_producer,"memory":{"initial":memory_initial,"warm":memory_warm,"end_before_oracle":memory_end,"after_oracle":memory()},"final_wrong_bytes":wrong,"target_bytes":16384,"readback_transient_bytes":16384,"scope":"Source to GPU completion, ack and predecessor retirement; full test observers; no WSI/IPC/readback in interval; known payload memory not whole-process attribution"})
++}
++#[test]
++#[ignore = "frozen address cost process; explicit driver only"]
++fn complete_endpoint() {
++    let output = std::path::PathBuf::from(std::env::var("GPUI_ADDRESS_COST_OUTPUT").unwrap());
++    std::fs::create_dir(&output).unwrap();
++    let name = std::env::var("GPUI_ADDRESS_COST_MODE").unwrap();
++    let family = std::env::var("GPUI_ADDRESS_COST_FAMILY").unwrap();
++    let mode = match name.as_str() {
++        "raw" => None,
++        "relocation" => Some(Mode::RawRelocation),
++        "relative" => Some(Mode::RelativeDomains),
++        "stable" => Some(Mode::StableDraws),
++        _ => panic!("unknown frozen mode"),
++    };
++    let setup = Instant::now();
++    pollster::block_on(async {
++        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
++        desc.backends = wgpu::Backends::VULKAN;
++        let instance = wgpu::Instance::new(desc);
++        let adapter = instance
++            .request_adapter(&wgpu::RequestAdapterOptions {
++                force_fallback_adapter: true,
++                ..Default::default()
++            })
++            .await
++            .unwrap();
++        let info = format!("{:?}", adapter.get_info());
++        let (device, queue) = adapter.request_device(&Default::default()).await.unwrap();
++        let context = if mode.is_some() {
++            GpuContext::new_address_lab(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
++                .await
++                .unwrap()
++        } else {
++            GpuContext::new(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
++                .await
++                .unwrap()
++        };
++        let setup_ns = setup.elapsed().as_nanos() as u64;
++        let mut result = match family.as_str() {
++            "keyed4" | "unkeyed4" | "keyed256" | "reorder256" => {
++                let fillers = if family.ends_with("256") { 256 } else { 4 };
++                let reorder = family == "reorder256";
++                run(
++                    Tree::new(family != "unkeyed4", fillers, vec![1, 2, 3]),
++                    &context,
++                    mode,
++                    |owner, next| {
++                        owner
++                            .set(
++                                Tree::KEYS,
++                                if next {
++                                    if reorder {
++                                        vec![3, 1, 2]
++                                    } else {
++                                        vec![1, 9, 2, 3]
++                                    }
++                                } else {
++                                    vec![1, 2, 3]
++                                },
++                            )
++                            .unwrap();
++                    },
++                    &output,
++                )
++            }
++            "mixed" => run(
++                Variety::new(false),
++                &context,
++                mode,
++                |owner, next| {
++                    owner.set(Variety::MORE, next).unwrap();
++                },
++                &output,
++            ),
++            "resources" => run(
++                Replacement::new(),
++                &context,
++                mode,
++                |owner, next| {
++                    owner.set(Replacement::NEXT, next).unwrap();
++                },
++                &output,
++            ),
++            _ => panic!("unknown frozen family"),
++        };
++        if mode.is_some() {
++            std::fs::write(
++                output.join("alternative.wgsl"),
++                gpui_gpu::address_lab::shader_source(),
++            )
++            .unwrap();
++        }
++        result["mode"] = json!(name);
++        result["family"] = json!(family);
++        result["device_pipeline_setup_ns"] = json!(setup_ns);
++        result["adapter"] = json!(info);
++        std::fs::write(
++            output.join("result.json"),
++            serde_json::to_vec(&result).unwrap(),
++        )
++        .unwrap();
++        assert_eq!(result["final_wrong_bytes"], 0);
++    });
++}

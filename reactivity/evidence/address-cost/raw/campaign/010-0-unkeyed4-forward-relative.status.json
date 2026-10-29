@@ -1,0 +1,18 @@
+{
+  "index": 10,
+  "block": 0,
+  "family": "unkeyed4",
+  "direction": "forward",
+  "mode": "relative",
+  "path": "010-0-unkeyed4-forward-relative",
+  "exit": 0,
+  "elapsed_seconds": 0.904548168182373,
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+    "native::address_publication_tests::cost::complete_endpoint",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ]
+}

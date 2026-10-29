@@ -1,0 +1,268 @@
+{
+  "relative": {
+    "verdict": "NOT ADMITTED",
+    "timing": false,
+    "storage": true,
+    "failed_timing": [
+      {
+        "family": "keyed4",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.0658565888095737,
+        "threshold": 1.05
+      },
+      {
+        "family": "mixed",
+        "direction": 0,
+        "control": "relocation",
+        "score": 0.997183676772216,
+        "threshold": 0.8
+      },
+      {
+        "family": "mixed",
+        "direction": 0,
+        "control": "raw",
+        "score": 0.9982437385788399,
+        "threshold": 0.8
+      },
+      {
+        "family": "mixed",
+        "direction": 1,
+        "control": "relocation",
+        "score": 1.011260933105476,
+        "threshold": 0.8
+      },
+      {
+        "family": "mixed",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.0151524564304992,
+        "threshold": 0.8
+      },
+      {
+        "family": "resources",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.1140986172134812,
+        "threshold": 1.05
+      },
+      {
+        "family": "resources",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.097901072653297,
+        "threshold": 1.05
+      }
+    ],
+    "failed_storage": []
+  },
+  "stable": {
+    "verdict": "NOT ADMITTED",
+    "timing": false,
+    "storage": false,
+    "failed_timing": [
+      {
+        "family": "keyed4",
+        "direction": 0,
+        "control": "relocation",
+        "score": 1.0874354289037944,
+        "threshold": 1.05
+      },
+      {
+        "family": "keyed4",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.136465547719569,
+        "threshold": 1.05
+      },
+      {
+        "family": "keyed4",
+        "direction": 1,
+        "control": "relocation",
+        "score": 1.0796249781950547,
+        "threshold": 1.05
+      },
+      {
+        "family": "keyed4",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.1328285372675975,
+        "threshold": 1.05
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 0,
+        "control": "relocation",
+        "score": 1.0896834523555214,
+        "threshold": 1.05
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.1283441918002166,
+        "threshold": 1.05
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 1,
+        "control": "relocation",
+        "score": 1.0909859896248297,
+        "threshold": 1.05
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.1723356857090124,
+        "threshold": 1.05
+      },
+      {
+        "family": "keyed256",
+        "direction": 0,
+        "control": "relocation",
+        "score": 1.1379097602067678,
+        "threshold": 0.8
+      },
+      {
+        "family": "keyed256",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.148436847861551,
+        "threshold": 0.8
+      },
+      {
+        "family": "keyed256",
+        "direction": 1,
+        "control": "relocation",
+        "score": 1.131718159796207,
+        "threshold": 0.8
+      },
+      {
+        "family": "keyed256",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.1559431960594753,
+        "threshold": 0.8
+      },
+      {
+        "family": "reorder256",
+        "direction": 0,
+        "control": "relocation",
+        "score": 1.1125385310962301,
+        "threshold": 1.05
+      },
+      {
+        "family": "reorder256",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.0972378487052414,
+        "threshold": 1.05
+      },
+      {
+        "family": "reorder256",
+        "direction": 1,
+        "control": "relocation",
+        "score": 1.0772090958725569,
+        "threshold": 1.05
+      },
+      {
+        "family": "reorder256",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.085801775170758,
+        "threshold": 1.05
+      },
+      {
+        "family": "mixed",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.0639785882445771,
+        "threshold": 1.05
+      },
+      {
+        "family": "resources",
+        "direction": 0,
+        "control": "relocation",
+        "score": 1.0570392028739755,
+        "threshold": 1.05
+      },
+      {
+        "family": "resources",
+        "direction": 0,
+        "control": "raw",
+        "score": 1.1117137593429116,
+        "threshold": 1.05
+      },
+      {
+        "family": "resources",
+        "direction": 1,
+        "control": "raw",
+        "score": 1.0942399736497403,
+        "threshold": 1.05
+      }
+    ],
+    "failed_storage": [
+      {
+        "family": "keyed4",
+        "direction": 0,
+        "cpu": 13.573407202216066,
+        "gpu": 16.785090664875757
+      },
+      {
+        "family": "keyed4",
+        "direction": 1,
+        "cpu": 13.461218836565097,
+        "gpu": 14.034251175285426
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 0,
+        "cpu": 38.86986301369863,
+        "gpu": 22.286769644056413
+      },
+      {
+        "family": "unkeyed4",
+        "direction": 1,
+        "cpu": 38.71232876712329,
+        "gpu": 25.037609133646743
+      },
+      {
+        "family": "keyed256",
+        "direction": 0,
+        "cpu": 7.7009719839908515,
+        "gpu": 3.5209549071618036
+      },
+      {
+        "family": "keyed256",
+        "direction": 1,
+        "cpu": 7.598913664951401,
+        "gpu": 3.5209549071618036
+      },
+      {
+        "family": "reorder256",
+        "direction": 0,
+        "cpu": 7.4119827053736875,
+        "gpu": 3.5209549071618036
+      },
+      {
+        "family": "reorder256",
+        "direction": 1,
+        "cpu": 7.4119827053736875,
+        "gpu": 3.5209549071618036
+      },
+      {
+        "family": "mixed",
+        "direction": 0,
+        "cpu": 70.330900243309,
+        "gpu": 1.7222354340071344
+      },
+      {
+        "family": "mixed",
+        "direction": 1,
+        "cpu": 70.12530413625304,
+        "gpu": 1.8439952437574316
+      }
+    ]
+  }
+}

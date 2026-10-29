@@ -1,0 +1,18 @@
+{
+  "index": 272,
+  "block": 5,
+  "family": "mixed",
+  "direction": "forward",
+  "mode": "relocation",
+  "path": "272-5-mixed-forward-relocation",
+  "exit": 0,
+  "elapsed_seconds": 2.1630258560180664,
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+    "native::address_publication_tests::cost::complete_endpoint",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ]
+}

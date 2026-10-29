@@ -1,0 +1,5186 @@
+[
+  {
+    "index": 0,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "000-0-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7950420379638672,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 1,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "001-0-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7979662418365479,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 2,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "002-0-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.8524925708770752,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 3,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "003-0-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8832883834838867,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 4,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "004-0-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8126661777496338,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 5,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "005-0-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7524583339691162,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 6,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "006-0-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8094475269317627,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 7,
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "007-0-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.8255705833435059,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 8,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "008-0-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.9464869499206543,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 9,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "009-0-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.9883077144622803,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 10,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "010-0-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.904548168182373,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 11,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "011-0-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.9828488826751709,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 12,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "012-0-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.9705507755279541,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 13,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "013-0-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.8735570907592773,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 14,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "014-0-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8546650409698486,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 15,
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "015-0-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.809424638748169,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 16,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "016-0-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.4612221717834473,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 17,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "017-0-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.359983205795288,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 18,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "018-0-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.385939121246338,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 19,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "019-0-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.7406787872314453,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 20,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "020-0-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.656254291534424,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 21,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "021-0-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.249264717102051,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 22,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "022-0-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.351834774017334,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 23,
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "023-0-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.3558526039123535,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 24,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "024-0-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.294304609298706,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 25,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "025-0-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.361041307449341,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 26,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "026-0-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.3640472888946533,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 27,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "027-0-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.719817638397217,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 28,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "028-0-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.7324142456054688,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 29,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "029-0-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.3032665252685547,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 30,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "030-0-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.2439234256744385,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 31,
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "031-0-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.4299397468566895,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 32,
+    "block": 0,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "032-0-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.8121724128723145,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 33,
+    "block": 0,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "033-0-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.758744478225708,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 34,
+    "block": 0,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "034-0-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.763685941696167,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 35,
+    "block": 0,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "035-0-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.8939919471740723,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 36,
+    "block": 0,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "036-0-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.846825122833252,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 37,
+    "block": 0,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "037-0-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.8092172145843506,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 38,
+    "block": 0,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "038-0-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.7257039546966553,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 39,
+    "block": 0,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "039-0-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.6749818325042725,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 40,
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "040-0-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.2575867176055908,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 41,
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "041-0-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.3235106468200684,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 42,
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "042-0-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.3164052963256836,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 43,
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "043-0-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.3349554538726807,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 44,
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "044-0-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.3320066928863525,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 45,
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "045-0-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.3534314632415771,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 46,
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "046-0-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.352003812789917,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 47,
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "047-0-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.2724432945251465,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 48,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "048-1-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7461845874786377,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 49,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "049-1-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7477524280548096,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 50,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "050-1-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.843421459197998,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 51,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "051-1-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7623867988586426,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 52,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "052-1-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7622480392456055,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 53,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "053-1-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8298656940460205,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 54,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "054-1-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7237644195556641,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 55,
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "055-1-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7371337413787842,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 56,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "056-1-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7978496551513672,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 57,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "057-1-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7823853492736816,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 58,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "058-1-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8702297210693359,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 59,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "059-1-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7769393920898438,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 60,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "060-1-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7866489887237549,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 61,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "061-1-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.867727518081665,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 62,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "062-1-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7785835266113281,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 63,
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "063-1-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7930469512939453,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 64,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "064-1-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.353872776031494,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 65,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "065-1-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.324766159057617,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 66,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "066-1-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.901210308074951,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 67,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "067-1-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.5379254817962646,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 68,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "068-1-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.5504519939422607,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 69,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "069-1-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.320601224899292,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 70,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "070-1-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.5753731727600098,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 71,
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "071-1-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.5505645275115967,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 72,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "072-1-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.5611889362335205,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 73,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "073-1-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.610469102859497,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 74,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "074-1-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.869054079055786,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 75,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "075-1-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.643282175064087,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 76,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "076-1-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.537588119506836,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 77,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "077-1-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.197181224822998,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 78,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "078-1-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.8552491664886475,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 79,
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "079-1-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.767700433731079,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 80,
+    "block": 1,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "080-1-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 2.1560752391815186,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 81,
+    "block": 1,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "081-1-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 2.1323843002319336,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 82,
+    "block": 1,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "082-1-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 2.120112895965576,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 83,
+    "block": 1,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "083-1-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.9326140880584717,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 84,
+    "block": 1,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "084-1-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 2.1043667793273926,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 85,
+    "block": 1,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "085-1-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 2.1206438541412354,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 86,
+    "block": 1,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "086-1-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 2.011692523956299,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 87,
+    "block": 1,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "087-1-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 2.246264934539795,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 88,
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "088-1-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.695662498474121,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 89,
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "089-1-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.6618211269378662,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 90,
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "090-1-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.7001285552978516,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 91,
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "091-1-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.8729352951049805,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 92,
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "092-1-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.8226637840270996,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 93,
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "093-1-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.8222041130065918,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 94,
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "094-1-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.7312617301940918,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 95,
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "095-1-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.7249751091003418,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 96,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "096-2-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.986475944519043,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 97,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "097-2-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.0434086322784424,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 98,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "098-2-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.9548928737640381,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 99,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "099-2-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.9946389198303223,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 100,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "100-2-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.0365304946899414,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 101,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "101-2-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.999868631362915,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 102,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "102-2-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.1405014991760254,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 103,
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "103-2-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.1404213905334473,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 104,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "104-2-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.1449127197265625,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 105,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "105-2-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.3132965564727783,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 106,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "106-2-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.1401290893554688,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 107,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "107-2-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.0582659244537354,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 108,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "108-2-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.050309658050537,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 109,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "109-2-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.0586843490600586,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 110,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "110-2-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.1915192604064941,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 111,
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "111-2-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.019012689590454,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 112,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "112-2-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 4.124521017074585,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 113,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "113-2-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.642526865005493,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 114,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "114-2-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.968489646911621,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 115,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "115-2-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.9774365425109863,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 116,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "116-2-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.923772096633911,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 117,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "117-2-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 4.095027685165405,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 118,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "118-2-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.595251798629761,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 119,
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "119-2-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.820586681365967,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 120,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "120-2-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.9128971099853516,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 121,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "121-2-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.0717504024505615,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 122,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "122-2-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.586014747619629,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 123,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "123-2-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.3988115787506104,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 124,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "124-2-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.3941049575805664,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 125,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "125-2-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.4619247913360596,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 126,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "126-2-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.8790929317474365,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 127,
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "127-2-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.476182222366333,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 128,
+    "block": 2,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "128-2-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.8776333332061768,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 129,
+    "block": 2,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "129-2-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.894733190536499,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 130,
+    "block": 2,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "130-2-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.7807202339172363,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 131,
+    "block": 2,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "131-2-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.8279399871826172,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 132,
+    "block": 2,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "132-2-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.866081714630127,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 133,
+    "block": 2,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "133-2-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.8637480735778809,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 134,
+    "block": 2,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "134-2-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.9734086990356445,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 135,
+    "block": 2,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "135-2-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.8732717037200928,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 136,
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "136-2-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.4180841445922852,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 137,
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "137-2-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.45184326171875,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 138,
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "138-2-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.3901784420013428,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 139,
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "139-2-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.4579379558563232,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 140,
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "140-2-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.4384374618530273,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 141,
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "141-2-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.3699538707733154,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 142,
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "142-2-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.5671164989471436,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 143,
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "143-2-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.5263416767120361,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 144,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "144-3-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.9167485237121582,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 145,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "145-3-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.8780241012573242,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 146,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "146-3-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.9540605545043945,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 147,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "147-3-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.9829790592193604,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 148,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "148-3-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.0922143459320068,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 149,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "149-3-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.2181379795074463,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 150,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "150-3-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.9883155822753906,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 151,
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "151-3-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.974266767501831,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 152,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "152-3-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.0532376766204834,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 153,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "153-3-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.9985611438751221,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 154,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "154-3-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.9196088314056396,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 155,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "155-3-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.9519603252410889,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 156,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "156-3-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.941169023513794,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 157,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "157-3-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.9314239025115967,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 158,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "158-3-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.9649670124053955,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 159,
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "159-3-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.006615161895752,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 160,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "160-3-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.06410551071167,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 161,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "161-3-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.5928142070770264,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 162,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "162-3-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.748171329498291,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 163,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "163-3-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.5900485515594482,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 164,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "164-3-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.5041298866271973,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 165,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "165-3-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.557093381881714,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 166,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "166-3-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.491690158843994,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 167,
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "167-3-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.983139991760254,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 168,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "168-3-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.9522457122802734,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 169,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "169-3-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.3811988830566406,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 170,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "170-3-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.3152785301208496,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 171,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "171-3-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.3433706760406494,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 172,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "172-3-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.3105781078338623,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 173,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "173-3-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.38798189163208,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 174,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "174-3-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.4055063724517822,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 175,
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "175-3-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.794656753540039,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 176,
+    "block": 3,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "176-3-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.9136266708374023,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 177,
+    "block": 3,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "177-3-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.7926068305969238,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 178,
+    "block": 3,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "178-3-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.8446416854858398,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 179,
+    "block": 3,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "179-3-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.7966628074645996,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 180,
+    "block": 3,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "180-3-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.8088536262512207,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 181,
+    "block": 3,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "181-3-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.8198778629302979,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 182,
+    "block": 3,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "182-3-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.7398293018341064,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 183,
+    "block": 3,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "183-3-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.8665173053741455,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 184,
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "184-3-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.475571632385254,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 185,
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "185-3-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.3068203926086426,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 186,
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "186-3-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.3781073093414307,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 187,
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "187-3-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.4313158988952637,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 188,
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "188-3-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.371797800064087,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 189,
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "189-3-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.3936026096343994,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 190,
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "190-3-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.314687967300415,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 191,
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "191-3-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.4500949382781982,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 192,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "192-4-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7817337512969971,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 193,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "193-4-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7905371189117432,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 194,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "194-4-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7842109203338623,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 195,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "195-4-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8353252410888672,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 196,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "196-4-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8594534397125244,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 197,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "197-4-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7902054786682129,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 198,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "198-4-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.7680587768554688,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 199,
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "199-4-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7316875457763672,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 200,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "200-4-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.8352949619293213,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 201,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "201-4-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.855766773223877,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 202,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "202-4-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.7896404266357422,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 203,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "203-4-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8848800659179688,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 204,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "204-4-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.896540641784668,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 205,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "205-4-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.8106050491333008,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 206,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "206-4-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8017778396606445,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 207,
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "207-4-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.8237905502319336,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 208,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "208-4-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.3429391384124756,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 209,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "209-4-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.423884391784668,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 210,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "210-4-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.6903350353240967,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 211,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "211-4-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.176902532577515,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 212,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "212-4-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.419780731201172,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 213,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "213-4-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.685926675796509,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 214,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "214-4-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.5908563137054443,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 215,
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "215-4-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.4934303760528564,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 216,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "216-4-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.260427236557007,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 217,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "217-4-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.2478103637695312,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 218,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "218-4-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.2908754348754883,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 219,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "219-4-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.7138748168945312,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 220,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "220-4-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.717189073562622,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 221,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "221-4-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.276073455810547,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 222,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "222-4-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.3489203453063965,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 223,
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "223-4-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.5127384662628174,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 224,
+    "block": 4,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "224-4-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.854114294052124,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 225,
+    "block": 4,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "225-4-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 2.000093460083008,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 226,
+    "block": 4,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "226-4-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.993363380432129,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 227,
+    "block": 4,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "227-4-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.907763957977295,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 228,
+    "block": 4,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "228-4-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.9790589809417725,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 229,
+    "block": 4,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "229-4-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.9419605731964111,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 230,
+    "block": 4,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "230-4-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.9231195449829102,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 231,
+    "block": 4,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "231-4-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.9284639358520508,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 232,
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "232-4-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.5805792808532715,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 233,
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "233-4-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.5550165176391602,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 234,
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "234-4-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.543454647064209,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 235,
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "235-4-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.5589103698730469,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 236,
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "236-4-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.6346485614776611,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 237,
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "237-4-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.5831174850463867,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 238,
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "238-4-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.5969293117523193,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 239,
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "239-4-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.4585235118865967,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 240,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "240-5-keyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8575117588043213,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 241,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "241-5-keyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.844597578048706,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 242,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "242-5-keyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.8763978481292725,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 243,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "243-5-keyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7876043319702148,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 244,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "244-5-keyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.770653486251831,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 245,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "245-5-keyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.9052877426147461,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 246,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "246-5-keyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.8274505138397217,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 247,
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "247-5-keyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8486361503601074,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 248,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "248-5-unkeyed4-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8948562145233154,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 249,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "249-5-unkeyed4-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.822606086730957,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 250,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "250-5-unkeyed4-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.89536452293396,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 251,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "251-5-unkeyed4-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.7929470539093018,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 252,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "252-5-unkeyed4-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 0.8078296184539795,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 253,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "253-5-unkeyed4-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 0.9428446292877197,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 254,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "254-5-unkeyed4-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 0.8610069751739502,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 255,
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "255-5-unkeyed4-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 0.8728241920471191,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 256,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "256-5-keyed256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.5215260982513428,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 257,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "257-5-keyed256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.535532236099243,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 258,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "258-5-keyed256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.9355313777923584,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 259,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "259-5-keyed256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.440152406692505,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 260,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "260-5-keyed256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.5974340438842773,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 261,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "261-5-keyed256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 3.9658315181732178,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 262,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "262-5-keyed256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.6897125244140625,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 263,
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "263-5-keyed256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.6323561668395996,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 264,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "264-5-reorder256-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.450695276260376,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 265,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "265-5-reorder256-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.7293734550476074,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 266,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "266-5-reorder256-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.074717283248901,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 267,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "267-5-reorder256-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.725240468978882,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 268,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "268-5-reorder256-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 3.735356092453003,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 269,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "269-5-reorder256-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 4.095916509628296,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 270,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "270-5-reorder256-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 3.701807737350464,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 271,
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "271-5-reorder256-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 3.952749490737915,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 272,
+    "block": 5,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "272-5-mixed-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 2.1630258560180664,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 273,
+    "block": 5,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "273-5-mixed-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 2.11440110206604,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 274,
+    "block": 5,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "274-5-mixed-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 2.3923707008361816,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 275,
+    "block": 5,
+    "family": "mixed",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "275-5-mixed-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 2.2313923835754395,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 276,
+    "block": 5,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "276-5-mixed-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 2.3621010780334473,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 277,
+    "block": 5,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "277-5-mixed-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 2.402531147003174,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 278,
+    "block": 5,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "278-5-mixed-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 2.4184646606445312,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 279,
+    "block": 5,
+    "family": "mixed",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "279-5-mixed-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 2.2788665294647217,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 280,
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relocation",
+    "path": "280-5-resources-forward-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.7423384189605713,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 281,
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "relative",
+    "path": "281-5-resources-forward-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.6266672611236572,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 282,
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "stable",
+    "path": "282-5-resources-forward-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.7660801410675049,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 283,
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "raw",
+    "path": "283-5-resources-forward-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.6462738513946533,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 284,
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "raw",
+    "path": "284-5-resources-reverse-raw",
+    "exit": 0,
+    "elapsed_seconds": 1.6084837913513184,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 285,
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "stable",
+    "path": "285-5-resources-reverse-stable",
+    "exit": 0,
+    "elapsed_seconds": 1.7811670303344727,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 286,
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relative",
+    "path": "286-5-resources-reverse-relative",
+    "exit": 0,
+    "elapsed_seconds": 1.8561391830444336,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  },
+  {
+    "index": 287,
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "relocation",
+    "path": "287-5-resources-reverse-relocation",
+    "exit": 0,
+    "elapsed_seconds": 1.5242669582366943,
+    "args": [
+      "/home/user/gpui-preserved-test-binaries/794090f8b67a8e0e3119c2f3c88bd82bf7b5ccbf5da3eb333d51a617e53463b9",
+      "native::address_publication_tests::cost::complete_endpoint",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ]
+  }
+]

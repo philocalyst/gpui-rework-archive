@@ -1,0 +1,31 @@
+{
+  "previous": "/home/user/gpui-address-publication-target",
+  "target": "/home/user/gpui-address-cost-target",
+  "verified_parent": "/home/user/gpui-address-publication-evidence/accounted",
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "--target-dir",
+    "/home/user/gpui-address-cost-target",
+    "-p",
+    "gpui_gpu",
+    "-p",
+    "gpui_reactivity_state",
+    "-p",
+    "gpui",
+    "-p",
+    "gpui_reactivity_host",
+    "-p",
+    "gpui_inline_call",
+    "-p",
+    "gpui_canvas",
+    "-p",
+    "gpui_reactivity_core"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "     Removed 1002 files, 100.9MiB total\n",
+  "free": 7070715904
+}
