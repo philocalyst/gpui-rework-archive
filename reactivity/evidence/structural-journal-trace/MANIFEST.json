@@ -1,6 +1,6 @@
 {
   "PROTOCOL.md": "462214e4a68b414c4fc3c14fd9fbc3b07df211d459967ad72cbdcc69d33321e9",
-  "README.md": "dab5107b945cd32de08fe1777fae7ae66cef2101f4519c171804f44a2c9dafb8",
+  "README.md": "10104c99befdeeb7febf7a613eeeb5e41546bc01e7d845d96ea0943827df0b99",
   "frozen/native/structural_trace_tests.rs": "e2f7e65261af2bf69460f46b9f817c3d75844e72fb87ecee5be2ea96cca2e1ee",
   "frozen/native.rs": "e7a8a17a6bc0c4520041994853b230e74fdc69843d9e756efb0bd918a200cdb9",
   "frozen/runtime/structural_trace.rs": "75dadabd585062f65ba96469b3b3a45a6d228becaf0c3d2de51d5174f411aeff",
@@ -229,7 +229,9 @@
   "raw/owner-dependency/trace/unkeyed-4-remove.fresh.rgba": "0e3dd1c217ede038f2f1cc9e37f0b06d631018a9f5c00fd173160d16b31ba4b7",
   "raw/owner-dependency/trace/unkeyed-4-remove.full.rgba": "0e3dd1c217ede038f2f1cc9e37f0b06d631018a9f5c00fd173160d16b31ba4b7",
   "raw/owner-dependency/ui.wgsl": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+  "raw/rejected-verifier-resource-assumption.py": "10e3c526564106fc0345a82528542252da577f65ab059cb3238717a52bb5c376",
+  "raw/rejected-verifier-resource-assumption.txt": "1de94ff92d169b0e0b21ce1e3555e6cb085b1472c6a23e39f83abc1cc8ce665f",
   "raw/seal.py": "b98a17f159dacb7d1a31ff1f8e7ebc723bfc136fed38e38c3bddd6b329c14b05",
   "source.txt": "6baa48e46639ceb341e531e4b7ac264de92befa41eece093423985c82f4d3663",
-  "verify.py": "10e3c526564106fc0345a82528542252da577f65ab059cb3238717a52bb5c376"
+  "verify.py": "c3bcedc5966d9375d288427d5eb2436836e5b3b7d688c1160eb1f389116439d1"
 }

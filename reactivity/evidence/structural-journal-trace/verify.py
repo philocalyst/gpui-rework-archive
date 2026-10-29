@@ -30,7 +30,9 @@ for row in trace['results']:
  assert work['relocated']==sum(old_ids[i]['index']!=new_ids[i]['index'] for i in survivors)
  assert work['layout_insertions']==(0 if case.startswith('unkeyed') and op=='move' else len(nodes))
  assert row['gpu']['copied_pixels']==4096
- assert row['scene']['resource_entries']==row['scene']['masks']==row['scene']['images']==row['scene']['gradients']==0
+ assert row['scene']['masks']==row['scene']['images']==row['scene']['gradients']==0
+ assert row['scene']['resource_entries']==(6 if op=='insert' else 5) if case.startswith('keyed') else row['scene']['resource_entries']==1
+ assert row['scene']['resource_header_bytes']==128
  if op=='insert':
   bad=(base/'trace'/f'{case}-mutant-actual.rgba').read_bytes();good=(base/'trace'/f'{case}-mutant-expected.rgba').read_bytes();assert sum(a!=b for a,b in zip(bad,good))==row['subtree_damage_mutant']['wrong_bytes']==326;mutants+=1
  old[case]=nodes
