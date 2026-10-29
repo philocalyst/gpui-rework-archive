@@ -1,0 +1,207 @@
+{
+  "scope": "actual reversible Python address encoding, diagnostic only; unchanged total full producer/GPU bytes",
+  "roundtrip_frames": 15,
+  "frame_roots_need_versioned_descriptor": true,
+  "clip_parent_nonzero_cases": 0,
+  "controls": "raw original prefix versus relative clip-domain/common-backdistance; CSR/images/masks/corrections unchanged",
+  "results": [
+    {
+      "case": "keyed-4",
+      "operation": "insert",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 14,
+      "domain_changed_matched_lanes": 14,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 960,
+      "encoded_prefix_plus_descriptor_bytes": 964,
+      "decoded_full_output_bytes": 960,
+      "group_snapshot_scratch_bytes": 320,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 14
+      }
+    },
+    {
+      "case": "keyed-4",
+      "operation": "remove",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 14,
+      "domain_changed_matched_lanes": 14,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 864,
+      "encoded_prefix_plus_descriptor_bytes": 868,
+      "decoded_full_output_bytes": 864,
+      "group_snapshot_scratch_bytes": 288,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 14
+      }
+    },
+    {
+      "case": "keyed-4",
+      "operation": "move",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 15,
+      "domain_changed_matched_lanes": 15,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": false,
+      "raw_prefix_bytes": 864,
+      "encoded_prefix_plus_descriptor_bytes": 868,
+      "decoded_full_output_bytes": 864,
+      "group_snapshot_scratch_bytes": 288,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 15
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "insert",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 14,
+      "domain_changed_matched_lanes": 14,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 6816,
+      "encoded_prefix_plus_descriptor_bytes": 6820,
+      "decoded_full_output_bytes": 6816,
+      "group_snapshot_scratch_bytes": 2272,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 14
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "remove",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 14,
+      "domain_changed_matched_lanes": 14,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 6720,
+      "encoded_prefix_plus_descriptor_bytes": 6724,
+      "decoded_full_output_bytes": 6720,
+      "group_snapshot_scratch_bytes": 2240,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 14
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "move",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 15,
+      "domain_changed_matched_lanes": 15,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": false,
+      "raw_prefix_bytes": 6720,
+      "encoded_prefix_plus_descriptor_bytes": 6724,
+      "decoded_full_output_bytes": 6720,
+      "group_snapshot_scratch_bytes": 2240,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 15
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "insert",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 4,
+      "domain_changed_matched_lanes": 4,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 960,
+      "encoded_prefix_plus_descriptor_bytes": 964,
+      "decoded_full_output_bytes": 960,
+      "group_snapshot_scratch_bytes": 320,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 4
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "remove",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 4,
+      "domain_changed_matched_lanes": 4,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 864,
+      "encoded_prefix_plus_descriptor_bytes": 868,
+      "decoded_full_output_bytes": 864,
+      "group_snapshot_scratch_bytes": 288,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed dependency": 4
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "move",
+      "pairing": "surviving semantic identity plus local draw ordinal; interpretation still checked",
+      "raw_changed_matched_lanes": 4,
+      "domain_changed_matched_lanes": 4,
+      "removed_address_lane_differences": 0,
+      "descriptor_bytes": 4,
+      "descriptor_changed": false,
+      "raw_prefix_bytes": 864,
+      "encoded_prefix_plus_descriptor_bytes": 868,
+      "decoded_full_output_bytes": 864,
+      "group_snapshot_scratch_bytes": 288,
+      "stale_descriptor_wrong_lanes": 0,
+      "changed_remaining_classes": {
+        "changed content": 4
+      }
+    },
+    {
+      "case": "mixed",
+      "operation": "insert",
+      "pairing": "diagnostic correspondence by fixed fixture role; reminted semantic nodes are NOT authorized for reuse",
+      "raw_changed_matched_lanes": 29,
+      "domain_changed_matched_lanes": 18,
+      "removed_address_lane_differences": 11,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 944,
+      "encoded_prefix_plus_descriptor_bytes": 948,
+      "decoded_full_output_bytes": 944,
+      "group_snapshot_scratch_bytes": 256,
+      "stale_descriptor_wrong_lanes": 8,
+      "changed_remaining_classes": {
+        "changed dependency": 18
+      }
+    },
+    {
+      "case": "mixed",
+      "operation": "remove",
+      "pairing": "diagnostic correspondence by fixed fixture role; reminted semantic nodes are NOT authorized for reuse",
+      "raw_changed_matched_lanes": 29,
+      "domain_changed_matched_lanes": 18,
+      "removed_address_lane_differences": 11,
+      "descriptor_bytes": 4,
+      "descriptor_changed": true,
+      "raw_prefix_bytes": 848,
+      "encoded_prefix_plus_descriptor_bytes": 852,
+      "decoded_full_output_bytes": 848,
+      "group_snapshot_scratch_bytes": 224,
+      "stale_descriptor_wrong_lanes": 7,
+      "changed_remaining_classes": {
+        "changed dependency": 18
+      }
+    }
+  ]
+}

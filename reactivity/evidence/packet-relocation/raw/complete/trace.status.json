@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/c1d6cd899971dc407acdc0010ef3212ea14b686473f423c0cabb1df74876bf4c",
+    "native::packet_relocation_tests::live_packet_references",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.5851583480834961
+}

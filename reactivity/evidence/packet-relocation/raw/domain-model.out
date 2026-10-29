@@ -1,0 +1,11 @@
+keyed-4 insert 14 -> 14 stale 0
+keyed-4 remove 14 -> 14 stale 0
+keyed-4 move 15 -> 15 stale 0
+keyed-256 insert 14 -> 14 stale 0
+keyed-256 remove 14 -> 14 stale 0
+keyed-256 move 15 -> 15 stale 0
+unkeyed-4 insert 4 -> 4 stale 0
+unkeyed-4 remove 4 -> 4 stale 0
+unkeyed-4 move 4 -> 4 stale 0
+mixed insert 29 -> 18 stale 8
+mixed remove 29 -> 18 stale 7

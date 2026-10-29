@@ -1,0 +1,40 @@
+[
+  {
+    "lane": "candidate",
+    "artifact": {
+      "preserved": "/home/user/gpui-preserved-test-binaries/9eacf4d54680f66a8d8b7735ce07749cf1e2b7f16aca7641d8edc8da3d404b65",
+      "sha256": "9eacf4d54680f66a8d8b7735ce07749cf1e2b7f16aca7641d8edc8da3d404b65",
+      "bytes": 43151712,
+      "cargo_fresh": false
+    },
+    "command": [
+      "cargo",
+      "+nightly-2026-10-23",
+      "clean",
+      "--release",
+      "--target-dir",
+      "/home/user/gpui-emission-control-candidate-target"
+    ],
+    "stdout": "",
+    "stderr": "     Removed 4103 files, 997.6MiB total\n"
+  },
+  {
+    "lane": "baseline",
+    "artifact": {
+      "preserved": "/home/user/gpui-preserved-test-binaries/a7a2c85a9abad98b55baf806b4ec778a389b5a430dd20747a1344ab10b27fff3",
+      "sha256": "a7a2c85a9abad98b55baf806b4ec778a389b5a430dd20747a1344ab10b27fff3",
+      "bytes": 43062736,
+      "cargo_fresh": false
+    },
+    "command": [
+      "cargo",
+      "+nightly-2026-10-23",
+      "clean",
+      "--release",
+      "--target-dir",
+      "/home/user/gpui-emission-control-baseline-target"
+    ],
+    "stdout": "",
+    "stderr": "     Removed 4103 files, 997.5MiB total\n"
+  }
+]

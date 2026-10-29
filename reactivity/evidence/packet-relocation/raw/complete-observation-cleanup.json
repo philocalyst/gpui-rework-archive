@@ -1,0 +1,15 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "-p",
+    "gpui",
+    "--target-dir",
+    "/home/user/gpui-packet-relocation-corrected-target"
+  ],
+  "stdout": "",
+  "stderr": "     Removed 798 files, 45.0MiB total\n",
+  "reason": "Only gpui test capture changes; GPU source unchanged. Reuse same worktree target after explicit release package clean."
+}

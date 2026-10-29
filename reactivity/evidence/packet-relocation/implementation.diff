@@ -1,0 +1,394 @@
+diff --git a/reactivity/crates/gpu/Cargo.toml b/reactivity/crates/gpu/Cargo.toml
+index 03da7e2639..f41db3352e 100644
+--- a/reactivity/crates/gpu/Cargo.toml
++++ b/reactivity/crates/gpu/Cargo.toml
+@@ -11,6 +11,8 @@ default = ["simd"]
+ simd = ["gpui_canvas/simd"]
+ # Hardware oracle on the native backend; software Vulkan remains explicit.
+ gpu-tests = []
++# Read-only diagnostic snapshots; never enabled by the shipping GPUI dependency.
++packet-trace = []
+ vulkan-tests = ["gpu-tests"]
+ offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
+ 
+diff --git a/reactivity/crates/gpu/src/lib.rs b/reactivity/crates/gpu/src/lib.rs
+index 817b352467..07de14d85e 100644
+--- a/reactivity/crates/gpu/src/lib.rs
++++ b/reactivity/crates/gpu/src/lib.rs
+@@ -13,3 +13,6 @@ pub use wgpu;
+ #[cfg(all(test, feature = "gpu-tests"))]
+ #[path = "../tests/support/adapter.rs"]
+ mod test_adapter;
++
++#[cfg(feature = "packet-trace")]
++pub use renderer::PacketTrace;
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 32568986c9..238e7ef35f 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -134,6 +134,21 @@ const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
+ // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
+ const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
+ type Word = [u32; 4];
++/// Diagnostic CPU staging snapshot, not a GPU readback or publication journal.
++#[cfg(feature = "packet-trace")]
++#[derive(Debug)]
++pub struct PacketTrace {
++    pub records: Vec<[u32; 4]>,
++    /// First ordinal, placement count, physical start word, compact flag.
++    pub groups: Vec<[usize; 4]>,
++    pub ranges: Vec<[u32; 2]>,
++    pub references: Vec<u32>,
++    pub corrections: Vec<[u32; 8]>,
++    pub image_addresses: Vec<(String, [u32; 2])>,
++    pub observer_capacity_bytes: usize,
++    pub observer_header_bytes: usize,
++}
++
+ fn float_word(value: [f32; 4]) -> Word {
+     value.map(f32::to_bits)
+ }
+@@ -402,6 +417,8 @@ pub struct RendererState {
+     atlas: Atlas,
+     images: Option<Box<images::Images>>,
+     records: Vec<Word>,
++    #[cfg(feature = "packet-trace")]
++    trace_groups: Vec<[usize; 4]>,
+     ranges: Vec<[u32; 2]>,
+     references: Vec<u32>,
+     cursors: Vec<u32>,
+@@ -634,6 +651,8 @@ impl RendererState {
+             atlas,
+             images: None,
+             records: Vec::new(),
++            #[cfg(feature = "packet-trace")]
++            trace_groups: Vec::new(),
+             ranges: Vec::new(),
+             references: Vec::new(),
+             cursors: Vec::new(),
+@@ -645,6 +664,22 @@ impl RendererState {
+             packet: None,
+         }
+     }
++    #[cfg(feature = "packet-trace")]
++    fn trace_packet(&self) -> PacketTrace {
++        PacketTrace {
++            records: self.records.clone(),
++            groups: self.trace_groups.clone(),
++            ranges: self.ranges.clone(),
++            references: self.references.clone(),
++            corrections: self.residuals.iter().map(|r| bytemuck::cast(*r)).collect(),
++            image_addresses: self
++                .images
++                .as_ref()
++                .map_or_else(Vec::new, |i| i.trace_addresses()),
++            observer_capacity_bytes: self.trace_groups.capacity() * size_of::<[usize; 4]>(),
++            observer_header_bytes: size_of::<Vec<[usize; 4]>>(),
++        }
++    }
+     fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
+         if self.layout != context.layout {
+             return Err(Error::IncompatibleContext);
+@@ -739,6 +774,8 @@ impl RendererState {
+         self.ranges.clear();
+         self.ranges.resize(columns * rows, [0, 0]);
+         self.records.clear();
++        #[cfg(feature = "packet-trace")]
++        self.trace_groups.clear();
+         let bank_count = scene.paint_bank().len();
+         if bank_count > MAX_DRAWS * 2 {
+             return Err(Error::ResourceLimit);
+@@ -782,6 +819,13 @@ impl RendererState {
+             // Ordinary render's empty observer specializes away. Inline
+             // multi-placement diagnostic groups decline color-only patching.
+             group_ready(ordinal, group, self.records.len(), compact);
++            #[cfg(feature = "packet-trace")]
++            self.trace_groups.push([
++                ordinal,
++                group.bounds().len(),
++                self.records.len(),
++                usize::from(compact),
++            ]);
+             if compact {
+                 let mut error = [0.0_f32; 2];
+                 for (offset, p) in group.placements().enumerate() {
+diff --git a/reactivity/crates/gpu/src/renderer/images.rs b/reactivity/crates/gpu/src/renderer/images.rs
+index d8cbef509c..6878bae32d 100644
+--- a/reactivity/crates/gpu/src/renderer/images.rs
++++ b/reactivity/crates/gpu/src/renderer/images.rs
+@@ -41,6 +41,26 @@ pub(super) struct Images {
+     stats: ImageStats,
+ }
+ impl Images {
++    #[cfg(feature = "packet-trace")]
++    pub(super) fn trace_addresses(&self) -> Vec<(String, [u32; 2])> {
++        let mut rows: Vec<_> = self
++            .keys
++            .iter()
++            .map(|key| {
++                let e = self.entries[key];
++                (format!("{key:?}"), [IMAGE | e.word, e.flags])
++            })
++            .collect();
++        if let Some(g) = &self.gradients {
++            rows.extend(
++                g.keys
++                    .iter()
++                    .map(|key| (format!("{key:?}"), [GRADIENT | g.entries[key], 0])),
++            );
++        }
++        rows
++    }
++
+     pub(super) fn stats(&self) -> ImageStats {
+         self.stats
+     }
+diff --git a/reactivity/crates/gpu/src/renderer/owned.rs b/reactivity/crates/gpu/src/renderer/owned.rs
+index 4b5c79c62f..7ec78e99f3 100644
+--- a/reactivity/crates/gpu/src/renderer/owned.rs
++++ b/reactivity/crates/gpu/src/renderer/owned.rs
+@@ -3,6 +3,13 @@ use super::*;
+ use gpui_canvas::SlotEdit;
+ 
+ impl Renderer {
++    /// Snapshot staging arrays after a successful full preparation only.
++    /// This does not describe later slot patches or uncompleted GPU reads.
++    #[cfg(feature = "packet-trace")]
++    pub fn trace_packet(&self) -> PacketTrace {
++        self.state.trace_packet()
++    }
++
+     pub async fn request(
+         adapter: &wgpu::Adapter,
+         format: wgpu::TextureFormat,
+diff --git a/reactivity/crates/gpui/Cargo.toml b/reactivity/crates/gpui/Cargo.toml
+index aff3497d41..9aa437d6d0 100644
+--- a/reactivity/crates/gpui/Cargo.toml
++++ b/reactivity/crates/gpui/Cargo.toml
+@@ -42,6 +42,7 @@ x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "sof
+ wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+ 
+ [dev-dependencies]
++gpui_gpu = { path = "../gpu", default-features = false, features = ["packet-trace"] }
+ gpui_canvas = { path = "../canvas", default-features = false, features = ["emission-trace"] }
+ allocation-counter = "=0.8.1"
+ accesskit_consumer = "=0.39.1"
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index 588c680353..b4bd7a68fe 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -2234,3 +2234,6 @@ pub(crate) mod workload_port;
+ mod semantic_emission_tests;
+ #[cfg(test)]
+ mod structural_trace_tests;
++
++#[cfg(test)]
++mod packet_relocation_tests;
+diff --git a/reactivity/crates/gpui/src/native/packet_relocation_tests.rs b/reactivity/crates/gpui/src/native/packet_relocation_tests.rs
+new file mode 100644
+index 0000000000..3039ac3a35
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/packet_relocation_tests.rs
+@@ -0,0 +1,155 @@
++//! Address diagnostics only: the inherited mixed pixel gate remains FAILED.
++use super::semantic_emission_tests::Variety;
++use super::structural_trace_tests::{Tree, scene, submit, texture};
++use super::*;
++use serde_json::{Value, json};
++
++fn capture<M: View + 'static>(
++    owner: &mut Win<M>,
++    renderer: &mut gpui_gpu::RetainedRenderer,
++    packet: &mut Option<crate::PresentationToken>,
++    target: &wgpu::Texture,
++    case: &str,
++    operation: &str,
++) -> Value {
++    let observation = owner.structural_observation();
++    let mut scene = scene(owner);
++    scene["local_rects"] = owner
++        .with_scene(|s, _| {
++            json!(
++                s.draws()
++                    .map(|d| [
++                        d.local_rect.x,
++                        d.local_rect.y,
++                        d.local_rect.width,
++                        d.local_rect.height
++                    ])
++                    .collect::<Vec<_>>()
++            )
++        })
++        .unwrap();
++    let clips = owner
++        .with_scene(|s, _| s.clip_nodes().map(|n| json!({"rect":[n.local_rect.x,n.local_rect.y,n.local_rect.width,n.local_rect.height],"inverse":n.inverse,"radius":n.radius,"parent":n.parent,"raster":n.raster_rect.map(|r|[r.x,r.y,r.width,r.height])})).collect::<Vec<_>>())
++        .unwrap();
++    let (token, gpu) = submit(owner, renderer, packet, target);
++    assert!(!renderer.stats().packet_reused);
++    let mut trace = None;
++    let allocation = allocation_counter::measure(|| trace = Some(renderer.trace_packet()));
++    let trace = trace.unwrap();
++    assert_eq!(trace.records.len() * 16, renderer.stats().draw_record_bytes);
++    assert_eq!(
++        trace.groups.iter().map(|g| g[1]).sum::<usize>(),
++        renderer.stats().draws
++    );
++    owner.presented(token).unwrap();
++    let stats = renderer.stats();
++    let snapshot_bytes = trace.records.capacity() * 16
++        + trace.groups.capacity() * 32
++        + trace.ranges.capacity() * 8
++        + trace.references.capacity() * 4
++        + trace.corrections.capacity() * 32;
++    json!({"case":case,"operation":operation,"observation":observation,"scene":scene,"clips":clips,"gpu":gpu,
++        "packet":{"records":trace.records,"groups":trace.groups,"ranges":trace.ranges,"references":trace.references,"corrections":trace.corrections,"image_addresses":trace.image_addresses},
++        "diagnostic":{"observer_capacity_bytes":trace.observer_capacity_bytes,"observer_header_bytes":trace.observer_header_bytes,"snapshot_array_capacity_bytes":snapshot_bytes,"snapshot_header_bytes":size_of::<gpui_gpu::PacketTrace>(),"snapshot_allocation_bytes":allocation.bytes_total,"snapshot_allocations":allocation.count_total,"snapshot_retained_bytes":allocation.bytes_current},
++        "resources":{"mask_upload_bytes":stats.mask_upload_bytes,"atlas_bytes":stats.atlas_bytes,"atlas_keys":stats.atlas_keys,"atlas_key_capacity":stats.atlas_key_capacity,"correction_key_capacity":stats.correction_key_capacity},
++        "image_stats":renderer.image_stats().map(|s|json!({"resources":s.resources,"packed_bytes":s.packed_bytes,"uploaded_bytes":s.uploaded_bytes,"prefix_bytes":s.prefix_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"index_capacity":s.index_capacity}))})
++}
++#[test]
++#[ignore = "explicit packet address diagnostic, not a parity gate"]
++fn live_packet_references() {
++    let output = std::path::PathBuf::from(std::env::var("GPUI_PACKET_TRACE_OUTPUT").unwrap());
++    std::fs::create_dir(&output).unwrap();
++    pollster::block_on(async {
++        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
++        desc.backends = wgpu::Backends::VULKAN;
++        let instance = wgpu::Instance::new(desc);
++        let adapter = instance
++            .request_adapter(&wgpu::RequestAdapterOptions {
++                force_fallback_adapter: true,
++                ..Default::default()
++            })
++            .await
++            .unwrap();
++        let (device, queue) = adapter.request_device(&Default::default()).await.unwrap();
++        let mut results = Vec::new();
++        for (keyed, fillers) in [(true, 4), (true, 256), (false, 4)] {
++            let case = format!("{}-{fillers}", if keyed { "keyed" } else { "unkeyed" });
++            let mut renderer = gpui_gpu::RetainedRenderer::new(
++                Renderer::new(
++                    device.clone(),
++                    queue.clone(),
++                    wgpu::TextureFormat::Rgba8UnormSrgb,
++                )
++                .await
++                .unwrap(),
++            );
++            let target = texture(&device);
++            let mut packet = None;
++            let mut owner = Win::recording(
++                Tree::new(keyed, fillers, vec![1, 2, 3]),
++                WindowOptions {
++                    size: [64, 64],
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++            for (operation, keys) in [
++                ("initial", vec![1, 2, 3]),
++                ("insert", vec![1, 9, 2, 3]),
++                ("remove", vec![1, 2, 3]),
++                ("move", vec![3, 1, 2]),
++            ] {
++                if operation != "initial" {
++                    owner.structural_reset();
++                    owner.set(Tree::KEYS, keys).unwrap();
++                }
++                results.push(capture(
++                    &mut owner,
++                    &mut renderer,
++                    &mut packet,
++                    &target,
++                    &case,
++                    operation,
++                ));
++            }
++        }
++        let mut renderer = gpui_gpu::RetainedRenderer::new(
++            Renderer::new(
++                device.clone(),
++                queue.clone(),
++                wgpu::TextureFormat::Rgba8UnormSrgb,
++            )
++            .await
++            .unwrap(),
++        );
++        let target = texture(&device);
++        let mut packet = None;
++        let mut owner = Win::recording(
++            Variety::new(false),
++            WindowOptions {
++                size: [64, 64],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        for (operation, more) in [("initial", false), ("insert", true), ("remove", false)] {
++            if operation != "initial" {
++                owner.structural_reset();
++                owner.set(Variety::MORE, more).unwrap();
++            }
++            results.push(capture(
++                &mut owner,
++                &mut renderer,
++                &mut packet,
++                &target,
++                "mixed",
++                operation,
++            ));
++        }
++        std::fs::write(
++            output.join("trace.json"),
++            serde_json::to_vec_pretty(&results).unwrap(),
++        )
++        .unwrap();
++    });
++}
+diff --git a/reactivity/crates/gpui/src/native/semantic_emission_tests.rs b/reactivity/crates/gpui/src/native/semantic_emission_tests.rs
+index c0c9fe5d3a..57acad09fb 100644
+--- a/reactivity/crates/gpui/src/native/semantic_emission_tests.rs
++++ b/reactivity/crates/gpui/src/native/semantic_emission_tests.rs
+@@ -3,14 +3,14 @@ use super::structural_trace_tests::{capture, scene, submit, texture};
+ use super::*;
+ use crate::prelude::*;
+ use serde_json::json;
+-struct Variety {
++pub(super) struct Variety {
+     more: Signal<bool>,
+     picture: crate::Image,
+ }
+ impl Variety {
+-    const MORE: Source<Self, bool> =
++    pub(super) const MORE: Source<Self, bool> =
+         Source::new(FieldId::new(1), "more", |m| &m.more, |m| &mut m.more);
+-    fn new(more: bool) -> Self {
++    pub(super) fn new(more: bool) -> Self {
+         Self {
+             more: Signal::new(more),
+             picture: crate::Image::rgba8(
+diff --git a/reactivity/crates/gpui/src/native/structural_trace_tests.rs b/reactivity/crates/gpui/src/native/structural_trace_tests.rs
+index 46bf95c713..d08330de55 100644
+--- a/reactivity/crates/gpui/src/native/structural_trace_tests.rs
++++ b/reactivity/crates/gpui/src/native/structural_trace_tests.rs
+@@ -2,7 +2,7 @@
+ use super::*;
+ use crate::prelude::*;
+ use serde_json::json;
+-struct Tree {
++pub(super) struct Tree {
+     keys: Signal<Vec<u64>>,
+     keyed: bool,
+     fillers: usize,
+@@ -11,9 +11,9 @@ struct Tree {
+ impl Tree {
+     const BAD: Source<Self, Affine> =
+         Source::new(FieldId::new(2), "bad", |m| &m.bad, |m| &mut m.bad);
+-    const KEYS: Source<Self, Vec<u64>> =
++    pub(super) const KEYS: Source<Self, Vec<u64>> =
+         Source::new(FieldId::new(1), "keys", |m| &m.keys, |m| &mut m.keys);
+-    fn new(keyed: bool, fillers: usize, keys: Vec<u64>) -> Self {
++    pub(super) fn new(keyed: bool, fillers: usize, keys: Vec<u64>) -> Self {
+         Self {
+             keys: Signal::new(keys),
+             keyed,

@@ -1,0 +1,11 @@
+keyed-4 insert words 54 60 semantic 9 {'changed dependency': 14} role {'changed dependency': 14} upload 1312
+keyed-4 remove words 60 54 semantic 9 {'changed dependency': 14} role {'changed dependency': 14} upload 1184
+keyed-4 move words 54 54 semantic 9 {'changed dependency': 15} role {'changed dependency': 15} upload 1184
+keyed-256 insert words 420 426 semantic 70 {'changed dependency': 14} role {'changed dependency': 14} upload 7992
+keyed-256 remove words 426 420 semantic 70 {'changed dependency': 14} role {'changed dependency': 14} upload 7872
+keyed-256 move words 420 420 semantic 70 {'changed dependency': 15} role {'changed dependency': 15} upload 7872
+unkeyed-4 insert words 54 60 semantic 6 {'changed dependency': 4} role {'changed dependency': 4} upload 1336
+unkeyed-4 remove words 60 54 semantic 6 {'changed dependency': 4} role {'changed dependency': 4} upload 1200
+unkeyed-4 move words 54 54 semantic 9 {'changed content': 4} role {'changed content': 4} upload 1200
+mixed insert words 53 59 semantic 1 {'relocated reference': 1} role {'relocated reference': 7, 'changed dependency': 22} upload 1320
+mixed remove words 59 53 semantic 1 {'relocated reference': 1} role {'relocated reference': 7, 'changed dependency': 22} upload 1208
