@@ -775,3 +775,12 @@ Existing capabilities refined: contiguous24B preorder Node storage and semantic 
 Keyed insertion with256 unrelated siblings preserves267 identities and adds2, but reconciles/indexes/inserts layout/paints269 nodes. Keyed reorder preserves all267 identities, moves6 ranks and still rebuilds267 layout nodes. Full public set allocation and raw GPU costs are preserved. A following overlapping sibling moves outside the edited group; actual group-only GPU repair corrupts326 pixel bytes in all6 cases.30 four-oracle frames and strict provenance/Clippy pass. No timing/adoption. Text/image payload lifetime remains open; clip entries1 or5/6 and128B resource headers are explicit.
 
 Next bounded hypothesis: emit ordered correspondence runs during existing live reconciliation, with complete cold-field absolute/relative parent encoding and raw tiny controls. The diagnostic insertion260→6 changed topology tuples /3 runs is not a byte/locality win; full fields, directories, literals, scratch, fragmentation and unchanged producer work remain to measure. Correspondence carries identity/position facts only, never paint/layout/resource reuse authority.
+
+
+## Live cold correspondence — 8714afdf2e81803693172acd981127d521f478a1
+
+No adoption. Complete24B cold fields and ordered correspondence are emitted in live reconciliation without snapshot reconstruction or a new identity registry. Description/reconciliation/layout/paint remain global; codec and verification work is charged. Relative parents reduce changed records but have no encoded-byte or fixed-block rewrite advantage over absolute in these fixtures. Insertion rewrites every shifted block.
+
+Keyed269-node insertion: hypothetical compressed replacement+journal+existing lookup1,675B versus raw+lookup6,552B, but actual raw mirror+three controls+trial+lookup17,094B. Tiny one-node comparison160B versus72B; high-entropy nine486B versus372B. Whole metadata matters. Insertion3 runs is not general: keyed reorder4; a permutation32. Cold-byte equality still accompanies704 changed pixel bytes; subtree-only GPU repair still corrupts326. No storage reuse authority for layout/paint/resources.
+
+Next question: an actual ordered retained extent store, with splits/rebuilds, bounded fragmentation/compaction, directories and current/retained-old versions charged. Raw and absolute remain controls; relative is not selected absent measured benefit. GPU emission mapping and dependency/resource/publication closure stay open. Paint remains NOT ADMITTED (single1024=1.103170), A/B unchanged.
