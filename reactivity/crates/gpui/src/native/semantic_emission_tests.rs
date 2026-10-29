@@ -48,7 +48,7 @@ impl View for Variety {
         ))
         .size(64)
         .bg(Color::WHITE)
-        .rounded(4)
+        .rounded(4.0)
         .clip()
         .transform(Affine::translation(1., 0.))
     }
