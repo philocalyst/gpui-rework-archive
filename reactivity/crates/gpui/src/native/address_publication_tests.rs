@@ -543,3 +543,5 @@ fn private_versions_and_addresses() {
         arena_bound(&raw, &lab, &output);
     });
 }
+
+mod cost;
