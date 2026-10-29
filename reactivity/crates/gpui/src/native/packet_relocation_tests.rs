@@ -42,6 +42,7 @@ fn capture<M: View + 'static>(
         renderer.stats().draws
     );
     owner.presented(token).unwrap();
+    let stats = renderer.stats();
     let snapshot_bytes = trace.records.capacity() * 16
         + trace.groups.capacity() * 32
         + trace.ranges.capacity() * 8
@@ -50,6 +51,7 @@ fn capture<M: View + 'static>(
     json!({"case":case,"operation":operation,"observation":observation,"scene":scene,"clips":clips,"gpu":gpu,
         "packet":{"records":trace.records,"groups":trace.groups,"ranges":trace.ranges,"references":trace.references,"corrections":trace.corrections,"image_addresses":trace.image_addresses},
         "diagnostic":{"observer_capacity_bytes":trace.observer_capacity_bytes,"observer_header_bytes":trace.observer_header_bytes,"snapshot_array_capacity_bytes":snapshot_bytes,"snapshot_header_bytes":size_of::<gpui_gpu::PacketTrace>(),"snapshot_allocation_bytes":allocation.bytes_total,"snapshot_allocations":allocation.count_total,"snapshot_retained_bytes":allocation.bytes_current},
+        "resources":{"mask_upload_bytes":stats.mask_upload_bytes,"atlas_bytes":stats.atlas_bytes,"atlas_keys":stats.atlas_keys,"atlas_key_capacity":stats.atlas_key_capacity,"correction_key_capacity":stats.correction_key_capacity},
         "image_stats":renderer.image_stats().map(|s|json!({"resources":s.resources,"packed_bytes":s.packed_bytes,"uploaded_bytes":s.uploaded_bytes,"prefix_bytes":s.prefix_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"index_capacity":s.index_capacity}))})
 }
 #[test]
