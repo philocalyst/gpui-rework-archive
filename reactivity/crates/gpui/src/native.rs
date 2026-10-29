@@ -2240,3 +2240,6 @@ mod packet_relocation_tests;
 
 #[cfg(test)]
 mod layout_handle_tests;
+
+#[cfg(all(test, feature = "layout-preservation-lab"))]
+mod layout_preservation_tests;

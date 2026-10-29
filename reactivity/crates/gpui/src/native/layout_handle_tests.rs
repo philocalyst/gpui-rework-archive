@@ -67,14 +67,14 @@ fn run<M: View + 'static>(
     }
     json!({"case":case,"frames":frames,"scope":"diagnostic full captures and comparisons outside Source; original producer/layout/render unchanged"})
 }
-struct Resources {
+pub(super) struct Resources {
     next: Signal<bool>,
     images: [crate::Image; 2],
 }
 impl Resources {
-    const NEXT: Source<Self, bool> =
+    pub(super) const NEXT: Source<Self, bool> =
         Source::new(FieldId::new(1), "next", |s| &s.next, |s| &mut s.next);
-    fn new(next: bool) -> Self {
+    pub(super) fn new(next: bool) -> Self {
         let image = |color: [u8; 4]| {
             crate::Image::rgba8(
                 2,
@@ -112,11 +112,11 @@ impl View for Resources {
         .transform(Affine::translation(1., 0.))
     }
 }
-struct Constrained {
-    narrow: Signal<bool>,
+pub(super) struct Constrained {
+    pub(super) narrow: Signal<bool>,
 }
 impl Constrained {
-    const NARROW: Source<Self, bool> =
+    pub(super) const NARROW: Source<Self, bool> =
         Source::new(FieldId::new(1), "narrow", |s| &s.narrow, |s| &mut s.narrow);
 }
 impl View for Constrained {

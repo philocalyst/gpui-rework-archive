@@ -27,6 +27,10 @@ pub(super) struct Work {
 impl<M: View + 'static> Win<M> {
     pub(crate) fn structural_reset(&mut self) {
         self.runtime_mut().unwrap().structural_work = Work::default();
+        #[cfg(feature = "layout-preservation-lab")]
+        {
+            self.runtime_mut().unwrap().layout_preservation.work = Default::default();
+        }
         self.reset_counters().unwrap();
     }
     pub(crate) fn structural_observation(&self) -> serde_json::Value {
@@ -61,6 +65,44 @@ pub(crate) struct LayoutCapture {
     epochs: [u64; 3],
 }
 impl LayoutCapture {
+    #[cfg(feature = "layout-preservation-lab")]
+    pub(crate) fn assert_equivalent(&self, other: &Self) {
+        assert_eq!(self.rows.len(), other.rows.len());
+        let ranks = |rows: &[LayoutRow]| {
+            rows.iter()
+                .enumerate()
+                .map(|(i, r)| (r.id, i))
+                .collect::<BTreeMap<_, _>>()
+        };
+        let a = ranks(&self.rows);
+        let b = ranks(&other.rows);
+        for (x, y) in self.rows.iter().zip(&other.rows) {
+            assert_eq!(x.style, y.style);
+            assert_eq!(x.layout, y.layout);
+            assert_eq!(x.measured, y.measured);
+            assert_eq!(x.parent.map(|p| a[&p]), y.parent.map(|p| b[&p]));
+            assert_eq!(
+                x.children.iter().map(|p| a[p]).collect::<Vec<_>>(),
+                y.children.iter().map(|p| b[p]).collect::<Vec<_>>()
+            );
+        }
+    }
+    #[cfg(feature = "layout-preservation-lab")]
+    pub(crate) fn assert_retired<M: View + 'static>(&self, owner: &Win<M>) -> usize {
+        let r = owner.runtime().unwrap();
+        let mut retired = 0;
+        for row in &self.rows {
+            if !r.by_identity.contains(row.identity) {
+                assert!(
+                    !r.layout.tree().contains(row.id),
+                    "removed generation remains valid"
+                );
+                retired += 1;
+            }
+        }
+        retired
+    }
+
     pub(crate) fn report(&self) -> serde_json::Value {
         let rows:Vec<_>=self.rows.iter().map(|r| json!({"identity":r.identity,"handle":format!("{:?}",r.id),"parent":r.parent.map(|id|format!("{id:?}")),"children":r.children.iter().map(|id|format!("{id:?}")).collect::<Vec<_>>(),"style":format!("{:?}",r.style),"layout":format!("{:?}",r.layout),"measured":r.measured})).collect();
         let storage = self.storage;

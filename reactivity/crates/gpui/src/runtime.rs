@@ -1187,6 +1187,8 @@ impl SurfaceDamage {
 }
 #[cfg(test)]
 mod cold_correspondence;
+#[cfg(feature = "layout-preservation-lab")]
+pub(crate) mod layout_preservation;
 #[cfg(test)]
 mod ordered_cold_extents;
 #[cfg(test)]
@@ -1219,6 +1221,8 @@ struct Runtime<M> {
     viewports: BTreeMap<ViewportKey, ViewportState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
+    #[cfg(feature = "layout-preservation-lab")]
+    layout_preservation: layout_preservation::State,
     layout_nodes: Vec<NodeId>,
     layout_dirty: BTreeSet<u64>,
     rebuild_layout: bool,
@@ -1469,6 +1473,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
+            #[cfg(feature = "layout-preservation-lab")]
+            layout_preservation: Default::default(),
             layout_nodes: Vec::new(),
             layout_dirty: BTreeSet::new(),
             rebuild_layout: true,
@@ -2083,6 +2089,8 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
     fn poison(&mut self) {
+        #[cfg(feature = "layout-preservation-lab")]
+        self.layout_preservation.invalidate();
         if let Some(metadata) = &mut self.metadata {
             metadata.editing = None;
         }
@@ -2349,6 +2357,25 @@ impl<M: View + 'static> Runtime<M> {
         }
         let (handlers, old_handlers) =
             handlers::Handlers::replace(self.handlers.take(), handler_count);
+        #[cfg(feature = "layout-preservation-lab")]
+        let mut layout_builder = {
+            if self.layout_preservation.mode() == layout_preservation::Mode::Forced {
+                self.rebuild_layout = true;
+            }
+            let eligible = self.logical_valid
+                && !self.rebuild_layout
+                && !self.topology_changed
+                && !self.layout.is_poisoned();
+            self.layout_preservation.begin(
+                self.nodes.len(),
+                drafts.len(),
+                self.layout_nodes.first().copied(),
+                self.latest_token,
+                self.complete_epoch,
+                self.source_epoch,
+                eligible,
+            )
+        };
         let old_styles = std::mem::take(&mut self.styles);
         let siblings = siblings::Siblings::new(&self.nodes);
         let mut old = std::mem::take(&mut self.nodes)
@@ -2476,6 +2503,14 @@ impl<M: View + 'static> Runtime<M> {
             }
             #[cfg(test)]
             let cold_old_rank = previous.as_ref().map(|_| previous_index.unwrap());
+            #[cfg(feature = "layout-preservation-lab")]
+            if let Some(builder) = &mut layout_builder {
+                builder.record(
+                    index,
+                    previous.as_ref().map(|_| previous_index.unwrap()),
+                    &mut self.layout_preservation.work,
+                );
+            }
             let previous_handler = previous.as_ref().and_then(Node::handler_slot);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
@@ -2921,6 +2956,9 @@ impl<M: View + 'static> Runtime<M> {
         self.cold_correspondence.finish();
         #[cfg(test)]
         self.ordered_cold_extents.finish(&self.cold_correspondence);
+        #[cfg(feature = "layout-preservation-lab")]
+        self.layout_preservation
+            .stage(layout_builder, self.topology_changed);
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
@@ -3134,10 +3172,14 @@ impl<M: View + 'static> Runtime<M> {
         match catch_unwind(AssertUnwindSafe(|| self.present_inner())) {
             Ok(Ok(())) => Ok(self.commit()),
             Ok(Err(error)) => {
+                #[cfg(feature = "layout-preservation-lab")]
+                self.layout_preservation.invalidate();
                 self.rebuild_layout = true;
                 Err(error)
             }
             Err(_) => {
+                #[cfg(feature = "layout-preservation-lab")]
+                self.layout_preservation.invalidate();
                 self.rebuild_layout = true;
                 if let Some(text) = &mut self.text {
                     text.system = None;
@@ -3313,7 +3355,23 @@ impl<M: View + 'static> Runtime<M> {
         let composition = self
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
-        if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
+        #[cfg(feature = "layout-preservation-lab")]
+        let preserved = self.layout_preservation.apply(
+            &mut self.layout,
+            &mut self.layout_nodes,
+            &self.nodes,
+            &self.styles,
+            &self.list_rows,
+            self.latest_token,
+            self.complete_epoch,
+            self.source_epoch,
+            usize::from(self.layout_depth),
+            !self.rebuild_layout && self.topology_changed,
+        )?;
+        #[cfg(not(feature = "layout-preservation-lab"))]
+        let preserved = false;
+        if !preserved && (self.rebuild_layout || self.topology_changed || self.layout.is_poisoned())
+        {
             #[cfg(test)]
             {
                 self.structural_work.layout_full_rebuilds += 1;
@@ -3354,7 +3412,17 @@ impl<M: View + 'static> Runtime<M> {
             // generation. Keep complete capabilities sorted for measurement
             // routing without rebuilding a map on every layout pass.
             debug_assert!(self.layout_nodes.is_sorted());
+            #[cfg(feature = "layout-preservation-lab")]
+            self.layout_preservation.rebuilt();
         } else {
+            #[cfg(feature = "layout-preservation-lab")]
+            {
+                let before = self.layout_dirty.len();
+                self.layout_preservation.work.dirty_identity_checks += before;
+                self.layout_dirty
+                    .retain(|id| self.by_identity.contains(*id));
+                self.layout_preservation.work.retired_dirty_ids += before - self.layout_dirty.len();
+            }
             // Auto-sized viewports depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
@@ -3396,6 +3464,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         let before = self.layout.stats();
         let layout_nodes = &self.layout_nodes;
+        #[cfg(feature = "layout-preservation-lab")]
+        let layout_route = &mut self.layout_preservation;
         let mut failure = None;
         let nodes = &self.nodes;
         let styles = &self.styles;
@@ -3403,6 +3473,9 @@ impl<M: View + 'static> Runtime<M> {
         let images = &self.images;
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
+            #[cfg(feature = "layout-preservation-lab")]
+            let index = layout_route.measure_index(id, layout_nodes);
+            #[cfg(not(feature = "layout-preservation-lab"))]
             let index = layout_nodes
                 .binary_search(&id)
                 .expect("measurement names a node in the current layout arena");
@@ -4175,6 +4248,9 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(test)]
         self.semantic_emission.install(emission);
         self.complete_epoch = self.source_epoch;
+        #[cfg(feature = "layout-preservation-lab")]
+        self.layout_preservation
+            .commit(token, self.layout_nodes[0], self.layout_nodes.len());
         self.next_presentation = next_sequence;
         drop(shaper);
         if let Some(text) = &mut self.text {
