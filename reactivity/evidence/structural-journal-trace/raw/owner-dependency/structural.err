@@ -1,0 +1,7 @@
+
+thread 'native::structural_trace_tests::live_structural_boundary' (974413) panicked at crates/gpui/src/element.rs:724:14:
+invalid literal style property: PropertyError { property: Transform, reason: NonFinite }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::structural_trace_tests::live_structural_boundary' (974413) panicked at crates/gpui/src/native/structural_trace_tests.rs:349:55:
+called `Result::unwrap()` on an `Err` value: Poisoned

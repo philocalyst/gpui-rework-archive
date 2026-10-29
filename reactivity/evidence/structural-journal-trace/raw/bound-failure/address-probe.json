@@ -1,0 +1,488 @@
+[
+  {
+    "case": "unkeyed-4",
+    "operation": "insert",
+    "input_nodes_walked": 25,
+    "absolute_parent_record_changes": 8,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 6,
+        "len": 6
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-4",
+    "operation": "remove",
+    "input_nodes_walked": 25,
+    "absolute_parent_record_changes": 7,
+    "relative_parent_record_changes": 5,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 6,
+        "old_start": 7,
+        "len": 6
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-4",
+    "operation": "move",
+    "input_nodes_walked": 24,
+    "absolute_parent_record_changes": 0,
+    "relative_parent_record_changes": 0,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 12
+      }
+    ],
+    "run_count": 1,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "insert",
+    "input_nodes_walked": 81,
+    "absolute_parent_record_changes": 36,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 6,
+        "len": 34
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "remove",
+    "input_nodes_walked": 81,
+    "absolute_parent_record_changes": 35,
+    "relative_parent_record_changes": 5,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 6,
+        "old_start": 7,
+        "len": 34
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "move",
+    "input_nodes_walked": 80,
+    "absolute_parent_record_changes": 0,
+    "relative_parent_record_changes": 0,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 40
+      }
+    ],
+    "run_count": 1,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "insert",
+    "input_nodes_walked": 529,
+    "absolute_parent_record_changes": 260,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 6,
+        "len": 258
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "remove",
+    "input_nodes_walked": 529,
+    "absolute_parent_record_changes": 259,
+    "relative_parent_record_changes": 5,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "new",
+        "new_start": 3,
+        "old_start": null,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 6,
+        "old_start": 7,
+        "len": 258
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "move",
+    "input_nodes_walked": 528,
+    "absolute_parent_record_changes": 0,
+    "relative_parent_record_changes": 0,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 264
+      }
+    ],
+    "run_count": 1,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-4",
+    "operation": "insert",
+    "input_nodes_walked": 32,
+    "absolute_parent_record_changes": 8,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "new",
+        "new_start": 5,
+        "old_start": null,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 5,
+        "len": 10
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-4",
+    "operation": "remove",
+    "input_nodes_walked": 32,
+    "absolute_parent_record_changes": 6,
+    "relative_parent_record_changes": 4,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 7,
+        "len": 10
+      }
+    ],
+    "run_count": 2,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-4",
+    "operation": "move",
+    "input_nodes_walked": 30,
+    "absolute_parent_record_changes": 3,
+    "relative_parent_record_changes": 3,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 3,
+        "old_start": 7,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 3,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 9,
+        "old_start": 9,
+        "len": 6
+      }
+    ],
+    "run_count": 4,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-32",
+    "operation": "insert",
+    "input_nodes_walked": 88,
+    "absolute_parent_record_changes": 36,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "new",
+        "new_start": 5,
+        "old_start": null,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 5,
+        "len": 38
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-32",
+    "operation": "remove",
+    "input_nodes_walked": 88,
+    "absolute_parent_record_changes": 34,
+    "relative_parent_record_changes": 4,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 7,
+        "len": 38
+      }
+    ],
+    "run_count": 2,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-32",
+    "operation": "move",
+    "input_nodes_walked": 86,
+    "absolute_parent_record_changes": 3,
+    "relative_parent_record_changes": 3,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 3,
+        "old_start": 7,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 3,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 9,
+        "old_start": 9,
+        "len": 34
+      }
+    ],
+    "run_count": 4,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-256",
+    "operation": "insert",
+    "input_nodes_walked": 536,
+    "absolute_parent_record_changes": 260,
+    "relative_parent_record_changes": 6,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "new",
+        "new_start": 5,
+        "old_start": null,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 7,
+        "old_start": 5,
+        "len": 262
+      }
+    ],
+    "run_count": 3,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-256",
+    "operation": "remove",
+    "input_nodes_walked": 536,
+    "absolute_parent_record_changes": 258,
+    "relative_parent_record_changes": 4,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 5
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 7,
+        "len": 262
+      }
+    ],
+    "run_count": 2,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  },
+  {
+    "case": "keyed-256",
+    "operation": "move",
+    "input_nodes_walked": 534,
+    "absolute_parent_record_changes": 3,
+    "relative_parent_record_changes": 3,
+    "identity_order_runs": [
+      {
+        "kind": "old",
+        "new_start": 0,
+        "old_start": 0,
+        "len": 3
+      },
+      {
+        "kind": "old",
+        "new_start": 3,
+        "old_start": 7,
+        "len": 2
+      },
+      {
+        "kind": "old",
+        "new_start": 5,
+        "old_start": 3,
+        "len": 4
+      },
+      {
+        "kind": "old",
+        "new_start": 9,
+        "old_start": 9,
+        "len": 258
+      }
+    ],
+    "run_count": 4,
+    "scope": "diagnostic identity/kind/parent topology only; does not cover full Node fields, layout, scene records, resources or GPU publication"
+  }
+]

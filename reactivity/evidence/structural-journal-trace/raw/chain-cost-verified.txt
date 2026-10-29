@@ -1,0 +1,1 @@
+{"verified": true, "archived_files": 9371, "preflight_pixel_comparisons": 442, "timing_pixel_comparisons": 1224, "samples": 208896, "warmups": 26112, "canonical_ELFs_checked": ["control", "candidate"], "verdict": "NOT ADMITTED", "failed": [["single", 1024]]}

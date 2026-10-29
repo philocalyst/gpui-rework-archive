@@ -1,0 +1,59 @@
+{
+  "simulated_frames": 368,
+  "exact_actual_gpu_frames": 303,
+  "cpu_tests": 82,
+  "gpu_mutants": [
+    {
+      "case": "staircase-1024-overlap-compressed-m10",
+      "errors": [
+        {
+          "fence": 0,
+          "audit_byte_errors": 0,
+          "pixel_byte_errors": 162
+        }
+      ]
+    },
+    {
+      "case": "staircase-1024-overlap-compressed-m11",
+      "errors": [
+        {
+          "fence": 0,
+          "audit_byte_errors": 0,
+          "pixel_byte_errors": 1488
+        }
+      ]
+    },
+    {
+      "case": "geometry-m12",
+      "errors": [
+        {
+          "fence": 2,
+          "audit_byte_errors": 32,
+          "pixel_byte_errors": 1024
+        }
+      ]
+    },
+    {
+      "case": "geometry-m13",
+      "errors": [
+        {
+          "fence": 2,
+          "audit_byte_errors": 0,
+          "pixel_byte_errors": 1536
+        }
+      ]
+    },
+    {
+      "case": "geometry-m14",
+      "errors": [
+        {
+          "fence": 1,
+          "audit_byte_errors": 76,
+          "pixel_byte_errors": 0
+        }
+      ]
+    }
+  ],
+  "verified": true
+}
+Manifest and frozen shader verified

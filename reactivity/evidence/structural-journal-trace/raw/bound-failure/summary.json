@@ -1,0 +1,1664 @@
+[
+  {
+    "case": "unkeyed-4",
+    "operation": "insert",
+    "old_nodes": 12,
+    "new_nodes": 13,
+    "survived": 9,
+    "minted": 4,
+    "retired": 3,
+    "relocated": 6,
+    "logical_node_payload_reconstructed_bytes": 312,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      7
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 13,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 13,
+      "minted": 4,
+      "paint_nodes": 13,
+      "reconciled": 13,
+      "relocated": 6,
+      "survived": 9
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 13,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 31425,
+      "count": 83,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 6493,
+      "retained_delta": 677
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 1, sequence: 1 })",
+      "bin_visits": 96,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1536,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 1, sequence: 1 })",
+      "raw_records": 960,
+      "token": "PresentationToken { window: 1, sequence: 2 }",
+      "upload_bytes": 1336,
+      "validations": 10
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "unkeyed-4",
+    "operation": "remove",
+    "old_nodes": 13,
+    "new_nodes": 12,
+    "survived": 9,
+    "minted": 3,
+    "retired": 4,
+    "relocated": 6,
+    "logical_node_payload_reconstructed_bytes": 288,
+    "group_old_span": [
+      2,
+      7
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 12,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 12,
+      "minted": 3,
+      "paint_nodes": 12,
+      "reconciled": 12,
+      "relocated": 6,
+      "survived": 9
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 12,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 31388,
+      "count": 82,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 6456,
+      "retained_delta": 1027
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 1, sequence: 2 })",
+      "bin_visits": 82,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1536,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 1, sequence: 2 })",
+      "raw_records": 864,
+      "token": "PresentationToken { window: 1, sequence: 3 }",
+      "upload_bytes": 1200,
+      "validations": 9
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-4",
+    "operation": "move",
+    "old_nodes": 12,
+    "new_nodes": 12,
+    "survived": 12,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 0,
+    "logical_node_payload_reconstructed_bytes": 288,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 12,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 12,
+      "reconciled": 12,
+      "relocated": 0,
+      "survived": 12
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 12,
+      "exact_updates": 0,
+      "layout_runs": 0,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 17808,
+      "count": 36,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 6344,
+      "retained_delta": 784
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 1, sequence: 3 })",
+      "bin_visits": 82,
+      "composited_pixels": 625,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1536,
+      "damage": [
+        0,
+        0,
+        25,
+        25
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 1, sequence: 3 })",
+      "raw_records": 864,
+      "token": "PresentationToken { window: 1, sequence: 4 }",
+      "upload_bytes": 1200,
+      "validations": 9
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-4",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 1, sequence: 4 }"
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "insert",
+    "old_nodes": 40,
+    "new_nodes": 41,
+    "survived": 37,
+    "minted": 4,
+    "retired": 3,
+    "relocated": 34,
+    "logical_node_payload_reconstructed_bytes": 984,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      7
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 41,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 41,
+      "minted": 4,
+      "paint_nodes": 41,
+      "reconciled": 41,
+      "relocated": 34,
+      "survived": 37
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 41,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 82077,
+      "count": 103,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 22856,
+      "retained_delta": 2721
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 7, sequence: 1 })",
+      "bin_visits": 282,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 5000,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 7, sequence: 1 })",
+      "raw_records": 3648,
+      "token": "PresentationToken { window: 7, sequence: 2 }",
+      "upload_bytes": 4404,
+      "validations": 38
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "remove",
+    "old_nodes": 41,
+    "new_nodes": 40,
+    "survived": 37,
+    "minted": 3,
+    "retired": 4,
+    "relocated": 34,
+    "logical_node_payload_reconstructed_bytes": 960,
+    "group_old_span": [
+      2,
+      7
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 40,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 40,
+      "minted": 3,
+      "paint_nodes": 40,
+      "reconciled": 40,
+      "relocated": 34,
+      "survived": 37
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 40,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 81800,
+      "count": 103,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 22840,
+      "retained_delta": 2543
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 7, sequence: 2 })",
+      "bin_visits": 268,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 5000,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 7, sequence: 2 })",
+      "raw_records": 3552,
+      "token": "PresentationToken { window: 7, sequence: 3 }",
+      "upload_bytes": 4276,
+      "validations": 37
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "move",
+    "old_nodes": 40,
+    "new_nodes": 40,
+    "survived": 40,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 0,
+    "logical_node_payload_reconstructed_bytes": 960,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 40,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 40,
+      "reconciled": 40,
+      "relocated": 0,
+      "survived": 40
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 40,
+      "exact_updates": 0,
+      "layout_runs": 0,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 54684,
+      "count": 43,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 22848,
+      "retained_delta": 2576
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 7, sequence: 3 })",
+      "bin_visits": 268,
+      "composited_pixels": 625,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 5000,
+      "damage": [
+        0,
+        0,
+        25,
+        25
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 7, sequence: 3 })",
+      "raw_records": 3552,
+      "token": "PresentationToken { window: 7, sequence: 4 }",
+      "upload_bytes": 4276,
+      "validations": 37
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-32",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 7, sequence: 4 }"
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "insert",
+    "old_nodes": 264,
+    "new_nodes": 265,
+    "survived": 261,
+    "minted": 4,
+    "retired": 3,
+    "relocated": 258,
+    "logical_node_payload_reconstructed_bytes": 6360,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      7
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 265,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 265,
+      "minted": 4,
+      "paint_nodes": 265,
+      "reconciled": 265,
+      "relocated": 258,
+      "survived": 261
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 265,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 479101,
+      "count": 129,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 182344,
+      "retained_delta": 17057
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 13, sequence: 1 })",
+      "bin_visits": 498,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9056,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 13, sequence: 1 })",
+      "raw_records": 6816,
+      "token": "PresentationToken { window: 13, sequence: 2 }",
+      "upload_bytes": 8016,
+      "validations": 71
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "remove",
+    "old_nodes": 265,
+    "new_nodes": 264,
+    "survived": 261,
+    "minted": 3,
+    "retired": 4,
+    "relocated": 258,
+    "logical_node_payload_reconstructed_bytes": 6336,
+    "group_old_span": [
+      2,
+      7
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 7,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 264,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 264,
+      "minted": 3,
+      "paint_nodes": 264,
+      "reconciled": 264,
+      "relocated": 258,
+      "survived": 261
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 264,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 478824,
+      "count": 129,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 182328,
+      "retained_delta": 16879
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 13, sequence: 2 })",
+      "bin_visits": 484,
+      "composited_pixels": 990,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9056,
+      "damage": [
+        0,
+        7,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 13, sequence: 2 })",
+      "raw_records": 6720,
+      "token": "PresentationToken { window: 13, sequence: 3 }",
+      "upload_bytes": 7888,
+      "validations": 70
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "move",
+    "old_nodes": 264,
+    "new_nodes": 264,
+    "survived": 264,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 0,
+    "logical_node_payload_reconstructed_bytes": 6336,
+    "group_old_span": [
+      2,
+      6
+    ],
+    "group_new_span": [
+      2,
+      6
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 264,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 264,
+      "reconciled": 264,
+      "relocated": 0,
+      "survived": 264
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 264,
+      "exact_updates": 0,
+      "layout_runs": 0,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 325372,
+      "count": 48,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 182336,
+      "retained_delta": 16912
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 13, sequence: 3 })",
+      "bin_visits": 484,
+      "composited_pixels": 625,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9056,
+      "damage": [
+        0,
+        0,
+        25,
+        25
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 13, sequence: 3 })",
+      "raw_records": 6720,
+      "token": "PresentationToken { window: 13, sequence: 4 }",
+      "upload_bytes": 7888,
+      "validations": 70
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "unkeyed-256",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 13, sequence: 4 }"
+  },
+  {
+    "case": "keyed-4",
+    "operation": "insert",
+    "old_nodes": 15,
+    "new_nodes": 17,
+    "survived": 15,
+    "minted": 2,
+    "retired": 0,
+    "relocated": 10,
+    "logical_node_payload_reconstructed_bytes": 408,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      11
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 17,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 17,
+      "minted": 2,
+      "paint_nodes": 17,
+      "reconciled": 17,
+      "relocated": 10,
+      "survived": 15
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 17,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 60693,
+      "count": 133,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 11825,
+      "retained_delta": 4218
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 19, sequence: 1 })",
+      "bin_visits": 84,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1504,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 19, sequence: 1 })",
+      "raw_records": 960,
+      "token": "PresentationToken { window: 19, sequence: 2 }",
+      "upload_bytes": 1312,
+      "validations": 10
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "keyed-4",
+    "operation": "remove",
+    "old_nodes": 17,
+    "new_nodes": 15,
+    "survived": 15,
+    "minted": 0,
+    "retired": 2,
+    "relocated": 10,
+    "logical_node_payload_reconstructed_bytes": 360,
+    "group_old_span": [
+      2,
+      11
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 15,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 15,
+      "minted": 0,
+      "paint_nodes": 15,
+      "reconciled": 15,
+      "relocated": 10,
+      "survived": 15
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 15,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 49483,
+      "count": 121,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 9167,
+      "retained_delta": -1634
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 19, sequence: 2 })",
+      "bin_visits": 74,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1504,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 19, sequence: 2 })",
+      "raw_records": 864,
+      "token": "PresentationToken { window: 19, sequence: 3 }",
+      "upload_bytes": 1184,
+      "validations": 9
+    },
+    "identity_index_kind": "contiguous",
+    "identity_index_heap_bytes": 0,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-4",
+    "operation": "move",
+    "old_nodes": 15,
+    "new_nodes": 15,
+    "survived": 15,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 6,
+    "logical_node_payload_reconstructed_bytes": 360,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 15,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 15,
+      "minted": 0,
+      "paint_nodes": 15,
+      "reconciled": 15,
+      "relocated": 6,
+      "survived": 15
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 15,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 49515,
+      "count": 122,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 9039,
+      "retained_delta": 1152
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 19, sequence: 3 })",
+      "bin_visits": 74,
+      "composited_pixels": 576,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 1504,
+      "damage": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "gpu_buffer_bytes": 1488,
+      "previous": "Some(PresentationToken { window: 19, sequence: 3 })",
+      "raw_records": 864,
+      "token": "PresentationToken { window: 19, sequence: 4 }",
+      "upload_bytes": 1184,
+      "validations": 9
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 64,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-4",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 19, sequence: 4 }"
+  },
+  {
+    "case": "keyed-32",
+    "operation": "insert",
+    "old_nodes": 43,
+    "new_nodes": 45,
+    "survived": 43,
+    "minted": 2,
+    "retired": 0,
+    "relocated": 38,
+    "logical_node_payload_reconstructed_bytes": 1080,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      11
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 45,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 45,
+      "minted": 2,
+      "paint_nodes": 45,
+      "reconciled": 45,
+      "relocated": 38,
+      "survived": 43
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 45,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 101249,
+      "count": 145,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 23856,
+      "retained_delta": 3498
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 25, sequence: 1 })",
+      "bin_visits": 270,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 4968,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 25, sequence: 1 })",
+      "raw_records": 3648,
+      "token": "PresentationToken { window: 25, sequence: 2 }",
+      "upload_bytes": 4380,
+      "validations": 38
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "keyed-32",
+    "operation": "remove",
+    "old_nodes": 45,
+    "new_nodes": 43,
+    "survived": 43,
+    "minted": 0,
+    "retired": 2,
+    "relocated": 38,
+    "logical_node_payload_reconstructed_bytes": 1032,
+    "group_old_span": [
+      2,
+      11
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 43,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 43,
+      "minted": 0,
+      "paint_nodes": 43,
+      "reconciled": 43,
+      "relocated": 38,
+      "survived": 43
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 43,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 100183,
+      "count": 142,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 23800,
+      "retained_delta": 2414
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 25, sequence: 2 })",
+      "bin_visits": 260,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 4968,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 25, sequence: 2 })",
+      "raw_records": 3552,
+      "token": "PresentationToken { window: 25, sequence: 3 }",
+      "upload_bytes": 4260,
+      "validations": 37
+    },
+    "identity_index_kind": "contiguous",
+    "identity_index_heap_bytes": 0,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-32",
+    "operation": "move",
+    "old_nodes": 43,
+    "new_nodes": 43,
+    "survived": 43,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 6,
+    "logical_node_payload_reconstructed_bytes": 1032,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 43,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 43,
+      "minted": 0,
+      "paint_nodes": 43,
+      "reconciled": 43,
+      "relocated": 6,
+      "survived": 43
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 43,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 100215,
+      "count": 143,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 23808,
+      "retained_delta": 2944
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 25, sequence: 3 })",
+      "bin_visits": 260,
+      "composited_pixels": 576,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 4968,
+      "damage": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "gpu_buffer_bytes": 5328,
+      "previous": "Some(PresentationToken { window: 25, sequence: 3 })",
+      "raw_records": 3552,
+      "token": "PresentationToken { window: 25, sequence: 4 }",
+      "upload_bytes": 4260,
+      "validations": 37
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 64,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-32",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 25, sequence: 4 }"
+  },
+  {
+    "case": "keyed-256",
+    "operation": "insert",
+    "old_nodes": 267,
+    "new_nodes": 269,
+    "survived": 267,
+    "minted": 2,
+    "retired": 0,
+    "relocated": 262,
+    "logical_node_payload_reconstructed_bytes": 6456,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      11
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ],
+        "new": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 269,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 269,
+      "minted": 2,
+      "paint_nodes": 269,
+      "reconciled": 269,
+      "relocated": 262,
+      "survived": 267
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 269,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 498337,
+      "count": 171,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 183344,
+      "retained_delta": 17834
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 31, sequence: 1 })",
+      "bin_visits": 486,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9024,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 31, sequence: 1 })",
+      "raw_records": 6816,
+      "token": "PresentationToken { window: 31, sequence: 2 }",
+      "upload_bytes": 7992,
+      "validations": 71
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 48,
+    "subtree_damage_mutant": {
+      "restricted_damage": [
+        0,
+        0,
+        25,
+        33
+      ],
+      "wrong_bytes": 326
+    }
+  },
+  {
+    "case": "keyed-256",
+    "operation": "remove",
+    "old_nodes": 269,
+    "new_nodes": 267,
+    "survived": 267,
+    "minted": 0,
+    "retired": 2,
+    "relocated": 262,
+    "logical_node_payload_reconstructed_bytes": 6408,
+    "group_old_span": [
+      2,
+      11
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [
+      {
+        "identity": 10,
+        "old": [
+          7.999999523162842,
+          27.999998092651367,
+          24.0000057220459,
+          8.000006675720215
+        ],
+        "new": [
+          7.999999523162842,
+          19.999998092651367,
+          24.0000057220459,
+          8.000004768371582
+        ]
+      }
+    ],
+    "work": {
+      "identity_index_input": 267,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 267,
+      "minted": 0,
+      "paint_nodes": 267,
+      "reconciled": 267,
+      "relocated": 262,
+      "survived": 267
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 267,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 497271,
+      "count": 168,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 183288,
+      "retained_delta": 16750
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 31, sequence: 2 })",
+      "bin_visits": 476,
+      "composited_pixels": 957,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9024,
+      "damage": [
+        0,
+        8,
+        33,
+        37
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 31, sequence: 2 })",
+      "raw_records": 6720,
+      "token": "PresentationToken { window: 31, sequence: 3 }",
+      "upload_bytes": 7872,
+      "validations": 70
+    },
+    "identity_index_kind": "contiguous",
+    "identity_index_heap_bytes": 0,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-256",
+    "operation": "move",
+    "old_nodes": 267,
+    "new_nodes": 267,
+    "survived": 267,
+    "minted": 0,
+    "retired": 0,
+    "relocated": 6,
+    "logical_node_payload_reconstructed_bytes": 6408,
+    "group_old_span": [
+      2,
+      9
+    ],
+    "group_new_span": [
+      2,
+      9
+    ],
+    "changed_outside_group": [],
+    "work": {
+      "identity_index_input": 267,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 267,
+      "minted": 0,
+      "paint_nodes": 267,
+      "reconciled": 267,
+      "relocated": 6,
+      "survived": 267
+    },
+    "counters": {
+      "coarse_updates": 1,
+      "descriptions": 1,
+      "destination_compares": 267,
+      "exact_updates": 0,
+      "layout_runs": 1,
+      "measure_calls": 0,
+      "owner_reruns": 1,
+      "paint_passes": 1,
+      "presentations": 0,
+      "source_operations": 1,
+      "source_reads": 0,
+      "text_bytes_copied": 0,
+      "text_promotions": 0
+    },
+    "allocations": {
+      "bytes": 497303,
+      "count": 169,
+      "includes": "source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work",
+      "peak_delta": 183296,
+      "retained_delta": 17280
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 31, sequence: 3 })",
+      "bin_visits": 476,
+      "composited_pixels": 576,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 9024,
+      "damage": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "gpu_buffer_bytes": 9424,
+      "previous": "Some(PresentationToken { window: 31, sequence: 3 })",
+      "raw_records": 6720,
+      "token": "PresentationToken { window: 31, sequence: 4 }",
+      "upload_bytes": 7872,
+      "validations": 70
+    },
+    "identity_index_kind": "runs",
+    "identity_index_heap_bytes": 64,
+    "subtree_damage_mutant": null
+  },
+  {
+    "case": "keyed-256",
+    "operation": "failed-newer",
+    "work": {
+      "identity_index_input": 0,
+      "image_reconcile_entries": 0,
+      "layout_insertions": 0,
+      "minted": 0,
+      "paint_nodes": 0,
+      "reconciled": 0,
+      "relocated": 0,
+      "survived": 0
+    },
+    "eligible": "PresentationToken { window: 31, sequence: 4 }"
+  }
+]

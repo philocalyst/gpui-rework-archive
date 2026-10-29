@@ -1,0 +1,4 @@
+
+thread 'native::structural_trace_tests::live_structural_boundary' (971473) panicked at crates/gpui/src/native/structural_trace_tests.rs:294:21:
+assertion failed: owner.presented(stale).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
