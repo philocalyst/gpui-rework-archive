@@ -1,0 +1,16 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "clean",
+    "--release",
+    "-p",
+    "gpui"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.10074901580810547
+}

@@ -1,0 +1,11 @@
+
+running 1 test
+test native::semantic_emission_tests::zero_multiple_and_shared_resources ... FAILED
+
+failures:
+
+failures:
+    native::semantic_emission_tests::zero_multiple_and_shared_resources
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 256 filtered out; finished in 0.51s
+

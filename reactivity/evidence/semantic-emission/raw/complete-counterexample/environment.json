@@ -1,0 +1,12 @@
+{
+  "CARGO_TARGET_DIR": "/home/user/gpui-semantic-emission-target",
+  "CARGO_BUILD_JOBS": "4",
+  "CARGO_INCREMENTAL": "0",
+  "CARGO_PROFILE_RELEASE_DEBUG": "0",
+  "RUSTFLAGS": null,
+  "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+  "LP_NUM_THREADS": "4",
+  "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+  "GPUI_STRUCTURAL_TRACE_OUTPUT": "/home/user/gpui-semantic-emission-evidence/complete-counterexample/trace",
+  "GPUI_SEMANTIC_EMISSION_OUTPUT": "/home/user/gpui-semantic-emission-evidence/complete-counterexample/variety"
+}

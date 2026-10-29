@@ -1,0 +1,4 @@
+
+thread 'native::semantic_emission_tests::zero_multiple_and_shared_resources' (1179237) panicked at crates/gpui/src/native/semantic_emission_tests.rs:167:9:
+exact pixel gate; all counterexample images and mapping observations preserved
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

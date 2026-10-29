@@ -1,0 +1,18 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "-p",
+    "gpui"
+  ],
+  "exit": 0,
+  "target": "/home/user/gpui-semantic-emission-target",
+  "canonical": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/d4dba793f1b5661f42992e3ce3fb06e818e3ddeb6557e43e7d428eaf7a7fa4d0",
+    "sha256": "d4dba793f1b5661f42992e3ce3fb06e818e3ddeb6557e43e7d428eaf7a7fa4d0",
+    "bytes": 43128504,
+    "cargo_fresh": false
+  }
+}

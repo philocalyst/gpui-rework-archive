@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/24a3ca4e872b8e4e6d84d341d4b7c70246cb9ac47198f9749d182f07f4d58b90",
+    "native::semantic_emission_tests::zero_multiple_and_shared_resources",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "elapsed_seconds": 0.5325038433074951
+}

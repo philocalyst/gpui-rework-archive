@@ -1,0 +1,20 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "--target-dir",
+    "/home/user/gpui-ordered-cold-extents-target"
+  ],
+  "exit": 0,
+  "before_free": 8244412416,
+  "after_free": 9310711808,
+  "preserved": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/b4016e0dba907c5129f1ca14a9e77d56f8bac4abf40d08e260611a78a105de2b",
+    "sha256": "b4016e0dba907c5129f1ca14a9e77d56f8bac4abf40d08e260611a78a105de2b",
+    "bytes": 42846312,
+    "cargo_fresh": false
+  },
+  "sealed_parent": "cae48074c797af4f1bd204cd0d0c70175f934a7a"
+}

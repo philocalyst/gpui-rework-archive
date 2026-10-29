@@ -1,0 +1,4 @@
+
+thread 'native::semantic_emission_tests::zero_multiple_and_shared_resources' (1148930) panicked at crates/gpui/src/native/semantic_emission_tests.rs:143:13:
+assertion failed: draws.iter().any(|d| !d["clip_chain"].is_null())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

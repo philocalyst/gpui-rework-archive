@@ -1,0 +1,5 @@
+{
+  "reason": "free disk below 8GiB before build",
+  "free": 8549126144,
+  "source": "0dd8b425b454831201bc2e1b156bcdd79992d6ef"
+}

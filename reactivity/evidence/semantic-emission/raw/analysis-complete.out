@@ -1,0 +1,15 @@
+unkeyed-4 insert 13 10 zero/multi 3 0 outside [{'identity': 7, 'old_node': 6, 'new_node': 7, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 4000
+unkeyed-4 move 12 9 zero/multi 3 0 outside [] retained 3840
+unkeyed-32 insert 41 38 zero/multi 3 0 outside [{'identity': 7, 'old_node': 6, 'new_node': 7, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 12960
+unkeyed-32 move 40 37 zero/multi 3 0 outside [] retained 12800
+unkeyed-256 insert 265 71 zero/multi 194 0 outside [{'identity': 7, 'old_node': 6, 'new_node': 7, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 84640
+unkeyed-256 move 264 70 zero/multi 194 0 outside [] retained 84480
+keyed-4 insert 17 10 zero/multi 7 0 outside [{'identity': 10, 'old_node': 9, 'new_node': 11, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 5120
+keyed-4 move 15 9 zero/multi 6 0 outside [] retained 4800
+keyed-32 insert 45 38 zero/multi 7 0 outside [{'identity': 10, 'old_node': 9, 'new_node': 11, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 14080
+keyed-32 move 43 37 zero/multi 6 0 outside [] retained 13760
+keyed-256 insert 269 71 zero/multi 198 0 outside [{'identity': 10, 'old_node': 9, 'new_node': 11, 'old_range': [4, 5], 'new_range': [5, 6], 'old_support': [7, 19, 33, 29], 'new_support': [7, 27, 33, 37]}] retained 85760
+keyed-256 move 267 70 zero/multi 197 0 outside [] retained 85440
+variety initial 7 9 zero/multi 2 3 resources {'masks': 1, 'images': 1, 'gradients': 0, 'resource_entries': 3, 'resource_handles_bytes': 96}
+variety insert 8 10 zero/multi 2 3 resources {'masks': 1, 'images': 1, 'gradients': 0, 'resource_entries': 3, 'resource_handles_bytes': 96}
+variety remove 7 9 zero/multi 2 3 resources {'masks': 1, 'images': 1, 'gradients': 0, 'resource_entries': 3, 'resource_handles_bytes': 96}
