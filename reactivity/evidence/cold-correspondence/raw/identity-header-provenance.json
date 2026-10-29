@@ -1,0 +1,9 @@
+{
+  "compiler": "nightly-2026-10-23",
+  "bytes": 24,
+  "inputs": {
+    "/home/user/gpui-cold-correspondence-evidence/identity_header.rs": "bfedb3b1fdcb7c86c1540e9f65e04acd4262508461f291700560d25e685793d2",
+    "/home/user/gpui-cold-correspondence-evidence/identity-header-probe": "055c61ff43291700bd842f53fe24c99c55e5ca4b85344b22e35f67108c1af7c6",
+    "/home/user/gpui-cold-correspondence-lab/reactivity/crates/gpui/src/runtime/identity_index.rs": "60982f39d3b0db098f2b9211b56fe4ff96ac5aa960e10e31aad12b3e88e34419"
+  }
+}

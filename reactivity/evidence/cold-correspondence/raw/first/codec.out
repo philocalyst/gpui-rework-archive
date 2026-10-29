@@ -1,0 +1,9 @@
+
+running 4 tests
+test runtime::cold_correspondence::tests::complete_fields_and_boundaries_roundtrip ... ok
+test runtime::cold_correspondence::tests::false_identity_correspondence_is_rejected - should panic ... ok
+test runtime::cold_correspondence::tests::fragmented_correspondence_preserves_only_identity_and_position ... ok
+test runtime::cold_correspondence::tests::max_width_columns_and_raw_escape_are_exact ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 248 filtered out; finished in 0.00s
+

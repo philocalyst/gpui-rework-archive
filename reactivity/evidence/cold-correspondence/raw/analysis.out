@@ -1,0 +1,30 @@
+unkeyed-4 insert runs 3 payload [312, 76, 76] rewrites [312, 76, 76] baseline/actualshadow 336 1952
+unkeyed-4 remove runs 3 payload [288, 74, 74] rewrites [288, 74, 74] baseline/actualshadow 312 1900
+unkeyed-4 move runs 1 payload [288, 74, 74] rewrites [0, 0, 0] baseline/actualshadow 312 1900
+unkeyed-32 insert runs 3 payload [984, 217, 217] rewrites [984, 217, 217] baseline/actualshadow 1008 3626
+unkeyed-32 remove runs 3 payload [960, 211, 211] rewrites [960, 211, 211] baseline/actualshadow 984 3566
+unkeyed-32 move runs 1 payload [960, 211, 211] rewrites [0, 0, 0] baseline/actualshadow 984 3566
+unkeyed-256 insert runs 3 payload [6360, 1251, 1251] rewrites [6360, 1251, 1251] baseline/actualshadow 6384 16782
+unkeyed-256 remove runs 3 payload [6336, 1245, 1245] rewrites [6336, 1245, 1245] baseline/actualshadow 6360 16722
+unkeyed-256 move runs 1 payload [6336, 1245, 1245] rewrites [0, 0, 0] baseline/actualshadow 6360 16722
+keyed-4 insert runs 3 payload [408, 96, 96] rewrites [408, 96, 96] baseline/actualshadow 432 2184
+keyed-4 remove runs 2 payload [360, 87, 87] rewrites [360, 87, 87] baseline/actualshadow 384 2070
+keyed-4 move runs 4 payload [360, 87, 87] rewrites [360, 87, 87] baseline/actualshadow 384 2070
+keyed-32 insert runs 3 payload [1080, 241, 241] rewrites [1080, 241, 241] baseline/actualshadow 1104 3866
+keyed-32 remove runs 2 payload [1032, 231, 231] rewrites [1032, 231, 231] baseline/actualshadow 1056 3750
+keyed-32 move runs 4 payload [1032, 231, 231] rewrites [1032, 158, 158] baseline/actualshadow 1056 3750
+keyed-256 insert runs 3 payload [6456, 1275, 1275] rewrites [6456, 1275, 1275] baseline/actualshadow 6480 17022
+keyed-256 remove runs 2 payload [6408, 1253, 1253] rewrites [6408, 1253, 1253] baseline/actualshadow 6432 16882
+keyed-256 move runs 4 payload [6408, 1253, 1253] rewrites [6408, 158, 158] baseline/actualshadow 6432 16882
+storage 0 False baseline 24 alternatives+journal {'Raw': 64, 'Absolute': 64, 'Relative': 64}
+storage 0 True baseline 24 alternatives+journal {'Raw': 64, 'Absolute': 64, 'Relative': 64}
+storage 1 False baseline 48 alternatives+journal {'Raw': 136, 'Absolute': 136, 'Relative': 136}
+storage 1 True baseline 48 alternatives+journal {'Raw': 136, 'Absolute': 136, 'Relative': 136}
+storage 8 False baseline 216 alternatives+journal {'Raw': 304, 'Absolute': 304, 'Relative': 304}
+storage 8 True baseline 216 alternatives+journal {'Raw': 304, 'Absolute': 304, 'Relative': 304}
+storage 9 False baseline 240 alternatives+journal {'Raw': 328, 'Absolute': 222, 'Relative': 222}
+storage 9 True baseline 240 alternatives+journal {'Raw': 328, 'Absolute': 354, 'Relative': 354}
+storage 32 False baseline 792 alternatives+journal {'Raw': 880, 'Absolute': 350, 'Relative': 350}
+storage 32 True baseline 792 alternatives+journal {'Raw': 880, 'Absolute': 890, 'Relative': 890}
+storage 257 False baseline 6192 alternatives+journal {'Raw': 6280, 'Absolute': 2066, 'Relative': 2066}
+storage 257 True baseline 6192 alternatives+journal {'Raw': 6280, 'Absolute': 6386, 'Relative': 6386}

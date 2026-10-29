@@ -1,0 +1,10 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/ff3a15cb903b5b68ce5fbea681264a387c3f5bb6c5808bd1340a52ca1686b9d3",
+    "runtime::cold_correspondence::tests::",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.0043582916259765625
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/9f46f4c50724c99a/out/damage_suffix-9f46f4c50724c99a",
+    "canonical": "/home/user/gpui-preserved-test-binaries/c82b8f387c437e8883c0369b83ffa48bf2d457a00139621e25e6fe90382ca10e",
+    "sha256": "c82b8f387c437e8883c0369b83ffa48bf2d457a00139621e25e6fe90382ca10e",
+    "bytes": 8570160,
+    "inode": 4431993,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-mask-lattice-width-target/release/build/gpui_gpu/e02b747f77180ba1/out/gpui_gpu-e02b747f77180ba1",
+    "canonical": "/home/user/gpui-preserved-test-binaries/3a487642e9d41e008706a631be1df1777add765368e6c2f2b872943ec42f6938",
+    "sha256": "3a487642e9d41e008706a631be1df1777add765368e6c2f2b872943ec42f6938",
+    "bytes": 11618336,
+    "inode": 4554065,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-target/release/traversal_public",
+    "canonical": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200,
+    "inode": 4655751,
+    "nlink": 2
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-target/release/build/gpui_display_span_lab/49c2694727a19124/out/traversal_public",
+    "canonical": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200,
+    "inode": 4655751,
+    "nlink": 2
+  },
+  {
+    "path": "/home/user/gpui-native-task-sync-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6",
+    "canonical": "/home/user/gpui-preserved-test-binaries/714a9c82d3cb5151db85be7cba77f703d7ab99aa04098430c69061871869cd01",
+    "sha256": "714a9c82d3cb5151db85be7cba77f703d7ab99aa04098430c69061871869cd01",
+    "bytes": 13980152,
+    "inode": 2249357,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-local-publication-negative-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06",
+    "canonical": "/home/user/gpui-preserved-test-binaries/911a01458f6d9c93d02a77b2b73348a0b978fac087aa224a65867af8f3b91e36",
+    "sha256": "911a01458f6d9c93d02a77b2b73348a0b978fac087aa224a65867af8f3b91e36",
+    "bytes": 11206312,
+    "inode": 3143327,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-region-omit-target/release/build/gpui_gpu/a7e285389186b836/out/build_script_build",
+    "canonical": "/home/user/gpui-preserved-test-binaries/4a98acd60fce7ec5d14da81c002ff10c015e05c0350d8b3cb8f1c5bb234154e9",
+    "sha256": "4a98acd60fce7ec5d14da81c002ff10c015e05c0350d8b3cb8f1c5bb234154e9",
+    "bytes": 8228264,
+    "inode": 1087022,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-list-source-negative-target/release/build/gpui/f5aeb3454a48d817/out/list_source-f5aeb3454a48d817",
+    "canonical": "/home/user/gpui-preserved-test-binaries/a68642a6cd5c4660e4b04c2b0c779f6857bd5e966b87b0b30caefee75c01a4b8",
+    "sha256": "a68642a6cd5c4660e4b04c2b0c779f6857bd5e966b87b0b30caefee75c01a4b8",
+    "bytes": 11443160,
+    "inode": 2863557,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/traversal_public",
+    "canonical": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200,
+    "inode": 4662885,
+    "nlink": 2
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/49c2694727a19124/out/traversal_public",
+    "canonical": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200,
+    "inode": 4662885,
+    "nlink": 2
+  },
+  {
+    "path": "/home/user/gpui-scroll-copy-cost-control-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+    "canonical": "/home/user/gpui-preserved-test-binaries/6be40471a9818d3ce52c97b39acdcc8483eea737861f0edaf94dadf9872213e9",
+    "sha256": "6be40471a9818d3ce52c97b39acdcc8483eea737861f0edaf94dadf9872213e9",
+    "bytes": 9981232,
+    "inode": 3017821,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-native-task-skip-yield-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6",
+    "canonical": "/home/user/gpui-preserved-test-binaries/8f900d8c11834f4bf0f54fa85e03570dee1a7c8ca3c53c9d490e2c43c749df28",
+    "sha256": "8f900d8c11834f4bf0f54fa85e03570dee1a7c8ca3c53c9d490e2c43c749df28",
+    "bytes": 13980232,
+    "inode": 2249604,
+    "nlink": 1
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-target/release/examples/images",
+    "canonical": "/home/user/gpui-preserved-test-binaries/adeeb46b7e43d67ef570621951950d1409139a1af8d892eb2e961ba44ee017ba",
+    "sha256": "adeeb46b7e43d67ef570621951950d1409139a1af8d892eb2e961ba44ee017ba",
+    "bytes": 8219584,
+    "inode": 4402566,
+    "nlink": 2
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-target/release/build/gpui_gpu/df133191a45f40c0/out/images",
+    "canonical": "/home/user/gpui-preserved-test-binaries/adeeb46b7e43d67ef570621951950d1409139a1af8d892eb2e961ba44ee017ba",
+    "sha256": "adeeb46b7e43d67ef570621951950d1409139a1af8d892eb2e961ba44ee017ba",
+    "bytes": 8219584,
+    "inode": 4402566,
+    "nlink": 2
+  }
+]

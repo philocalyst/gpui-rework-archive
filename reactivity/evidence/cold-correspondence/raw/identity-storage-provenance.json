@@ -1,0 +1,10 @@
+{
+  "compiler": "nightly-2026-10-23 --edition 2024 -O",
+  "scope": "existing production IdentityIndex constructor on the same synthetic identity sequences; input Vec scratch is outside retained-index count",
+  "files": {
+    "/home/user/gpui-cold-correspondence-evidence/identity_storage.rs": "e2619630381d3b18cd3e534fc80a6a48d58c2689086cba523a009b30227427a8",
+    "/home/user/gpui-cold-correspondence-evidence/identity-storage-probe": "ba01ed6e64f682c8b0e023884ebeec8a46b8ee91173f3a96707836170422e2e5",
+    "/home/user/gpui-cold-correspondence-evidence/identity-storage.csv": "c555b233e64b66c375f86cf36dbc36d84cbe082e5e0cac657653d24a770103fc",
+    "/home/user/gpui-cold-correspondence-lab/reactivity/crates/gpui/src/runtime/identity_index.rs": "60982f39d3b0db098f2b9211b56fe4ff96ac5aa960e10e31aad12b3e88e34419"
+  }
+}
