@@ -1,0 +1,110 @@
+[
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_canvas",
+      "src_path": "/home/user/gpui-component-contract-lab/reactivity/crates/canvas/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "emission-trace"
+    ],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/home/user/gpui-component-contract-lab/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_gpu",
+      "src_path": "/home/user/gpui-component-contract-lab/reactivity/crates/gpu/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "packet-trace"
+    ],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "test"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "component_description_contract",
+      "src_path": "/home/user/gpui-component-contract-lab/reactivity/crates/gpui/tests/component_description_contract.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [],
+    "fresh": false,
+    "executable": "/home/user/gpui-component-contract-target/release/build/gpui/3713ea8d17cd802b/out/component_description_contract-3713ea8d17cd802b"
+  }
+]

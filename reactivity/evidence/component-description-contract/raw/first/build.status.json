@@ -1,0 +1,23 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "gpui",
+    "--no-default-features",
+    "--test",
+    "component_description_contract",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 79.9767394065857
+}

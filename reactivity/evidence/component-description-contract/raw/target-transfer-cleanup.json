@@ -1,0 +1,29 @@
+{
+  "from_path": "/home/user/gpui-layout-cost-target",
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "--target-dir",
+    "/home/user/gpui-component-contract-target",
+    "-p",
+    "gpui",
+    "-p",
+    "gpui_gpu",
+    "-p",
+    "gpui_canvas",
+    "-p",
+    "gpui_reactivity_core",
+    "-p",
+    "gpui_reactivity_host",
+    "-p",
+    "gpui_reactivity_state",
+    "-p",
+    "gpui_inline_call"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "     Removed 916 files, 73.4MiB total\n",
+  "elapsed": 1.8996913433074951
+}
