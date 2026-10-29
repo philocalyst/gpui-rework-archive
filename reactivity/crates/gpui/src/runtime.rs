@@ -2122,6 +2122,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         let mut seen = BTreeSet::new();
         let crate::element::Description {
+            #[cfg(feature = "component-replay-lab")]
+            local_unreplayable,
             nodes: mut drafts,
             viewports: viewport_drafts,
             annotations: annotation_drafts,
@@ -2183,7 +2185,8 @@ impl<M: View + 'static> Runtime<M> {
             },
         )?;
         #[cfg(feature = "component-replay-lab")]
-        let local_plain_columns = viewport_drafts.is_empty()
+        let local_plain_columns = !local_unreplayable
+            && viewport_drafts.is_empty()
             && annotation_drafts.is_empty()
             && image_drafts.is_empty()
             && geometry_drafts.is_empty()
@@ -2221,6 +2224,11 @@ impl<M: View + 'static> Runtime<M> {
         let mut handler_count = 0;
         let mut fields = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0u32; drafts.len() + 1];
+        #[cfg(feature = "component-replay-lab")]
+        {
+            self.local.report.full_work.new_counts_bytes = new_counts.capacity() * size_of::<u32>();
+            self.local.report.full_work.child_count_visits = drafts.len();
+        }
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
         for index in 0..drafts.len() {
             let node = &drafts[index];
@@ -2236,6 +2244,10 @@ impl<M: View + 'static> Runtime<M> {
                     while drafts[preceding].parent != node.parent {
                         preceding = drafts[preceding].parent.unwrap() as usize;
                         depth -= 1;
+                        #[cfg(feature = "component-replay-lab")]
+                        {
+                            self.local.report.full_work.depth_unwinds += 1;
+                        }
                     }
                 }
             }
@@ -2374,6 +2386,24 @@ impl<M: View + 'static> Runtime<M> {
         let (handlers, old_handlers) =
             handlers::Handlers::replace(self.handlers.take(), handler_count);
         let old_styles = std::mem::take(&mut self.styles);
+        #[cfg(feature = "component-replay-lab")]
+        {
+            let work = &mut self.local.report.full_work;
+            let count = self.nodes.len();
+            work.old_nodes = count;
+            work.old_node_capacity_bytes = self.nodes.capacity() * size_of::<Node>();
+            work.old_style_payload_bytes = local_replay::style_bytes(&old_styles);
+            work.sibling_count_visits = count;
+            work.sibling_prefix_visits = if count == 0 { 0 } else { count + 1 };
+            work.sibling_address_visits = count;
+            work.sibling_scratch_bytes = if count == 0 {
+                0
+            } else {
+                (count * 2 + 2) * size_of::<u32>()
+            };
+            work.old_key_scan_visits = count;
+            work.old_identity_scan_visits = count;
+        }
         let siblings = siblings::Siblings::new(&self.nodes);
         let mut old = std::mem::take(&mut self.nodes)
             .into_iter()
@@ -2428,6 +2458,10 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(test)]
         self.ordered_cold_extents.reserve(drafts.len());
         for (index, draft) in drafts.into_iter().enumerate() {
+            #[cfg(feature = "component-replay-lab")]
+            {
+                self.local.report.full_work.reconciled_nodes += 1;
+            }
             #[cfg(test)]
             {
                 self.structural_work.reconciled += 1;
@@ -2445,6 +2479,10 @@ impl<M: View + 'static> Runtime<M> {
                 let mut sibling = index - 1;
                 while nodes[sibling].parent().index() != parent {
                     sibling = nodes[sibling].parent().index().unwrap();
+                    #[cfg(feature = "component-replay-lab")]
+                    {
+                        self.local.report.full_work.ordinal_unwinds += 1;
+                    }
                 }
                 nodes[sibling].ordinal() + 1
             };
@@ -2918,6 +2956,15 @@ impl<M: View + 'static> Runtime<M> {
         self.texts = texts;
         self.fanout = fanout;
         self.by_identity = by_identity;
+        #[cfg(feature = "component-replay-lab")]
+        {
+            let work = &mut self.local.report.full_work;
+            work.new_node_capacity_bytes = self.nodes.capacity() * size_of::<Node>();
+            work.new_style_payload_bytes = local_replay::style_bytes(&self.styles);
+            work.identity_index_inputs = self.nodes.len();
+            work.identity_index_bytes = local_replay::index_bytes(&self.by_identity);
+            work.fanout_groups = self.fanout.len();
+        }
         self.overrides
             .retain(|identity| self.by_identity.contains(identity));
         if let Some(metadata) = &mut self.metadata {

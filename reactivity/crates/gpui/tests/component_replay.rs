@@ -377,6 +377,40 @@ fn public_local_component_replay_qualification() {
         true,
         &mut rows,
     );
+    let mut a = window::<Literal>(0, Appearance::Plain, Mode::Replay);
+    let mut b = window::<Literal>(0, Appearance::Plain, Mode::FullRoot);
+    let old_root = a.inspect().unwrap().nodes[1].identity;
+    a.update(|m| m.tail += 1).unwrap();
+    b.update(|m| m.tail += 1).unwrap();
+    compare(&mut a, &mut b);
+    assert_ne!(
+        a.inspect().unwrap().nodes[1].identity,
+        old_root,
+        "parent child-count change remints the unkeyed region root"
+    );
+    grow(
+        "owner-remint-new-certificate",
+        &mut a,
+        &mut b,
+        true,
+        true,
+        &mut rows,
+    );
+    a.update(|m| m.appearance = Appearance::WrongDescriptor)
+        .unwrap();
+    b.update(|m| m.appearance = Appearance::WrongDescriptor)
+        .unwrap();
+    compare(&mut a, &mut b);
+    assert!(!a.local_replay_report().unwrap().certificate_live);
+    grow(
+        "replacement-descriptor-fallback",
+        &mut a,
+        &mut b,
+        false,
+        false,
+        &mut rows,
+    );
+    nested_boundary_case(&mut rows);
     let mut mutant = window::<Literal>(0, Appearance::Plain, Mode::OmitCallerMutant);
     let mut full = window::<Literal>(0, Appearance::Plain, Mode::FullRoot);
     mutant
@@ -396,4 +430,73 @@ fn public_local_component_replay_qualification() {
         serde_json::to_vec_pretty(&rows).unwrap(),
     )
     .unwrap();
+}
+
+struct Outer {
+    child: Child,
+}
+impl Outer {
+    const INNER: Component<Self, Child> =
+        Component::new(FieldId::new(1), "inner", |m| &m.child, |m| &mut m.child);
+}
+impl View for Outer {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct_component(Self::INNER)
+    }
+    fn view(&self) -> El<'_> {
+        Self::INNER.view(self)
+    }
+}
+struct NestedOwner {
+    outer: Outer,
+}
+impl NestedOwner {
+    const OUTER: Component<Self, Outer> =
+        Component::new(FieldId::new(1), "outer", |m| &m.outer, |m| &mut m.outer);
+}
+static NESTED: LocalComponent<NestedOwner, Outer> =
+    LocalComponent::new(NestedOwner::OUTER, RootRecipe::width(WidthInput::Absent));
+impl View for NestedOwner {
+    fn sources() -> Sources<Self> {
+        Sources::new().local_component(&NESTED)
+    }
+    fn view(&self) -> El<'_> {
+        PARENTS.fetch_add(1, Ordering::SeqCst);
+        row(()).child_local(&NESTED, self).size(64)
+    }
+}
+fn nested_boundary_case(rows: &mut Vec<Value>) {
+    let make = || {
+        Win::recording(
+            NestedOwner {
+                outer: Outer {
+                    child: Child {
+                        grow: Signal::new(false),
+                        handler: Signal::new(false),
+                    },
+                },
+            },
+            gpui::WindowOptions {
+                size: [64, 64],
+                ..Default::default()
+            },
+        )
+        .unwrap()
+    };
+    let mut a = make();
+    let mut b = make();
+    b.set_local_replay_mode(Mode::FullRoot).unwrap();
+    assert!(!a.local_replay_report().unwrap().certificate_live);
+    let inner = Outer::INNER.source(&Child::GROW);
+    reset();
+    a.set(NestedOwner::OUTER.source(&inner), true).unwrap();
+    let visits = calls();
+    b.set(NestedOwner::OUTER.source(&inner), true).unwrap();
+    assert_eq!(visits, [1, 1]);
+    assert!(!a.local_replay_report().unwrap().admitted);
+    assert_eq!(pixels(&mut a), pixels(&mut b));
+    ack(&mut a);
+    ack(&mut b);
+    assert_eq!(nodes(&a, true), nodes(&b, true));
+    rows.push(json!({"case":"nested-component-boundary-fallback","calls_replay":visits,"report":a.local_replay_report().unwrap()}));
 }

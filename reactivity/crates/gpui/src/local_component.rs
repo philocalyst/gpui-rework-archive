@@ -113,6 +113,8 @@ pub struct Origin {
     pub namespace: u64,
     pub root_identity: u64,
     pub parent_identity: u64,
+    pub input_revision: Option<u32>,
+    pub caller_replayed: bool,
     pub old_range: [usize; 2],
     pub new_range: [usize; 2],
     /// New local rank, old absolute rank, surviving/new semantic identity.
@@ -120,7 +122,30 @@ pub struct Origin {
 }
 
 #[derive(Clone, Debug, Default, serde::Serialize)]
+pub struct FullWork {
+    pub old_nodes: usize,
+    pub old_node_capacity_bytes: usize,
+    pub old_style_payload_bytes: Option<usize>,
+    pub new_counts_bytes: usize,
+    pub child_count_visits: usize,
+    pub depth_unwinds: usize,
+    pub ordinal_unwinds: usize,
+    pub reconciled_nodes: usize,
+    pub sibling_count_visits: usize,
+    pub sibling_prefix_visits: usize,
+    pub sibling_address_visits: usize,
+    pub sibling_scratch_bytes: usize,
+    pub old_key_scan_visits: usize,
+    pub old_identity_scan_visits: usize,
+    pub new_node_capacity_bytes: usize,
+    pub new_style_payload_bytes: Option<usize>,
+    pub identity_index_inputs: usize,
+    pub identity_index_bytes: usize,
+    pub fanout_groups: usize,
+}
+#[derive(Clone, Debug, Default, serde::Serialize)]
 pub struct Report {
+    pub full_work: FullWork,
     pub mode: Mode,
     pub admitted: bool,
     pub fallback: &'static str,

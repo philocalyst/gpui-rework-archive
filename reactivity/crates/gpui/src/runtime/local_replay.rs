@@ -231,13 +231,22 @@ impl<M: View + 'static> Runtime<M> {
         } else {
             recipe.render(&self.model)
         };
-        let mut description = el.flatten_lists(MAX_NODES, &(), |_, _, _, _, _, _, _| {
+        let mut description = match el.flatten_lists(MAX_NODES, &(), |_, _, _, _, _, _, _| {
             Err(ListError::MissingViewport.into())
-        })?;
+        }) {
+            Ok(description) => description,
+            Err(Error::List(ListError::MissingViewport)) => {
+                self.local.report.fallback = "new-list-requires-owner";
+                self.local.revoke();
+                return Ok(false);
+            }
+            Err(error) => return Err(error),
+        };
         self.local.report.local_drafts = description.nodes.len();
         self.local.report.local_draft_capacity_bytes =
             description.nodes.capacity() * size_of::<DraftNode<'_>>();
-        let mut supported = description.backgrounds.is_empty()
+        let mut supported = !description.local_unreplayable
+            && description.backgrounds.is_empty()
             && description.geometry.is_empty()
             && description.style_ports.is_empty()
             && description.mapped_ports.is_empty()
@@ -294,6 +303,8 @@ impl<M: View + 'static> Runtime<M> {
             namespace: cert.namespace.get(),
             root_identity: cert.root,
             parent_identity: cert.parent,
+            input_revision: input.map(Revision::get),
+            caller_replayed: self.local.mode != Mode::OmitCallerMutant,
             old_range: [start, end],
             new_range: [start, start + count],
             correspondence: Vec::with_capacity(count),
@@ -363,7 +374,8 @@ impl<M: View + 'static> Runtime<M> {
             new_styles.push(self.styles.get(index));
         }
         self.local.report.replacement_records_written = count;
-        self.local.report.old_style_payload_bytes = style_bytes(&self.styles);
+        self.local.report.old_style_payload_bytes =
+            style_bytes(&self.styles).expect("plain style admission");
         self.local.report.old_identity_index_bytes = index_bytes(&self.by_identity);
         self.local.report.replacement_capacity_bytes = replacements.capacity() * size_of::<Node>();
         self.local.report.correspondence_capacity_bytes =
@@ -375,7 +387,7 @@ impl<M: View + 'static> Runtime<M> {
             nodes.push(old.next().expect("prefix"));
         }
         for _ in start..end {
-            drop(old.next().expect("old subtree"));
+            let _removed = old.next().expect("old subtree");
         }
         nodes.extend(replacements);
         for mut node in old {
@@ -462,23 +474,31 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         let mut report = runtime.local.report.clone();
         report.mode = runtime.local.mode;
-        report.certificate_live = runtime.logical_valid && runtime.local.committed.is_some();
+        report.certificate_live = runtime.logical_valid
+            && !runtime.dirty
+            && !runtime.rebuild_layout
+            && runtime.source_epoch == runtime.complete_epoch
+            && runtime.local.committed.is_some_and(|cert| {
+                cert.epoch == runtime.complete_epoch
+                    && Some(cert.token) == runtime.latest_token
+                    && cert.namespace == runtime.sites.namespace()
+            });
         report.state_header_bytes = size_of::<State>();
         Ok(report)
     }
 }
 
-fn style_bytes(styles: &styles::Styles) -> usize {
+pub(super) fn style_bytes(styles: &styles::Styles) -> Option<usize> {
     match styles {
-        styles::Styles::Default => 0,
-        styles::Styles::Dense(v) => v.capacity() * size_of::<Style>(),
+        styles::Styles::Default => Some(0),
+        styles::Styles::Dense(v) => Some(v.capacity() * size_of::<Style>()),
         styles::Styles::Shared { palette, indices } => {
-            size_of_val(palette.as_ref()) + size_of_val(indices.as_ref())
+            Some(size_of_val(palette.as_ref()) + size_of_val(indices.as_ref()))
         }
-        styles::Styles::Colors(_) => 0, // Never admitted; no color storage claim.
+        styles::Styles::Colors(_) => None, // Never admitted; no color storage claim.
     }
 }
-fn index_bytes(index: &IdentityIndex) -> usize {
+pub(super) fn index_bytes(index: &IdentityIndex) -> usize {
     match index {
         IdentityIndex::Contiguous { .. } => 0,
         IdentityIndex::Runs(runs) => size_of_val(runs.as_ref()),

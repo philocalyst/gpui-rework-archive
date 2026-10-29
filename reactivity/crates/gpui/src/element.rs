@@ -940,6 +940,8 @@ impl<'a> El<'a> {
         let mut backgrounds = Vec::new();
         let mut style_ports = Vec::new();
         let mut mapped_ports = Vec::new();
+        #[cfg(feature = "component-replay-lab")]
+        let mut local_unreplayable = false;
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
@@ -973,6 +975,10 @@ impl<'a> El<'a> {
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            #[cfg(feature = "component-replay-lab")]
+            {
+                local_unreplayable |= projector.is_some();
+            }
             if let Some(gradient) = background {
                 backgrounds.push((index as usize, gradient));
             }
@@ -1113,6 +1119,8 @@ impl<'a> El<'a> {
             });
         }
         Ok(Description {
+            #[cfg(feature = "component-replay-lab")]
+            local_unreplayable,
             nodes: output,
             viewports,
             annotations,
@@ -1179,6 +1187,8 @@ impl Drop for ComponentBoundaries {
 }
 
 pub(crate) struct Description<'a> {
+    #[cfg(feature = "component-replay-lab")]
+    pub local_unreplayable: bool,
     pub backgrounds: Vec<(usize, &'a gpui_canvas::Gradient)>,
     pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
     pub style_ports: Vec<crate::style_port::Draft<'a>>,
