@@ -1,5 +1,11 @@
 branch	commit	committed_at	worktree_at_capture	subject
-local/architecture-performance	9fc648959ee0e1959f3c41dc2ecdd4b6ec5b6e2c	2026-10-28T19:24:07+00:00	/home/user/gpui-architecture-local	Record exact partition admission and scoped native prerequisite
+local/address-cost	9e349796d694cf10d32eb19d8c42e528f8d77985	2026-10-29T06:05:50+00:00	/home/user/gpui-address-cost-lab	Seal failed relative and stable address cost decisions with complete timing storage evidence
+local/address-publication	b1b640d87b58f7addbb0a59cfeb610a70cb093f0	2026-10-29T05:39:49+00:00	/home/user/gpui-address-publication-lab	Seal private relative-domain and stable-draw GPU comparison without adoption
+local/architecture-performance	0eb9b0caae9d68eabf46d54f04a4a23657e4184e	2026-10-29T10:08:15+00:00	/home/user/gpui-architecture-local	Record qualified local replay origin and measured producer storage losses
+local/cold-correspondence	8714afdf2e81803693172acd981127d521f478a1	2026-10-29T01:43:38+00:00	/home/user/gpui-cold-correspondence-lab	Seal live cold correspondence costs, fixed-block limits and authority counterexamples
+local/component-description-contract	773cd5d4543a130f071a830782b01bbae746c2d6	2026-10-29T08:27:16+00:00	/home/user/gpui-component-contract-lab	Seal component caller provenance counterexamples and explicit recipe admission obligations
+local/component-replay-design	2642c1c707bea24c28ddb5cdeb6b4e0ed576beaf	2026-10-29T08:52:18+00:00	/home/user/gpui-component-replay-design-lab	Compare existing recipes with explicit single-component replay contract
+local/component-replay-prototype	6e6c56a6d4123fad6ccf88d6038479bf7521a36d	2026-10-29T10:07:47+00:00	/home/user/gpui-component-replay-lab	Seal local component replay qualification with linear work and storage losses
 local/damage-suffix	380db598cdbed2dd81c5a41745473c40a876f148	2026-10-28T13:25:31+00:00	/home/user/gpui-damage-suffix-lab	Seal exact suffix correctness and code-cost qualification
 local/damage-suffix-cost	f90ca6b10844b9c7c828e37e310021d0e270df6c	2026-10-28T14:49:16+00:00	/home/user/gpui-damage-suffix-cost-lab	Seal exact suffix regression win across all 28 fixed workloads
 local/damage-suffix-native	bea6c4cf9135f494925ccd80b05f584e20fe7ff4	2026-10-28T13:41:34+00:00	/home/user/gpui-damage-suffix-native-lab	Seal successful exact suffix native startup cadence screen
@@ -8,6 +14,16 @@ local/damage-suffix-qualification	342e9495b10d7ab41ec9200b2d6a28acbb2af956	2026-
 local/delivery-sweep	dbd7dbd40b63f97e948a96bf7a8238f074b44569	2026-10-27T05:31:25+00:00	/home/user/gpui-delivery-sweep-lab	Preserve failed delivery sweep with exact public operation gates and jump-table control
 local/delivery-sweep-control	258cbe7b0ecffe01beadc30fd64d02b2da8e9ec8	2026-10-27T05:22:37+00:00	/home/user/gpui-delivery-control-lab	Constrain fixture return capture to its owned lane type
 local/delivery-sweep-negative	11683deaa2b326ec225df37170b5f584941e5291	2026-10-27T05:23:51+00:00	/home/user/gpui-delivery-negative-lab	Negative control: forget rotating delivery cursor between turns
+local/display-chunks	57ccf254851e12839da4b5deedd5c7047b686c80	2026-10-28T20:56:53+00:00	/home/user/gpui-display-chunks-lab	Seal direct-binding and deferred real-resource GPU lifetime subgates
+local/display-hot	d40381fa539f2b58b400785b386fe8477bba0954	2026-10-28T21:50:47+00:00	/home/user/gpui-display-hot-lab	evidence: seal isolated hot-parameter lifetime and GPU correctness
+local/display-hot-cost	be4833a9cfe2fa41acc7cd61338b5851984793e3	2026-10-28T22:14:12+00:00	/home/user/gpui-display-hot-cost-lab	evidence: seal hot parameter endpoint timing and conservative cost rejection
+local/display-live-seam	b2d48370d75482e300befd81d4f0bcbbedd560c7	2026-10-28T23:37:52+00:00	/home/user/gpui-display-live-seam-lab	Seal actual native Source-to-pixel seam and coalesced publication cost evidence
+local/display-radix	bb21d11455b6a03d134f99377c5a16b983fac27f	2026-10-28T21:30:43+00:00	/home/user/gpui-display-radix-lab	evidence: seal bounded radix directory and combined GPU pixel cohort
+local/display-spans	36f700a7345e7a561c66de498f840437ad4f0d3c	2026-10-28T20:09:15+00:00	/home/user/gpui-display-spans-lab	Seal compressed display representation comparison with exact GPU and public API evidence
+local/display-traversal	23b533e8fe829bd88ed38d817689f95e6aa4c719	2026-10-28T23:02:53+00:00	/home/user/gpui-display-traversal-lab	Seal independent traversal correctness, locality and lifetime evidence
+local/display-traversal-cost	2f357586bf213e2daf1043c80f5e02ad7177890d	2026-10-28T23:17:44+00:00	/home/user/gpui-display-traversal-cost-lab	Seal B cost campaign with failed tiny gates and qualified large-scene gains
+local/emission-control-baseline	f4468d6ebc39a644383ab8a01f23ef6a76d52d0b	2026-10-29T03:24:09+00:00	/home/user/gpui-emission-control-baseline-lab	control: remove semantic mapping instrumentation only
+local/emission-control-candidate	0cc1fb926b2fde1ddb02436ab388910de63d556d	2026-10-29T03:37:25+00:00	/home/user/gpui-emission-control-candidate-lab	evidence: exact pixel mismatch reproduces with semantic mapping removed
 local/glyph-damage	227a0567f912719d741a609c18b76f7f16d0e6c3	2026-10-27T22:44:13+00:00	/home/user/gpui-glyph-damage-lab	evidence: seal four-way glyph repair cost failure and exact image qualification
 local/glyph-damage-bounds	be8300c1e3eafacedfa20c062bf2e31ed1ada9ca	2026-10-27T21:12:15+00:00	/home/user/gpui-glyph-damage-bounds-lab	test: satisfy strict lint in identical small-text owner fixture
 local/glyph-damage-control	bb83c5d8f3da446d4cc1c259141f335797b1b60d	2026-10-27T21:12:14+00:00	/home/user/gpui-glyph-damage-control-lab	test: satisfy strict lint in identical small-text owner fixture
@@ -33,6 +49,9 @@ local/gpu-text-packet-negative	cca9f74c6db60fd4f71fdb63e10d804aa7620915	2026-10-
 local/gpu-text-tiles	3dd29a0ebdea85ed7b4076ab51069865293e8737	2026-10-27T11:53:32+00:00	/home/user/gpui-gpu-text-tiles-lab	Preserve rejected tile repair trial with stream gains and small-update regressions
 local/gpu-text-tiles-negative	4eb6ba28b5cae7e59195d4de0d1a926da73547ef	2026-10-27T11:12:28+00:00	/home/user/gpui-gpu-text-tiles-negative-lab	Negative control: omit old-only dirty tile memberships
 local/image-placement	131c05c3c9324b15a672e63252ea90193eaa043e	2026-10-27T19:00:52+00:00	/home/user/gpui-image-placement-lab	evidence: qualify independent image placement correction and retain baseline pixel failure
+local/layout-handle-seam	160fd281de0c27a160d46d9d5a1da6bd89eb33ca	2026-10-29T06:28:16+00:00	/home/user/gpui-layout-handle-seam-lab	Seal semantic to layout capability loss trace and dependency routing seam
+local/layout-preservation	99e08a91501979280cc212beb1763a1cb5c35bbb	2026-10-29T07:32:56+00:00	/home/user/gpui-layout-preservation-lab	Seal bounded live layout preservation, authority failure correction, and full storage/work accounting
+local/layout-preservation-cost	16947f57007258f7c0aa370717e355c4d0597dcc	2026-10-29T07:56:08+00:00	/home/user/gpui-layout-cost-lab	Close layout preservation cost: both variants not admitted with preserved raw control and storage regressions
 local/list-local-publication	9725cfa2679d68e014f1587c506c83b1dde6d71c	2026-10-27T19:40:42+00:00	/home/user/gpui-local-publication-lab	evidence: retain failed whole-frame local publication gate and complete qualification
 local/list-local-publication-control	6895a10440abb8496e5e6eabbf16cf01877e68f0	2026-10-27T19:05:25+00:00	/home/user/gpui-local-publication-control-lab	fix: keep image content origin local to the admitted node transform
 local/list-local-publication-negative	2a24197706922175b269452784d90b3da2b58ae7	2026-10-27T19:11:18+00:00	/home/user/gpui-local-publication-negative-lab	negative control: omit name invalidation on corrected membership candidate
@@ -55,7 +74,7 @@ local/mask-miss-all	6afe48ddddf5ddb406d43671a3037335072f2978	2026-10-28T18:06:32
 local/mask-miss-audit	2520aeece9359124d0d8f4d450b04f03f5685d55	2026-10-28T18:19:05+00:00	/home/user/gpui-mask-miss-audit-lab	Seal native mask miss selection audit including retained display failure
 local/mask-miss-native	c8a65525e8798fd522eb91ef19ff4bd0e4e2ba9a	2026-10-28T18:33:44+00:00	/home/user/gpui-mask-miss-native-lab	Seal failed mask miss native screen with all workload gates passing
 local/mask-partitions	a0086d6dd1ae8cd4e4869e88851885b03c73989b	2026-10-28T19:22:56+00:00	/home/user/gpui-mask-partitions-lab	Seal exact sample partition admission and horizontal refinement counterexample
-local/mask-partitions-native	0b60a96399b381c6fda0a4706b05e08f85dd9396	2026-10-28T19:22:57+00:00	/home/user/gpui-mask-partitions-native-lab	Freeze sample partition native comparison and inherited host-path scope
+local/mask-partitions-native	ceed2bd852d576a0b2aec08a728e8f0c92075a06	2026-10-28T19:40:45+00:00	/home/user/gpui-mask-partitions-native-lab	Seal rejected sample-partition native screen before architecture redirection
 local/mask-partitions-x	7bcd9c311a093776cc7b588a2e49e211be01a1f1	2026-10-28T19:19:22+00:00	/home/user/gpui-mask-partitions-x-lab	Negative control: discard required horizontal sample partition cuts
 local/mask-quad	e00f436fbfef57bdc0379df6e46c6888d7855097	2026-10-28T16:50:19+00:00	/home/user/gpui-mask-quad-lab	Seal exact GPU admission and falsified four-cell row mutant
 local/mask-quad-native	58da795dad73d181269ed59b5cca05c4bca80b51	2026-10-28T17:03:48+00:00	/home/user/gpui-mask-quad-native-lab	Reject four-cell native screen with all observations and independent verification
@@ -75,9 +94,12 @@ local/native-thread-attribution	ba1d3122a896679cea0a39ea25ccb75b7a756e52	2026-10
 local/native-workload-parity	3d60e5b4a8c9ba8867bc81a4d7112193adcde225	2026-10-27T12:59:04+00:00	/home/user/gpui-native-parity-lab	Record native source ingress qualification and incomplete parity gates
 local/native-workspace	344c7f8ddd55326dca2c88322f67530914c97733	2026-10-28T12:09:52+00:00	/home/user/gpui-native-workspace-lab	evidence: seal native workspace cadence and CPU failures without dropping observations
 local/native-workspace-control	20919cb160f6fcc5ab85eca607b97d4173739409	2026-10-28T00:54:33+00:00	/home/user/gpui-native-workspace-control-lab	Preregister matched-profile native diagnostic
+local/ordered-cold-extents	cae48074c797af4f1bd204cd0d0c70175f934a7a	2026-10-29T02:32:40+00:00	/home/user/gpui-ordered-cold-extents-lab	evidence: seal actual ordered extent sharing and fragmentation losses
+local/packet-relocation	41a986b3f0dfe9e032944ecbedb4a13c824cdf91	2026-10-29T04:07:24+00:00	/home/user/gpui-packet-relocation-lab	Seal live packet relocation trace and relative-domain countermodel
 local/patch-workspace	f7b3f60c70faf6d548fffda530d4de83b2570e34	2026-10-28T11:25:03+00:00	/home/user/gpui-patch-workspace-lab	evidence: seal workspace reuse with all 112 fixed cost gates passing
 local/patch-workspace-qualification	e106b788863e7ed8a6cad97a4130322b5264ce46	2026-10-28T09:04:45+00:00	/home/user/gpui-patch-workspace-checkpoint-lab	evidence: preserve workspace qualification and allocation gates before timing
 local/patch-workspace-retire	5d24115d28d39f4095415290fd262cd2bb05e6b2	2026-10-28T08:42:28+00:00	/home/user/gpui-patch-workspace-retire-lab	test: deliberately retain superseded sparse publication payload
+local/producer-observer-ledger	64fc4b385771e2e57574986a010a578c5db7fe53	2026-10-29T08:11:32+00:00	/home/user/gpui-producer-ledger-lab	Seal production versus observer traversal ledger and qualified component-origin hypothesis
 local/question-borrowed-negative	5432db0d159f721bb87edfe2afbf6da43f5e70f4	2026-10-27T07:40:41+00:00	/home/user/gpui-question-borrowed-negative-lab	Negative control forgets the first borrowed source member
 local/question-source-borrowed	6553d9a6dfb42dedf9f32ad7f20768b4789fe081	2026-10-27T09:17:23+00:00	/home/user/gpui-question-source-borrowed-lab	Preserve borrowed Question cohort trial and independent failed-gate verdict
 local/question-source-control	92b1c28dfa8050ae863c08bc2b086cc5906ac32f	2026-10-27T06:36:10+00:00	/home/user/gpui-question-source-control-lab	Freeze identical settled Question allocation control
@@ -99,6 +121,10 @@ local/scroll-sparse-authority	0a0a496e4640e80797bfc89f3a82731ffd3d7043	2026-10-2
 local/scroll-sparse-bounds	599e36c149ea252f96056f3d8e827da137f71197	2026-10-28T04:28:58+00:00	/home/user/gpui-scroll-sparse-bounds-lab	Respect ordinary SDR opaque-clear admission in shared GPU fixtures
 local/scroll-sparse-omit	d6c1efceff015d68c7deff1367c0bcb532c3f268	2026-10-28T04:43:06+00:00	/home/user/gpui-scroll-sparse-omit-lab	Fault witness: scroll omit must fail actual pixel equality
 local/scroll-sparse-repair	53165424be4665a9874b6f3f5f31aa0d301e57ed	2026-10-28T06:16:15+00:00	/home/user/gpui-scroll-sparse-lab	Preserve complete rejected precise scroll repair experiment
+local/semantic-emission	521c61f7c5813449ae59a50cbd693a411e4be2da	2026-10-29T03:17:28+00:00	/home/user/gpui-semantic-emission-lab	evidence: seal semantic command ranges and preserve exact text pixel failure
+local/slot-chain	55adff11c0d205bf3a59fdda07e7bcc713305329	2026-10-29T00:01:24+00:00	/home/user/gpui-slot-chain-lab	Seal bounded same-slot chain correctness, costs and authority counterexamples
+local/slot-chain-cost	86cbdf638d45f79fe9d6b156cc7185a601a60042	2026-10-29T00:33:42+00:00	/home/user/gpui-slot-chain-cost-lab	Seal live chain cost: large gains but fixed single-edit gate fails
+local/slot-chain-cost-control	2ab71199287f718acb4fc8d352d32aac6b4bf804	2026-10-29T00:09:58+00:00	/home/user/gpui-slot-chain-cost-control-lab	Freeze live raw control with identical Source completion harness
 local/source-batch-control	577a6ab938bac89b1be90db12a63bf1f487c58e5	2026-10-27T05:50:22+00:00	/home/user/gpui-source-batch-control-lab	Add separate allocation probe without instrumenting timed executable
 local/source-batch-negative	06b3cad1d36b8b181e759c8f85f0c9dc54bb4fd6	2026-10-27T05:44:53+00:00	/home/user/gpui-source-batch-negative-lab	Negative control: admit owner-dependent text sources into sparse batch
 local/source-batch-publication	1830d9d54fe73903ffd909e3e19aab8c25e9763d	2026-10-27T06:15:42+00:00	/home/user/gpui-source-batch-lab	Qualify typed text batches with complete CPU, allocation, semantic and native evidence
@@ -108,6 +134,7 @@ local/sparse-text-negative	543405da31acf5d11374de0d4020a0f1b0105d70	2026-10-27T0
 local/sparse-text-outline	5b670209df18941f8604bea2ee2d2bfe3597da78	2026-10-27T09:40:13+00:00	/home/user/gpui-sparse-outline-lab	Record complete outline-only text batch qualification and failed control
 local/sparse-text-publication	a91fd03b9b1623efbde68dfd8c00cadf79e7508e	2026-10-27T03:31:30+00:00	/home/user/gpui-sparse-text-lab	Preserve sparse publication evidence and inconclusive admission verdict
 local/state-segments	bed967a3c20e605ad4636b749bb6ce9348731d57	2026-10-27T03:08:46+00:00	/home/user/gpui-state-lab	Add identical state-update allocation and reclamation fixture
+local/structural-journal-trace	e2cc1712443473c0d8a15224141c85a538647518	2026-10-29T00:57:39+00:00	/home/user/gpui-structural-journal-trace-lab	Qualify structural trace with explicit retained clip-resource accounting
 local/text-cache-bounded	e6bda77dfc6784533cbc2b769f05b55fdc701c61	2026-10-27T04:03:41+00:00	/home/user/gpui-bounded-cache-lab	Preserve bounded-cache memory win and failing CPU admission cells
 local/text-cache-bounded-negative	287bffb806e5d9eae6855b7549fc51f612b29682	2026-10-27T03:48:53+00:00	/home/user/gpui-bounded-negative	Negative control retains oversized paragraph storage
 local/text-cache-cold-trim	6b03ad48ad6e8c3b60c6a31a71761686f65a744d	2026-10-27T05:41:48+00:00	/home/user/gpui-cold-trim-lab	Preserve bounded cold-trim CPU campaign, uncertainty, and composed native gates

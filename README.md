@@ -4,15 +4,17 @@ Written 2026-10-24. Source host: **Nudox Prod** (`ilo-prod`, `root@87.99.136.215
 
 This repo is the preserved state of the GPUI clean-room rework as it stood on prod: every worktree's commit, every worktree's uncommitted/untracked work, the three stashes, and all local branches and tags. It is a git archive, not a working checkout. Nothing on prod was modified or deleted.
 
-## Research continuation — 2026-10-28
+## Research continuation — 2026-10-29
 
-The architecture/performance investigation is preserved on **141 additional `local/*` branches**, including implementations, baselines, negative controls, qualification checkpoints, and rejected experiments. The `local/` prefix is retained as part of their original names.
+The architecture/performance investigation is now captured on **168 `local/*` branches**, including 27 new branches and 2 updated tips since October 28. Implementations, baselines, failed experiments and original verdicts are preserved.
 
-- **[Research branch index](RESEARCH_BRANCHES.md)** — direct links to the main investigations and every captured branch, including BBTree-inspired tree traversal, text/state publication, native lists, retained rendering, and GPU damage repair.
-- **[Research manifest](RESEARCH_MANIFEST.tsv)** — exact commit SHAs, commit timestamps, original worktree paths, and latest commit subjects for all 141 branches.
-- Publication preserves the research; it does **not** declare every candidate adopted or establish an overall performance win over ZGX. Each dossier retains its own acceptance gates, failures, and limitations. External binaries and non-Git evidence are not included.
+- **[Current research index](RESEARCH_BRANCHES.md)** — latest component replay qualification, BBTree/display representation experiments, structural/layout investigations and the production/observer cost correction.
+- **[Exact snapshot manifest](RESEARCH_MANIFEST.tsv)** — captured commits and provenance for every research branch.
+- **[October 28 snapshot](RESEARCH_BRANCHES_2026-10-28.md)** — preserved historical index.
 
-The numbered sections and appendices below describe the **original October 24 archive**. Their counts and host/storage observations are historical; the research index above records the later additions separately.
+Publication is preservation, not adoption or an overall ZGX victory. The latest prototype still has linear producer work and storage losses; the original end-to-end/hardware goal remains unproven. External executable/build archives are not uploaded. Historical “local only” wording in sealed dossiers predates this authorized publication.
+
+The numbered sections and appendices below describe the original October 24 archive and retain their historical counts.
 
 ## 1. Status at a glance
 
