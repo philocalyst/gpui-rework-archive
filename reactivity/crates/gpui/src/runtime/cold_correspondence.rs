@@ -453,11 +453,24 @@ mod tests {
         } else {
             i as u64 + 1
         };
-        let links = super::super::links::NodeLinks::new(
-            (i != 0).then_some(i.saturating_sub(1)),
-            (i % 17) as u32,
-            Some(i),
-        );
+        let links = if entropy {
+            let bound = super::super::MAX_NODES;
+            super::super::links::NodeLinks::new(
+                if i == 0 {
+                    None
+                } else {
+                    Some(((id >> 24) as usize) % i)
+                },
+                (((id >> 8) as usize) % bound) as u32,
+                Some((id as usize) % bound),
+            )
+        } else {
+            super::super::links::NodeLinks::new(
+                (i != 0).then_some(i.saturating_sub(1)),
+                (i % 17) as u32,
+                Some(i),
+            )
+        };
         Wire([
             id,
             links.word(),
@@ -475,6 +488,7 @@ mod tests {
             for entropy in [false, true] {
                 let mut t = Trials::default();
                 t.begin(7, 0);
+                t.reserve(n);
                 for i in 0..n {
                     t.push(i, None, record(i, entropy));
                 }
@@ -488,6 +502,10 @@ mod tests {
                 if n <= TINY {
                     assert!(t.stores.iter().all(|s| matches!(s, Store::Raw(_))));
                 }
+                println!(
+                    "\nCOLD_STORAGE {}",
+                    json!({"n":n,"entropy":entropy,"report":t.report()})
+                );
             }
         }
     }
@@ -536,6 +554,7 @@ mod tests {
         assert_eq!(t.runs.len(), 32);
         assert!(!t.accepts(previous));
         assert_eq!(size_of::<Run>(), 12);
+        println!("\nCOLD_FRAGMENT {}", t.report());
     }
     #[test]
     #[should_panic(expected = "correspondence identity must survive reconciliation")]

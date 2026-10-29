@@ -68,3 +68,11 @@ created only by the post-update observation method. Report pending candidate
 heap and revoke correspondence reporting after incomplete description, while
 retaining prior codec stores. This makes every retained experiment metadata
 field countable; the first gate remains preserved. No latency observations exist.
+
+Final observation-only unit extension records numeric storage for every existing
+0..257 boundary case instead of merely asserting roundtrip. High-entropy cases
+now vary every packed link field within its bit domain as well as identity,
+content and scope, and use the same known-count reservation as the live producer.
+These are codec field-domain fixtures, not asserted realizable UI/resource
+references. The32-run permutation counterexample is recorded too. Codec bytes,
+live workload and interpretation rules are unchanged; no timing is introduced.
