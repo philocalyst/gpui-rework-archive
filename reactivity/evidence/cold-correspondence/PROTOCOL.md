@@ -42,3 +42,21 @@ No new timing campaign. First decision: encoded storage/rewrite costs versus
 unchanged total producer work; determine whether the next representation step is
 justified. GPU emission extents and incremental dependency/resource closure stay
 subsequent work. All changes remain local.
+
+Implementation endpoint clarification before execution: stores are logical source
+versions in the existing window namespace, not presentation tokens. Unit stale/
+foreign checks do not qualify GPU publication authority. Relative-parent fields
+are converted using logical preorder rank; identity correspondence is accepted
+only from the live reconciler's surviving previous_index. Old codec images remain
+retained while a new image is built. Cross-codec verification scans the encoded
+images after completion and is explicitly charged as validation, not discovery.
+Known final draft length reserves raw payload and block-directory capacity before
+the same reconciliation loop emits records. No post-hoc snapshot is used.
+
+Fixed block32 storage deliberately keeps the ordinal-block rewrite comparison:
+a shifted block boundary may require rewriting most blocks even if only six
+relative-parent tuples change. Dirty encoded bytes are a hypothetical required
+payload comparison, not actual staged/uploaded bytes. All new encoded producer
+bytes are counted separately. The raw mirror and three alternative stores are
+all live in this diagnostic build; complete production memory reduction cannot
+be claimed while that shadow exists.

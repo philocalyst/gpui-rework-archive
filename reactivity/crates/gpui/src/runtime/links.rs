@@ -8,6 +8,33 @@ const _: () = assert!(BITS * 3 <= u64::BITS && MAX_NODES as u64 <= MASK);
 
 pub(super) struct NodeLinks(u64);
 impl NodeLinks {
+    #[cfg(test)]
+    pub(super) fn word(&self) -> u64 {
+        self.0
+    }
+    #[cfg(test)]
+    pub(super) fn relative_word(word: u64, index: usize) -> u64 {
+        let parent = word & MASK;
+        let delta = if parent == 0 {
+            0
+        } else {
+            let parent = parent as usize - 1;
+            assert!(parent < index);
+            (index - parent) as u64
+        };
+        (word & !MASK) | delta
+    }
+    #[cfg(test)]
+    pub(super) fn absolute_word(word: u64, index: usize) -> u64 {
+        let delta = (word & MASK) as usize;
+        let parent = if delta == 0 {
+            0
+        } else {
+            assert!(delta <= index);
+            (index - delta + 1) as u64
+        };
+        (word & !MASK) | parent
+    }
     pub(super) fn new(parent: Option<usize>, ordinal: u32, handler: Option<usize>) -> Self {
         assert!((ordinal as usize) < MAX_NODES, "admitted sibling ordinal");
         Self(

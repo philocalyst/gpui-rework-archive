@@ -1186,10 +1186,14 @@ impl SurfaceDamage {
     }
 }
 #[cfg(test)]
+mod cold_correspondence;
+#[cfg(test)]
 mod structural_trace;
 struct Runtime<M> {
     #[cfg(test)]
     structural_work: structural_trace::Work,
+    #[cfg(test)]
+    cold_correspondence: cold_correspondence::Trials,
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
@@ -1439,6 +1443,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             next_identity: 1,
             #[cfg(test)]
             structural_work: Default::default(),
+            #[cfg(test)]
+            cold_correspondence: Default::default(),
             focused: None,
             sites,
             overrides: Overrides::default(),
@@ -2081,6 +2087,9 @@ impl<M: View + 'static> Runtime<M> {
         readers: &dyn crate::reader::ReaderValues,
         mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
+        #[cfg(test)]
+        self.cold_correspondence
+            .begin(self.sites.namespace().get(), self.source_epoch);
         let mut text_only = !mount && property_changed.is_none() && self.can_record_text_change();
         let mut changed_text = None;
         let reuse_identities = self.logical_valid;
@@ -2375,6 +2384,8 @@ impl<M: View + 'static> Runtime<M> {
             Vec::with_capacity(drafts.iter().filter(|draft| draft.text.is_some()).count());
         let mut changed = 0;
         let mut background_cursor = background_drafts.iter().peekable();
+        #[cfg(test)]
+        self.cold_correspondence.reserve(drafts.len());
         for (index, draft) in drafts.into_iter().enumerate() {
             #[cfg(test)]
             {
@@ -2446,6 +2457,8 @@ impl<M: View + 'static> Runtime<M> {
                 self.structural_work.relocated +=
                     usize::from(previous.is_some() && previous_index != Some(index));
             }
+            #[cfg(test)]
+            let cold_old_rank = previous.as_ref().map(|_| previous_index.unwrap());
             let previous_handler = previous.as_ref().and_then(Node::handler_slot);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
@@ -2630,6 +2643,17 @@ impl<M: View + 'static> Runtime<M> {
                 property_changed = None;
             }
             changed += usize::from(node_changed);
+            #[cfg(test)]
+            self.cold_correspondence.push(
+                index,
+                cold_old_rank,
+                cold_correspondence::Wire([
+                    node.identity(),
+                    node.links.word(),
+                    u64::from(node.content.0),
+                    u64::from(node.component_scope),
+                ]),
+            );
             nodes.push(node);
         }
         #[cfg(test)]
@@ -2876,6 +2900,8 @@ impl<M: View + 'static> Runtime<M> {
                 None
             };
         }
+        #[cfg(test)]
+        self.cold_correspondence.finish();
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
