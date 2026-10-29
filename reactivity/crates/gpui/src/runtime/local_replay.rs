@@ -164,7 +164,7 @@ impl<M: View + 'static> Runtime<M> {
             end,
             input,
         } = cert.seed;
-        if field.scope() != scope
+        if field.local_scope() != scope
             || !self.logical_valid
             || self.dirty
             || self.rebuild_layout
@@ -406,7 +406,7 @@ impl<M: View + 'static> Runtime<M> {
                     depth += 1;
                 } else {
                     let mut preceding = index - 1;
-                    while nodes[preceding].parent() != nodes[index].parent() {
+                    while nodes[preceding].parent().index() != nodes[index].parent().index() {
                         preceding = nodes[preceding]
                             .parent()
                             .index()

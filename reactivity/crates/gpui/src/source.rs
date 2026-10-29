@@ -26,6 +26,10 @@ impl FieldId {
     pub const fn get(self) -> u32 {
         ((self.0.get() - 1) >> 32) as u32
     }
+    #[cfg(feature = "component-replay-lab")]
+    pub(crate) const fn local_scope(self) -> u32 {
+        self.scope()
+    }
     const fn scope(self) -> u32 {
         (self.0.get() - 1) as u32
     }
@@ -631,7 +635,7 @@ trait ComponentSchema<M> {
     ) -> Result<Revision, TextEditError>;
     fn scan(&self, model: &M, output: &mut Vec<(FieldId, Revision)>);
 }
-pub(crate) struct ComponentEntry<M, C> {
+pub(crate) struct ComponentEntry<M: 'static, C> {
     pub(crate) component: Component<M, C>,
     pub(crate) sources: Sources<C>,
     start: u32,
@@ -640,7 +644,7 @@ pub(crate) struct ComponentEntry<M, C> {
     #[cfg(feature = "component-replay-lab")]
     local_replay: Option<&'static dyn crate::local_component::Replay<M>>,
 }
-impl<M, C> ComponentEntry<M, C> {
+impl<M: 'static, C> ComponentEntry<M, C> {
     pub(crate) fn qualify_scope(&self, scope: u32) -> u32 {
         self.start + scope
     }

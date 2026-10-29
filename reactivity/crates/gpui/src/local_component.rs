@@ -49,7 +49,7 @@ impl<P> RootRecipe<P> {
             _ => None,
         };
         if let Some(width) = self.value(parent) {
-            crate::property::WIDTH.validate(&width)?;
+            crate::style_port::Scalar::Number(width).admit(crate::property::PropertyId::Width)?;
         }
         Ok(revision)
     }
