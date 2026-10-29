@@ -1,0 +1,1449 @@
+{
+  "verdict": "TRACE ONLY; existing authority seam identified; no optimization/adoption/timing",
+  "frames": [
+    {
+      "case": "keyed-4",
+      "operation": "initial",
+      "nodes": 15,
+      "work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 15,
+        "layout_cheap_answers": 21,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 15,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 15,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 0,
+        "survived": 0
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": null,
+      "changed_pixel_bytes": null,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 256,
+        "slots": 15,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 14,
+        "children_capacity_bytes": 448,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 6840,
+        "row_visits": 15,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "capture_allocation": {
+          "bytes": 7288,
+          "count": 8,
+          "peak_delta": 7288,
+          "retained_delta": 7288
+        },
+        "comparison_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "report_allocation": {
+          "bytes": 161446,
+          "count": 848,
+          "peak_delta": 79390,
+          "retained_delta": 40918
+        }
+      }
+    },
+    {
+      "case": "keyed-4",
+      "operation": "insert",
+      "nodes": 17,
+      "work": {
+        "identity_index_input": 17,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 17,
+        "layout_cheap_answers": 23,
+        "layout_computed_answers": 11,
+        "layout_computes": 1,
+        "layout_discarded_handles": 15,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 17,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 2,
+        "paint_nodes": 17,
+        "reconciled": 17,
+        "relocated": 10,
+        "survived": 15
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        10
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 10,
+        "allocated_caches": 8,
+        "cache_heap_bytes": 2880,
+        "lane_capacity_bytes": 3616,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 512,
+        "slots": 17,
+        "topology_bytes": 896
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 16,
+        "children_capacity_bytes": 512,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 7752,
+        "row_visits": 17,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 73225,
+          "count": 204,
+          "peak_delta": 16700,
+          "retained_delta": 7063
+        },
+        "capture_allocation": {
+          "bytes": 8264,
+          "count": 9,
+          "peak_delta": 8264,
+          "retained_delta": 8264
+        },
+        "comparison_allocation": {
+          "bytes": 88391,
+          "count": 780,
+          "peak_delta": 53359,
+          "retained_delta": 26774
+        },
+        "report_allocation": {
+          "bytes": 182738,
+          "count": 959,
+          "peak_delta": 89706,
+          "retained_delta": 46076
+        }
+      }
+    },
+    {
+      "case": "keyed-4",
+      "operation": "remove",
+      "nodes": 15,
+      "work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 15,
+        "layout_cheap_answers": 21,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 17,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 15,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 10,
+        "survived": 15
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        10
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 512,
+        "slots": 15,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 14,
+        "children_capacity_bytes": 448,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 6840,
+        "row_visits": 15,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 62926,
+          "count": 192,
+          "peak_delta": 13724,
+          "retained_delta": -1954
+        },
+        "capture_allocation": {
+          "bytes": 7288,
+          "count": 8,
+          "peak_delta": 7288,
+          "retained_delta": 7288
+        },
+        "comparison_allocation": {
+          "bytes": 88407,
+          "count": 780,
+          "peak_delta": 53359,
+          "retained_delta": 26774
+        },
+        "report_allocation": {
+          "bytes": 161446,
+          "count": 848,
+          "peak_delta": 79390,
+          "retained_delta": 40918
+        }
+      }
+    },
+    {
+      "case": "keyed-4",
+      "operation": "move",
+      "nodes": 15,
+      "work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 15,
+        "layout_cheap_answers": 21,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 15,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 15,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 6,
+        "survived": 15
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": false,
+      "changed_pixel_bytes": 704,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 512,
+        "slots": 15,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 14,
+        "children_capacity_bytes": 448,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 6840,
+        "row_visits": 15,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 63287,
+          "count": 192,
+          "peak_delta": 13590,
+          "retained_delta": -111
+        },
+        "capture_allocation": {
+          "bytes": 7288,
+          "count": 8,
+          "peak_delta": 7288,
+          "retained_delta": 7288
+        },
+        "comparison_allocation": {
+          "bytes": 88399,
+          "count": 780,
+          "peak_delta": 53383,
+          "retained_delta": 26786
+        },
+        "report_allocation": {
+          "bytes": 161532,
+          "count": 848,
+          "peak_delta": 79476,
+          "retained_delta": 40961
+        }
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "initial",
+      "nodes": 267,
+      "work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 267,
+        "layout_cheap_answers": 777,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 267,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 267,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 0,
+        "survived": 0
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": null,
+      "changed_pixel_bytes": null,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 57856,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 8192,
+        "slots": 267,
+        "topology_bytes": 14336
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 266,
+        "children_capacity_bytes": 4480,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 121752,
+        "row_visits": 267,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "capture_allocation": {
+          "bytes": 130264,
+          "count": 14,
+          "peak_delta": 128280,
+          "retained_delta": 126232
+        },
+        "comparison_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "report_allocation": {
+          "bytes": 2844086,
+          "count": 14456,
+          "peak_delta": 1379054,
+          "retained_delta": 690750
+        }
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "insert",
+      "nodes": 269,
+      "work": {
+        "identity_index_input": 269,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 269,
+        "layout_cheap_answers": 779,
+        "layout_computed_answers": 11,
+        "layout_computes": 1,
+        "layout_discarded_handles": 267,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 269,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 2,
+        "paint_nodes": 269,
+        "reconciled": 269,
+        "relocated": 262,
+        "survived": 267
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        10
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 10,
+        "allocated_caches": 8,
+        "cache_heap_bytes": 2880,
+        "lane_capacity_bytes": 57856,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 8192,
+        "slots": 269,
+        "topology_bytes": 14336
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 268,
+        "children_capacity_bytes": 4544,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 122664,
+        "row_visits": 269,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 581024,
+          "count": 272,
+          "peak_delta": 183344,
+          "retained_delta": 52783
+        },
+        "capture_allocation": {
+          "bytes": 131240,
+          "count": 15,
+          "peak_delta": 129256,
+          "retained_delta": 127208
+        },
+        "comparison_allocation": {
+          "bytes": 1569687,
+          "count": 13437,
+          "peak_delta": 927983,
+          "retained_delta": 452618
+        },
+        "report_allocation": {
+          "bytes": 2865398,
+          "count": 14567,
+          "peak_delta": 1389390,
+          "retained_delta": 695918
+        }
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "remove",
+      "nodes": 267,
+      "work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 267,
+        "layout_cheap_answers": 777,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 269,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 267,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 262,
+        "survived": 267
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        10
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 57856,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 8192,
+        "slots": 267,
+        "topology_bytes": 14336
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 266,
+        "children_capacity_bytes": 4480,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 121752,
+        "row_visits": 267,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 583518,
+          "count": 268,
+          "peak_delta": 183288,
+          "retained_delta": 8143
+        },
+        "capture_allocation": {
+          "bytes": 130264,
+          "count": 14,
+          "peak_delta": 128280,
+          "retained_delta": 126232
+        },
+        "comparison_allocation": {
+          "bytes": 1569735,
+          "count": 13437,
+          "peak_delta": 927983,
+          "retained_delta": 452618
+        },
+        "report_allocation": {
+          "bytes": 2844086,
+          "count": 14456,
+          "peak_delta": 1379054,
+          "retained_delta": 690750
+        }
+      }
+    },
+    {
+      "case": "keyed-256",
+      "operation": "move",
+      "nodes": 267,
+      "work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 267,
+        "layout_cheap_answers": 777,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 267,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 267,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 6,
+        "survived": 267
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": false,
+      "changed_pixel_bytes": 704,
+      "storage": {
+        "absolute_contexts": 1,
+        "active_styles": 9,
+        "allocated_caches": 7,
+        "cache_heap_bytes": 2520,
+        "lane_capacity_bytes": 57856,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 8192,
+        "slots": 267,
+        "topology_bytes": 14336
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 266,
+        "children_capacity_bytes": 4480,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 121752,
+        "row_visits": 267,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 586496,
+          "count": 255,
+          "peak_delta": 183296,
+          "retained_delta": -1216
+        },
+        "capture_allocation": {
+          "bytes": 130264,
+          "count": 14,
+          "peak_delta": 128280,
+          "retained_delta": 126232
+        },
+        "comparison_allocation": {
+          "bytes": 1569661,
+          "count": 13437,
+          "peak_delta": 927973,
+          "retained_delta": 452613
+        },
+        "report_allocation": {
+          "bytes": 2844086,
+          "count": 14456,
+          "peak_delta": 1379054,
+          "retained_delta": 690750
+        }
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "initial",
+      "nodes": 12,
+      "work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 3,
+        "layout_changed_writes": 12,
+        "layout_cheap_answers": 24,
+        "layout_computed_answers": 7,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 12,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 12,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 0,
+        "survived": 0
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": null,
+      "changed_pixel_bytes": null,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 6,
+        "allocated_caches": 4,
+        "cache_heap_bytes": 1440,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 256,
+        "slots": 12,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 11,
+        "children_capacity_bytes": 256,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 5472,
+        "row_visits": 12,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "capture_allocation": {
+          "bytes": 5728,
+          "count": 5,
+          "peak_delta": 5728,
+          "retained_delta": 5728
+        },
+        "comparison_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "report_allocation": {
+          "bytes": 129504,
+          "count": 677,
+          "peak_delta": 63912,
+          "retained_delta": 33179
+        }
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "insert",
+      "nodes": 13,
+      "work": {
+        "identity_index_input": 13,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 3,
+        "layout_changed_writes": 13,
+        "layout_cheap_answers": 27,
+        "layout_computed_answers": 7,
+        "layout_computes": 1,
+        "layout_discarded_handles": 12,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 13,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 4,
+        "paint_nodes": 13,
+        "reconciled": 13,
+        "relocated": 6,
+        "survived": 9
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        3,
+        7
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 6,
+        "allocated_caches": 4,
+        "cache_heap_bytes": 1440,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 256,
+        "slots": 13,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 12,
+        "children_capacity_bytes": 256,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 5928,
+        "row_visits": 13,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 40139,
+          "count": 140,
+          "peak_delta": 10646,
+          "retained_delta": 3037
+        },
+        "capture_allocation": {
+          "bytes": 6184,
+          "count": 5,
+          "peak_delta": 6184,
+          "retained_delta": 6184
+        },
+        "comparison_allocation": {
+          "bytes": 54739,
+          "count": 480,
+          "peak_delta": 33419,
+          "retained_delta": 16708
+        },
+        "report_allocation": {
+          "bytes": 140140,
+          "count": 731,
+          "peak_delta": 69060,
+          "retained_delta": 35753
+        }
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "remove",
+      "nodes": 12,
+      "work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 3,
+        "layout_changed_writes": 12,
+        "layout_cheap_answers": 24,
+        "layout_computed_answers": 7,
+        "layout_computes": 1,
+        "layout_discarded_handles": 13,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 12,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 2,
+        "layout_style_calls": 0,
+        "minted": 3,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 6,
+        "survived": 9
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [
+        2,
+        3,
+        7
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 1408,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 6,
+        "allocated_caches": 4,
+        "cache_heap_bytes": 1440,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 256,
+        "slots": 12,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 11,
+        "children_capacity_bytes": 256,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 5472,
+        "row_visits": 12,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 41348,
+          "count": 140,
+          "peak_delta": 10459,
+          "retained_delta": 1059
+        },
+        "capture_allocation": {
+          "bytes": 5728,
+          "count": 5,
+          "peak_delta": 5728,
+          "retained_delta": 5728
+        },
+        "comparison_allocation": {
+          "bytes": 54747,
+          "count": 480,
+          "peak_delta": 33419,
+          "retained_delta": 16708
+        },
+        "report_allocation": {
+          "bytes": 129504,
+          "count": 677,
+          "peak_delta": 63912,
+          "retained_delta": 33179
+        }
+      }
+    },
+    {
+      "case": "unkeyed-4",
+      "operation": "move",
+      "nodes": 12,
+      "work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 0,
+        "layout_changed_writes": 0,
+        "layout_cheap_answers": 0,
+        "layout_computed_answers": 0,
+        "layout_computes": 0,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 0,
+        "layout_insertions": 0,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 0,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 0,
+        "survived": 12
+      },
+      "surviving_handles": 12,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 704,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 6,
+        "allocated_caches": 4,
+        "cache_heap_bytes": 1440,
+        "lane_capacity_bytes": 1808,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 256,
+        "slots": 12,
+        "topology_bytes": 448
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 11,
+        "children_capacity_bytes": 256,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 5472,
+        "row_visits": 12,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 28836,
+          "count": 90,
+          "peak_delta": 10168,
+          "retained_delta": -80
+        },
+        "capture_allocation": {
+          "bytes": 5728,
+          "count": 5,
+          "peak_delta": 5728,
+          "retained_delta": 5728
+        },
+        "comparison_allocation": {
+          "bytes": 71533,
+          "count": 630,
+          "peak_delta": 43405,
+          "retained_delta": 21749
+        },
+        "report_allocation": {
+          "bytes": 129504,
+          "count": 677,
+          "peak_delta": 63912,
+          "retained_delta": 33179
+        }
+      }
+    },
+    {
+      "case": "resources",
+      "operation": "initial",
+      "nodes": 3,
+      "work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_cached_answers": 0,
+        "layout_changed_writes": 3,
+        "layout_cheap_answers": 0,
+        "layout_computed_answers": 5,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 3,
+        "layout_measure_queries": 4,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 3,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 0
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": null,
+      "changed_pixel_bytes": null,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 3,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 3,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 2,
+        "children_capacity_bytes": 64,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1368,
+        "row_visits": 3,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "capture_allocation": {
+          "bytes": 1432,
+          "count": 2,
+          "peak_delta": 1432,
+          "retained_delta": 1432
+        },
+        "comparison_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "report_allocation": {
+          "bytes": 33856,
+          "count": 182,
+          "peak_delta": 17656,
+          "retained_delta": 10051
+        }
+      }
+    },
+    {
+      "case": "resources",
+      "operation": "replace",
+      "nodes": 3,
+      "work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 1,
+        "layout_cheap_answers": 0,
+        "layout_computed_answers": 4,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 2,
+        "layout_full_rebuilds": 0,
+        "layout_insertions": 0,
+        "layout_measure_queries": 4,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 0,
+        "layout_style_calls": 2,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "surviving_handles": 3,
+      "own_core_style_equal_layout_changed": [
+        2
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 905,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 3,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 3,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 2,
+        "children_capacity_bytes": 64,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1368,
+        "row_visits": 3,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 8996,
+          "count": 92,
+          "peak_delta": 3544,
+          "retained_delta": 1154
+        },
+        "capture_allocation": {
+          "bytes": 1432,
+          "count": 2,
+          "peak_delta": 1432,
+          "retained_delta": 1432
+        },
+        "comparison_allocation": {
+          "bytes": 18963,
+          "count": 172,
+          "peak_delta": 12075,
+          "retained_delta": 6620
+        },
+        "report_allocation": {
+          "bytes": 33858,
+          "count": 182,
+          "peak_delta": 17658,
+          "retained_delta": 10052
+        }
+      }
+    },
+    {
+      "case": "resources",
+      "operation": "return",
+      "nodes": 3,
+      "work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 1,
+        "layout_cheap_answers": 0,
+        "layout_computed_answers": 4,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 2,
+        "layout_full_rebuilds": 0,
+        "layout_insertions": 0,
+        "layout_measure_queries": 4,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 0,
+        "layout_style_calls": 2,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "surviving_handles": 3,
+      "own_core_style_equal_layout_changed": [
+        2
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 905,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 3,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 3,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 2,
+        "children_capacity_bytes": 64,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1368,
+        "row_visits": 3,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 8898,
+          "count": 87,
+          "peak_delta": 3326,
+          "retained_delta": 456
+        },
+        "capture_allocation": {
+          "bytes": 1432,
+          "count": 2,
+          "peak_delta": 1432,
+          "retained_delta": 1432
+        },
+        "comparison_allocation": {
+          "bytes": 18963,
+          "count": 172,
+          "peak_delta": 12075,
+          "retained_delta": 6620
+        },
+        "report_allocation": {
+          "bytes": 33856,
+          "count": 182,
+          "peak_delta": 17656,
+          "retained_delta": 10051
+        }
+      }
+    },
+    {
+      "case": "constraints",
+      "operation": "initial",
+      "nodes": 4,
+      "work": {
+        "identity_index_input": 4,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 4,
+        "layout_changed_writes": 4,
+        "layout_cheap_answers": 2,
+        "layout_computed_answers": 5,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 4,
+        "layout_measure_queries": 2,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 4,
+        "paint_nodes": 4,
+        "reconciled": 4,
+        "relocated": 0,
+        "survived": 0
+      },
+      "surviving_handles": 0,
+      "own_core_style_equal_layout_changed": [],
+      "projected_old_handle_order_sorted": null,
+      "changed_pixel_bytes": null,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 4,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 4,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 3,
+        "children_capacity_bytes": 128,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1824,
+        "row_visits": 4,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "capture_allocation": {
+          "bytes": 1952,
+          "count": 3,
+          "peak_delta": 1952,
+          "retained_delta": 1952
+        },
+        "comparison_allocation": {
+          "bytes": 0,
+          "count": 0,
+          "peak_delta": 0,
+          "retained_delta": 0
+        },
+        "report_allocation": {
+          "bytes": 44464,
+          "count": 239,
+          "peak_delta": 22776,
+          "retained_delta": 12611
+        }
+      }
+    },
+    {
+      "case": "constraints",
+      "operation": "narrow",
+      "nodes": 4,
+      "work": {
+        "identity_index_input": 4,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 5,
+        "layout_changed_writes": 4,
+        "layout_cheap_answers": 2,
+        "layout_computed_answers": 5,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 1,
+        "layout_full_rebuilds": 0,
+        "layout_insertions": 0,
+        "layout_measure_queries": 2,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 0,
+        "layout_style_calls": 1,
+        "minted": 0,
+        "paint_nodes": 4,
+        "reconciled": 4,
+        "relocated": 0,
+        "survived": 4
+      },
+      "surviving_handles": 4,
+      "own_core_style_equal_layout_changed": [
+        1,
+        3,
+        4
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 2544,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 4,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 4,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 3,
+        "children_capacity_bytes": 128,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1824,
+        "row_visits": 4,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 20740,
+          "count": 111,
+          "peak_delta": 8996,
+          "retained_delta": 5588
+        },
+        "capture_allocation": {
+          "bytes": 1952,
+          "count": 3,
+          "peak_delta": 1952,
+          "retained_delta": 1952
+        },
+        "comparison_allocation": {
+          "bytes": 24647,
+          "count": 222,
+          "peak_delta": 15463,
+          "retained_delta": 8330
+        },
+        "report_allocation": {
+          "bytes": 44474,
+          "count": 239,
+          "peak_delta": 22786,
+          "retained_delta": 12616
+        }
+      }
+    },
+    {
+      "case": "constraints",
+      "operation": "return",
+      "nodes": 4,
+      "work": {
+        "identity_index_input": 4,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 6,
+        "layout_changed_writes": 4,
+        "layout_cheap_answers": 2,
+        "layout_computed_answers": 4,
+        "layout_computes": 1,
+        "layout_discarded_handles": 0,
+        "layout_explicit_dirty_calls": 1,
+        "layout_full_rebuilds": 0,
+        "layout_insertions": 0,
+        "layout_measure_queries": 1,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 0,
+        "layout_style_calls": 1,
+        "minted": 0,
+        "paint_nodes": 4,
+        "reconciled": 4,
+        "relocated": 0,
+        "survived": 4
+      },
+      "surviving_handles": 4,
+      "own_core_style_equal_layout_changed": [
+        1,
+        3,
+        4
+      ],
+      "projected_old_handle_order_sorted": true,
+      "changed_pixel_bytes": 2544,
+      "storage": {
+        "absolute_contexts": 0,
+        "active_styles": 4,
+        "allocated_caches": 3,
+        "cache_heap_bytes": 1080,
+        "lane_capacity_bytes": 456,
+        "layout_header_bytes": 664,
+        "runtime_handle_capacity_bytes": 64,
+        "slots": 4,
+        "topology_bytes": 112
+      },
+      "diagnostic": {
+        "capture_header_bytes": 112,
+        "child_edges": 3,
+        "children_capacity_bytes": 128,
+        "exclusions": "Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes",
+        "row_bytes": 456,
+        "row_capacity_bytes": 1824,
+        "row_visits": 4,
+        "storage_cache_scan_passes": 2
+      },
+      "allocations": {
+        "source_allocation": {
+          "bytes": 12112,
+          "count": 94,
+          "peak_delta": 4576,
+          "retained_delta": 380
+        },
+        "capture_allocation": {
+          "bytes": 1952,
+          "count": 3,
+          "peak_delta": 1952,
+          "retained_delta": 1952
+        },
+        "comparison_allocation": {
+          "bytes": 24647,
+          "count": 222,
+          "peak_delta": 15463,
+          "retained_delta": 8330
+        },
+        "report_allocation": {
+          "bytes": 44464,
+          "count": 239,
+          "peak_delta": 22776,
+          "retained_delta": 12611
+        }
+      }
+    }
+  ],
+  "requirements": {
+    "semantic_to_layout_handle_retention": "existing on unchanged topology; wholesale replacement on changed ordered identities",
+    "measurement_route": "fresh preorder handles sorted; projected survivor reorder breaks binary-search assumption",
+    "cache_and_dependency_authority": "existing scheduler/invalidation; own core style or handle equality insufficient",
+    "generic_structural_journal": "missing",
+    "mixed_cpu_gpu_parity": "FAILED inherited; not rerun by fresh CPU diagnostic",
+    "speedup": "unmeasured; previous software endpoint wait-dominated"
+  }
+}

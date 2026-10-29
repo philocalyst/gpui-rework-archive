@@ -1,0 +1,365 @@
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index b4bd7a68fe..3d8864c410 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -2237,3 +2237,6 @@ mod structural_trace_tests;
+ 
+ #[cfg(test)]
+ mod packet_relocation_tests;
++
++#[cfg(test)]
++mod layout_handle_tests;
+diff --git a/reactivity/crates/gpui/src/native/layout_handle_tests.rs b/reactivity/crates/gpui/src/native/layout_handle_tests.rs
+new file mode 100644
+index 0000000000..260ddf249c
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/layout_handle_tests.rs
+@@ -0,0 +1,197 @@
++//! Raw producer diagnostics only. No retained-layout optimization or GPU parity claim.
++use super::structural_trace_tests::Tree;
++use super::*;
++use crate::prelude::*;
++use serde_json::{Value, json};
++
++fn allocation(a: allocation_counter::AllocationInfo) -> Value {
++    json!({"bytes":a.bytes_total,"count":a.count_total,"retained_delta":a.bytes_current,"peak_delta":a.bytes_max})
++}
++fn run<M: View + 'static>(
++    case: &str,
++    operations: &[&str],
++    build: impl Fn(usize) -> M,
++    update: impl Fn(&mut Win<M>, usize),
++    output: &std::path::Path,
++) -> Value {
++    let mut owner = Win::with_size(build(0), 64, 64).unwrap();
++    let mut previous = None;
++    let mut previous_pixels = None;
++    let mut frames = Vec::new();
++    for (step, &operation) in operations.iter().enumerate() {
++        if step != 0 {
++            owner.structural_reset();
++        }
++        let source = allocation_counter::measure(|| {
++            if step != 0 {
++                update(&mut owner, step);
++            }
++        });
++        let mut captured = None;
++        let capture_allocation = allocation_counter::measure(|| {
++            captured = Some(owner.layout_capture());
++        });
++        let captured = captured.unwrap();
++        let mut comparison = None;
++        let comparison_allocation = allocation_counter::measure(|| {
++            comparison = previous.as_ref().map(|old| captured.compare(old));
++        });
++        let mut capture_report = None;
++        let report_allocation = allocation_counter::measure(|| {
++            capture_report = Some(captured.report());
++        });
++        let actual = owner.with_pixels(|p, _, _| p.to_vec()).unwrap();
++        let mut fresh = Win::with_size(build(step), 64, 64).unwrap();
++        let expected = fresh.with_pixels(|p, _, _| p.to_vec()).unwrap();
++        let wrong = actual.iter().zip(&expected).filter(|(a, b)| a != b).count();
++        let changed = previous_pixels
++            .as_ref()
++            .map(|old: &Vec<u8>| old.iter().zip(&actual).filter(|(a, b)| a != b).count());
++        std::fs::write(
++            output.join(format!("{case}-{operation}.actual.rgba")),
++            &actual,
++        )
++        .unwrap();
++        std::fs::write(
++            output.join(format!("{case}-{operation}.fresh.rgba")),
++            &expected,
++        )
++        .unwrap();
++        frames.push(json!({"operation":operation,"source_allocation":allocation(source),"capture_allocation":allocation(capture_allocation),"comparison_allocation":allocation(comparison_allocation),"report_allocation":allocation(report_allocation),"layout":capture_report,"comparison":comparison,"producer":owner.structural_observation(),"fresh_cpu_wrong_bytes":wrong,"changed_pixel_bytes":changed}));
++        assert_eq!(
++            wrong, 0,
++            "fresh full CPU producer oracle; no GPU parity inference"
++        );
++        previous = Some(captured);
++        previous_pixels = Some(actual);
++    }
++    json!({"case":case,"frames":frames,"scope":"diagnostic full captures and comparisons outside Source; original producer/layout/render unchanged"})
++}
++struct Resources {
++    next: Signal<bool>,
++    images: [crate::Image; 2],
++}
++impl Resources {
++    const NEXT: Source<Self, bool> =
++        Source::new(FieldId::new(1), "next", |s| &s.next, |s| &mut s.next);
++    fn new(next: bool) -> Self {
++        let image = |color: [u8; 4]| {
++            crate::Image::rgba8(
++                2,
++                2,
++                crate::ImageProfile::Srgb,
++                crate::AlphaMode::Straight,
++                color.repeat(4).into_boxed_slice(),
++            )
++            .unwrap()
++        };
++        Self {
++            next: Signal::new(next),
++            images: [image([255, 0, 0, 255]), image([0, 0, 255, 255])],
++        }
++    }
++}
++impl View for Resources {
++    fn sources() -> Sources<Self> {
++        Sources::new().field(Self::NEXT)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text(if *self.next { "nn" } else { "mm" })
++                .font_size(12)
++                .w(48)
++                .h(16),
++            crate::image(&self.images[usize::from(*self.next)])
++                .w(16)
++                .h(16),
++        ))
++        .size(64)
++        .bg(Color::WHITE)
++        .rounded(4.0)
++        .clip()
++        .transform(Affine::translation(1., 0.))
++    }
++}
++struct Constrained {
++    narrow: Signal<bool>,
++}
++impl Constrained {
++    const NARROW: Source<Self, bool> =
++        Source::new(FieldId::new(1), "narrow", |s| &s.narrow, |s| &mut s.narrow);
++}
++impl View for Constrained {
++    fn sources() -> Sources<Self> {
++        Sources::new().field(Self::NARROW)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            column((text("alpha beta gamma delta").font_size(12),)).w(if *self.narrow {
++                24
++            } else {
++                56
++            }),
++            div().w(12).h(8).bg(Color::rgb(0, 0, 255)),
++        ))
++        .size(64)
++        .bg(Color::WHITE)
++        .clip()
++    }
++}
++#[test]
++#[ignore = "explicit layout handle authority trace"]
++fn live_layout_handles() {
++    let output = std::path::PathBuf::from(std::env::var("GPUI_LAYOUT_HANDLE_OUTPUT").unwrap());
++    std::fs::create_dir(&output).unwrap();
++    let mut cases = Vec::new();
++    for (keyed, fillers) in [(true, 4), (true, 256), (false, 4)] {
++        let keys = |i| match i {
++            1 => vec![1, 9, 2, 3],
++            3 => vec![3, 1, 2],
++            _ => vec![1, 2, 3],
++        };
++        cases.push(run(
++            &format!("{}-{fillers}", if keyed { "keyed" } else { "unkeyed" }),
++            &["initial", "insert", "remove", "move"],
++            |i| Tree::new(keyed, fillers, keys(i)),
++            |owner, i| {
++                owner.set(Tree::KEYS, keys(i)).unwrap();
++            },
++            &output,
++        ));
++        std::fs::write(
++            output.join("trace.json"),
++            serde_json::to_vec_pretty(&cases).unwrap(),
++        )
++        .unwrap();
++    }
++    cases.push(run(
++        "resources",
++        &["initial", "replace", "return"],
++        |i| Resources::new(i == 1),
++        |owner, i| {
++            owner.set(Resources::NEXT, i == 1).unwrap();
++        },
++        &output,
++    ));
++    std::fs::write(
++        output.join("trace.json"),
++        serde_json::to_vec_pretty(&cases).unwrap(),
++    )
++    .unwrap();
++    cases.push(run(
++        "constraints",
++        &["initial", "narrow", "return"],
++        |i| Constrained {
++            narrow: Signal::new(i == 1),
++        },
++        |owner, i| {
++            owner.set(Constrained::NARROW, i == 1).unwrap();
++        },
++        &output,
++    ));
++    std::fs::write(
++        output.join("trace.json"),
++        serde_json::to_vec_pretty(&cases).unwrap(),
++    )
++    .unwrap();
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index dba5840dc6..112927bef6 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3314,6 +3314,14 @@ impl<M: View + 'static> Runtime<M> {
+             .composition_preview()
+             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
+         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
++            #[cfg(test)]
++            {
++                self.structural_work.layout_full_rebuilds += 1;
++                self.structural_work.layout_rebuild_reason_bits |= u8::from(self.rebuild_layout)
++                    | (u8::from(self.topology_changed) << 1)
++                    | (u8::from(self.layout.is_poisoned()) << 2);
++                self.structural_work.layout_discarded_handles += self.layout_nodes.len();
++            }
+             self.layout = LayoutTree::new();
+             self.layout_nodes.clear();
+             for (index, node) in self.nodes.iter().enumerate() {
+@@ -3351,6 +3359,10 @@ impl<M: View + 'static> Runtime<M> {
+             // retained parent change must refresh the child's grow/basis too,
+             // including inspector contributions applied before description.
+             for (&key, state) in &self.viewports {
++                #[cfg(test)]
++                {
++                    self.structural_work.layout_parent_flow_checks += 1;
++                }
+                 let identity = state.identity(key);
+                 let index = self.by_identity.required(identity);
+                 if self.nodes[index].parent().index().is_some_and(|parent| {
+@@ -3360,6 +3372,11 @@ impl<M: View + 'static> Runtime<M> {
+                 }
+             }
+             for identity in &self.layout_dirty {
++                #[cfg(test)]
++                {
++                    self.structural_work.layout_style_calls += 1;
++                    self.structural_work.layout_explicit_dirty_calls += 1;
++                }
+                 let index = self.by_identity.required(*identity);
+                 let id = self.layout_nodes[index];
+                 self.layout.set_style(
+@@ -3431,6 +3448,17 @@ impl<M: View + 'static> Runtime<M> {
+             &mut measure,
+         )?;
+         let after = self.layout.stats();
++        #[cfg(test)]
++        {
++            let work = &mut self.structural_work;
++            work.layout_computes += after.computes - before.computes;
++            work.layout_computed_answers += after.computed_answers - before.computed_answers;
++            work.layout_cached_answers += after.cached_answers - before.cached_answers;
++            work.layout_cheap_answers += after.cheap_answers - before.cheap_answers;
++            work.layout_measure_queries += after.measure_calls - before.measure_calls;
++            work.layout_changed_writes +=
++                after.changed_layout_writes - before.changed_layout_writes;
++        }
+         self.counters.layout_runs += after.computes - before.computes;
+         self.counters.measure_calls += after.measure_calls - before.measure_calls;
+         if let Some(error) = failure {
+diff --git a/reactivity/crates/gpui/src/runtime/structural_trace.rs b/reactivity/crates/gpui/src/runtime/structural_trace.rs
+index ef74a72998..ed19c40b9b 100644
+--- a/reactivity/crates/gpui/src/runtime/structural_trace.rs
++++ b/reactivity/crates/gpui/src/runtime/structural_trace.rs
+@@ -9,6 +9,18 @@ pub(super) struct Work {
+     pub relocated: usize,
+     pub identity_index_input: usize,
+     pub layout_insertions: usize,
++    pub layout_full_rebuilds: usize,
++    pub layout_rebuild_reason_bits: u8,
++    pub layout_discarded_handles: usize,
++    pub layout_style_calls: usize,
++    pub layout_explicit_dirty_calls: usize,
++    pub layout_parent_flow_checks: usize,
++    pub layout_computes: u64,
++    pub layout_computed_answers: u64,
++    pub layout_cached_answers: u64,
++    pub layout_cheap_answers: u64,
++    pub layout_measure_queries: u64,
++    pub layout_changed_writes: u64,
+     pub paint_nodes: usize,
+     pub image_reconcile_entries: usize,
+ }
+@@ -30,3 +42,67 @@ impl<M: View + 'static> Win<M> {
+         json!({"semantic_emission":r.semantic_emission.report(r),"ordered_cold_extents":r.ordered_cold_extents.report(),"cold_correspondence":r.cold_correspondence.report(),"raw_node_vec_header_bytes":std::mem::size_of::<Vec<Node>>(),"logical":logical,"work":r.structural_work,"counters":r.counters,"node_bytes":std::mem::size_of::<Node>(),"node_capacity_bytes":r.nodes.capacity()*std::mem::size_of::<Node>(),"presented_capacity_bytes":r.presented.capacity()*std::mem::size_of::<Presented>(),"layout_id_capacity_bytes":r.layout_nodes.capacity()*std::mem::size_of::<NodeId>(),"identity_index_kind":index_kind,"identity_index_heap_bytes":index_bytes,"pending":format!("{:?}",r.latest_token),"source_epoch":r.source_epoch,"complete_epoch":r.complete_epoch,"presentation_epoch":r.presentation_epoch})
+     }
+ }
++
++// Full diagnostic captures; none are consulted by the producer or layout engine.
++struct LayoutRow {
++    identity: u64,
++    id: NodeId,
++    parent: Option<NodeId>,
++    children: Vec<NodeId>,
++    style: cephal::Style,
++    layout: cephal::Layout,
++    measured: bool,
++}
++pub(crate) struct LayoutCapture {
++    rows: Vec<LayoutRow>,
++    storage: gpui_reactivity_core::layout::LayoutStorage,
++    topology_bytes: usize,
++    runtime_handle_capacity: usize,
++    epochs: [u64; 3],
++}
++impl LayoutCapture {
++    pub(crate) fn report(&self) -> serde_json::Value {
++        let rows:Vec<_>=self.rows.iter().map(|r| json!({"identity":r.identity,"handle":format!("{:?}",r.id),"parent":r.parent.map(|id|format!("{id:?}")),"children":r.children.iter().map(|id|format!("{id:?}")).collect::<Vec<_>>(),"style":format!("{:?}",r.style),"layout":format!("{:?}",r.layout),"measured":r.measured})).collect();
++        let storage = self.storage;
++        json!({"epochs":self.epochs,"rows":rows,"preorder_handles_sorted":self.rows.iter().map(|r|r.id).is_sorted(),"storage":{"slots":storage.slots,"active_styles":storage.active_styles,"allocated_caches":storage.allocated_caches,"lane_capacity_bytes":storage.lane_capacity_bytes,"cache_heap_bytes":storage.cache_heap_bytes,"absolute_contexts":storage.absolute_contexts,"layout_header_bytes":size_of::<LayoutTree>(),"topology_bytes":self.topology_bytes,"runtime_handle_capacity_bytes":self.runtime_handle_capacity},"diagnostic":{"row_visits":self.rows.len(),"child_edges":self.rows.iter().map(|r|r.children.len()).sum::<usize>(),"storage_cache_scan_passes":2,"row_bytes":size_of::<LayoutRow>(),"capture_header_bytes":size_of::<Self>(),"row_capacity_bytes":self.rows.capacity()*size_of::<LayoutRow>(),"children_capacity_bytes":self.rows.iter().map(|r|r.children.capacity()*size_of::<NodeId>()).sum::<usize>(),"exclusions":"Style internal allocations, JSON/String formatting and comparison maps are additional; allocation counter captures requested bytes"}})
++    }
++    pub(crate) fn compare(&self, old: &Self) -> serde_json::Value {
++        let before: BTreeMap<_, _> = old.rows.iter().map(|r| (r.identity, r)).collect();
++        let new_ids: BTreeSet<_> = self.rows.iter().map(|r| r.identity).collect();
++        let mut projected = Vec::new();
++        let matches:Vec<_>=self.rows.iter().enumerate().filter_map(|(rank,after)|{
++            let prior=before.get(&after.identity)?;
++            projected.push(prior.id);
++            Some(json!({"identity":after.identity,"new_rank":rank,"same_handle":prior.id==after.id,"same_own_style":prior.style==after.style,"same_layout":prior.layout==after.layout,"old_handle":format!("{:?}",prior.id),"new_handle":format!("{:?}",after.id),"old_layout":format!("{:?}",prior.layout),"new_layout":format!("{:?}",after.layout)}))
++        }).collect();
++        json!({"semantic_matches":matches,"survived":projected.len(),"minted":self.rows.len()-projected.len(),"removed":old.rows.iter().filter(|r|!new_ids.contains(&r.identity)).count(),"projected_old_survivor_handles_sorted_in_new_preorder":projected.is_sorted(),"scope":"offline diagnostic identity pairing only; not a layout reuse certificate or optimized mirror diff","comparison_work":{"old_map_inserts":old.rows.len(),"new_set_inserts":self.rows.len(),"new_lookups":self.rows.len(),"old_membership_checks":old.rows.len(),"projected_capacity_bytes":projected.capacity()*size_of::<NodeId>()}})
++    }
++}
++impl<M: View + 'static> Win<M> {
++    pub(crate) fn layout_capture(&self) -> LayoutCapture {
++        let r = self.runtime().unwrap();
++        assert!(r.logical_valid && !r.layout.is_poisoned());
++        assert_eq!(r.nodes.len(), r.layout_nodes.len());
++        let rows = r
++            .nodes
++            .iter()
++            .zip(&r.layout_nodes)
++            .map(|(node, &id)| LayoutRow {
++                identity: node.identity(),
++                id,
++                parent: r.layout.tree().parent(id).unwrap(),
++                children: r.layout.tree().children(Some(id)).unwrap().collect(),
++                style: r.layout.style(id).unwrap().clone(),
++                layout: r.layout.layout(id).unwrap(),
++                measured: node.text_slot().0 != u32::MAX || node.kind() == NodeKind::Image,
++            })
++            .collect();
++        LayoutCapture {
++            rows,
++            storage: r.layout.storage(),
++            topology_bytes: r.layout.tree().allocated_bytes(),
++            runtime_handle_capacity: r.layout_nodes.capacity() * size_of::<NodeId>(),
++            epochs: [r.source_epoch, r.complete_epoch, r.presentation_epoch],
++        }
++    }
++}
