@@ -1,0 +1,18 @@
+{
+  "index": 80,
+  "block": 1,
+  "family": "resources",
+  "direction": "forward",
+  "mode": "automatic",
+  "path": "080-1-resources-forward-automatic",
+  "exit": 0,
+  "elapsed_seconds": 0.8628804683685303,
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/18c5adc20a8d6d550eab54687591397e351f26efa0dc37394b9bbf750a2ec03d",
+    "native::layout_cost_tests::complete_endpoint",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ]
+}

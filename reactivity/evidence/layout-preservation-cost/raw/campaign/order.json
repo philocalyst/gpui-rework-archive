@@ -1,0 +1,1730 @@
+[
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 0,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 1,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 2,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 3,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 4,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "keyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "unkeyed4",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "keyed256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "reorder256",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "unkeyedmove",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "resources",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "constraints",
+    "direction": "reverse",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "append"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "forward",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "ordered"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "automatic"
+  },
+  {
+    "block": 5,
+    "family": "measured",
+    "direction": "reverse",
+    "mode": "append"
+  }
+]

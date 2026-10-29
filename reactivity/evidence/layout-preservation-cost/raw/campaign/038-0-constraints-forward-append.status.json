@@ -1,0 +1,18 @@
+{
+  "index": 38,
+  "block": 0,
+  "family": "constraints",
+  "direction": "forward",
+  "mode": "append",
+  "path": "038-0-constraints-forward-append",
+  "exit": 0,
+  "elapsed_seconds": 1.2456932067871094,
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/18c5adc20a8d6d550eab54687591397e351f26efa0dc37394b9bbf750a2ec03d",
+    "native::layout_cost_tests::complete_endpoint",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ]
+}
