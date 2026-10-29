@@ -6,8 +6,11 @@ struct Tree {
     keys: Signal<Vec<u64>>,
     keyed: bool,
     fillers: usize,
+    bad: Signal<Affine>,
 }
 impl Tree {
+    const BAD: Source<Self, Affine> =
+        Source::new(FieldId::new(2), "bad", |m| &m.bad, |m| &mut m.bad);
     const KEYS: Source<Self, Vec<u64>> =
         Source::new(FieldId::new(1), "keys", |m| &m.keys, |m| &mut m.keys);
     fn new(keyed: bool, fillers: usize, keys: Vec<u64>) -> Self {
@@ -15,9 +18,10 @@ impl Tree {
             keys: Signal::new(keys),
             keyed,
             fillers,
+            bad: Signal::new(Affine::translation(f32::NAN, 0.)),
         }
     }
-    fn item(key: u64) -> El<'static> {
+    fn item(&self, key: u64) -> El<'_> {
         let color = match key % 4 {
             0 => Color::BLACK,
             1 => Color::rgb(255, 0, 0),
@@ -26,7 +30,7 @@ impl Tree {
         };
         let el = div().w(24).h(8).bg(color);
         if key == u64::MAX {
-            el.transform(Affine::translation(f32::NAN, 0.))
+            el.transform(&self.bad)
         } else {
             el
         }
@@ -43,12 +47,12 @@ impl crate::ItemSource for Tree {
         self.keys.iter().position(|&k| k == key.get())
     }
     fn row(&self, index: usize) -> El<'_> {
-        Self::item(self.keys[index])
+        self.item(self.keys[index])
     }
 }
 impl View for Tree {
     fn sources() -> Sources<Self> {
-        Sources::new().field(Self::KEYS)
+        Sources::new().field(Self::KEYS).direct(Self::BAD)
     }
     fn view(&self) -> El<'_> {
         let group = if self.keyed {
@@ -56,7 +60,7 @@ impl View for Tree {
                 .w(24)
                 .h((self.keys.len() * 8) as f32)
         } else {
-            column(self.keys.iter().copied().map(Self::item)).w(24)
+            column(self.keys.iter().copied().map(|key| self.item(key))).w(24)
         };
         row((
             column((
@@ -342,6 +346,11 @@ fn live_structural_boundary() {
                     }
                     results.push(json!({"case":prefix,"operation":operation,"before":previous,"snapshot":next,"observation":observation,"scene":scene(&owner),"gpu":gpu,"allocation":{"count":allocation.count_total,"bytes":allocation.bytes_total,"retained_delta":allocation.bytes_current,"peak_delta":allocation.bytes_max,"includes":"source Vec clone + complete public set; excludes diagnostic snapshot/scene mirrors and GPU/oracle work"},"subtree_damage_mutant":mutant_wrong}));
                     previous = next;
+                    std::fs::write(
+                        output.join("partial.json"),
+                        serde_json::to_vec_pretty(&results).unwrap(),
+                    )
+                    .unwrap();
                 }
                 let good = packet.unwrap();
                 owner.structural_reset();

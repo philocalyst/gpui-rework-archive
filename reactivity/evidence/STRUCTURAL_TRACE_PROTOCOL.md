@@ -44,3 +44,10 @@ Deref/branch reads. `direct` explicitly excludes those dependencies; the first
 fixture incorrectly used it, produced no structural candidate, and correctly
 accepted the unchanged token. Preserve that failed harness attempt. No runtime
 authority rule or acceptance requirement changes.
+
+The owner-dependency attempt passed insertion/removal/reorder pixels and the
+GPU damage mutant, then the failed-newer fixture used a literal NaN transform.
+The public builder correctly panicked and poisoned the owner, so that is not
+an eligible-old-candidate scenario. Preserve the failure. The corrected fixture
+uses a registered direct transform binding only on the rejected new row; its
+fallible property admission exercises a non-poisoning failed preparation.
