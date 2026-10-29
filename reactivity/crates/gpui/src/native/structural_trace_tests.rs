@@ -177,14 +177,14 @@ pub(super) fn scene<M: View + 'static>(owner: &Win<M>) -> serde_json::Value {
         json!({"draws":draws,"scene_lane_bytes":st.lane_bytes(),"scene_header_bytes":st.header_bytes,"resource_header_bytes":st.resource_header_bytes,"resource_handles_bytes":st.resource_handles_bytes,"resource_index_capacity":st.resource_index_capacity,"resource_entries":st.resource_entries,"masks":s.masks().len(),"images":s.images().count(),"gradients":s.gradients().count()})
     }).unwrap()
 }
-pub(super) fn verify<M: View + 'static>(
+pub(super) fn capture<M: View + 'static>(
     owner: &mut Win<M>,
     renderer: &gpui_gpu::RetainedRenderer,
     oracle: &mut Renderer,
     target: &wgpu::Texture,
     expected: &mut Win<M>,
     path: &std::path::Path,
-) {
+) -> [Vec<u8>; 4] {
     let actual = read(renderer, target);
     let cpu = owner.with_pixels(|p, _, _| p.to_vec()).unwrap();
     let fresh = expected.with_pixels(|p, _, _| p.to_vec()).unwrap();
@@ -194,17 +194,28 @@ pub(super) fn verify<M: View + 'static>(
         .unwrap()
         .unwrap();
     let gpu = read(renderer, &full);
-    assert_eq!(actual, cpu);
-    assert_eq!(actual, fresh);
-    assert_eq!(actual, gpu);
     for (kind, bytes) in [
-        ("actual", actual),
-        ("cpu", cpu),
-        ("fresh", fresh),
-        ("full", gpu),
+        ("actual", &actual),
+        ("cpu", &cpu),
+        ("fresh", &fresh),
+        ("full", &gpu),
     ] {
         std::fs::write(path.with_extension(format!("{kind}.rgba")), bytes).unwrap();
     }
+    [actual, cpu, fresh, gpu]
+}
+pub(super) fn verify<M: View + 'static>(
+    owner: &mut Win<M>,
+    renderer: &gpui_gpu::RetainedRenderer,
+    oracle: &mut Renderer,
+    target: &wgpu::Texture,
+    expected: &mut Win<M>,
+    path: &std::path::Path,
+) {
+    let [actual, cpu, fresh, full] = capture(owner, renderer, oracle, target, expected, path);
+    assert_eq!(actual, cpu);
+    assert_eq!(actual, fresh);
+    assert_eq!(actual, full);
 }
 #[test]
 #[ignore = "explicit structural trace gate"]

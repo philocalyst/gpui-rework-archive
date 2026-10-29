@@ -1,5 +1,5 @@
 //! Bounded actual-emission variety, with existing full render oracles.
-use super::structural_trace_tests::{scene, submit, texture, verify};
+use super::structural_trace_tests::{capture, scene, submit, texture};
 use super::*;
 use crate::prelude::*;
 use serde_json::json;
@@ -145,7 +145,7 @@ fn zero_multiple_and_shared_resources() {
             let (token, gpu) = submit(&owner, &mut renderer, &mut packet, &target);
             owner.presented(token).unwrap();
             let mut fresh = Win::with_size(Variety::new(more), 64, 64).unwrap();
-            verify(
+            let pixels = capture(
                 &mut owner,
                 &renderer,
                 &mut oracle,
@@ -153,12 +153,24 @@ fn zero_multiple_and_shared_resources() {
                 &mut fresh,
                 &output.join(operation),
             );
-            results.push(json!({"operation":operation,"observation":observation,"scene":s,"gpu":gpu,"one_node_one_command_wrong_rows":wrong,"allocation":allocation.map(|a|json!({"bytes":a.bytes_total,"count":a.count_total,"retained_delta":a.bytes_current,"peak_delta":a.bytes_max}))}));
+            let differences: Vec<_> = pixels[1..]
+                .iter()
+                .map(|p| pixels[0].iter().zip(p).filter(|(a, b)| a != b).count())
+                .collect();
+            results.push(json!({"operation":operation,"observation":observation,"scene":s,"gpu":gpu,"one_node_one_command_wrong_rows":wrong,"pixel_wrong_bytes_cpu_fresh_full":differences,"allocation":allocation.map(|a|json!({"bytes":a.bytes_total,"count":a.count_total,"retained_delta":a.bytes_current,"peak_delta":a.bytes_max}))}));
         }
         std::fs::write(
             output.join("trace.json"),
             serde_json::to_vec_pretty(&results).unwrap(),
         )
         .unwrap();
+        assert!(
+            results.iter().all(|r| r["pixel_wrong_bytes_cpu_fresh_full"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|n| n.as_u64() == Some(0))),
+            "exact pixel gate; all counterexample images and mapping observations preserved"
+        );
     });
 }
