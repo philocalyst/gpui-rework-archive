@@ -78,6 +78,16 @@ pub struct LayoutStats {
     pub changed_layout_writes: u64,
 }
 
+/// Actual mutation-loop work; diagnostic counters grant no cache authority.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct MutationWork {
+    pub order_calls: u64,
+    pub validation_ancestors: u64,
+    pub sibling_relinks: u64,
+    pub context_ancestors: u64,
+    pub depth_nodes: u64,
+}
+
 /// Known lane and cache heap payload only. Excludes allocator overhead and
 /// vendor style-table metadata; this is not an RSS measurement.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -192,6 +202,7 @@ pub struct LayoutTree {
     generation: u32,
     speculation: u32,
     stats: LayoutStats,
+    mutation_work: MutationWork,
     poisoned: bool,
 }
 
@@ -221,6 +232,7 @@ impl LayoutTree {
             generation: 1,
             speculation: 0,
             stats: LayoutStats::default(),
+            mutation_work: MutationWork::default(),
             poisoned: false,
         }
     }
@@ -229,6 +241,9 @@ impl LayoutTree {
     }
     pub fn stats(&self) -> LayoutStats {
         self.stats
+    }
+    pub fn mutation_work(&self) -> MutationWork {
+        self.mutation_work
     }
     pub fn generation(&self) -> u32 {
         self.generation
@@ -362,9 +377,25 @@ impl LayoutTree {
         Ok(removed)
     }
     pub fn reparent(&mut self, node: NodeId, parent: Option<NodeId>) -> Result<bool, LayoutError> {
-        self.tree.validate_reparent(node, parent)?;
+        self.reparent_before(node, parent, None)
+    }
+    /// Move before an existing sibling, or append with None, preserving the
+    /// existing layout invalidations. Failed validation changes no topology or
+    /// cached authority. Mutation counters also charge rejected ancestor walks.
+    pub fn reparent_before(
+        &mut self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> Result<bool, LayoutError> {
+        self.mutation_work.order_calls += 1;
+        let mut steps = 0;
+        let valid = self.tree.validate_before(node, parent, before, &mut steps);
+        self.mutation_work.validation_ancestors += steps;
+        valid?;
         let old_parent = self.tree.parent(node)?;
-        if old_parent == parent && self.tree.next_sibling(node)?.is_none() {
+        if before == Some(node) || (old_parent == parent && self.tree.next_sibling(node)? == before)
+        {
             return Ok(false);
         }
         let old_depth = self.depths[self.tree.slot(node)];
@@ -374,7 +405,9 @@ impl LayoutTree {
         if let Some(new) = parent {
             self.invalidate_absolute_above(new);
         }
-        self.tree.reparent(node, parent)?;
+        let changed = self.tree.move_before_validated(node, parent, before);
+        debug_assert!(changed);
+        self.mutation_work.sibling_relinks += 1;
         self.viewports.remove(&node);
         if old_parent != parent {
             if let Some(old) = old_parent {
@@ -387,6 +420,7 @@ impl LayoutTree {
         let new_depth = parent.map_or(0, |id| self.depths[self.tree.slot(id)] + 1);
         if old_depth != new_depth {
             for id in self.tree.subtree(node)? {
+                self.mutation_work.depth_nodes += 1;
                 let depth = self
                     .tree
                     .parent(id)?
@@ -597,6 +631,7 @@ impl LayoutTree {
             return;
         }
         loop {
+            self.mutation_work.context_ancestors += 1;
             if self
                 .absolute_contexts
                 .as_mut()
@@ -876,6 +911,95 @@ impl Incremental for Engine<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ordered_before_matches_fresh_layout_and_keeps_dirty_contract() {
+        use cephal::style::{Dimension, Display, FlexDirection};
+        fn root_style() -> Style {
+            Style {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                ..Style::DEFAULT
+            }
+        }
+        fn leaf_style(width: f32) -> Style {
+            Style {
+                size: Size {
+                    width: Dimension::length(width),
+                    height: Dimension::length(10.),
+                },
+                ..Style::DEFAULT
+            }
+        }
+        let viewport = Size {
+            width: AvailableSpace::Definite(100.),
+            height: AvailableSpace::Definite(40.),
+        };
+        let mut layout = LayoutTree::new();
+        let root = layout
+            .insert(None, NodeKind::Element, root_style())
+            .unwrap();
+        let ids: Vec<_> = [11., 17., 23.]
+            .into_iter()
+            .map(|w| {
+                layout
+                    .insert(Some(root), NodeKind::Element, leaf_style(w))
+                    .unwrap()
+            })
+            .collect();
+        layout.compute(root, viewport).unwrap();
+        for order in [[2, 0, 1], [1, 2, 0], [0, 1, 2]] {
+            let mut cursor = layout.tree().children(Some(root)).unwrap().next();
+            for &i in &order {
+                if cursor != Some(ids[i]) {
+                    layout.reparent_before(ids[i], Some(root), cursor).unwrap();
+                }
+                cursor = layout.tree().next_sibling(ids[i]).unwrap();
+            }
+            assert!(layout.compute(root, viewport).unwrap());
+            let mut fresh = LayoutTree::new();
+            let fresh_root = fresh.insert(None, NodeKind::Element, root_style()).unwrap();
+            let fresh_ids: Vec<_> = order
+                .into_iter()
+                .map(|i| {
+                    fresh
+                        .insert(
+                            Some(fresh_root),
+                            NodeKind::Element,
+                            leaf_style([11., 17., 23.][i]),
+                        )
+                        .unwrap()
+                })
+                .collect();
+            fresh.compute(fresh_root, viewport).unwrap();
+            assert_eq!(
+                layout.layout(root).unwrap(),
+                fresh.layout(fresh_root).unwrap()
+            );
+            for (i, id) in order.into_iter().zip(fresh_ids) {
+                assert_eq!(layout.layout(ids[i]).unwrap(), fresh.layout(id).unwrap());
+            }
+            assert!(!layout.compute(root, viewport).unwrap());
+        }
+        assert!(layout.mutation_work().sibling_relinks > 0);
+        let snapshot = layout.tree().preorder().collect::<Vec<_>>();
+        assert!(layout.reparent_before(root, Some(ids[0]), None).is_err());
+        assert_eq!(layout.tree().preorder().collect::<Vec<_>>(), snapshot);
+        assert!(!layout.compute(root, viewport).unwrap());
+        // A move across depth updates every moved descendant's lane.
+        let branch = layout
+            .insert(Some(root), NodeKind::Element, Style::DEFAULT)
+            .unwrap();
+        let grandchild = layout
+            .insert(Some(ids[0]), NodeKind::Element, leaf_style(3.))
+            .unwrap();
+        let before = layout.mutation_work();
+        layout.reparent_before(ids[0], Some(branch), None).unwrap();
+        assert_eq!(layout.mutation_work().depth_nodes - before.depth_nodes, 2);
+        assert_eq!(layout.depths[layout.tree.slot(grandchild)], 3);
+        layout.compute(root, viewport).unwrap();
+        assert!(!layout.compute(root, viewport).unwrap());
+    }
+
     #[test]
     fn hidden_marker_uses_flags_and_revokes_on_mutation_and_rollover() {
         let mut tree = LayoutTree::new();

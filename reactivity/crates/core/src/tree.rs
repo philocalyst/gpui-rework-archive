@@ -169,15 +169,83 @@ impl Tree {
         node: NodeId,
         parent: Option<NodeId>,
     ) -> Result<(), TreeError> {
+        self.validate_before(node, parent, None, &mut 0)
+    }
+    pub(crate) fn validate_before(
+        &self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+        ancestor_steps: &mut u64,
+    ) -> Result<(), TreeError> {
         let index = self.index(node)?;
-        let mut ancestor = self.optional_index(parent)?;
+        let parent_index = self.optional_index(parent)?;
+        let mut ancestor = parent_index;
         while ancestor != NIL {
+            *ancestor_steps += 1;
             if ancestor == index {
                 return Err(TreeError::Cycle);
             }
             ancestor = self.entries[ancestor as usize].parent;
         }
+        if let Some(before) = before {
+            let before = self.index(before)?;
+            if self.entries[before as usize].parent != parent_index {
+                return Err(TreeError::InvalidNode);
+            }
+        }
         Ok(())
+    }
+    /// Ordered move; None appends. All capability/parent/cycle checks precede
+    /// link mutation, including a request naming the node itself as `before`.
+    pub fn reparent_before(
+        &mut self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> Result<bool, TreeError> {
+        self.validate_before(node, parent, before, &mut 0)?;
+        Ok(self.move_before_validated(node, parent, before))
+    }
+    // The caller holds the exclusive tree borrow and has validated all three
+    // capabilities without intervening topology mutation. Layout cache/metadata
+    // invalidation does not change topology. Index accesses remain checked Rust.
+    pub(crate) fn move_before_validated(
+        &mut self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> bool {
+        let index = self.index(node).expect("validated node");
+        let parent = self.optional_index(parent).expect("validated parent");
+        let before = self.optional_index(before).expect("validated sibling");
+        if before == index
+            || (self.entries[index as usize].parent == parent
+                && self.entries[index as usize].next == before)
+        {
+            return false;
+        }
+        self.detach(index);
+        if before == NIL {
+            self.attach(index, parent);
+        } else {
+            let prev = self.entries[before as usize].prev;
+            if prev == NIL {
+                if parent == NIL {
+                    self.first = index;
+                } else {
+                    self.entries[parent as usize].first = index;
+                }
+            } else {
+                self.entries[prev as usize].next = index;
+            }
+            self.entries[before as usize].prev = index;
+            let entry = &mut self.entries[index as usize];
+            entry.parent = parent;
+            entry.prev = prev;
+            entry.next = before;
+        }
+        true
     }
     pub fn remove(&mut self, node: NodeId) -> Result<usize, TreeError> {
         let root = self.index(node)?;
@@ -390,6 +458,64 @@ impl Iterator for Preorder<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ordered_before_preserves_capabilities_and_rejects_invalid_moves() {
+        let mut tree = Tree::new();
+        let root = tree.insert(None, NodeKind::Element).unwrap();
+        let other = tree.insert(None, NodeKind::Element).unwrap();
+        let ids: Vec<_> = (0..4)
+            .map(|_| tree.insert(Some(root), NodeKind::Element).unwrap())
+            .collect();
+        let leaf = tree.insert(Some(ids[1]), NodeKind::Element).unwrap();
+        let mut model = ids.clone();
+        // Every ordered pair, including already-correct position and self.
+        for &node in &ids {
+            for before in ids.iter().copied().map(Some).chain([None]) {
+                if before != Some(node) {
+                    model.retain(|&id| id != node);
+                    let at = before.map_or(model.len(), |id| {
+                        model.iter().position(|&x| x == id).unwrap()
+                    });
+                    model.insert(at, node);
+                }
+                tree.reparent_before(node, Some(root), before).unwrap();
+                assert_eq!(
+                    tree.children(Some(root)).unwrap().collect::<Vec<_>>(),
+                    model
+                );
+                assert_eq!(tree.parent(leaf).unwrap(), Some(ids[1]));
+                assert!(ids.iter().all(|&id| tree.contains(id)));
+            }
+        }
+        assert!(tree.reparent_before(ids[1], Some(other), None).unwrap());
+        assert_eq!(tree.parent(leaf).unwrap(), Some(ids[1]));
+        assert!(
+            tree.reparent_before(ids[1], Some(root), Some(ids[0]))
+                .unwrap()
+        );
+        let before = tree.preorder().collect::<Vec<_>>();
+        let foreign = Tree::new().insert(None, NodeKind::Element).unwrap();
+        for (node, parent, sibling) in [
+            (root, Some(leaf), None),
+            (foreign, Some(root), None),
+            (ids[0], Some(foreign), None),
+            (ids[0], Some(root), Some(foreign)),
+            (ids[0], Some(root), Some(other)),
+        ] {
+            assert!(tree.reparent_before(node, parent, sibling).is_err());
+            assert_eq!(tree.preorder().collect::<Vec<_>>(), before);
+        }
+        tree.remove(ids[2]).unwrap();
+        let replacement = tree.insert(Some(root), NodeKind::Element).unwrap();
+        assert_ne!(replacement, ids[2]);
+        let before = tree.preorder().collect::<Vec<_>>();
+        assert!(
+            tree.reparent_before(ids[0], Some(root), Some(ids[2]))
+                .is_err()
+        );
+        assert_eq!(tree.preorder().collect::<Vec<_>>(), before);
+    }
 
     #[test]
     fn exhausted_generation_retires_slot_without_aba() {
