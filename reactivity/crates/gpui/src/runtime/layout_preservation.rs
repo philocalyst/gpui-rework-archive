@@ -38,6 +38,7 @@ pub(super) struct Work {
     pub context_ancestors: u64,
     pub depth_nodes: u64,
     pub route_rows: usize,
+    pub route_build_peak_bytes: usize,
     pub route_sort_compares: usize,
     pub route_lookups: usize,
     pub route_lookup_compares: usize,
@@ -382,6 +383,10 @@ impl State {
             self.work.route_sort_compares += 1;
             a.0.cmp(&b.0)
         });
+        self.work.route_build_peak_bytes = self
+            .work
+            .route_build_peak_bytes
+            .max((self.route.capacity() + route.capacity()) * size_of::<(NodeId, u32)>());
         self.route = route;
         self.route_active = true;
         *handles = next; // Working scratch only; commit follows successful preparation.
@@ -391,7 +396,7 @@ impl State {
 #[cfg(test)]
 impl<M: View + 'static> Win<M> {
     pub(crate) fn layout_preservation_mode(&mut self, mode: Mode) {
-        let r = self.runtime_mut().unwrap();
+        let mut r = self.runtime_mut().unwrap();
         assert!(
             r.layout_nodes.is_sorted() && !r.layout_preservation.route_active,
             "select before any structural preservation"
@@ -399,18 +404,19 @@ impl<M: View + 'static> Win<M> {
         r.layout_preservation.mode = mode;
     }
     pub(crate) fn layout_wrong_route(&mut self) {
-        let r = self.runtime_mut().unwrap();
+        let mut r = self.runtime_mut().unwrap();
         assert!(r.layout_preservation.route_active && !r.layout_nodes.is_sorted());
         r.layout_preservation.route_active = false;
     }
     pub(crate) fn layout_inject_poison(&mut self) {
-        let r = self.runtime_mut().unwrap();
+        let mut r = self.runtime_mut().unwrap();
         let measured = r
             .nodes
             .iter()
             .position(|n| n.text_slot().0 != u32::MAX)
             .unwrap();
-        r.layout.mark_dirty(r.layout_nodes[measured]).unwrap();
+        let measured = r.layout_nodes[measured];
+        r.layout.mark_dirty(measured).unwrap();
         let root = r.layout_nodes[0];
         let result = catch_unwind(AssertUnwindSafe(|| {
             r.layout
