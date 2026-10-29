@@ -3314,6 +3314,14 @@ impl<M: View + 'static> Runtime<M> {
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
+            #[cfg(test)]
+            {
+                self.structural_work.layout_full_rebuilds += 1;
+                self.structural_work.layout_rebuild_reason_bits |= u8::from(self.rebuild_layout)
+                    | (u8::from(self.topology_changed) << 1)
+                    | (u8::from(self.layout.is_poisoned()) << 2);
+                self.structural_work.layout_discarded_handles += self.layout_nodes.len();
+            }
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for (index, node) in self.nodes.iter().enumerate() {
@@ -3351,6 +3359,10 @@ impl<M: View + 'static> Runtime<M> {
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
             for (&key, state) in &self.viewports {
+                #[cfg(test)]
+                {
+                    self.structural_work.layout_parent_flow_checks += 1;
+                }
                 let identity = state.identity(key);
                 let index = self.by_identity.required(identity);
                 if self.nodes[index].parent().index().is_some_and(|parent| {
@@ -3360,6 +3372,11 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             for identity in &self.layout_dirty {
+                #[cfg(test)]
+                {
+                    self.structural_work.layout_style_calls += 1;
+                    self.structural_work.layout_explicit_dirty_calls += 1;
+                }
                 let index = self.by_identity.required(*identity);
                 let id = self.layout_nodes[index];
                 self.layout.set_style(
@@ -3431,6 +3448,17 @@ impl<M: View + 'static> Runtime<M> {
             &mut measure,
         )?;
         let after = self.layout.stats();
+        #[cfg(test)]
+        {
+            let work = &mut self.structural_work;
+            work.layout_computes += after.computes - before.computes;
+            work.layout_computed_answers += after.computed_answers - before.computed_answers;
+            work.layout_cached_answers += after.cached_answers - before.cached_answers;
+            work.layout_cheap_answers += after.cheap_answers - before.cheap_answers;
+            work.layout_measure_queries += after.measure_calls - before.measure_calls;
+            work.layout_changed_writes +=
+                after.changed_layout_writes - before.changed_layout_writes;
+        }
         self.counters.layout_runs += after.computes - before.computes;
         self.counters.measure_calls += after.measure_calls - before.measure_calls;
         if let Some(error) = failure {

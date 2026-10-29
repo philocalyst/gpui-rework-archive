@@ -2237,3 +2237,6 @@ mod structural_trace_tests;
 
 #[cfg(test)]
 mod packet_relocation_tests;
+
+#[cfg(test)]
+mod layout_handle_tests;
