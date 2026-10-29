@@ -1,0 +1,12 @@
+
+running 2 tests
+test native::layout_preservation_tests::layout_preservation_authority ... FAILED
+test native::layout_preservation_tests::live_layout_preservation ... ok
+
+failures:
+
+failures:
+    native::layout_preservation_tests::layout_preservation_authority
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 259 filtered out; finished in 0.54s
+

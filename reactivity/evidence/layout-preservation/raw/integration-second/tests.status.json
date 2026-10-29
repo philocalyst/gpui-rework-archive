@@ -1,0 +1,11 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/2d722e3bcdadb006a2f14ab950f2f802f4a4f84c3f014f5221743c8f2a80f324",
+    "native::layout_preservation_tests::",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "elapsed_seconds": 0.5461115837097168
+}

@@ -1,0 +1,3934 @@
+[
+  {
+    "case": "failed-newer",
+    "failure": {
+      "committed": null,
+      "mode": "Ordered",
+      "pending_bytes": 0,
+      "qualified_route": [],
+      "route_active": true,
+      "route_capacity_bytes": 0,
+      "route_rows": 0,
+      "state_header_bytes": 344,
+      "work": {
+        "authority_declines": 0,
+        "committed": 0,
+        "context_ancestors": 0,
+        "correspondence_checks": 0,
+        "depth_nodes": 0,
+        "dirty_identity_checks": 0,
+        "frontier_peak_bytes": 0,
+        "frontier_pops": 0,
+        "frontier_pushes": 0,
+        "handle_scratch_bytes": 0,
+        "inserted_nodes": 0,
+        "invalidated": 1,
+        "new_handle_writes": 0,
+        "order_calls": 0,
+        "plan_allocations": 0,
+        "plan_attempts": 0,
+        "plan_peak_bytes": 0,
+        "plan_staged": 0,
+        "prefix_materialized": 0,
+        "preflight_nodes": 0,
+        "preserved_nodes": 0,
+        "rank_writes": 0,
+        "removal_checks": 0,
+        "removed_nodes": 0,
+        "retired_dirty_ids": 0,
+        "route_build_peak_bytes": 0,
+        "route_lookup_compares": 0,
+        "route_lookups": 0,
+        "route_rows": 0,
+        "route_sort_compares": 0,
+        "sibling_checks": 0,
+        "sibling_relinks": 0,
+        "validation_ancestors": 0
+      },
+      "working": true
+    },
+    "mode": "Ordered",
+    "older_ack_accepted": true,
+    "recovery": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 45,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 360,
+            "encoded_payload_bytes": 360,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 60,
+            "known_old_new_plus_builder_scratch_peak_bytes": 920,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 400,
+            "ordinal_block_rewrite_payload_bytes": 360,
+            "raw_storage": true,
+            "records": 15,
+            "retained_bytes": 400,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 480,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 24,
+            "encoded_bytes_produced": 87,
+            "encoded_payload_bytes": 87,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 180,
+            "known_old_new_plus_builder_scratch_peak_bytes": 902,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 24,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 151,
+            "ordinal_block_rewrite_payload_bytes": 87,
+            "raw_storage": false,
+            "records": 15,
+            "retained_bytes": 151,
+            "store_header_bytes": 40,
+            "validation_decodes": 15
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 480,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 24,
+            "encoded_bytes_produced": 87,
+            "encoded_payload_bytes": 87,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 180,
+            "known_old_new_plus_builder_scratch_peak_bytes": 902,
+            "mode": "Relative",
+            "new_directory_bytes_written": 24,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 151,
+            "ordinal_block_rewrite_payload_bytes": 87,
+            "raw_storage": false,
+            "records": 15,
+            "retained_bytes": 151,
+            "store_header_bytes": 40,
+            "validation_decodes": 15
+          }
+        ],
+        "combined_control_store_retained_bytes": 702,
+        "combined_store_run_trial_retained_bytes": 1686,
+        "from_namespace": 1,
+        "from_source_epoch": 1,
+        "old_combined_control_store_retained_bytes": 702,
+        "pending_heap_bytes": 0,
+        "producer_records": 15,
+        "raw_canonical_literal_bytes": 360,
+        "run_capacity_bytes": 48,
+        "run_count": 1,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 12,
+        "runs": [
+          {
+            "len": 15,
+            "new_start": 0,
+            "old_start": 4294967295
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 1,
+        "to_source_epoch": 3,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 3,
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 15,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "identity_index_heap_bytes": 0,
+      "identity_index_kind": "contiguous",
+      "layout_id_capacity_bytes": 240,
+      "logical": [
+        {
+          "identity": 16,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 17,
+          "index": 1,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 18,
+          "index": 2,
+          "kind": "List",
+          "parent": 1,
+          "row_key": null
+        },
+        {
+          "identity": 19,
+          "index": 3,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 1
+        },
+        {
+          "identity": 20,
+          "index": 4,
+          "kind": "Div",
+          "parent": 3,
+          "row_key": null
+        },
+        {
+          "identity": 21,
+          "index": 5,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 2
+        },
+        {
+          "identity": 22,
+          "index": 6,
+          "kind": "Div",
+          "parent": 5,
+          "row_key": null
+        },
+        {
+          "identity": 23,
+          "index": 7,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 3
+        },
+        {
+          "identity": 24,
+          "index": 8,
+          "kind": "Div",
+          "parent": 7,
+          "row_key": null
+        },
+        {
+          "identity": 25,
+          "index": 9,
+          "kind": "Div",
+          "parent": 1,
+          "row_key": null
+        },
+        {
+          "identity": 26,
+          "index": 10,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 27,
+          "index": 11,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 28,
+          "index": 12,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 29,
+          "index": 13,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 30,
+          "index": 14,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 360,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 1320,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 1080,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 440,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 360,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 2088,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 112,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 1320,
+              "producer_records": 15,
+              "raw_copied_bytes": 360,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 288,
+              "block_control_bytes": 120,
+              "block_payload_bytes": 231,
+              "bytes": 671,
+              "directory_capacity_bytes": 80,
+              "physical_block_records": 36,
+              "piece_visits": 5,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 36,
+              "unique_blocks": 3,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 40,
+              "block_payload_bytes": 87,
+              "bytes": 223,
+              "directory_capacity_bytes": 16,
+              "physical_block_records": 15,
+              "piece_visits": 1,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 15,
+              "unique_blocks": 1,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1439,
+            "current_pieces": 1,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 64,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 10,
+              "accounting_scratch_capacity_peak_bytes": 368,
+              "before_compaction_pieces": 1,
+              "builder_piece_capacity_peak_bytes": 240,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 16,
+              "descriptor_bytes_written": 16,
+              "encoder_field_reads": 180,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 40,
+              "new_chunks": 1,
+              "new_encoded_bytes": 87,
+              "new_encoded_records": 15,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 895,
+              "producer_records": 15,
+              "raw_copied_bytes": 0,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 1024,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 15,
+              "verification_directory_searches": 15,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 120,
+              "block_payload_bytes": 261,
+              "bytes": 669,
+              "directory_capacity_bytes": 48,
+              "physical_block_records": 45,
+              "piece_visits": 3,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 45,
+              "unique_blocks": 3,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 40,
+              "block_payload_bytes": 87,
+              "bytes": 223,
+              "directory_capacity_bytes": 16,
+              "physical_block_records": 15,
+              "piece_visits": 1,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 15,
+              "unique_blocks": 1,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1437,
+            "current_pieces": 1,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 32,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 6,
+              "accounting_scratch_capacity_peak_bytes": 240,
+              "before_compaction_pieces": 1,
+              "builder_piece_capacity_peak_bytes": 240,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 16,
+              "descriptor_bytes_written": 16,
+              "encoder_field_reads": 180,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 40,
+              "new_chunks": 1,
+              "new_encoded_bytes": 87,
+              "new_encoded_records": 15,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 893,
+              "producer_records": 15,
+              "raw_copied_bytes": 0,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 1024,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 15,
+              "verification_directory_searches": 15,
+              "version_lease_clones": 1
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 1, sequence: 3 })",
+      "presentation_epoch": 3,
+      "presented_capacity_bytes": 960,
+      "raw_node_vec_header_bytes": 24,
+      "semantic_emission": {
+        "current": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 1 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 2 })",
+              "parent": 3,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                24,
+                8
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 3 })",
+              "parent": 5,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "support": [
+                0,
+                8,
+                24,
+                16
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 4 })",
+              "parent": 7,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "support": [
+                0,
+                16,
+                24,
+                24
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                7,
+                19,
+                33,
+                29
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                8.0,
+                20.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                2
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                3
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                1.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                1,
+                49,
+                4
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                2.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 3, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                2,
+                49,
+                5
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                3.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 3, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 2040,
+          "heap_bytes": 2400,
+          "row_bytes": 24,
+          "row_capacity_bytes": 360,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 16,
+              "node_end": 15,
+              "start": 0,
+              "subtree_end": 9
+            },
+            {
+              "end": 1,
+              "identity": 17,
+              "node_end": 10,
+              "start": 1,
+              "subtree_end": 5
+            },
+            {
+              "end": 1,
+              "identity": 18,
+              "node_end": 9,
+              "start": 1,
+              "subtree_end": 4
+            },
+            {
+              "end": 1,
+              "identity": 19,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 20,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 21,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 22,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 23,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 4,
+              "identity": 24,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 5,
+              "identity": 25,
+              "node_end": 10,
+              "start": 4,
+              "subtree_end": 5
+            },
+            {
+              "end": 5,
+              "identity": 26,
+              "node_end": 15,
+              "start": 5,
+              "subtree_end": 9
+            },
+            {
+              "end": 6,
+              "identity": 27,
+              "node_end": 12,
+              "start": 5,
+              "subtree_end": 6
+            },
+            {
+              "end": 7,
+              "identity": 28,
+              "node_end": 13,
+              "start": 6,
+              "subtree_end": 7
+            },
+            {
+              "end": 8,
+              "identity": 29,
+              "node_end": 14,
+              "start": 7,
+              "subtree_end": 8
+            },
+            {
+              "end": 9,
+              "identity": 30,
+              "node_end": 15,
+              "start": 8,
+              "subtree_end": 9
+            }
+          ],
+          "source_epoch": 3,
+          "token": "PresentationToken { window: 1, sequence: 3 }",
+          "work": {
+            "cursor_reads": 30,
+            "dependency_bytes_written": 2040,
+            "row_bytes_written": 480,
+            "rows": 15,
+            "stack_capacity_bytes": 64,
+            "stack_pops": 15,
+            "stack_pushes": 15,
+            "support_draw_visits": 9
+          }
+        },
+        "current_lookup_matches_live_version": true,
+        "lookup_verification_visits": 15,
+        "previous": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 1 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 2 })",
+              "parent": 3,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                24,
+                8
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 3 })",
+              "parent": 5,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "support": [
+                0,
+                8,
+                24,
+                16
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 4 })",
+              "parent": 7,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "support": [
+                0,
+                16,
+                24,
+                24
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                7,
+                19,
+                33,
+                29
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                8.0,
+                20.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                2
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                3
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                1.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                1,
+                49,
+                4
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                2.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 2, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                2,
+                49,
+                5
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                3.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 2, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 2040,
+          "heap_bytes": 2400,
+          "row_bytes": 24,
+          "row_capacity_bytes": 360,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 1,
+              "node_end": 15,
+              "start": 0,
+              "subtree_end": 9
+            },
+            {
+              "end": 1,
+              "identity": 2,
+              "node_end": 10,
+              "start": 1,
+              "subtree_end": 5
+            },
+            {
+              "end": 1,
+              "identity": 3,
+              "node_end": 9,
+              "start": 1,
+              "subtree_end": 4
+            },
+            {
+              "end": 1,
+              "identity": 8,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 9,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 4,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 5,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 6,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 4,
+              "identity": 7,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 5,
+              "identity": 10,
+              "node_end": 10,
+              "start": 4,
+              "subtree_end": 5
+            },
+            {
+              "end": 5,
+              "identity": 11,
+              "node_end": 15,
+              "start": 5,
+              "subtree_end": 9
+            },
+            {
+              "end": 6,
+              "identity": 12,
+              "node_end": 12,
+              "start": 5,
+              "subtree_end": 6
+            },
+            {
+              "end": 7,
+              "identity": 13,
+              "node_end": 13,
+              "start": 6,
+              "subtree_end": 7
+            },
+            {
+              "end": 8,
+              "identity": 14,
+              "node_end": 14,
+              "start": 7,
+              "subtree_end": 8
+            },
+            {
+              "end": 9,
+              "identity": 15,
+              "node_end": 15,
+              "start": 8,
+              "subtree_end": 9
+            }
+          ],
+          "source_epoch": 1,
+          "token": "PresentationToken { window: 1, sequence: 2 }",
+          "work": {
+            "cursor_reads": 30,
+            "dependency_bytes_written": 2040,
+            "row_bytes_written": 480,
+            "rows": 15,
+            "stack_capacity_bytes": 64,
+            "stack_pops": 15,
+            "stack_pushes": 15,
+            "support_draw_visits": 9
+          }
+        },
+        "retained_heap_bytes": 4800,
+        "scope": "test producer mapping only; old metadata owns no scene/resource/GPU lease",
+        "store_header_bytes": 272
+      },
+      "source_epoch": 3,
+      "work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 15,
+        "layout_cheap_answers": 21,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 15,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 15,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 15,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 0,
+        "survived": 0
+      }
+    }
+  },
+  {
+    "case": "failed-newer",
+    "failure": {
+      "committed": null,
+      "mode": "Append",
+      "pending_bytes": 0,
+      "qualified_route": [],
+      "route_active": true,
+      "route_capacity_bytes": 0,
+      "route_rows": 0,
+      "state_header_bytes": 344,
+      "work": {
+        "authority_declines": 0,
+        "committed": 0,
+        "context_ancestors": 0,
+        "correspondence_checks": 0,
+        "depth_nodes": 0,
+        "dirty_identity_checks": 0,
+        "frontier_peak_bytes": 0,
+        "frontier_pops": 0,
+        "frontier_pushes": 0,
+        "handle_scratch_bytes": 0,
+        "inserted_nodes": 0,
+        "invalidated": 1,
+        "new_handle_writes": 0,
+        "order_calls": 0,
+        "plan_allocations": 0,
+        "plan_attempts": 0,
+        "plan_peak_bytes": 0,
+        "plan_staged": 0,
+        "prefix_materialized": 0,
+        "preflight_nodes": 0,
+        "preserved_nodes": 0,
+        "rank_writes": 0,
+        "removal_checks": 0,
+        "removed_nodes": 0,
+        "retired_dirty_ids": 0,
+        "route_build_peak_bytes": 0,
+        "route_lookup_compares": 0,
+        "route_lookups": 0,
+        "route_rows": 0,
+        "route_sort_compares": 0,
+        "sibling_checks": 0,
+        "sibling_relinks": 0,
+        "validation_ancestors": 0
+      },
+      "working": true
+    },
+    "mode": "Append",
+    "older_ack_accepted": true,
+    "recovery": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 45,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 360,
+            "encoded_payload_bytes": 360,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 60,
+            "known_old_new_plus_builder_scratch_peak_bytes": 920,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 400,
+            "ordinal_block_rewrite_payload_bytes": 360,
+            "raw_storage": true,
+            "records": 15,
+            "retained_bytes": 400,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 480,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 24,
+            "encoded_bytes_produced": 87,
+            "encoded_payload_bytes": 87,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 180,
+            "known_old_new_plus_builder_scratch_peak_bytes": 902,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 24,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 151,
+            "ordinal_block_rewrite_payload_bytes": 87,
+            "raw_storage": false,
+            "records": 15,
+            "retained_bytes": 151,
+            "store_header_bytes": 40,
+            "validation_decodes": 15
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 480,
+            "builder_header_bytes": 120,
+            "changed_records": 15,
+            "directory_capacity_bytes": 24,
+            "encoded_bytes_produced": 87,
+            "encoded_payload_bytes": 87,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 180,
+            "known_old_new_plus_builder_scratch_peak_bytes": 902,
+            "mode": "Relative",
+            "new_directory_bytes_written": 24,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 151,
+            "ordinal_block_rewrite_payload_bytes": 87,
+            "raw_storage": false,
+            "records": 15,
+            "retained_bytes": 151,
+            "store_header_bytes": 40,
+            "validation_decodes": 15
+          }
+        ],
+        "combined_control_store_retained_bytes": 702,
+        "combined_store_run_trial_retained_bytes": 1686,
+        "from_namespace": 3,
+        "from_source_epoch": 1,
+        "old_combined_control_store_retained_bytes": 702,
+        "pending_heap_bytes": 0,
+        "producer_records": 15,
+        "raw_canonical_literal_bytes": 360,
+        "run_capacity_bytes": 48,
+        "run_count": 1,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 12,
+        "runs": [
+          {
+            "len": 15,
+            "new_start": 0,
+            "old_start": 4294967295
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 3,
+        "to_source_epoch": 3,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 3,
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 15,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "identity_index_heap_bytes": 0,
+      "identity_index_kind": "contiguous",
+      "layout_id_capacity_bytes": 240,
+      "logical": [
+        {
+          "identity": 16,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 17,
+          "index": 1,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 18,
+          "index": 2,
+          "kind": "List",
+          "parent": 1,
+          "row_key": null
+        },
+        {
+          "identity": 19,
+          "index": 3,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 1
+        },
+        {
+          "identity": 20,
+          "index": 4,
+          "kind": "Div",
+          "parent": 3,
+          "row_key": null
+        },
+        {
+          "identity": 21,
+          "index": 5,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 2
+        },
+        {
+          "identity": 22,
+          "index": 6,
+          "kind": "Div",
+          "parent": 5,
+          "row_key": null
+        },
+        {
+          "identity": 23,
+          "index": 7,
+          "kind": "ListItem",
+          "parent": 2,
+          "row_key": 3
+        },
+        {
+          "identity": 24,
+          "index": 8,
+          "kind": "Div",
+          "parent": 7,
+          "row_key": null
+        },
+        {
+          "identity": 25,
+          "index": 9,
+          "kind": "Div",
+          "parent": 1,
+          "row_key": null
+        },
+        {
+          "identity": 26,
+          "index": 10,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 27,
+          "index": 11,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 28,
+          "index": 12,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 29,
+          "index": 13,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        },
+        {
+          "identity": 30,
+          "index": 14,
+          "kind": "Div",
+          "parent": 10,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 360,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 1320,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 1080,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 440,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 360,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 2088,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 112,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 1320,
+              "producer_records": 15,
+              "raw_copied_bytes": 360,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 288,
+              "block_control_bytes": 120,
+              "block_payload_bytes": 231,
+              "bytes": 671,
+              "directory_capacity_bytes": 80,
+              "physical_block_records": 36,
+              "piece_visits": 5,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 36,
+              "unique_blocks": 3,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 40,
+              "block_payload_bytes": 87,
+              "bytes": 223,
+              "directory_capacity_bytes": 16,
+              "physical_block_records": 15,
+              "piece_visits": 1,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 15,
+              "unique_blocks": 1,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1439,
+            "current_pieces": 1,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 64,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 10,
+              "accounting_scratch_capacity_peak_bytes": 368,
+              "before_compaction_pieces": 1,
+              "builder_piece_capacity_peak_bytes": 240,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 16,
+              "descriptor_bytes_written": 16,
+              "encoder_field_reads": 180,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 40,
+              "new_chunks": 1,
+              "new_encoded_bytes": 87,
+              "new_encoded_records": 15,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 895,
+              "producer_records": 15,
+              "raw_copied_bytes": 0,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 1024,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 15,
+              "verification_directory_searches": 15,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 120,
+              "block_payload_bytes": 261,
+              "bytes": 669,
+              "directory_capacity_bytes": 48,
+              "physical_block_records": 45,
+              "piece_visits": 3,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 45,
+              "unique_blocks": 3,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 160,
+              "block_control_bytes": 40,
+              "block_payload_bytes": 87,
+              "bytes": 223,
+              "directory_capacity_bytes": 16,
+              "physical_block_records": 15,
+              "piece_visits": 1,
+              "raw_buffer_capacity_bytes": 0,
+              "referenced_block_records": 15,
+              "unique_blocks": 1,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1437,
+            "current_pieces": 1,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 32,
+            "records": 15,
+            "retained_old_versions": 2,
+            "source_epoch": 3,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 6,
+              "accounting_scratch_capacity_peak_bytes": 240,
+              "before_compaction_pieces": 1,
+              "builder_piece_capacity_peak_bytes": 240,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 16,
+              "descriptor_bytes_written": 16,
+              "encoder_field_reads": 180,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 40,
+              "new_chunks": 1,
+              "new_encoded_bytes": 87,
+              "new_encoded_records": 15,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 893,
+              "producer_records": 15,
+              "raw_copied_bytes": 0,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 1024,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 15,
+              "verification_directory_comparisons": 15,
+              "verification_directory_searches": 15,
+              "version_lease_clones": 1
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 3, sequence: 3 })",
+      "presentation_epoch": 3,
+      "presented_capacity_bytes": 960,
+      "raw_node_vec_header_bytes": 24,
+      "semantic_emission": {
+        "current": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 1 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 2 })",
+              "parent": 3,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                24,
+                8
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 3 })",
+              "parent": 5,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "support": [
+                0,
+                8,
+                24,
+                16
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 4 })",
+              "parent": 7,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "support": [
+                0,
+                16,
+                24,
+                24
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                7,
+                19,
+                33,
+                29
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                8.0,
+                20.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                2
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                3
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                1.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                1,
+                49,
+                4
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                2.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 7, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                2,
+                49,
+                5
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                3.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 7, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 2040,
+          "heap_bytes": 2400,
+          "row_bytes": 24,
+          "row_capacity_bytes": 360,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 16,
+              "node_end": 15,
+              "start": 0,
+              "subtree_end": 9
+            },
+            {
+              "end": 1,
+              "identity": 17,
+              "node_end": 10,
+              "start": 1,
+              "subtree_end": 5
+            },
+            {
+              "end": 1,
+              "identity": 18,
+              "node_end": 9,
+              "start": 1,
+              "subtree_end": 4
+            },
+            {
+              "end": 1,
+              "identity": 19,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 20,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 21,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 22,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 23,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 4,
+              "identity": 24,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 5,
+              "identity": 25,
+              "node_end": 10,
+              "start": 4,
+              "subtree_end": 5
+            },
+            {
+              "end": 5,
+              "identity": 26,
+              "node_end": 15,
+              "start": 5,
+              "subtree_end": 9
+            },
+            {
+              "end": 6,
+              "identity": 27,
+              "node_end": 12,
+              "start": 5,
+              "subtree_end": 6
+            },
+            {
+              "end": 7,
+              "identity": 28,
+              "node_end": 13,
+              "start": 6,
+              "subtree_end": 7
+            },
+            {
+              "end": 8,
+              "identity": 29,
+              "node_end": 14,
+              "start": 7,
+              "subtree_end": 8
+            },
+            {
+              "end": 9,
+              "identity": 30,
+              "node_end": 15,
+              "start": 8,
+              "subtree_end": 9
+            }
+          ],
+          "source_epoch": 3,
+          "token": "PresentationToken { window: 3, sequence: 3 }",
+          "work": {
+            "cursor_reads": 30,
+            "dependency_bytes_written": 2040,
+            "row_bytes_written": 480,
+            "rows": 15,
+            "stack_capacity_bytes": 64,
+            "stack_pops": 15,
+            "stack_pushes": 15,
+            "support_draw_visits": 9
+          }
+        },
+        "current_lookup_matches_live_version": true,
+        "lookup_verification_visits": 15,
+        "previous": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 1 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 2 })",
+              "parent": 3,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                24,
+                8
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 2 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 3 })",
+              "parent": 5,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "support": [
+                0,
+                8,
+                24,
+                16
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                8.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 3 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 1 })",
+              "parent": 2,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 4 })",
+              "parent": 7,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "support": [
+                0,
+                16,
+                24,
+                24
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 4 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 1,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                7,
+                19,
+                33,
+                29
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                8.0,
+                20.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": null,
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                2
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                0,
+                49,
+                3
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                1.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                1,
+                49,
+                4
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                2.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 6, index: 0 })",
+              "parent": 10,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                0.0
+              ],
+              "support": [
+                31,
+                2,
+                49,
+                5
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                32.0,
+                3.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 6, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 2040,
+          "heap_bytes": 2400,
+          "row_bytes": 24,
+          "row_capacity_bytes": 360,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 1,
+              "node_end": 15,
+              "start": 0,
+              "subtree_end": 9
+            },
+            {
+              "end": 1,
+              "identity": 2,
+              "node_end": 10,
+              "start": 1,
+              "subtree_end": 5
+            },
+            {
+              "end": 1,
+              "identity": 3,
+              "node_end": 9,
+              "start": 1,
+              "subtree_end": 4
+            },
+            {
+              "end": 1,
+              "identity": 8,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 9,
+              "node_end": 5,
+              "start": 1,
+              "subtree_end": 2
+            },
+            {
+              "end": 2,
+              "identity": 4,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 5,
+              "node_end": 7,
+              "start": 2,
+              "subtree_end": 3
+            },
+            {
+              "end": 3,
+              "identity": 6,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 4,
+              "identity": 7,
+              "node_end": 9,
+              "start": 3,
+              "subtree_end": 4
+            },
+            {
+              "end": 5,
+              "identity": 10,
+              "node_end": 10,
+              "start": 4,
+              "subtree_end": 5
+            },
+            {
+              "end": 5,
+              "identity": 11,
+              "node_end": 15,
+              "start": 5,
+              "subtree_end": 9
+            },
+            {
+              "end": 6,
+              "identity": 12,
+              "node_end": 12,
+              "start": 5,
+              "subtree_end": 6
+            },
+            {
+              "end": 7,
+              "identity": 13,
+              "node_end": 13,
+              "start": 6,
+              "subtree_end": 7
+            },
+            {
+              "end": 8,
+              "identity": 14,
+              "node_end": 14,
+              "start": 7,
+              "subtree_end": 8
+            },
+            {
+              "end": 9,
+              "identity": 15,
+              "node_end": 15,
+              "start": 8,
+              "subtree_end": 9
+            }
+          ],
+          "source_epoch": 1,
+          "token": "PresentationToken { window: 3, sequence: 2 }",
+          "work": {
+            "cursor_reads": 30,
+            "dependency_bytes_written": 2040,
+            "row_bytes_written": 480,
+            "rows": 15,
+            "stack_capacity_bytes": 64,
+            "stack_pops": 15,
+            "stack_pushes": 15,
+            "support_draw_visits": 9
+          }
+        },
+        "retained_heap_bytes": 4800,
+        "scope": "test producer mapping only; old metadata owns no scene/resource/GPU lease",
+        "store_header_bytes": 272
+      },
+      "source_epoch": 3,
+      "work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_cached_answers": 1,
+        "layout_changed_writes": 15,
+        "layout_cheap_answers": 21,
+        "layout_computed_answers": 10,
+        "layout_computes": 1,
+        "layout_discarded_handles": 15,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 15,
+        "layout_measure_queries": 0,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 3,
+        "layout_style_calls": 0,
+        "minted": 15,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 0,
+        "survived": 0
+      }
+    }
+  },
+  {
+    "case": "wrong-route",
+    "older_ack_accepted": true,
+    "qualified": {
+      "committed": "PresentationToken { window: 5, sequence: 2 }",
+      "mode": "Ordered",
+      "pending_bytes": 0,
+      "qualified_route": [
+        [
+          "NodeId { arena: 12, generation: 1, index: 2 }",
+          4
+        ],
+        [
+          "NodeId { arena: 12, generation: 1, index: 4 }",
+          6
+        ],
+        [
+          "NodeId { arena: 12, generation: 1, index: 6 }",
+          2
+        ]
+      ],
+      "route_active": true,
+      "route_capacity_bytes": 96,
+      "route_rows": 3,
+      "state_header_bytes": 344,
+      "work": {
+        "authority_declines": 0,
+        "committed": 2,
+        "context_ancestors": 1,
+        "correspondence_checks": 7,
+        "depth_nodes": 0,
+        "dirty_identity_checks": 6,
+        "frontier_peak_bytes": 120,
+        "frontier_pops": 5,
+        "frontier_pushes": 5,
+        "handle_scratch_bytes": 112,
+        "inserted_nodes": 0,
+        "invalidated": 1,
+        "new_handle_writes": 7,
+        "order_calls": 1,
+        "plan_allocations": 3,
+        "plan_attempts": 1,
+        "plan_peak_bytes": 140,
+        "plan_staged": 1,
+        "prefix_materialized": 1,
+        "preflight_nodes": 7,
+        "preserved_nodes": 7,
+        "rank_writes": 7,
+        "removal_checks": 7,
+        "removed_nodes": 0,
+        "retired_dirty_ids": 0,
+        "route_build_peak_bytes": 96,
+        "route_lookup_compares": 42,
+        "route_lookups": 12,
+        "route_rows": 3,
+        "route_sort_compares": 3,
+        "sibling_checks": 7,
+        "sibling_relinks": 1,
+        "validation_ancestors": 1
+      },
+      "working": false
+    },
+    "rejected": "Err(Committed { error: PresentationPanicked, commit: Commit { source_epoch: 2, presentation_epoch: 1, presentation_valid: true, prepared_epoch: None, changed_nodes: 3 } })"
+  },
+  {
+    "case": "poison-recovery",
+    "preservation": {
+      "committed": "PresentationToken { window: 6, sequence: 2 }",
+      "mode": "Ordered",
+      "pending_bytes": 0,
+      "qualified_route": [],
+      "route_active": false,
+      "route_capacity_bytes": 0,
+      "route_rows": 0,
+      "state_header_bytes": 344,
+      "work": {
+        "authority_declines": 1,
+        "committed": 1,
+        "context_ancestors": 0,
+        "correspondence_checks": 0,
+        "depth_nodes": 0,
+        "dirty_identity_checks": 0,
+        "frontier_peak_bytes": 0,
+        "frontier_pops": 0,
+        "frontier_pushes": 0,
+        "handle_scratch_bytes": 0,
+        "inserted_nodes": 0,
+        "invalidated": 1,
+        "new_handle_writes": 0,
+        "order_calls": 0,
+        "plan_allocations": 0,
+        "plan_attempts": 0,
+        "plan_peak_bytes": 0,
+        "plan_staged": 0,
+        "prefix_materialized": 0,
+        "preflight_nodes": 0,
+        "preserved_nodes": 0,
+        "rank_writes": 0,
+        "removal_checks": 0,
+        "removed_nodes": 0,
+        "retired_dirty_ids": 0,
+        "route_build_peak_bytes": 0,
+        "route_lookup_compares": 12,
+        "route_lookups": 4,
+        "route_rows": 0,
+        "route_sort_compares": 0,
+        "sibling_checks": 0,
+        "sibling_relinks": 0,
+        "validation_ancestors": 0
+      },
+      "working": false
+    },
+    "producer": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 9,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 0,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 72,
+            "encoded_payload_bytes": 72,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 12,
+            "known_old_new_plus_builder_scratch_peak_bytes": 344,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 3,
+            "old_retained_bytes": 112,
+            "ordinal_block_rewrite_payload_bytes": 0,
+            "raw_storage": true,
+            "records": 3,
+            "retained_bytes": 112,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 96,
+            "builder_header_bytes": 120,
+            "changed_records": 0,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 72,
+            "encoded_payload_bytes": 72,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 12,
+            "known_old_new_plus_builder_scratch_peak_bytes": 440,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 3,
+            "old_retained_bytes": 112,
+            "ordinal_block_rewrite_payload_bytes": 0,
+            "raw_storage": true,
+            "records": 3,
+            "retained_bytes": 112,
+            "store_header_bytes": 40,
+            "validation_decodes": 3
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 96,
+            "builder_header_bytes": 120,
+            "changed_records": 0,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 72,
+            "encoded_payload_bytes": 72,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 12,
+            "known_old_new_plus_builder_scratch_peak_bytes": 440,
+            "mode": "Relative",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 3,
+            "old_retained_bytes": 112,
+            "ordinal_block_rewrite_payload_bytes": 0,
+            "raw_storage": true,
+            "records": 3,
+            "retained_bytes": 112,
+            "store_header_bytes": 40,
+            "validation_decodes": 3
+          }
+        ],
+        "combined_control_store_retained_bytes": 336,
+        "combined_store_run_trial_retained_bytes": 1320,
+        "from_namespace": 6,
+        "from_source_epoch": 0,
+        "old_combined_control_store_retained_bytes": 336,
+        "pending_heap_bytes": 0,
+        "producer_records": 3,
+        "raw_canonical_literal_bytes": 0,
+        "run_capacity_bytes": 48,
+        "run_count": 1,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 12,
+        "runs": [
+          {
+            "len": 3,
+            "new_start": 0,
+            "old_start": 0
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 6,
+        "to_source_epoch": 1,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 1,
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 3,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 4,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 2,
+        "text_promotions": 1
+      },
+      "identity_index_heap_bytes": 0,
+      "identity_index_kind": "contiguous",
+      "layout_id_capacity_bytes": 64,
+      "logical": [
+        {
+          "identity": 1,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 2,
+          "index": 1,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 3,
+          "index": 2,
+          "kind": "Image",
+          "parent": 0,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 72,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 304,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 144,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 152,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 72,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1072,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 3,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 304,
+              "producer_records": 3,
+              "raw_copied_bytes": 72,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 3,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 304,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 144,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 152,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 72,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1072,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 3,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 304,
+              "producer_records": 3,
+              "raw_copied_bytes": 72,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 3,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 304,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 144,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 152,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 72,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1072,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 3,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 304,
+              "producer_records": 3,
+              "raw_copied_bytes": 72,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 3,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 6, sequence: 2 })",
+      "presentation_epoch": 1,
+      "presented_capacity_bytes": 192,
+      "raw_node_vec_header_bytes": 24,
+      "semantic_emission": {
+        "current": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 10, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 10, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "support": [
+                1,
+                4,
+                17,
+                14
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 10, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 10, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "support": [
+                0,
+                15,
+                18,
+                33
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 10, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 408,
+          "heap_bytes": 480,
+          "row_bytes": 24,
+          "row_capacity_bytes": 72,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 1,
+              "node_end": 3,
+              "start": 0,
+              "subtree_end": 4
+            },
+            {
+              "end": 3,
+              "identity": 2,
+              "node_end": 2,
+              "start": 1,
+              "subtree_end": 3
+            },
+            {
+              "end": 4,
+              "identity": 3,
+              "node_end": 3,
+              "start": 3,
+              "subtree_end": 4
+            }
+          ],
+          "source_epoch": 1,
+          "token": "PresentationToken { window: 6, sequence: 2 }",
+          "work": {
+            "cursor_reads": 6,
+            "dependency_bytes_written": 408,
+            "row_bytes_written": 96,
+            "rows": 3,
+            "stack_capacity_bytes": 32,
+            "stack_pops": 3,
+            "stack_pushes": 3,
+            "support_draw_visits": 4
+          }
+        },
+        "current_lookup_matches_live_version": true,
+        "lookup_verification_visits": 3,
+        "previous": {
+          "dependencies": [
+            {
+              "inherited_clip": "Rect(Rect { x: 0.0, y: 0.0, width: 64.0, height: 64.0 })",
+              "parent": null,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              "support": [
+                0,
+                0,
+                64,
+                64
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 9, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 9, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "support": [
+                1,
+                4,
+                25,
+                14
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 9, index: 0 })"
+            },
+            {
+              "inherited_clip": "Chain(ClipId { owner: 9, index: 0 })",
+              "parent": 0,
+              "parent_space": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                0.0
+              ],
+              "support": [
+                0,
+                15,
+                18,
+                33
+              ],
+              "transform": [
+                1.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                16.0
+              ],
+              "used_clip": "Chain(ClipId { owner: 9, index: 0 })"
+            }
+          ],
+          "dependency_bytes": 136,
+          "dependency_capacity_bytes": 408,
+          "heap_bytes": 480,
+          "row_bytes": 24,
+          "row_capacity_bytes": 72,
+          "rows": [
+            {
+              "end": 1,
+              "identity": 1,
+              "node_end": 3,
+              "start": 0,
+              "subtree_end": 4
+            },
+            {
+              "end": 3,
+              "identity": 2,
+              "node_end": 2,
+              "start": 1,
+              "subtree_end": 3
+            },
+            {
+              "end": 4,
+              "identity": 3,
+              "node_end": 3,
+              "start": 3,
+              "subtree_end": 4
+            }
+          ],
+          "source_epoch": 0,
+          "token": "PresentationToken { window: 6, sequence: 1 }",
+          "work": {
+            "cursor_reads": 6,
+            "dependency_bytes_written": 408,
+            "row_bytes_written": 96,
+            "rows": 3,
+            "stack_capacity_bytes": 32,
+            "stack_pops": 3,
+            "stack_pushes": 3,
+            "support_draw_visits": 4
+          }
+        },
+        "retained_heap_bytes": 960,
+        "scope": "test producer mapping only; old metadata owns no scene/resource/GPU lease",
+        "store_header_bytes": 272
+      },
+      "source_epoch": 1,
+      "work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_cached_answers": 0,
+        "layout_changed_writes": 3,
+        "layout_cheap_answers": 0,
+        "layout_computed_answers": 5,
+        "layout_computes": 1,
+        "layout_discarded_handles": 3,
+        "layout_explicit_dirty_calls": 0,
+        "layout_full_rebuilds": 1,
+        "layout_insertions": 3,
+        "layout_measure_queries": 4,
+        "layout_parent_flow_checks": 0,
+        "layout_rebuild_reason_bits": 4,
+        "layout_style_calls": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      }
+    }
+  }
+]

@@ -1,0 +1,7 @@
+
+thread 'native::layout_preservation_tests::layout_preservation_authority' (1522904) panicked at crates/gpui/src/runtime/layout_preservation.rs:209:18:
+fresh sorted layout handles: 7
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::layout_preservation_tests::layout_preservation_authority' (1522904) panicked at crates/gpui/src/runtime/layout_preservation.rs:429:33:
+bounded layout poison fault

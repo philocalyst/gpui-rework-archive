@@ -1,0 +1,13 @@
+
+running 8 tests
+test layout::tests::cold_context_owner_replaces_takes_and_promotes_without_demotion ... ok
+test layout::tests::generation_rollover_clears_old_cache_stamps ... ok
+test layout::tests::hidden_marker_uses_flags_and_revokes_on_mutation_and_rollover ... ok
+test layout::tests::oof_records_remain_live_through_rollover_and_reused_slots ... ok
+test layout::tests::ordered_before_matches_fresh_layout_and_keeps_dirty_contract ... ok
+test layout::tests::speculative_oof_writes_cannot_allocate_or_replace_real_records ... ok
+test tree::tests::exhausted_generation_retires_slot_without_aba ... ok
+test tree::tests::ordered_before_preserves_capabilities_and_rejects_invalid_moves ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
