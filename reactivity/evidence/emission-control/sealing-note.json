@@ -1,0 +1,4 @@
+{
+  "reason": "First sealing attempt checked candidate git cleanliness after copying its new untracked evidence; it stopped before writing documentation or committing. Build sources/evidence were unchanged. Resumed with explicit tracked-source guards.",
+  "code_or_evidence_changed": false
+}

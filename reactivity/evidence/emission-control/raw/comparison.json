@@ -1,0 +1,119 @@
+{
+  "verdict": "REPRODUCED WITHOUT MAPPING; exact cross-backend gate remains FAILED",
+  "scope": "only semantic mapping instrumentation removed; older controls and renderer identical; no timing/cause/tolerance claim",
+  "changed_inputs": {
+    "reactivity/crates/gpui/src/runtime.rs": [
+      "16c0b99bfe5ae739be176437ade2a89edcbfac062cd6bfe7e6ce9b43b9775507",
+      "e95cf8fe54067f8dc7a8b741b7b4679fd672a18b5002e9b55d781f3fdbcd1829"
+    ],
+    "reactivity/crates/gpui/src/runtime/semantic_emission.rs": [
+      "3511d8d2689b360e86d43b13581c01f034707992d1952135c60abd18170a5b92",
+      null
+    ],
+    "reactivity/crates/gpui/src/runtime/structural_trace.rs": [
+      "82e5b4f8e8dfaf359abaa6d43f50bad589524b6dcf4a002f2efc470fe9d14681",
+      "18072021255fdae47e00552501c7f5254e3e9d2027a6b1327fd1c98df9550642"
+    ]
+  },
+  "shader_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+  "frames": [
+    {
+      "operation": "initial",
+      "scene_identical": true,
+      "pixel_gate": "FAILED",
+      "candidate": [
+        48,
+        48,
+        0
+      ],
+      "baseline": [
+        48,
+        48,
+        0
+      ],
+      "cross_process_wrong_bytes": {
+        "actual": 0,
+        "cpu": 0,
+        "fresh": 0,
+        "full": 0
+      },
+      "gpu_counters_identical": true,
+      "source_allocations": [
+        null,
+        null
+      ]
+    },
+    {
+      "operation": "insert",
+      "scene_identical": true,
+      "pixel_gate": "FAILED",
+      "candidate": [
+        48,
+        48,
+        0
+      ],
+      "baseline": [
+        48,
+        48,
+        0
+      ],
+      "cross_process_wrong_bytes": {
+        "actual": 0,
+        "cpu": 0,
+        "fresh": 0,
+        "full": 0
+      },
+      "gpu_counters_identical": true,
+      "source_allocations": [
+        {
+          "bytes": 28612,
+          "count": 145,
+          "peak_delta": 6852,
+          "retained_delta": 4484
+        },
+        {
+          "bytes": 27284,
+          "count": 141,
+          "peak_delta": 5556,
+          "retained_delta": 3204
+        }
+      ]
+    },
+    {
+      "operation": "remove",
+      "scene_identical": true,
+      "pixel_gate": "FAILED",
+      "candidate": [
+        48,
+        48,
+        0
+      ],
+      "baseline": [
+        48,
+        48,
+        0
+      ],
+      "cross_process_wrong_bytes": {
+        "actual": 0,
+        "cpu": 0,
+        "fresh": 0,
+        "full": 0
+      },
+      "gpu_counters_identical": true,
+      "source_allocations": [
+        {
+          "bytes": 26180,
+          "count": 140,
+          "peak_delta": 5300,
+          "retained_delta": 1740
+        },
+        {
+          "bytes": 25012,
+          "count": 136,
+          "peak_delta": 4148,
+          "retained_delta": 1740
+        }
+      ]
+    }
+  ]
+}

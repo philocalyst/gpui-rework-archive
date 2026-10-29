@@ -1,0 +1,2489 @@
+[
+  {
+    "allocation": null,
+    "gpu": {
+      "base": "None",
+      "bin_visits": 76,
+      "compact_draws": 4,
+      "composited_pixels": 4096,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 2008,
+      "damage": [
+        0,
+        0,
+        64,
+        64
+      ],
+      "draws": 9,
+      "gpu_buffer_bytes": 1744,
+      "inline_draws": 5,
+      "previous": "None",
+      "raw_records": 848,
+      "shared_groups": 2,
+      "token": "PresentationToken { window: 1, sequence: 1 }",
+      "upload_bytes": 1208,
+      "validations": 9
+    },
+    "observation": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 21,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 368,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 40,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 224,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 592,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 40,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 7
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 224,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 592,
+            "mode": "Relative",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 0,
+            "old_retained_bytes": 40,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 7
+          }
+        ],
+        "combined_control_store_retained_bytes": 624,
+        "combined_store_run_trial_retained_bytes": 1608,
+        "from_namespace": 0,
+        "from_source_epoch": 0,
+        "old_combined_control_store_retained_bytes": 120,
+        "pending_heap_bytes": 0,
+        "producer_records": 7,
+        "raw_canonical_literal_bytes": 168,
+        "run_capacity_bytes": 48,
+        "run_count": 1,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 12,
+        "runs": [
+          {
+            "len": 7,
+            "new_start": 0,
+            "old_start": 4294967295
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 1,
+        "to_source_epoch": 0,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 0,
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 1,
+        "destination_compares": 7,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 8,
+        "owner_reruns": 0,
+        "paint_passes": 1,
+        "presentations": 0,
+        "source_operations": 0,
+        "source_reads": 0,
+        "text_bytes_copied": 4,
+        "text_promotions": 2
+      },
+      "identity_index_heap_bytes": 0,
+      "identity_index_kind": "contiguous",
+      "layout_id_capacity_bytes": 128,
+      "logical": [
+        {
+          "identity": 1,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 2,
+          "index": 1,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 3,
+          "index": 2,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 4,
+          "index": 3,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 5,
+          "index": 4,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 6,
+          "index": 5,
+          "kind": "Image",
+          "parent": 4,
+          "row_key": null
+        },
+        {
+          "identity": 7,
+          "index": 6,
+          "kind": "Image",
+          "parent": 4,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 168,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 984,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 0,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 0,
+            "source_epoch": 0,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 96,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 248,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 0
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 984,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 0,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 0,
+            "source_epoch": 0,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 96,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 248,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 0
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 984,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 0,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 0,
+            "source_epoch": 0,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 96,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 248,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 0
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 1, sequence: 1 })",
+      "presentation_epoch": 0,
+      "presented_capacity_bytes": 0,
+      "raw_node_vec_header_bytes": 24,
+      "source_epoch": 0,
+      "work": {
+        "identity_index_input": 7,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 7,
+        "minted": 7,
+        "paint_nodes": 7,
+        "reconciled": 7,
+        "relocated": 0,
+        "survived": 0
+      }
+    },
+    "one_node_one_command_wrong_rows": null,
+    "operation": "initial",
+    "pixel_wrong_bytes_cpu_fresh_full": [
+      48,
+      48,
+      0
+    ],
+    "scene": {
+      "draws": [
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 0,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "RoundedRect(4.0)"
+        },
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            50.0,
+            17.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.6444796919822693,
+            0.6444796919822693,
+            0.6444796919822693,
+            1.0
+          ],
+          "image_key": null,
+          "index": 1,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            1.0,
+            4.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 2,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            4.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 3,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            1.0,
+            20.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 4,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -16.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            20.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 5,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -16.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            0.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 6,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            0.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 7,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        },
+        {
+          "bounds": [
+            8.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 8,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -9.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        }
+      ],
+      "gradients": 0,
+      "images": 1,
+      "masks": 1,
+      "resource_entries": 3,
+      "resource_handles_bytes": 96,
+      "resource_header_bytes": 128,
+      "resource_index_capacity": 6,
+      "scene_header_bytes": 264,
+      "scene_lane_bytes": 1608
+    }
+  },
+  {
+    "allocation": {
+      "bytes": 27284,
+      "count": 141,
+      "peak_delta": 5556,
+      "retained_delta": 3204
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 1, sequence: 1 })",
+      "bin_visits": 84,
+      "compact_draws": 4,
+      "composited_pixels": 2250,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 2160,
+      "damage": [
+        0,
+        0,
+        50,
+        45
+      ],
+      "draws": 10,
+      "gpu_buffer_bytes": 1744,
+      "inline_draws": 6,
+      "previous": "Some(PresentationToken { window: 1, sequence: 1 })",
+      "raw_records": 944,
+      "shared_groups": 2,
+      "token": "PresentationToken { window: 1, sequence: 2 }",
+      "upload_bytes": 1320,
+      "validations": 10
+    },
+    "observation": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 24,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 192,
+            "encoded_payload_bytes": 192,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 32,
+            "known_old_new_plus_builder_scratch_peak_bytes": 560,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 208,
+            "ordinal_block_rewrite_payload_bytes": 192,
+            "raw_storage": true,
+            "records": 8,
+            "retained_bytes": 232,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 256,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 192,
+            "encoded_payload_bytes": 192,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 32,
+            "known_old_new_plus_builder_scratch_peak_bytes": 816,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 208,
+            "ordinal_block_rewrite_payload_bytes": 192,
+            "raw_storage": true,
+            "records": 8,
+            "retained_bytes": 232,
+            "store_header_bytes": 40,
+            "validation_decodes": 8
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 256,
+            "builder_header_bytes": 120,
+            "changed_records": 7,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 192,
+            "encoded_payload_bytes": 192,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 32,
+            "known_old_new_plus_builder_scratch_peak_bytes": 816,
+            "mode": "Relative",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 208,
+            "ordinal_block_rewrite_payload_bytes": 192,
+            "raw_storage": true,
+            "records": 8,
+            "retained_bytes": 232,
+            "store_header_bytes": 40,
+            "validation_decodes": 8
+          }
+        ],
+        "combined_control_store_retained_bytes": 696,
+        "combined_store_run_trial_retained_bytes": 1680,
+        "from_namespace": 1,
+        "from_source_epoch": 0,
+        "old_combined_control_store_retained_bytes": 624,
+        "pending_heap_bytes": 0,
+        "producer_records": 8,
+        "raw_canonical_literal_bytes": 168,
+        "run_capacity_bytes": 48,
+        "run_count": 2,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 24,
+        "runs": [
+          {
+            "len": 1,
+            "new_start": 0,
+            "old_start": 0
+          },
+          {
+            "len": 7,
+            "new_start": 1,
+            "old_start": 4294967295
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 1,
+        "to_source_epoch": 1,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 1,
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 8,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 8,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 4,
+        "text_promotions": 2
+      },
+      "identity_index_heap_bytes": 32,
+      "identity_index_kind": "runs",
+      "layout_id_capacity_bytes": 128,
+      "logical": [
+        {
+          "identity": 1,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 8,
+          "index": 1,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 9,
+          "index": 2,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 10,
+          "index": 3,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 11,
+          "index": 4,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 12,
+          "index": 5,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 13,
+          "index": 6,
+          "kind": "Image",
+          "parent": 5,
+          "row_key": null
+        },
+        {
+          "identity": 14,
+          "index": 7,
+          "kind": "Image",
+          "parent": 5,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 192,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 520,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 360,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 272,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 192,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1288,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 8,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 520,
+              "producer_records": 8,
+              "raw_copied_bytes": 192,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 8,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 520,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 360,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 272,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 192,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1288,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 8,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 520,
+              "producer_records": 8,
+              "raw_copied_bytes": 192,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 8,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 520,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 360,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 160,
+              "versions": 2
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 272,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 192,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1288,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 8,
+            "retained_old_versions": 1,
+            "source_epoch": 1,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 104,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 520,
+              "producer_records": 8,
+              "raw_copied_bytes": 192,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 8,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 1, sequence: 2 })",
+      "presentation_epoch": 0,
+      "presented_capacity_bytes": 448,
+      "raw_node_vec_header_bytes": 24,
+      "source_epoch": 1,
+      "work": {
+        "identity_index_input": 8,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 8,
+        "minted": 7,
+        "paint_nodes": 8,
+        "reconciled": 8,
+        "relocated": 0,
+        "survived": 1
+      }
+    },
+    "one_node_one_command_wrong_rows": null,
+    "operation": "insert",
+    "pixel_wrong_bytes_cpu_fresh_full": [
+      48,
+      48,
+      0
+    ],
+    "scene": {
+      "draws": [
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 0,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "RoundedRect(4.0)"
+        },
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            18.0,
+            5.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 1,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            0.0,
+            3.0,
+            50.0,
+            18.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.6444796919822693,
+            0.6444796919822693,
+            0.6444796919822693,
+            1.0
+          ],
+          "image_key": null,
+          "index": 2,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -4.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            1.0,
+            8.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 3,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -4.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            8.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 4,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -4.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            1.0,
+            24.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 5,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -20.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            24.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 6,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -20.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            0.0,
+            35.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 7,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -36.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            0.0,
+            35.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 8,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -36.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        },
+        {
+          "bounds": [
+            8.0,
+            35.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 9,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -9.0,
+            -36.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        }
+      ],
+      "gradients": 0,
+      "images": 1,
+      "masks": 1,
+      "resource_entries": 3,
+      "resource_handles_bytes": 96,
+      "resource_header_bytes": 128,
+      "resource_index_capacity": 6,
+      "scene_header_bytes": 264,
+      "scene_lane_bytes": 1664
+    }
+  },
+  {
+    "allocation": {
+      "bytes": 25012,
+      "count": 136,
+      "peak_delta": 4148,
+      "retained_delta": 1740
+    },
+    "gpu": {
+      "base": "Some(PresentationToken { window: 1, sequence: 2 })",
+      "bin_visits": 76,
+      "compact_draws": 4,
+      "composited_pixels": 2250,
+      "copied_pixels": 4096,
+      "cpu_index_bytes": 2160,
+      "damage": [
+        0,
+        0,
+        50,
+        45
+      ],
+      "draws": 9,
+      "gpu_buffer_bytes": 1744,
+      "inline_draws": 5,
+      "previous": "Some(PresentationToken { window: 1, sequence: 2 })",
+      "raw_records": 848,
+      "shared_groups": 2,
+      "token": "PresentationToken { window: 1, sequence: 3 }",
+      "upload_bytes": 1208,
+      "validations": 9
+    },
+    "observation": {
+      "cold_correspondence": {
+        "additional_whole_decoder_verification_records": 21,
+        "alternatives": [
+          {
+            "bounded_scratch_capacity_peak_bytes": 0,
+            "builder_header_bytes": 120,
+            "changed_records": 6,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 560,
+            "mode": "Raw",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 232,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 0
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 224,
+            "builder_header_bytes": 120,
+            "changed_records": 6,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 784,
+            "mode": "Absolute",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 232,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 7
+          },
+          {
+            "bounded_scratch_capacity_peak_bytes": 224,
+            "builder_header_bytes": 120,
+            "changed_records": 6,
+            "directory_capacity_bytes": 0,
+            "encoded_bytes_produced": 168,
+            "encoded_payload_bytes": 168,
+            "encoder_base_width_stack_bytes": 36,
+            "encoder_field_reads": 28,
+            "known_old_new_plus_builder_scratch_peak_bytes": 784,
+            "mode": "Relative",
+            "new_directory_bytes_written": 0,
+            "old_point_decodes": 1,
+            "old_retained_bytes": 232,
+            "ordinal_block_rewrite_payload_bytes": 168,
+            "raw_storage": true,
+            "records": 7,
+            "retained_bytes": 208,
+            "store_header_bytes": 40,
+            "validation_decodes": 7
+          }
+        ],
+        "combined_control_store_retained_bytes": 624,
+        "combined_store_run_trial_retained_bytes": 1608,
+        "from_namespace": 1,
+        "from_source_epoch": 1,
+        "old_combined_control_store_retained_bytes": 696,
+        "pending_heap_bytes": 0,
+        "producer_records": 7,
+        "raw_canonical_literal_bytes": 144,
+        "run_capacity_bytes": 48,
+        "run_count": 2,
+        "run_header_bytes": 24,
+        "run_payload_bytes": 24,
+        "runs": [
+          {
+            "len": 1,
+            "new_start": 0,
+            "old_start": 0
+          },
+          {
+            "len": 6,
+            "new_start": 1,
+            "old_start": 4294967295
+          }
+        ],
+        "scope": "test-only shadow cold stores; no layout/paint/resource/GPU authority",
+        "status": "complete logical correspondence",
+        "to_namespace": 1,
+        "to_source_epoch": 2,
+        "trial_header_bytes": 1056
+      },
+      "complete_epoch": 2,
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 7,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 8,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 4,
+        "text_promotions": 2
+      },
+      "identity_index_heap_bytes": 32,
+      "identity_index_kind": "runs",
+      "layout_id_capacity_bytes": 128,
+      "logical": [
+        {
+          "identity": 1,
+          "index": 0,
+          "kind": "Div",
+          "parent": null,
+          "row_key": null
+        },
+        {
+          "identity": 15,
+          "index": 1,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 16,
+          "index": 2,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 17,
+          "index": 3,
+          "kind": "Text",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 18,
+          "index": 4,
+          "kind": "Div",
+          "parent": 0,
+          "row_key": null
+        },
+        {
+          "identity": 19,
+          "index": 5,
+          "kind": "Image",
+          "parent": 4,
+          "row_key": null
+        },
+        {
+          "identity": 20,
+          "index": 6,
+          "kind": "Image",
+          "parent": 4,
+          "row_key": null
+        }
+      ],
+      "node_bytes": 24,
+      "node_capacity_bytes": 168,
+      "ordered_cold_extents": {
+        "alternatives": [
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 768,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 528,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1536,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Raw",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 2,
+            "source_epoch": 2,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 112,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 768,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 768,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 528,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1536,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Absolute",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 2,
+            "source_epoch": 2,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 112,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 768,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          },
+          {
+            "all_retained": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 768,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 528,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 240,
+              "versions": 3
+            },
+            "arc_control_bytes": 16,
+            "builder_header_bytes": 416,
+            "current": {
+              "accounting_scratch_capacity_bytes": 32,
+              "block_control_bytes": 0,
+              "block_payload_bytes": 0,
+              "bytes": 248,
+              "directory_capacity_bytes": 0,
+              "physical_block_records": 0,
+              "piece_visits": 0,
+              "raw_buffer_capacity_bytes": 168,
+              "referenced_block_records": 0,
+              "unique_blocks": 0,
+              "unreferenced_block_records": 0,
+              "version_control_bytes": 80,
+              "versions": 1
+            },
+            "current_and_history_plus_state_bytes": 1536,
+            "current_pieces": 0,
+            "encoder_base_width_stack_bytes": 36,
+            "history_handle_capacity_bytes": 32,
+            "mode": "Relative",
+            "pending_heap_bytes": 0,
+            "pending_work": null,
+            "piece_bytes": 16,
+            "post_report_block_scratch_capacity_bytes": 0,
+            "records": 7,
+            "retained_old_versions": 2,
+            "source_epoch": 2,
+            "state_header_bytes": 736,
+            "status": "complete logical store",
+            "work": {
+              "accounting_piece_visits": 0,
+              "accounting_scratch_capacity_peak_bytes": 112,
+              "before_compaction_pieces": 0,
+              "builder_piece_capacity_peak_bytes": 0,
+              "compaction_chunk_control_bytes": 0,
+              "compaction_cursor_hits": 0,
+              "compaction_decodes": 0,
+              "compaction_directory_comparisons": 0,
+              "compaction_directory_searches": 0,
+              "compaction_encoded_bytes": 0,
+              "compaction_new_chunks": 0,
+              "compactions": 0,
+              "cursor_hits": 0,
+              "descriptor_bytes_copied": 0,
+              "descriptor_bytes_written": 0,
+              "encoder_field_reads": 0,
+              "lease_clones": 0,
+              "new_chunk_control_bytes": 0,
+              "new_chunks": 0,
+              "new_encoded_bytes": 0,
+              "new_encoded_records": 0,
+              "old_directory_comparisons": 0,
+              "old_directory_searches": 0,
+              "old_point_decodes": 0,
+              "peak_known_version_storage_bytes": 768,
+              "producer_records": 7,
+              "raw_copied_bytes": 168,
+              "reusable_records": 0,
+              "scratch_capacity_peak_bytes": 0,
+              "split_slice_descriptors": 0,
+              "verification_decodes": 7,
+              "verification_directory_comparisons": 0,
+              "verification_directory_searches": 0,
+              "version_lease_clones": 1
+            }
+          }
+        ],
+        "scope": "CPU immutable cold versions only; no layout/paint/resource/GPU authority"
+      },
+      "pending": "Some(PresentationToken { window: 1, sequence: 3 })",
+      "presentation_epoch": 1,
+      "presented_capacity_bytes": 512,
+      "raw_node_vec_header_bytes": 24,
+      "source_epoch": 2,
+      "work": {
+        "identity_index_input": 7,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 7,
+        "minted": 6,
+        "paint_nodes": 7,
+        "reconciled": 7,
+        "relocated": 0,
+        "survived": 1
+      }
+    },
+    "one_node_one_command_wrong_rows": null,
+    "operation": "remove",
+    "pixel_wrong_bytes_cpu_fresh_full": [
+      48,
+      48,
+      0
+    ],
+    "scene": {
+      "draws": [
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 0,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "RoundedRect(4.0)"
+        },
+        {
+          "bounds": [
+            0.0,
+            0.0,
+            50.0,
+            17.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.6444796919822693,
+            0.6444796919822693,
+            0.6444796919822693,
+            1.0
+          ],
+          "image_key": null,
+          "index": 1,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            1.0,
+            4.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 2,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            4.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 3,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            0.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            1.0,
+            20.0,
+            12.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 4,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -16.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            12.0,
+            20.0,
+            13.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 5,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -16.0
+          ],
+          "mask_key": "GlyphKey { face: 1, glyph: 80, size: 1094713344 }",
+          "source": "Mask(GlyphMask { key: GlyphKey { face: 1, glyph: 80, size: 1094713344 }, width: 10, height: 7, coverage: [100, 24, 119, 123, 31, 23, 116, 123, 36, 0, 250, 184, 100, 155, 226, 191, 106, 136, 234, 11, 252, 66, 0, 0, 242, 79, 0, 0, 218, 53, 252, 26, 0, 0, 228, 42, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64, 252, 20, 0, 0, 228, 40, 0, 0, 204, 64] })"
+        },
+        {
+          "bounds": [
+            0.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": null,
+          "index": 6,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Solid"
+        },
+        {
+          "bounds": [
+            0.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 7,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -1.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        },
+        {
+          "bounds": [
+            8.0,
+            31.0,
+            10.0,
+            10.0
+          ],
+          "clip": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ],
+          "clip_chain": {
+            "depth": 1,
+            "index": 0
+          },
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "image_key": "ImageKey(1)",
+          "index": 8,
+          "inverse": [
+            1.0,
+            -0.0,
+            -0.0,
+            1.0,
+            -9.0,
+            -32.0
+          ],
+          "mask_key": null,
+          "source": "Image { image: ImageView { key: ImageKey(1), width: 2, height: 2, pixels: Rgba8 { bytes: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 0, 255], profile: Srgb, alpha: Straight } }, sampling: Linear, radius: 0.0 }"
+        }
+      ],
+      "gradients": 0,
+      "images": 1,
+      "masks": 1,
+      "resource_entries": 3,
+      "resource_handles_bytes": 96,
+      "resource_header_bytes": 128,
+      "resource_index_capacity": 6,
+      "scene_header_bytes": 264,
+      "scene_lane_bytes": 1608
+    }
+  }
+]
