@@ -51,7 +51,7 @@ fn read(context: &GpuContext, target: &wgpu::Texture) -> Vec<u8> {
 fn record(version: &Version) -> Value {
     let w = version.work();
     let s = version.stats();
-    json!({"keys_compared":w.key_comparisons,"key_insertions":w.key_insertions,"key_moved_bytes":w.key_moved_bytes,"directory_entries":w.directory_entries,"group_events":w.group_events,"tile_comparisons":w.tile_comparisons,"tile_reused":w.tile_reused,"tile_appended_entries":w.tile_appended_entries,"arena_compactions":w.arena_compactions,"scan_bytes":w.scanned_bytes,"instance_staged_bytes":w.staged_bytes,"write_calls":w.write_calls,"gpu_copy_bytes":w.gpu_copy_bytes,"gpu_copy_calls":w.gpu_copy_calls,"cpu_copy_bytes":w.cpu_copy_bytes,"fallback":w.fallback,"format_group_visits":w.format_group_visits,"clip_guard_visits":w.clip_guard_visits,"resource_keys_examined":w.resource_keys_examined,"resource_index_cloned_capacity":w.resource_index_cloned_capacity,"orphan_copy_bytes":version.orphan_copy_bytes(),"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"adapter_retained_bytes":version.adapter_retained_bytes(),"images":version.images().map(|s|json!({"uploaded":s.uploaded_bytes,"index_capacity":s.index_capacity,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))})
+    json!({"keys_compared":w.key_comparisons,"key_insertions":w.key_insertions,"key_moved_bytes":w.key_moved_bytes,"directory_entries":w.directory_entries,"directory_rows":version.directory_rows(),"resident_index_entries":version.index_entries(),"group_events":w.group_events,"tile_comparisons":w.tile_comparisons,"tile_reused":w.tile_reused,"tile_appended_entries":w.tile_appended_entries,"arena_compactions":w.arena_compactions,"scan_bytes":w.scanned_bytes,"instance_staged_bytes":w.staged_bytes,"write_calls":w.write_calls,"gpu_copy_bytes":w.gpu_copy_bytes,"gpu_copy_calls":w.gpu_copy_calls,"cpu_copy_bytes":w.cpu_copy_bytes,"fallback":w.fallback,"format_group_visits":w.format_group_visits,"clip_guard_visits":w.clip_guard_visits,"resource_keys_examined":w.resource_keys_examined,"resource_index_cloned_capacity":w.resource_index_cloned_capacity,"orphan_copy_bytes":version.orphan_copy_bytes(),"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"adapter_retained_bytes":version.adapter_retained_bytes(),"images":version.images().map(|s|json!({"uploaded":s.uploaded_bytes,"index_capacity":s.index_capacity,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))})
 }
 #[allow(clippy::too_many_arguments)]
 fn run_case<M: View + 'static>(
@@ -249,6 +249,120 @@ impl View for Replacement {
         .transform(Affine::translation(1., 0.))
     }
 }
+struct BankFallback {
+    color: Signal<crate::Color>,
+}
+impl View for BankFallback {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Source::new(
+            FieldId::new(1),
+            "color",
+            |s| &s.color,
+            |s| &mut s.color,
+        ))
+    }
+    fn view(&self) -> El<'_> {
+        crate::div().size(64).bg(&self.color)
+    }
+}
+struct ParentFallback;
+impl View for ParentFallback {
+    fn view(&self) -> El<'_> {
+        crate::column((crate::div()
+            .size(32)
+            .bg(crate::Color::BLACK)
+            .rounded(4.0)
+            .clip(),))
+        .size(64)
+        .bg(crate::Color::WHITE)
+        .rounded(4.0)
+        .clip()
+    }
+}
+fn arena_bound(raw: &GpuContext, lab: &GpuContext, output: &std::path::Path) {
+    let mut owner = Win::recording(
+        Tree::new(true, 4, vec![1, 2, 3]),
+        WindowOptions {
+            size: [64, 64],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let (_, stamp, _) = owner.packet_keys();
+    let mut handles = Handles::new(stamp[0]);
+    let mut versions = Vec::with_capacity(2);
+    let mut original = RendererState::new(raw);
+    let raw_target = texture(raw.device());
+    let target = texture(lab.device());
+    let mut rows = Vec::new();
+    let mut compacted = 0;
+    for i in 0..=128 {
+        if i != 0 {
+            owner
+                .set(
+                    Tree::KEYS,
+                    if i % 2 == 1 {
+                        vec![1, 9, 2, 3]
+                    } else {
+                        vec![1, 2, 3]
+                    },
+                )
+                .unwrap();
+        }
+        let (token, stamp, keys) = owner.packet_keys();
+        let candidate = owner
+            .with_scene(|scene, scene_token| {
+                assert_eq!(scene_token, token);
+                original
+                    .render(raw, scene, &raw_target.create_view(&Default::default()))
+                    .unwrap();
+                Version::prepare(
+                    lab,
+                    scene,
+                    &target.create_view(&Default::default()),
+                    stamp,
+                    keys,
+                    &mut handles,
+                    Mode::StableDraws,
+                    versions.last(),
+                    Fault::None,
+                )
+                .unwrap()
+            })
+            .unwrap();
+        versions.push(candidate);
+        versions
+            .last_mut()
+            .unwrap()
+            .submit(lab, &target.create_view(&Default::default()))
+            .unwrap();
+        let expected = read(raw, &raw_target);
+        let actual = read(lab, &target);
+        assert_eq!(
+            actual, expected,
+            "arena compaction exact original GPU pixels"
+        );
+        owner.presented(token).unwrap();
+        let candidate = versions.last().unwrap();
+        let work = candidate.work();
+        compacted += work.arena_compactions;
+        let dense = original.stats().tile_references;
+        assert_eq!(candidate.stats().tile_references, dense);
+        assert!(!work.fallback);
+        assert!(candidate.index_entries() <= 4 * dense + 1024);
+        rows.push(json!({"step":i,"dense_references":dense,"retained_versions":versions.len(),"unique_gpu_payload_bytes":Version::unique_gpu_storage_bytes(&versions),"work":record(candidate)}));
+        // Every reader is complete. Release the predecessor, keeping only the
+        // current root for the following update; no unfenced range recycling.
+        if versions.len() == 2 {
+            versions.remove(0);
+        }
+    }
+    std::fs::write(output.join("arena-bound.json"),serde_json::to_vec_pretty(&json!({"updates":128,"frames":129,"compactions":compacted,"rows":rows,"pixels":"exact original GPU at every step"})).unwrap()).unwrap();
+    assert!(
+        compacted > 0,
+        "the fixed bound must actually be crossed in this gate"
+    );
+}
 #[test]
 #[ignore = "explicit bounded address publication GPU experiment"]
 fn private_versions_and_addresses() {
@@ -372,6 +486,54 @@ fn private_versions_and_addresses() {
                 serde_json::to_vec_pretty(&cases).unwrap(),
             )
             .unwrap();
+            let owner = Win::recording(
+                BankFallback {
+                    color: Signal::new(crate::Color::rgb(10, 50, 200)),
+                },
+                WindowOptions {
+                    size: [64, 64],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            let bank = run_case(
+                owner,
+                &raw,
+                &lab,
+                mode,
+                "bank-fallback",
+                &["initial"],
+                |_, _| unreachable!(),
+                &output,
+            );
+            assert_eq!(bank["frames"][0]["candidate"]["fallback"], true);
+            cases.push(bank);
+            let owner = Win::recording(
+                ParentFallback,
+                WindowOptions {
+                    size: [64, 64],
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+            let parent = run_case(
+                owner,
+                &raw,
+                &lab,
+                mode,
+                "parent-fallback",
+                &["initial"],
+                |_, _| unreachable!(),
+                &output,
+            );
+            assert_eq!(parent["frames"][0]["candidate"]["fallback"], true);
+            cases.push(parent);
+            std::fs::write(
+                output.join("trace.json"),
+                serde_json::to_vec_pretty(&cases).unwrap(),
+            )
+            .unwrap();
         }
+        arena_bound(&raw, &lab, &output);
     });
 }

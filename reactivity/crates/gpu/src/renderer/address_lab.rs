@@ -566,6 +566,12 @@ impl Version {
     pub fn snapshot(&self) -> PacketTrace {
         self.state.trace_packet()
     }
+    pub fn index_entries(&self) -> usize {
+        self.state.references.len()
+    }
+    pub fn directory_rows(&self) -> usize {
+        self.state.lab.as_ref().unwrap().directory.len()
+    }
     pub fn adapter_retained_bytes(&self) -> usize {
         size_of::<Frame>() + self.state.lab.as_ref().unwrap().heap()
     }
@@ -603,5 +609,33 @@ impl Version {
             }
         }
         total
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn bounded_handles() {
+        let mut h = Handles::new(7);
+        let mut w = Work::default();
+        let keys: Vec<_> = (1..=4096).map(|i| [i, 0]).collect();
+        let admitted = h.resolve(7, &keys, &mut w).unwrap();
+        assert_eq!(admitted.len(), 4096);
+        assert_eq!(
+            admitted
+                .iter()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            4096
+        );
+        let bytes = h.retained_bytes();
+        assert!(h.resolve(7, &[[4097, 0]], &mut w).is_none());
+        assert!(h.resolve(8, &[[1, 0]], &mut w).is_none());
+        assert!(h.resolve(7, &[[1, 0], [1, 0]], &mut w).is_none());
+        assert_eq!(h.retained_bytes(), bytes);
+        assert_eq!(h.resolve(7, &keys, &mut w).unwrap(), admitted);
+        assert_eq!(h.rows.len(), 4096);
     }
 }
