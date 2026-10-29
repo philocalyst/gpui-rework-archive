@@ -2,7 +2,6 @@
 use super::semantic_emission_tests::Variety;
 use super::structural_trace_tests::{Tree, scene, submit, texture};
 use super::*;
-use crate::prelude::*;
 use serde_json::{Value, json};
 
 fn capture<M: View + 'static>(
