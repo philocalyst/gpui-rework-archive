@@ -1,0 +1,28 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "clean",
+    "--release",
+    "-p",
+    "gpui",
+    "-p",
+    "gpui_reactivity_core",
+    "-p",
+    "gpui_reactivity_state",
+    "-p",
+    "gpui_canvas",
+    "-p",
+    "gpui_gpu",
+    "-p",
+    "gpui_inline_call",
+    "-p",
+    "gpui_reactivity_host"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.3007657527923584
+}

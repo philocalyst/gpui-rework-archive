@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-component-replay-lab/reactivity/crates/gpui)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-component-replay-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 12.96s

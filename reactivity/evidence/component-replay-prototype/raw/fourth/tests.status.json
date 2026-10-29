@@ -1,0 +1,10 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/95b023144c6c372f941beba09a6a4db354425fbb14cf865053e7d687da0df684",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.027736425399780273
+}

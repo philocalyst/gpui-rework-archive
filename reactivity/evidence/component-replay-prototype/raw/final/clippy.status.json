@@ -1,0 +1,26 @@
+{
+  "args": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "clippy",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "gpui",
+    "--no-default-features",
+    "--features",
+    "component-replay-lab",
+    "--test",
+    "component_replay",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 25.72301483154297
+}

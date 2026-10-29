@@ -1,0 +1,114 @@
+[
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_canvas",
+      "src_path": "/home/user/gpui-component-replay-lab/reactivity/crates/canvas/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "emission-trace"
+    ],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/home/user/gpui-component-replay-lab/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "component-replay-lab"
+    ],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_gpu",
+      "src_path": "/home/user/gpui-component-replay-lab/reactivity/crates/gpu/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "packet-trace"
+    ],
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "target": {
+      "kind": [
+        "test"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "component_description_contract",
+      "src_path": "/home/user/gpui-component-replay-lab/reactivity/crates/gpui/tests/component_description_contract.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "component-replay-lab"
+    ],
+    "fresh": false,
+    "executable": "/home/user/gpui-component-replay-target/release/build/gpui/2f1a5bb3dd633b54/out/component_description_contract-2f1a5bb3dd633b54"
+  }
+]
