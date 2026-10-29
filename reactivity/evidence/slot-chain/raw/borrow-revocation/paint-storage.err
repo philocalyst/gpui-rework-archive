@@ -1,0 +1,4 @@
+paint_headers,Node=24,Presented=64,Runtime=1816,Fanout=32,Metadata=272,Transition=48,Prepared=40
+paint_mount,bound=false,allocations=35,retained=6004,peak=6108
+paint_warm,allocations=0,bytes=0
+paint_mount,bound=true,allocations=45,retained=6868,peak=6972

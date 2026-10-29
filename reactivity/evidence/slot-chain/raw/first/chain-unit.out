@@ -1,0 +1,8 @@
+
+running 3 tests
+test runtime::paint::chain_tests::bounded_chain_preserves_exact_endpoints_and_acknowledgement ... ok
+test runtime::paint::chain_tests::chain_cannot_extend_a_missing_tail_or_foreign_namespace ... ok
+test runtime::paint::chain_tests::chain_rejects_distinct_slots_geometry_replacement_and_failed_preparation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 247 filtered out; finished in 0.00s
+

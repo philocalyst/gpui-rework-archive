@@ -1,0 +1,6 @@
+
+running 1 test
+test runtime::paint::chain_borrow_failure_test::early_incomplete_borrow_revokes_summary_without_revoking_complete_pixels ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 250 filtered out; finished in 0.00s
+

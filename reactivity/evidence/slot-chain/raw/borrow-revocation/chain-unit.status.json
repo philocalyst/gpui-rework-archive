@@ -1,0 +1,10 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/06b96bf72259fc2c03f0bf31d0d51b13641d755bc3786bee2301d14827c058a3",
+    "runtime::paint::chain_tests::",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.004495143890380859
+}

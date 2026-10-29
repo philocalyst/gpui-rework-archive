@@ -1,0 +1,17 @@
+{
+  "artifact": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/ca95ad752f5c7a9632d90921d3528dd067f2657026727e23ca7562a2c70cd4c7",
+    "sha256": "ca95ad752f5c7a9632d90921d3528dd067f2657026727e23ca7562a2c70cd4c7",
+    "bytes": 42077808,
+    "cargo_fresh": false
+  },
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/ca95ad752f5c7a9632d90921d3528dd067f2657026727e23ca7562a2c70cd4c7",
+    "runtime::paint::tests::cold_storage_and_warm_edits_have_explicit_allocation_costs",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "seconds": 0.003194570541381836
+}
