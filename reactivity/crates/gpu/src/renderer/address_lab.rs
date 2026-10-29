@@ -29,6 +29,8 @@ pub struct Work {
     pub cpu_copy_bytes: usize,
     pub fallback: bool,
     pub resource_keys_examined: usize,
+    pub format_group_visits: usize,
+    pub clip_guard_visits: usize,
     pub resource_index_cloned_capacity: usize,
 }
 /// A bounded address allocator; it does not mint semantic identity or authorize
@@ -417,10 +419,20 @@ impl Version {
         if predecessor.is_some_and(|p| p.stamp[0] != stamp[0] || p.stamp[1] >= stamp[1]) {
             return Err(Error::InvalidScene);
         }
+        let mut work = Work::default();
+        let encoded_clips = scene.groups().any(|g| {
+            work.format_group_visits += 1;
+            g.clip_chain().is_some()
+        });
+        // Only encoded parent links constrain this shader. Unused clip metadata
+        // and prefixes lowered by clips::append to raster rectangles have none.
         let supported = scene.paint_bank().len() == 0
             && scene.gradients().next().is_none()
-            && scene.clip_nodes().all(|n| n.parent.is_none());
-        let mut work = Work::default();
+            && (!encoded_clips
+                || scene.clip_nodes().all(|n| {
+                    work.clip_guard_visits += 1;
+                    n.raster_rect.is_some() || n.parent.is_none()
+                }));
         let mut effective = mode;
         let handles = if supported && mode == Mode::StableDraws {
             match allocator.resolve(stamp[0], keys, &mut work) {

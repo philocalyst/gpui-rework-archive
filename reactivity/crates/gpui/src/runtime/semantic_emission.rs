@@ -1,6 +1,7 @@
 //! Actual producer event mapping. Diagnostic metadata grants no rendering authority.
 use super::*;
 use serde_json::json;
+type PacketKeys<'a> = (PresentationToken, [u64; 2], &'a [[u64; 2]]);
 #[derive(Clone, Copy, serde::Serialize)]
 struct Row {
     identity: u64,
@@ -131,10 +132,7 @@ pub(super) struct Store {
     previous: Option<Mapping>,
 }
 impl Store {
-    fn command_keys<M>(
-        &self,
-        r: &Runtime<M>,
-    ) -> Option<(PresentationToken, [u64; 2], &[[u64; 2]])> {
+    fn command_keys<M>(&self, r: &Runtime<M>) -> Option<PacketKeys<'_>> {
         let m = self.current.as_ref()?;
         (Some(m.token) == r.latest_token
             && m.source_epoch == r.source_epoch
@@ -172,7 +170,7 @@ impl Store {
 }
 
 impl<M: View + 'static> Win<M> {
-    pub(crate) fn packet_keys(&self) -> (PresentationToken, [u64; 2], &[[u64; 2]]) {
+    pub(crate) fn packet_keys(&self) -> PacketKeys<'_> {
         let r = self.runtime().unwrap();
         r.semantic_emission
             .command_keys(r)
