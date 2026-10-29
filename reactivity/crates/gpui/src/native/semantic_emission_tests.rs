@@ -108,32 +108,40 @@ fn zero_multiple_and_shared_resources() {
             };
             let observation = owner.structural_observation();
             let s = scene(&owner);
-            let rows = observation["semantic_emission"]["current"]["rows"]
-                .as_array()
-                .unwrap();
-            assert!(rows.iter().any(|r| r["end"] == r["start"]));
-            assert!(
-                rows.iter()
-                    .any(|r| r["end"].as_u64().unwrap() > r["start"].as_u64().unwrap() + 1)
-            );
             let draws = s["draws"].as_array().unwrap();
-            let mut next = 0;
-            for row in rows {
-                assert_eq!(row["start"].as_u64().unwrap(), next);
-                next = row["end"].as_u64().unwrap();
-            }
-            assert_eq!(next as usize, draws.len());
-            // Deliberate one-node/one-command assumption is contradicted by
-            // the actual admitted stream, without changing the renderer.
-            let wrong = rows
-                .iter()
-                .enumerate()
-                .filter(|(i, r)| {
-                    r["start"].as_u64() != Some(*i as u64)
-                        || r["end"].as_u64() != Some(*i as u64 + 1)
-                })
-                .count();
-            assert!(wrong > 0);
+            let expectation = std::env::var("GPUI_EXPECT_EMISSION").unwrap();
+            let wrong = if let Some(rows) =
+                observation["semantic_emission"]["current"]["rows"].as_array()
+            {
+                assert_eq!(expectation, "present");
+
+                assert!(rows.iter().any(|r| r["end"] == r["start"]));
+                assert!(
+                    rows.iter()
+                        .any(|r| r["end"].as_u64().unwrap() > r["start"].as_u64().unwrap() + 1)
+                );
+                let mut next = 0;
+                for row in rows {
+                    assert_eq!(row["start"].as_u64().unwrap(), next);
+                    next = row["end"].as_u64().unwrap();
+                }
+                assert_eq!(next as usize, draws.len());
+                // Deliberate one-node/one-command assumption is contradicted by
+                // the actual admitted stream, without changing the renderer.
+                let wrong = rows
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, r)| {
+                        r["start"].as_u64() != Some(*i as u64)
+                            || r["end"].as_u64() != Some(*i as u64 + 1)
+                    })
+                    .count();
+                assert!(wrong > 0);
+                Some(wrong)
+            } else {
+                assert_eq!(expectation, "absent");
+                None
+            };
             assert_eq!(s["images"], 1);
             assert_eq!(
                 draws.iter().filter(|d| !d["image_key"].is_null()).count(),
