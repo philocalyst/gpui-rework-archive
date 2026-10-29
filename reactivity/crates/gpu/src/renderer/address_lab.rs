@@ -23,6 +23,10 @@ pub struct Work {
     pub arena_compactions: usize,
     pub scanned_bytes: usize,
     pub staged_bytes: usize,
+    /// Globals, record prefix, tile ranges, indices, corrections.
+    pub staged_by_domain: [usize; 5],
+    pub directory_staged_bytes: usize,
+    pub tile_rows_examined: usize,
     pub write_calls: usize,
     pub gpu_copy_bytes: u64,
     pub gpu_copy_calls: usize,
@@ -268,6 +272,7 @@ impl Frame {
         let mut reuse = Vec::with_capacity(ranges.len());
         let mut append = 0;
         for (now, old) in ranges.iter().zip(&base.ranges) {
+            self.work.tile_rows_examined += 1;
             let same = if now[1] == UNIFORM_TILE || old[1] == UNIFORM_TILE {
                 self.work.tile_comparisons += 1;
                 now == old
@@ -325,6 +330,7 @@ impl Frame {
         globals.mapping[1] = f32::from_bits(clip as u32);
         globals.mapping[2] = f32::from_bits(directory as u32);
         self.work.staged_bytes += 48;
+        self.work.staged_by_domain[0] += 48;
         self.work.write_calls += 1;
     }
     pub(super) fn upload(
@@ -340,6 +346,11 @@ impl Frame {
         let Some(base) = base else {
             buffer.write(&context.device, &context.queue, bytes);
             self.work.staged_bytes += bytes.len();
+            self.work.staged_by_domain[kind + 1] += bytes.len();
+            if kind == 0 && self.mode == Mode::StableDraws {
+                self.work.directory_staged_bytes +=
+                    bytes.len().saturating_sub(self.directory_base * 16);
+            }
             self.work.write_calls += usize::from(!bytes.is_empty());
             return;
         };
@@ -358,6 +369,11 @@ impl Frame {
                     .queue
                     .write_buffer(&buffer.handle, s as u64, &bytes[s..offset]);
                 self.work.staged_bytes += offset - s;
+                self.work.staged_by_domain[kind + 1] += offset - s;
+                if kind == 0 && self.mode == Mode::StableDraws {
+                    self.work.directory_staged_bytes +=
+                        offset.saturating_sub(s.max(self.directory_base * 16));
+                }
                 self.work.write_calls += 1;
             }
         }
@@ -366,6 +382,11 @@ impl Frame {
                 .queue
                 .write_buffer(&buffer.handle, s as u64, &bytes[s..]);
             self.work.staged_bytes += bytes.len() - s;
+            self.work.staged_by_domain[kind + 1] += bytes.len() - s;
+            if kind == 0 && self.mode == Mode::StableDraws {
+                self.work.directory_staged_bytes +=
+                    bytes.len().saturating_sub(s.max(self.directory_base * 16));
+            }
             self.work.write_calls += 1;
         }
     }
@@ -568,6 +589,9 @@ impl Version {
     }
     pub fn index_entries(&self) -> usize {
         self.state.references.len()
+    }
+    pub fn observer_retained_bytes(&self) -> usize {
+        self.state.address_observer_bytes()
     }
     pub fn directory_rows(&self) -> usize {
         self.state.lab.as_ref().unwrap().directory.len()

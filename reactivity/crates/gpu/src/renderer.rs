@@ -706,6 +706,10 @@ impl RendererState {
             observer_header_bytes: size_of::<Vec<[usize; 4]>>(),
         }
     }
+    #[cfg(feature = "address-lab")]
+    pub fn address_observer_bytes(&self) -> usize {
+        size_of::<Vec<[usize; 4]>>() + self.trace_groups.capacity() * size_of::<[usize; 4]>()
+    }
     fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
         if self.layout != context.layout {
             return Err(Error::IncompatibleContext);

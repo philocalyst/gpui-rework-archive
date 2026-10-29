@@ -51,7 +51,9 @@ fn read(context: &GpuContext, target: &wgpu::Texture) -> Vec<u8> {
 fn record(version: &Version) -> Value {
     let w = version.work();
     let s = version.stats();
-    json!({"keys_compared":w.key_comparisons,"key_insertions":w.key_insertions,"key_moved_bytes":w.key_moved_bytes,"directory_entries":w.directory_entries,"directory_rows":version.directory_rows(),"resident_index_entries":version.index_entries(),"group_events":w.group_events,"tile_comparisons":w.tile_comparisons,"tile_reused":w.tile_reused,"tile_appended_entries":w.tile_appended_entries,"arena_compactions":w.arena_compactions,"scan_bytes":w.scanned_bytes,"instance_staged_bytes":w.staged_bytes,"write_calls":w.write_calls,"gpu_copy_bytes":w.gpu_copy_bytes,"gpu_copy_calls":w.gpu_copy_calls,"cpu_copy_bytes":w.cpu_copy_bytes,"fallback":w.fallback,"format_group_visits":w.format_group_visits,"clip_guard_visits":w.clip_guard_visits,"resource_keys_examined":w.resource_keys_examined,"resource_index_cloned_capacity":w.resource_index_cloned_capacity,"orphan_copy_bytes":version.orphan_copy_bytes(),"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"adapter_retained_bytes":version.adapter_retained_bytes(),"images":version.images().map(|s|json!({"uploaded":s.uploaded_bytes,"index_capacity":s.index_capacity,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))})
+    assert_eq!(w.staged_bytes, w.staged_by_domain.iter().sum::<usize>());
+    assert!(w.directory_staged_bytes <= version.directory_rows().div_ceil(4) * 16);
+    json!({"keys_compared":w.key_comparisons,"key_insertions":w.key_insertions,"key_moved_bytes":w.key_moved_bytes,"directory_entries":w.directory_entries,"directory_rows":version.directory_rows(),"resident_index_entries":version.index_entries(),"group_events":w.group_events,"tile_comparisons":w.tile_comparisons,"tile_reused":w.tile_reused,"tile_appended_entries":w.tile_appended_entries,"arena_compactions":w.arena_compactions,"scan_bytes":w.scanned_bytes,"instance_staged_bytes":w.staged_bytes,"staged_by_domain":w.staged_by_domain,"directory_staged_bytes":w.directory_staged_bytes,"tile_rows_examined":w.tile_rows_examined,"observer_retained_bytes":version.observer_retained_bytes(),"write_calls":w.write_calls,"gpu_copy_bytes":w.gpu_copy_bytes,"gpu_copy_calls":w.gpu_copy_calls,"cpu_copy_bytes":w.cpu_copy_bytes,"fallback":w.fallback,"format_group_visits":w.format_group_visits,"clip_guard_visits":w.clip_guard_visits,"resource_keys_examined":w.resource_keys_examined,"resource_index_cloned_capacity":w.resource_index_cloned_capacity,"orphan_copy_bytes":version.orphan_copy_bytes(),"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"adapter_retained_bytes":version.adapter_retained_bytes(),"images":version.images().map(|s|json!({"uploaded":s.uploaded_bytes,"index_capacity":s.index_capacity,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))})
 }
 #[allow(clippy::too_many_arguments)]
 fn run_case<M: View + 'static>(
@@ -86,12 +88,15 @@ fn run_case<M: View + 'static>(
         let oracle_target = texture(raw.device());
         let mut candidate = None;
         let mut prepare_allocation = None;
+        let mut raw_allocation = None;
         owner
             .with_scene(|scene, scene_token| {
                 assert_eq!(token, scene_token);
-                original
-                    .render(raw, scene, &oracle_target.create_view(&Default::default()))
-                    .unwrap();
+                raw_allocation = Some(allocation_counter::measure(|| {
+                    original
+                        .render(raw, scene, &oracle_target.create_view(&Default::default()))
+                        .unwrap();
+                }));
                 prepare_allocation = Some(allocation_counter::measure(|| {
                     candidate = Some(
                         Version::prepare(
@@ -112,6 +117,7 @@ fn run_case<M: View + 'static>(
             .unwrap();
         let candidate = candidate.unwrap();
         let allocation = prepare_allocation.unwrap();
+        let raw_allocation = raw_allocation.unwrap();
         let oracle = read(raw, &oracle_target);
         std::fs::write(
             output.join(format!("{case}-{mode:?}-{operation}.raw.rgba")),
@@ -161,7 +167,7 @@ fn run_case<M: View + 'static>(
             // read() waited for the mutant's completion before releasing it.
         }
         let s = original.stats();
-        reports.push(json!({"operation":operation,"stamp":stamp,"source_allocation":{"bytes":source.bytes_total,"count":source.count_total,"retained_delta":source.bytes_current,"peak_delta":source.bytes_max},"prepare_allocation":{"bytes":allocation.bytes_total,"count":allocation.count_total,"retained_delta":allocation.bytes_current,"peak_delta":allocation.bytes_max},"producer":observation,"raw":{"instance_staged_bytes":s.instance_upload_bytes,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"images":original.image_stats().map(|s|json!({"uploaded":s.uploaded_bytes,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))},"candidate":record(&candidate),"handles_retained_bytes":handles.retained_bytes()}));
+        reports.push(json!({"operation":operation,"stamp":stamp,"source_allocation":{"bytes":source.bytes_total,"count":source.count_total,"retained_delta":source.bytes_current,"peak_delta":source.bytes_max},"prepare_allocation":{"bytes":allocation.bytes_total,"count":allocation.count_total,"retained_delta":allocation.bytes_current,"peak_delta":allocation.bytes_max},"producer":observation,"raw":{"prepare_allocation":{"bytes":raw_allocation.bytes_total,"count":raw_allocation.count_total,"retained_delta":raw_allocation.bytes_current,"peak_delta":raw_allocation.bytes_max},"observer_retained_bytes":original.address_observer_bytes(),"instance_staged_bytes":s.instance_upload_bytes,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"images":original.image_stats().map(|s|json!({"uploaded":s.uploaded_bytes,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))},"candidate":record(&candidate),"handles_retained_bytes":handles.retained_bytes()}));
         versions.push(candidate);
         targets.push(target);
         expected.push(oracle);
