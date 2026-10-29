@@ -8,14 +8,14 @@ const NONE: u32 = u32::MAX;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Wire(pub [u64; 4]);
 impl Wire {
-    fn write(self, out: &mut Vec<u8>) {
+    pub(super) fn write(self, out: &mut Vec<u8>) {
         out.extend_from_slice(&self.0[0].to_le_bytes());
         out.extend_from_slice(&self.0[1].to_le_bytes());
         for v in &self.0[2..] {
             out.extend_from_slice(&u32::try_from(*v).unwrap().to_le_bytes());
         }
     }
-    fn read(raw: &[u8]) -> Self {
+    pub(super) fn read(raw: &[u8]) -> Self {
         Self([
             u64::from_le_bytes(raw[0..8].try_into().unwrap()),
             u64::from_le_bytes(raw[8..16].try_into().unwrap()),
@@ -23,16 +23,16 @@ impl Wire {
             u32::from_le_bytes(raw[20..24].try_into().unwrap()) as u64,
         ])
     }
-    fn relative(mut self, index: usize) -> Self {
+    pub(super) fn relative(mut self, index: usize) -> Self {
         self.0[1] = super::links::NodeLinks::relative_word(self.0[1], index);
         self
     }
-    fn absolute(mut self, index: usize) -> Self {
+    pub(super) fn absolute(mut self, index: usize) -> Self {
         self.0[1] = super::links::NodeLinks::absolute_word(self.0[1], index);
         self
     }
 }
-fn encode(rows: &[Wire]) -> Vec<u8> {
+pub(super) fn encode(rows: &[Wire]) -> Vec<u8> {
     let mut bases = [0; 4];
     let mut widths = [0; 4];
     for c in 0..4 {
@@ -70,7 +70,7 @@ fn encode(rows: &[Wire]) -> Vec<u8> {
     packed
 }
 
-fn decode(bytes: &[u8], index: usize) -> Wire {
+pub(super) fn decode(bytes: &[u8], index: usize) -> Wire {
     assert!(index < usize::from(bytes[1]));
     if bytes[0] == 0 {
         return Wire::read(&bytes[2 + ROW * index..2 + ROW * (index + 1)]);
@@ -425,6 +425,9 @@ impl Trials {
         self.last_to = self.next;
         self.old_combined = old_bytes;
         self.base = self.next;
+    }
+    pub(super) fn raw_record(&self, index: usize) -> Wire {
+        self.stores[0].record(index)
     }
     pub(super) fn report(&self) -> serde_json::Value {
         let pending_heap = self.pending.as_ref().map_or(0, |builders| {

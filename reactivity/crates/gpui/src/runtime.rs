@@ -1188,12 +1188,16 @@ impl SurfaceDamage {
 #[cfg(test)]
 mod cold_correspondence;
 #[cfg(test)]
+mod ordered_cold_extents;
+#[cfg(test)]
 mod structural_trace;
 struct Runtime<M> {
     #[cfg(test)]
     structural_work: structural_trace::Work,
     #[cfg(test)]
     cold_correspondence: cold_correspondence::Trials,
+    #[cfg(test)]
+    ordered_cold_extents: ordered_cold_extents::Trials,
     model: M,
     sources: Sources<M>,
     nodes: Vec<Node>,
@@ -1445,6 +1449,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             structural_work: Default::default(),
             #[cfg(test)]
             cold_correspondence: Default::default(),
+            #[cfg(test)]
+            ordered_cold_extents: Default::default(),
             focused: None,
             sites,
             overrides: Overrides::default(),
@@ -2090,6 +2096,9 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(test)]
         self.cold_correspondence
             .begin(self.sites.namespace().get(), self.source_epoch);
+        #[cfg(test)]
+        self.ordered_cold_extents
+            .begin(self.sites.namespace().get(), self.source_epoch);
         let mut text_only = !mount && property_changed.is_none() && self.can_record_text_change();
         let mut changed_text = None;
         let reuse_identities = self.logical_valid;
@@ -2386,6 +2395,8 @@ impl<M: View + 'static> Runtime<M> {
         let mut background_cursor = background_drafts.iter().peekable();
         #[cfg(test)]
         self.cold_correspondence.reserve(drafts.len());
+        #[cfg(test)]
+        self.ordered_cold_extents.reserve(drafts.len());
         for (index, draft) in drafts.into_iter().enumerate() {
             #[cfg(test)]
             {
@@ -2644,16 +2655,16 @@ impl<M: View + 'static> Runtime<M> {
             }
             changed += usize::from(node_changed);
             #[cfg(test)]
-            self.cold_correspondence.push(
-                index,
-                cold_old_rank,
-                cold_correspondence::Wire([
+            {
+                let wire = cold_correspondence::Wire([
                     node.identity(),
                     node.links.word(),
                     u64::from(node.content.0),
                     u64::from(node.component_scope),
-                ]),
-            );
+                ]);
+                self.cold_correspondence.push(index, cold_old_rank, wire);
+                self.ordered_cold_extents.push(index, cold_old_rank, wire);
+            }
             nodes.push(node);
         }
         #[cfg(test)]
@@ -2902,6 +2913,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         #[cfg(test)]
         self.cold_correspondence.finish();
+        #[cfg(test)]
+        self.ordered_cold_extents.finish(&self.cold_correspondence);
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
