@@ -28,11 +28,12 @@ struct Entry {
     word: u32,
     flags: u32,
 }
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Gradients {
     keys: Vec<gpui_canvas::GradientKey>,
     entries: HashMap<gpui_canvas::GradientKey, u32>,
 }
+#[derive(Clone)]
 pub(super) struct Images {
     keys: Vec<ImageKey>,
     entries: HashMap<ImageKey, Entry>,

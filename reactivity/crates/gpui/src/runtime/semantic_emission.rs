@@ -27,11 +27,13 @@ struct Work {
     stack_capacity_bytes: usize,
     row_bytes_written: usize,
     dependency_bytes_written: usize,
+    command_key_bytes_written: usize,
 }
 struct Mapping {
     token: PresentationToken,
     source_epoch: u64,
     rows: Vec<Row>,
+    command_keys: Vec<[u64; 2]>,
     dependencies: Vec<Dependency>,
     work: Work,
 }
@@ -46,6 +48,7 @@ impl Builder {
                 token,
                 source_epoch,
                 rows: Vec::with_capacity(n),
+                command_keys: Vec::new(),
                 dependencies: Vec::with_capacity(n),
                 work: Work::default(),
             },
@@ -75,6 +78,12 @@ impl Builder {
             self.mapping.rows.last().map_or(0, |r| r.end as usize),
             range.start
         );
+        // Typed keys are emitted here, at the actual command event. Consumers
+        // borrow this exact-version stream without JSON/snapshot reconstruction.
+        self.mapping
+            .command_keys
+            .extend((0..range.len()).map(|local| [identity, local as u64]));
+        self.mapping.work.command_key_bytes_written += range.len() * size_of::<[u64; 2]>();
         self.mapping.work.rows += 1;
         self.mapping.work.cursor_reads += 2;
         self.mapping.work.support_draw_visits += range.len();
@@ -107,12 +116,13 @@ impl Builder {
 }
 impl Mapping {
     fn heap(&self) -> usize {
-        self.rows.capacity() * size_of::<Row>()
+        self.command_keys.capacity() * size_of::<[u64; 2]>()
+            + self.rows.capacity() * size_of::<Row>()
             + self.dependencies.capacity() * size_of::<Dependency>()
     }
     fn report(&self) -> serde_json::Value {
         let deps:Vec<_>=self.dependencies.iter().map(|d|json!({"parent":(d.parent!=u32::MAX).then_some(d.parent),"parent_space":d.parent_space,"transform":d.transform.map(|a|[a.a,a.b,a.c,a.d,a.tx,a.ty]),"inherited_clip":format!("{:?}",d.inherited),"used_clip":format!("{:?}",d.used),"support":d.support.bounds()})).collect();
-        json!({"token":format!("{:?}",self.token),"source_epoch":self.source_epoch,"rows":self.rows,"dependencies":deps,"work":self.work,"row_bytes":size_of::<Row>(),"dependency_bytes":size_of::<Dependency>(),"row_capacity_bytes":self.rows.capacity()*size_of::<Row>(),"dependency_capacity_bytes":self.dependencies.capacity()*size_of::<Dependency>(),"heap_bytes":self.heap()})
+        json!({"token":format!("{:?}",self.token),"source_epoch":self.source_epoch,"rows":self.rows,"dependencies":deps,"work":self.work,"row_bytes":size_of::<Row>(),"dependency_bytes":size_of::<Dependency>(),"row_capacity_bytes":self.rows.capacity()*size_of::<Row>(),"dependency_capacity_bytes":self.dependencies.capacity()*size_of::<Dependency>(),"command_key_capacity_bytes":self.command_keys.capacity()*size_of::<[u64;2]>(),"heap_bytes":self.heap()})
     }
 }
 #[derive(Default)]
@@ -121,6 +131,22 @@ pub(super) struct Store {
     previous: Option<Mapping>,
 }
 impl Store {
+    fn command_keys<M>(
+        &self,
+        r: &Runtime<M>,
+    ) -> Option<(PresentationToken, [u64; 2], &[[u64; 2]])> {
+        let m = self.current.as_ref()?;
+        (Some(m.token) == r.latest_token
+            && m.source_epoch == r.source_epoch
+            && m.source_epoch == r.complete_epoch
+            && r.logical_valid)
+            .then_some((
+                m.token,
+                [m.token.window.get(), m.token.sequence.get()],
+                m.command_keys.as_slice(),
+            ))
+    }
+
     pub(super) fn install(&mut self, b: Builder) {
         self.previous = self.current.replace(b.finish());
     }
@@ -142,5 +168,14 @@ impl Store {
             }
         }
         json!({"scope":"test producer mapping only; old metadata owns no scene/resource/GPU lease","current_lookup_matches_live_version":matches,"lookup_verification_visits":if matches{self.current.as_ref().unwrap().rows.len()}else{0},"store_header_bytes":size_of::<Self>(),"retained_heap_bytes":self.current.iter().chain(&self.previous).map(Mapping::heap).sum::<usize>(),"current":self.current.as_ref().map(Mapping::report),"previous":self.previous.as_ref().map(Mapping::report)})
+    }
+}
+
+impl<M: View + 'static> Win<M> {
+    pub(crate) fn packet_keys(&self) -> (PresentationToken, [u64; 2], &[[u64; 2]]) {
+        let r = self.runtime().unwrap();
+        r.semantic_emission
+            .command_keys(r)
+            .expect("exact completed live emission version")
     }
 }

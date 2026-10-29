@@ -134,6 +134,8 @@ const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
 // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
 const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
 type Word = [u32; 4];
+#[cfg(feature = "address-lab")]
+pub mod address_lab;
 /// Diagnostic CPU staging snapshot, not a GPU readback or publication journal.
 #[cfg(feature = "packet-trace")]
 #[derive(Debug)]
@@ -238,7 +240,13 @@ impl Buffer {
             handle: device.create_buffer(&wgpu::BufferDescriptor {
                 label: Some(label),
                 size,
-                usage: usage | wgpu::BufferUsages::COPY_DST,
+                usage: usage
+                    | wgpu::BufferUsages::COPY_DST
+                    | if cfg!(feature = "address-lab") {
+                        wgpu::BufferUsages::COPY_SRC
+                    } else {
+                        wgpu::BufferUsages::empty()
+                    },
                 mapped_at_creation: false,
             }),
             size,
@@ -394,6 +402,8 @@ pub struct Renderer {
 /// A different format requires a separate context. The queue must belong to
 /// the device, as with WGPU's ordinary safe resource-creation API.
 pub struct GpuContext {
+    #[cfg(feature = "address-lab")]
+    address_shader: bool,
     device: wgpu::Device,
     queue: wgpu::Queue,
     format: wgpu::TextureFormat,
@@ -428,6 +438,8 @@ pub struct RendererState {
     grouped_records: bool,
     stats: Stats,
     packet: Option<Packet>,
+    #[cfg(feature = "address-lab")]
+    lab: Option<Box<address_lab::Frame>>,
 }
 impl GpuContext {
     pub async fn request(
@@ -451,7 +463,17 @@ impl GpuContext {
         queue: wgpu::Queue,
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
+        Self::new_source(device, queue, format, Cow::Borrowed(SHADER_SOURCE)).await
+    }
+    async fn new_source(
+        device: wgpu::Device,
+        queue: wgpu::Queue,
+        format: wgpu::TextureFormat,
+        shader: Cow<'static, str>,
+    ) -> Result<Self, Error> {
         validate_format(format)?;
+        #[cfg(feature = "address-lab")]
+        let address_shader = matches!(shader, Cow::Owned(_));
         #[cfg(feature = "offline-shader")]
         let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
         #[cfg(feature = "offline-shader")]
@@ -473,7 +495,7 @@ impl GpuContext {
             None => (
                 device.create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("GPUI tile compositor"),
-                    source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
+                    source: wgpu::ShaderSource::Wgsl(shader),
                 }),
                 None,
             ),
@@ -534,6 +556,8 @@ impl GpuContext {
             format,
             pipeline,
             layout,
+            #[cfg(feature = "address-lab")]
+            address_shader,
         })
     }
     pub fn device(&self) -> &wgpu::Device {
@@ -662,6 +686,8 @@ impl RendererState {
             grouped_records: true,
             stats: Stats::default(),
             packet: None,
+            #[cfg(feature = "address-lab")]
+            lab: None,
         }
     }
     #[cfg(feature = "packet-trace")]
@@ -819,6 +845,10 @@ impl RendererState {
             // Ordinary render's empty observer specializes away. Inline
             // multi-placement diagnostic groups decline color-only patching.
             group_ready(ordinal, group, self.records.len(), compact);
+            #[cfg(feature = "address-lab")]
+            if let Some(lab) = &mut self.lab {
+                lab.group(ordinal, group.bounds().len(), self.records.len(), compact);
+            }
             #[cfg(feature = "packet-trace")]
             self.trace_groups.push([
                 ordinal,
@@ -859,6 +889,11 @@ impl RendererState {
                         draw.local_rect
                     };
                     let address = self.records.len() as u32;
+                    #[cfg(feature = "address-lab")]
+                    let address = self
+                        .lab
+                        .as_ref()
+                        .map_or(address, |lab| lab.reference(ordinal, address));
                     self.records.extend_from_slice(&[
                         float_word([r.x, r.y, r.width, r.height]),
                         [0, 0, 0, common],
@@ -881,6 +916,11 @@ impl RendererState {
                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
+                    #[cfg(feature = "address-lab")]
+                    let address = self
+                        .lab
+                        .as_ref()
+                        .map_or(address, |lab| lab.reference(ordinal, address));
                     let mut packet_draw = draw;
                     if lower_solid {
                         packet_draw.local_rect =
@@ -911,6 +951,10 @@ impl RendererState {
         }
         let draw_words_end = self.records.len();
         clips::append(&mut self.records, scene)?;
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.append_directory(&mut self.records, draw_words_end);
+        }
         images::prepare(
             &context.device,
             &context.queue,
@@ -990,6 +1034,11 @@ impl RendererState {
                 word -= if compact { 2 } else { 6 };
                 reverse_ordinal -= 1;
                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
+                #[cfg(feature = "address-lab")]
+                let address = self
+                    .lab
+                    .as_ref()
+                    .map_or(address, |lab| lab.reference(reverse_ordinal, address));
                 visit(bounds, columns, |tile| {
                     let range = &mut self.ranges[tile];
                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
@@ -1030,6 +1079,10 @@ impl RendererState {
         let mode = u32::from(scene.color_config.profile == OutputProfile::DisplayP3)
             | tone
             | if hdr { 4 } else { 0 };
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.finish(&mut self.records, &mut self.ranges, &mut self.references);
+        }
         let globals = Globals {
             viewport: [
                 scene.width,
@@ -1040,24 +1093,96 @@ impl RendererState {
             clear: scene.clear,
             mapping: [exposure, 0.0, 0.0, 0.0],
         };
+        #[cfg(feature = "address-lab")]
+        let globals = {
+            let mut globals = globals;
+            if let Some(lab) = &mut self.lab {
+                lab.globals(&mut globals);
+            }
+            globals
+        };
         context
             .queue
             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.upload(
+                &mut self.draws,
+                context,
+                bytemuck::cast_slice(&self.records),
+                0,
+            );
+        } else {
+            self.draws.write(
+                &context.device,
+                &context.queue,
+                bytemuck::cast_slice(&self.records),
+            );
+        }
+        #[cfg(not(feature = "address-lab"))]
         self.draws.write(
             &context.device,
             &context.queue,
             bytemuck::cast_slice(&self.records),
         );
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.upload(
+                &mut self.tiles,
+                context,
+                bytemuck::cast_slice(&self.ranges),
+                1,
+            );
+        } else {
+            self.tiles.write(
+                &context.device,
+                &context.queue,
+                bytemuck::cast_slice(&self.ranges),
+            );
+        }
+        #[cfg(not(feature = "address-lab"))]
         self.tiles.write(
             &context.device,
             &context.queue,
             bytemuck::cast_slice(&self.ranges),
         );
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.upload(
+                &mut self.indices,
+                context,
+                bytemuck::cast_slice(&self.references),
+                2,
+            );
+        } else {
+            self.indices.write(
+                &context.device,
+                &context.queue,
+                bytemuck::cast_slice(&self.references),
+            );
+        }
+        #[cfg(not(feature = "address-lab"))]
         self.indices.write(
             &context.device,
             &context.queue,
             bytemuck::cast_slice(&self.references),
         );
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &mut self.lab {
+            lab.upload(
+                &mut self.corrections,
+                context,
+                bytemuck::cast_slice(&self.residuals),
+                3,
+            );
+        } else {
+            self.corrections.write(
+                &context.device,
+                &context.queue,
+                bytemuck::cast_slice(&self.residuals),
+            );
+        }
+        #[cfg(not(feature = "address-lab"))]
         self.corrections.write(
             &context.device,
             &context.queue,
@@ -1147,6 +1272,10 @@ impl RendererState {
                 + self.cursors.capacity() * 4
                 + self.residuals.capacity() * 32,
         };
+        #[cfg(feature = "address-lab")]
+        if let Some(lab) = &self.lab {
+            self.stats.instance_upload_bytes = lab.work.staged_bytes;
+        }
         Ok(submitted)
     }
     /// Submit the last successfully prepared packet to a fresh target.

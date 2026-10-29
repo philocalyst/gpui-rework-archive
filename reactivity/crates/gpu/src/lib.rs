@@ -16,3 +16,6 @@ mod test_adapter;
 
 #[cfg(feature = "packet-trace")]
 pub use renderer::PacketTrace;
+
+#[cfg(feature = "address-lab")]
+pub use renderer::address_lab;

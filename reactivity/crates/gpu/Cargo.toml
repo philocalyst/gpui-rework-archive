@@ -13,6 +13,7 @@ simd = ["gpui_canvas/simd"]
 gpu-tests = []
 # Read-only diagnostic snapshots; never enabled by the shipping GPUI dependency.
 packet-trace = []
+address-lab = ["packet-trace"]
 vulkan-tests = ["gpu-tests"]
 offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
 
