@@ -1,0 +1,78 @@
+{
+  "source_commit": "773cd5d4543a130f071a830782b01bbae746c2d6",
+  "kind": "source-audit-only-no-new-execution",
+  "files": {
+    "AGENTS.md": {
+      "sha256": "9bd01fb01fa184cc52a56cfc1595b1f84db42de1eeeed879ae2d171c95d9151b",
+      "lines": 59
+    },
+    "reactivity/EXPERIMENTS.md": {
+      "sha256": "fdf0bbac1bac7c522d507e487702f897b8275ed6b055e3a157d9e3d1d9df2982",
+      "lines": 70
+    },
+    "reactivity/crates/gpui/src/lib.rs": {
+      "sha256": "9ce9e4ce21a01ac7101221d214a07bb9476d268fe901ad9f0ea89ef2d8ed8b6e",
+      "lines": 109
+    },
+    "reactivity/crates/gpui/src/source.rs": {
+      "sha256": "71c5db30e69957aff1a3fad9c47ca8edb493d72f9849c786b2c7ec1e54235d1b",
+      "lines": 1761
+    },
+    "reactivity/crates/gpui/src/source/value.rs": {
+      "sha256": "a6855dbea7ef4dd9b7803e9272513403f1d10e5b2a704d80276a140bf3038def",
+      "lines": 39
+    },
+    "reactivity/crates/gpui/src/component.rs": {
+      "sha256": "e2239f3fb99289449daf6f3c93a7371a32ec6936b5046466faa6bb2c115c8d5c",
+      "lines": 136
+    },
+    "reactivity/crates/gpui/src/style_port.rs": {
+      "sha256": "a2cedef6a07a86411c6aa893057d5351fb24d01b83f4e9132a4cca3d6b17b5b3",
+      "lines": 488
+    },
+    "reactivity/crates/gpui/src/runtime.rs": {
+      "sha256": "a02d99f30431f02988d0f3efa131171006b0eddecf4f419912d7082d8fc292ce",
+      "lines": 5997
+    },
+    "reactivity/crates/gpui/src/runtime/turn.rs": {
+      "sha256": "7bd4d1008d910398768f1b4117635fc7a80d087199dc80c7de4c3295e0979796",
+      "lines": 550
+    },
+    "reactivity/crates/gpui/src/style.rs": {
+      "sha256": "a7323793bef25e65e04df544b1d09654427a0663537877b87b6267aec04a88be",
+      "lines": 278
+    },
+    "reactivity/crates/gpui/src/reader.rs": {
+      "sha256": "77e77f5b0a959d4b826dd08a7d0caa95dcb514b57a42715367f5aa5f07f7f022",
+      "lines": 701
+    },
+    "reactivity/crates/gpui/src/reader/inputs.rs": {
+      "sha256": "13dbcb3f54c4dd118225ee753499c2e654fcc0ff697e87c72059c66dd609d9d5",
+      "lines": 316
+    },
+    "reactivity/crates/gpui/src/reader/question.rs": {
+      "sha256": "d5854dd4bae476fdc5b2ff94400f6efa87bee4962356e31295b2bbd24c9b827a",
+      "lines": 1267
+    },
+    "reactivity/crates/gpui/src/list.rs": {
+      "sha256": "0c3a509bd92c95c1bcdbae1ec522756dd018b6b3ec8753b98882868093056f76",
+      "lines": 145
+    },
+    "reactivity/crates/gpui/src/element.rs": {
+      "sha256": "18bcacf1bad322147b46169ace5ea36b3e3f5b281ac1acf12a81b534c508b849",
+      "lines": 1905
+    },
+    "reactivity/crates/gpui/tests/mapped_properties.rs": {
+      "sha256": "1cbdd1a58fe7bf1999426f369d0e08649c5db22d23d24a6bbe6f798a4cb2222f",
+      "lines": 539
+    },
+    "reactivity/crates/gpui/tests/components.rs": {
+      "sha256": "6746939060124dbcef1a118ee9afe718d1cbc7c608f8a2f135dfc24067481ef2",
+      "lines": 526
+    },
+    "reactivity/crates/gpui/tests/component_description_contract.rs": {
+      "sha256": "9d228236a427dbb54948d054f751a572c49eb8c810b261494cafad6ae909029e",
+      "lines": 158
+    }
+  }
+}
