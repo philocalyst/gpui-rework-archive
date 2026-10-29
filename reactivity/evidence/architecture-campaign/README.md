@@ -744,3 +744,18 @@ and structural/dependency journal remain absent. Consider narrowly bounded
 same-slot chain coalescence under existing authority; no new registry, A encoding,
 shipping adoption or performance claim. Compression remains a conditional
 hypothesis, not a chosen win; the broad goal is still active.
+
+
+Bounded same-slot chain correctness sealed **55adff11c0d205bf3a59fdda07e7bcc713305329**
+(source a10c29e6e0c62415609bf242e542f0778bceced7). Coalesced same-slot updates
+at1/9/32/256/1024 now16B/0 GPU validations/0 bin visits; current single edit stays
+16B/0/0. Exact endpoint/namespace/slot chain, ack clearing, full/failed preparation
+and incomplete-borrow revocation; no registry/API/representation change. Summary
+40→48B, bound mount6860→6868B, warm/1000-chain allocations0; shipping source+33.
+43 actual four-oracle pixel frames,4 chain/borrow unit checks, allocation ledger,
+two2048-byte GPU authority/geometry mutants, strict Clippy/guards pass. Cost is
+pending a prospective live comparison including the already-cheap single path.
+This supplies a narrow transition-composition certificate, not semantic subtree
+identity or structural/dependency/resource closure. After its one bounded cost
+decision, return to those journal/storage requirements. Cold compression stays
+separate; B's failed overall gate and A's withheld verdict remain unchanged.
