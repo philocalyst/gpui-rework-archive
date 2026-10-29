@@ -42,6 +42,7 @@ x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "sof
 wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
 
 [dev-dependencies]
+gpui_canvas = { path = "../canvas", default-features = false, features = ["emission-trace"] }
 allocation-counter = "=0.8.1"
 accesskit_consumer = "=0.39.1"
 

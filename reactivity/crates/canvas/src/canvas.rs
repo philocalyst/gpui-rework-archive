@@ -2921,6 +2921,25 @@ pub struct CanvasScene<'a> {
     pending: Canvas,
 }
 impl CanvasScene<'_> {
+    /// Experimental recording observer; no output or reuse authority.
+    #[cfg(feature = "emission-trace")]
+    #[doc(hidden)]
+    pub fn trace_command_count(&self) -> usize {
+        self.pending.commands.order.len()
+    }
+    /// Observe only commands actually admitted since the supplied cursor.
+    #[cfg(feature = "emission-trace")]
+    #[doc(hidden)]
+    pub fn trace_support_since(&self, start: usize) -> (usize, DamageRegion) {
+        let mut support = DamageRegion::default();
+        for address in &self.pending.commands.order[start..] {
+            support = support.union(DamageRegion::checked_canvas_bounds(
+                address.bounds.map(usize::from),
+            ));
+        }
+        (self.pending.commands.order.len(), support)
+    }
+
     pub fn fill_gradient(
         &mut self,
         gradient: &crate::Gradient,

@@ -2231,4 +2231,6 @@ mod scroll_bench;
 pub(crate) mod workload_port;
 
 #[cfg(test)]
+mod semantic_emission_tests;
+#[cfg(test)]
 mod structural_trace_tests;

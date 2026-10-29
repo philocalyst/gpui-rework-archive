@@ -81,7 +81,7 @@ impl View for Tree {
         .clip()
     }
 }
-fn texture(device: &wgpu::Device) -> wgpu::Texture {
+pub(super) fn texture(device: &wgpu::Device) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some("live seam target"),
         size: wgpu::Extent3d {
@@ -97,7 +97,7 @@ fn texture(device: &wgpu::Device) -> wgpu::Texture {
         view_formats: &[],
     })
 }
-fn read(renderer: &gpui_gpu::RetainedRenderer, image: &wgpu::Texture) -> Vec<u8> {
+pub(super) fn read(renderer: &gpui_gpu::RetainedRenderer, image: &wgpu::Texture) -> Vec<u8> {
     let device = renderer.device();
     let buffer = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("live seam readback"),
@@ -137,8 +137,8 @@ fn read(renderer: &gpui_gpu::RetainedRenderer, image: &wgpu::Texture) -> Vec<u8>
     bytes
 }
 
-fn submit(
-    owner: &Win<Tree>,
+pub(super) fn submit<M: View + 'static>(
+    owner: &Win<M>,
     renderer: &mut gpui_gpu::RetainedRenderer,
     packet: &mut Option<crate::PresentationToken>,
     target: &wgpu::Texture,
@@ -167,22 +167,22 @@ fn submit(
     let t = renderer.retained_stats();
     (
         token,
-        json!({"previous":format!("{before:?}"),"token":format!("{token:?}"),"base":format!("{base:?}"),"damage":damage,"upload_bytes":s.instance_upload_bytes,"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"gpu_buffer_bytes":s.gpu_buffer_bytes,"cpu_index_bytes":s.cpu_index_capacity_bytes,"raw_records":s.draw_record_bytes,"composited_pixels":t.composited_pixels,"copied_pixels":t.copied_pixels}),
+        json!({"previous":format!("{before:?}"),"token":format!("{token:?}"),"base":format!("{base:?}"),"damage":damage,"upload_bytes":s.instance_upload_bytes,"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"gpu_buffer_bytes":s.gpu_buffer_bytes,"cpu_index_bytes":s.cpu_index_capacity_bytes,"raw_records":s.draw_record_bytes,"composited_pixels":t.composited_pixels,"copied_pixels":t.copied_pixels,"draws":s.draws,"shared_groups":s.shared_groups,"compact_draws":s.compact_draws,"inline_draws":s.inline_draws}),
     )
 }
-fn scene(owner: &Win<Tree>) -> serde_json::Value {
+pub(super) fn scene<M: View + 'static>(owner: &Win<M>) -> serde_json::Value {
     owner.with_scene(|s,_| {
         let st=s.storage();
-        let draws:Vec<_>=s.draws().enumerate().map(|(i,d)|json!({"index":i,"bounds":[d.bounds.x,d.bounds.y,d.bounds.width,d.bounds.height],"clip":[d.clip.x,d.clip.y,d.clip.width,d.clip.height],"color":d.color,"source":format!("{:?}",d.source)})).collect();
+        let draws:Vec<_>=s.draws().enumerate().map(|(i,d)|json!({"index":i,"bounds":[d.bounds.x,d.bounds.y,d.bounds.width,d.bounds.height],"clip":[d.clip.x,d.clip.y,d.clip.width,d.clip.height],"color":d.color,"source":format!("{:?}",d.source),"inverse":d.inverse,"clip_chain":d.clip_chain.map(|c|json!({"index":c.index(),"depth":c.depth()})),"image_key":d.source.image().map(|(i,_)|format!("{:?}",i.key())),"mask_key":d.source.mask().map(|m|format!("{:?}",m.key))})).collect();
         json!({"draws":draws,"scene_lane_bytes":st.lane_bytes(),"scene_header_bytes":st.header_bytes,"resource_header_bytes":st.resource_header_bytes,"resource_handles_bytes":st.resource_handles_bytes,"resource_index_capacity":st.resource_index_capacity,"resource_entries":st.resource_entries,"masks":s.masks().len(),"images":s.images().count(),"gradients":s.gradients().count()})
     }).unwrap()
 }
-fn verify(
-    owner: &mut Win<Tree>,
+pub(super) fn verify<M: View + 'static>(
+    owner: &mut Win<M>,
     renderer: &gpui_gpu::RetainedRenderer,
     oracle: &mut Renderer,
     target: &wgpu::Texture,
-    expected: &mut Win<Tree>,
+    expected: &mut Win<M>,
     path: &std::path::Path,
 ) {
     let actual = read(renderer, target);

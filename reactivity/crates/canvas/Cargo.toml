@@ -5,6 +5,8 @@ edition.workspace = true
 license.workspace = true
 
 [features]
+# Local experimental observer, enabled only by the GPUI test dependency.
+emission-trace = []
 default = ["simd"]
 parallel = ["dep:rayon"]
 # Omit this feature to instantiate the same raster pipeline with Fallback.
