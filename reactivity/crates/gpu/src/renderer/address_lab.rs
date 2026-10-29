@@ -28,6 +28,8 @@ pub struct Work {
     pub gpu_copy_calls: usize,
     pub cpu_copy_bytes: usize,
     pub fallback: bool,
+    pub resource_keys_examined: usize,
+    pub resource_index_cloned_capacity: usize,
 }
 /// A bounded address allocator; it does not mint semantic identity or authorize
 /// reuse of an old draw's interpretation. Handles are not recycled in the campaign.
@@ -50,6 +52,8 @@ impl Handles {
             return None;
         }
         let mut out = Vec::with_capacity(keys.len());
+        let mut seen = [0_u64; 64]; // 512B bounded validation scratch.
+
         for &key in keys {
             let index = self.rows.binary_search_by(|(old, _)| {
                 work.key_comparisons += 1;
@@ -68,6 +72,11 @@ impl Handles {
                     handle
                 }
             };
+            let bit = 1_u64 << (handle % 64);
+            if seen[handle as usize / 64] & bit != 0 {
+                return None;
+            }
+            seen[handle as usize / 64] |= bit;
             out.push(handle);
         }
         Some(out)
@@ -408,7 +417,7 @@ impl Version {
         if predecessor.is_some_and(|p| p.stamp[0] != stamp[0] || p.stamp[1] >= stamp[1]) {
             return Err(Error::InvalidScene);
         }
-        let supported = scene.paint_bank().is_empty()
+        let supported = scene.paint_bank().len() == 0
             && scene.gradients().next().is_none()
             && scene.clip_nodes().all(|n| n.parent.is_none());
         let mut work = Work::default();
@@ -458,13 +467,16 @@ impl Version {
             // Submission order is essential: copying AFTER patch writes would
             // overwrite the candidate with predecessor bytes.
             context.queue.submit([encoder.finish()]);
+            work.resource_index_cloned_capacity +=
+                old.images.as_ref().map_or(0, |i| i.stats().index_capacity);
             state.images = old.images.clone();
             // Share an atlas only for existing keys; insertion into a shared
             // predecessor atlas would permit a later fork to overwrite readers.
-            if scene
-                .masks()
-                .all(|m| old.atlas.entries.contains_key(&m.key))
-            {
+            if scene.masks().all(|m| {
+                work.resource_keys_examined += 1;
+                old.atlas.entries.contains_key(&m.key)
+            }) {
+                work.resource_index_cloned_capacity += old.atlas.entries.capacity();
                 state.atlas = Atlas {
                     texture: old.atlas.texture.clone(),
                     view: old.atlas.view.clone(),
@@ -545,13 +557,32 @@ impl Version {
     pub fn adapter_retained_bytes(&self) -> usize {
         size_of::<Frame>() + self.state.lab.as_ref().unwrap().heap()
     }
+    pub fn orphan_copy_bytes(&self) -> u64 {
+        let Some(base) = self.state.lab.as_ref().unwrap().base.as_ref() else {
+            return 0;
+        };
+        let current = [
+            &self.state.draws.handle,
+            &self.state.tiles.handle,
+            &self.state.indices.handle,
+            &self.state.corrections.handle,
+        ];
+        base.copied_handles
+            .iter()
+            .zip(current)
+            .filter(|(old, current)| *old != *current)
+            .map(|(old, _)| old.size())
+            .sum()
+    }
     pub fn gpu_storage_bytes(&self) -> u64 {
-        self.state.stats.gpu_buffer_bytes + u64::from(self.state.atlas.side).pow(2)
+        self.state.stats.gpu_buffer_bytes
+            + self.orphan_copy_bytes()
+            + u64::from(self.state.atlas.side).pow(2)
     }
     pub fn unique_gpu_storage_bytes(versions: &[Self]) -> u64 {
         let mut total = 0;
         for (i, v) in versions.iter().enumerate() {
-            total += v.state.stats.gpu_buffer_bytes;
+            total += v.state.stats.gpu_buffer_bytes + v.orphan_copy_bytes();
             if !versions[..i]
                 .iter()
                 .any(|p| p.state.atlas.texture == v.state.atlas.texture)
