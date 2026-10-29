@@ -160,6 +160,8 @@ pub struct Report {
     pub old_identity_index_bytes: usize,
     pub identity_index_bytes: usize,
     pub local_drafts: usize,
+    pub local_admission_depth_visits: usize,
+    pub local_admission_depth_unwinds: usize,
     pub source_schema_validations: usize,
     pub recipe_entries_examined: usize,
     pub old_plain_visits: usize,

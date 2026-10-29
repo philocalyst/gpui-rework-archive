@@ -270,6 +270,32 @@ impl<M: View + 'static> Runtime<M> {
             self.local.revoke();
             return Ok(false);
         }
+        // Match the full producer's depth admission before minting identities
+        // or consuming retained nodes. A failed newer edit must not perturb the
+        // identity interval used by the subsequent full recovery.
+        let mut local_depth = 1usize;
+        for index in 0..description.nodes.len() {
+            self.local.report.local_admission_depth_visits += 1;
+            let parent = description.nodes[index].parent;
+            if index != 0 {
+                if parent == Some((index - 1) as u32) {
+                    local_depth += 1;
+                } else {
+                    let mut preceding = index - 1;
+                    while description.nodes[preceding].parent != parent {
+                        preceding =
+                            description.nodes[preceding].parent.expect("local preorder") as usize;
+                        local_depth -= 1;
+                        self.local.report.local_admission_depth_unwinds += 1;
+                    }
+                }
+            }
+            if local_depth > MAX_LAYOUT_DEPTH {
+                return Err(Error::DepthLimit {
+                    node: start + index,
+                });
+            }
+        }
         let old_len = self.nodes.len();
         let count = description.nodes.len();
         let new_len = old_len - (end - start) + count;
@@ -277,7 +303,7 @@ impl<M: View + 'static> Runtime<M> {
             return Err(Error::ResourceLimit);
         }
         self.next_identity
-            .checked_add(count as u64)
+            .checked_add(new_len as u64)
             .ok_or(Error::EpochExhausted)?;
         let siblings = siblings::Siblings::new(&self.nodes);
         self.local.report.sibling_count_visits = old_len;

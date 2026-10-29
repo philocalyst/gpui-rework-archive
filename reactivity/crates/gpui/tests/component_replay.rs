@@ -12,6 +12,7 @@ static CHILDREN: AtomicUsize = AtomicUsize::new(0);
 struct Child {
     grow: Signal<bool>,
     handler: Signal<bool>,
+    deep_on_grow: bool,
 }
 impl Child {
     const GROW: Source<Self, bool> =
@@ -29,6 +30,9 @@ impl View for Child {
     }
     fn view(&self) -> El<'_> {
         CHILDREN.fetch_add(1, Ordering::SeqCst);
+        if self.deep_on_grow && *self.grow {
+            return (0..130).fold(div().size(1), |child, _| column((child,)).size(1));
+        }
         let root = column((
             div().size(8).bg(Color::BLACK),
             (*self.grow).then(|| div().size(8).bg(Color::BLACK)),
@@ -89,6 +93,7 @@ macro_rules! fixture {
                     child: Child {
                         grow: Signal::new(false),
                         handler: Signal::new(false),
+                        deep_on_grow: false,
                     },
                     cap: Signal::new(None),
                     outside: Signal::new(2.0),
@@ -107,6 +112,7 @@ macro_rules! fixture {
                     child: Child {
                         grow: Signal::new(*self.child.grow),
                         handler: Signal::new(*self.child.handler),
+                        deep_on_grow: self.child.deep_on_grow,
                     },
                     cap: Signal::new(*self.cap),
                     outside: Signal::new(*self.outside),
@@ -410,6 +416,47 @@ fn public_local_component_replay_qualification() {
         false,
         &mut rows,
     );
+    let mut a = window::<Absent>(0, Appearance::Plain, Mode::Replay);
+    let mut b = window::<Absent>(0, Appearance::Plain, Mode::FullRoot);
+    a.update(|m| m.child.deep_on_grow = true).unwrap();
+    b.update(|m| m.child.deep_on_grow = true).unwrap();
+    let at = a.with_scene(|_, token| token).unwrap();
+    let bt = b.with_scene(|_, token| token).unwrap();
+    let prior = pixels(&mut a);
+    let ae = a
+        .set(Absent::child().source(&Child::GROW), true)
+        .unwrap_err();
+    let be = b
+        .set(Absent::child().source(&Child::GROW), true)
+        .unwrap_err();
+    assert!(matches!(
+        ae,
+        gpui::SetError::Committed {
+            error: gpui::Error::DepthLimit { node: 129 },
+            ..
+        }
+    ));
+    assert!(matches!(
+        be,
+        gpui::SetError::Committed {
+            error: gpui::Error::DepthLimit { node: 129 },
+            ..
+        }
+    ));
+    assert!(!a.local_replay_report().unwrap().certificate_live);
+    assert_eq!(pixels(&mut a), prior);
+    assert_eq!(pixels(&mut b), prior);
+    a.presented(at).unwrap();
+    b.presented(bt).unwrap();
+    rows.push(json!({"case":"depth-rejected-before-identity-mint","error_replay":format!("{ae:?}"),"error_full":format!("{be:?}"),"report":a.local_replay_report().unwrap()}));
+    grow(
+        "depth-failure-exact-remint-recovery",
+        &mut a,
+        &mut b,
+        false,
+        false,
+        &mut rows,
+    );
     nested_boundary_case(&mut rows);
     let mut mutant = window::<Literal>(0, Appearance::Plain, Mode::OmitCallerMutant);
     let mut full = window::<Literal>(0, Appearance::Plain, Mode::FullRoot);
@@ -473,6 +520,7 @@ fn nested_boundary_case(rows: &mut Vec<Value>) {
                     child: Child {
                         grow: Signal::new(false),
                         handler: Signal::new(false),
+                        deep_on_grow: false,
                     },
                 },
             },
