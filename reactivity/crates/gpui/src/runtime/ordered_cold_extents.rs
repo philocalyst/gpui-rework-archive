@@ -66,6 +66,8 @@ struct Work {
     accounting_piece_visits: usize,
     accounting_scratch_capacity_peak_bytes: usize,
     verification_decodes: usize,
+    verification_directory_searches: usize,
+    verification_directory_comparisons: usize,
     version_lease_clones: usize,
     encoder_field_reads: usize,
 }
@@ -316,7 +318,11 @@ impl Builder {
         }
         self.len += 1;
     }
-    fn finish(mut self, old_roots: &[&Version]) -> (Arc<Version>, Work) {
+    fn finish(
+        mut self,
+        old_roots: &[&Version],
+        old_root_capacity_bytes: usize,
+    ) -> (Arc<Version>, Work) {
         assert_eq!(self.expected, self.len);
         self.flush();
         let mut version = Version {
@@ -337,7 +343,7 @@ impl Builder {
         self.work.accounting_piece_visits += m.piece_visits;
         self.work.accounting_scratch_capacity_peak_bytes = m.accounting_scratch_capacity_bytes
             + roots.capacity() * size_of::<(&Version, bool)>()
-            + old_roots.len() * size_of::<&Version>();
+            + old_root_capacity_bytes;
         drop(roots);
         if let Data::Pieces(pieces) = &version.data {
             self.work.before_compaction_pieces = pieces.len();
@@ -389,7 +395,7 @@ impl Builder {
                     self.work.accounting_scratch_capacity_peak_bytes.max(
                         m.accounting_scratch_capacity_bytes
                             + roots.capacity() * size_of::<(&Version, bool)>()
-                            + old_roots.len() * size_of::<&Version>(),
+                            + old_root_capacity_bytes,
                     );
                 self.work.scratch_capacity_peak_bytes += scratch.capacity() * size_of::<Wire>();
                 drop(roots);
@@ -447,7 +453,11 @@ impl State {
             .chain(&self.history)
             .map(|v| &**v)
             .collect();
-        let (version, mut work) = self.pending.take().unwrap().finish(&old);
+        let (version, mut work) = self
+            .pending
+            .take()
+            .unwrap()
+            .finish(&old, old.capacity() * size_of::<&Version>());
         let mut roots: Vec<_> = old.iter().map(|v| (*v, true)).collect();
         roots.push((&version, true));
         let m = memory(&roots);
@@ -545,8 +555,17 @@ impl Trials {
             s.finish();
             let v = s.current.as_ref().unwrap();
             for i in 0..v.len {
-                assert_eq!(v.record(i), oracle.raw_record(i));
+                let mut reads = Work::default();
+                let (stored, _) = v.stored(i, &mut None, &mut reads);
+                let wire = if v.relative && matches!(v.data, Data::Pieces(_)) {
+                    stored.absolute(i)
+                } else {
+                    stored
+                };
+                assert_eq!(wire, oracle.raw_record(i));
                 s.work.verification_decodes += 1;
+                s.work.verification_directory_searches += reads.old_directory_searches;
+                s.work.verification_directory_comparisons += reads.old_directory_comparisons;
             }
         }
     }
