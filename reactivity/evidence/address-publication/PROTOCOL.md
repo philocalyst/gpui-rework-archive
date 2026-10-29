@@ -1,0 +1,24 @@
+# Bounded native address/publication comparison
+
+Parent41a986b3f0dfe9e032944ecbedb4a13c824cdf91. Local only. No adoption, combined A+B, codec tuning or production/ZGX claim. The inherited mixed CPU/GPU48-byte gate stays FAILED; new GPU comparisons qualify encoding equivalence only.
+
+Keep three address mechanisms independent:
+
+- Original raw full renderer/shader: practical control and independent pixel oracle.
+- Raw relocation publication: unchanged physical encoding, version-private copy plus dirty-block uploads, to attribute transport effects separately.
+- Relative clip/common domains: same transport as raw relocation; clip-base descriptor and placement-relative common references. Tile references remain physical.
+- Stable draw references: unchanged raw record encoding; dense bounded draw handles derived from existing semantic identity + own-command ordinal at actual emission/preparation events, a per-version handle→physical-address directory, and retained tile-list extents. No relative clip/common encoding in this lane.
+
+An actual implementation may be smaller than this planned envelope if the evidence falsifies a mechanism earlier; report missing subgates rather than broadening or claiming completion. Full description/reconciliation/layout/preparation work remains charged. No patches constructed from JSON, saved scene snapshots, or the offline analyzer. Existing staged arrays may be compared as an explicitly global raw-relocation control. The live emission observer must provide typed keys under exact source/presentation authority; it is a restricted adapter, not a generic journal.
+
+Version safety precedes GPU use. Candidates own private mutable buffers; copying a predecessor is a real, separately charged GPU copy with submission order before subsequent patch writes. Immutable resource texture handles may be shared only while no candidate mutates those coordinates; resource replacement/growth gets private storage or explicit fallback. Encoded records, globals/domain descriptor, tile ranges/indices, handle directory, corrections and material resources must form one version. Retaining an allocation alone is insufficient. Completion/fence ownership controls reclamation. Failed/stale candidates cannot become visible merely because uploads completed.
+
+Count per lane and frame: all producer/preparation visits, handle lookups/insertions, tile contributor comparisons and rebuilds, copied CPU bytes, dirty-block scan bytes, queue write count/staged bytes by domain, GPU buffer/texture copy bytes, directory/descriptor bytes, complete live/in-flight CPU/GPU storage and diagnostic storage separately. No reference-word-only cost claim. Keep original raw full upload as the practical control even if another lane beats raw relocation.
+
+Fixed initial limits: at most four retained candidate versions per correctness scenario; no handle recycling within those versions, at most4096 retained handles before raw fallback; tile index arena compacts when appending would exceed four times the current dense-reference count plus1024 u32 entries. Count compaction and fallback. Dirty publication compares16-byte blocks, coalesces adjacent changed blocks, and writes the final aligned4-byte tail exactly. Buffer replacement/capacity growth requires a complete write if predecessor data was not copied into that exact buffer. These policies are not tuned after results.
+
+Use the previous keyed4/keyed256/unkeyed4 initial/insert/remove/reorder and mixed initial/insert/remove fixtures. Add one bounded text/image replacement fixture to challenge resource interpretation. Exercise deferred oldest, overlapping candidate submissions, out-of-order consumption of private targets and rejection of a stale publication. Bind each result to its own source epoch and compare actual final pixels with the independent original raw GPU renderer. Retain structural CPU parity evidence separately; do not substitute this encoding gate for the unresolved mixed four-way gate.
+
+Carry old-descriptor/new-record and wrong-directory/version negative controls into actual GPU consumption. Unsupported paint-bank, gradient and nonzero parent-clip formats explicitly use the raw full path unless separately exercised and qualified; no generic compatibility claim. Any resource/lifetime uncertainty prevents admission, even if pixels match.
+
+Freeze clean source before each build/gate; unique target or explicit release cleanup for changed first-party packages; checksum-freshness, full input guards, canonical ELF, both original and alternative shader provenance, focused correctness and strict Clippy. Preserve failures. After correctness/cost accounting, preregister a separate complete native timing endpoint with exact per-cell aggregation and gates before observations. Do not infer speed from staged-byte differences, compare to ZGX, or carry prior prototype timings forward.
