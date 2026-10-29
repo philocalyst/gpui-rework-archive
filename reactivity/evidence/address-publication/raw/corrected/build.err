@@ -1,0 +1,10 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-address-publication-lab/reactivity/crates/gpu)
+   Compiling x11rb v0.14.0
+   Compiling gpui_reactivity_host v0.1.0 (/home/user/gpui-address-publication-lab/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/home/user/gpui-address-publication-lab/reactivity/crates/state)
+   Compiling gpui_inline_call v0.1.0 (/home/user/gpui-address-publication-lab/reactivity/crates/inline-call)
+   Compiling arcstr v1.2.0
+   Compiling pollster v1.0.1
+   Compiling allocation-counter v0.8.1
+   Compiling gpui v0.1.0 (/home/user/gpui-address-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2m 09s

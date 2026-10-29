@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/4e5ac4aec979adfa46a200e7364cba5d960821cab5930975311f4db533fe7a0a",
+    "native::address_publication_tests::private_versions_and_addresses",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 2.443251371383667
+}

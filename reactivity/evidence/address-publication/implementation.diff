@@ -1,0 +1,1663 @@
+diff --git a/reactivity/crates/gpu/Cargo.toml b/reactivity/crates/gpu/Cargo.toml
+index f41db3352e..08535fe2ac 100644
+--- a/reactivity/crates/gpu/Cargo.toml
++++ b/reactivity/crates/gpu/Cargo.toml
+@@ -13,6 +13,7 @@ simd = ["gpui_canvas/simd"]
+ gpu-tests = []
+ # Read-only diagnostic snapshots; never enabled by the shipping GPUI dependency.
+ packet-trace = []
++address-lab = ["packet-trace"]
+ vulkan-tests = ["gpu-tests"]
+ offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
+ 
+diff --git a/reactivity/crates/gpu/src/lib.rs b/reactivity/crates/gpu/src/lib.rs
+index 07de14d85e..a971fda0e3 100644
+--- a/reactivity/crates/gpu/src/lib.rs
++++ b/reactivity/crates/gpu/src/lib.rs
+@@ -16,3 +16,6 @@ mod test_adapter;
+ 
+ #[cfg(feature = "packet-trace")]
+ pub use renderer::PacketTrace;
++
++#[cfg(feature = "address-lab")]
++pub use renderer::address_lab;
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 238e7ef35f..05b54bf69a 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -134,6 +134,8 @@ const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
+ // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
+ const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
+ type Word = [u32; 4];
++#[cfg(feature = "address-lab")]
++pub mod address_lab;
+ /// Diagnostic CPU staging snapshot, not a GPU readback or publication journal.
+ #[cfg(feature = "packet-trace")]
+ #[derive(Debug)]
+@@ -238,7 +240,13 @@ impl Buffer {
+             handle: device.create_buffer(&wgpu::BufferDescriptor {
+                 label: Some(label),
+                 size,
+-                usage: usage | wgpu::BufferUsages::COPY_DST,
++                usage: usage
++                    | wgpu::BufferUsages::COPY_DST
++                    | if cfg!(feature = "address-lab") {
++                        wgpu::BufferUsages::COPY_SRC
++                    } else {
++                        wgpu::BufferUsages::empty()
++                    },
+                 mapped_at_creation: false,
+             }),
+             size,
+@@ -394,6 +402,8 @@ pub struct Renderer {
+ /// A different format requires a separate context. The queue must belong to
+ /// the device, as with WGPU's ordinary safe resource-creation API.
+ pub struct GpuContext {
++    #[cfg(feature = "address-lab")]
++    address_shader: bool,
+     device: wgpu::Device,
+     queue: wgpu::Queue,
+     format: wgpu::TextureFormat,
+@@ -428,6 +438,8 @@ pub struct RendererState {
+     grouped_records: bool,
+     stats: Stats,
+     packet: Option<Packet>,
++    #[cfg(feature = "address-lab")]
++    lab: Option<Box<address_lab::Frame>>,
+ }
+ impl GpuContext {
+     pub async fn request(
+@@ -450,8 +462,18 @@ impl GpuContext {
+         device: wgpu::Device,
+         queue: wgpu::Queue,
+         format: wgpu::TextureFormat,
++    ) -> Result<Self, Error> {
++        Self::new_source(device, queue, format, Cow::Borrowed(SHADER_SOURCE)).await
++    }
++    async fn new_source(
++        device: wgpu::Device,
++        queue: wgpu::Queue,
++        format: wgpu::TextureFormat,
++        shader: Cow<'static, str>,
+     ) -> Result<Self, Error> {
+         validate_format(format)?;
++        #[cfg(feature = "address-lab")]
++        let address_shader = matches!(shader, Cow::Owned(_));
+         #[cfg(feature = "offline-shader")]
+         let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
+         #[cfg(feature = "offline-shader")]
+@@ -473,7 +495,7 @@ impl GpuContext {
+             None => (
+                 device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                     label: Some("GPUI tile compositor"),
+-                    source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
++                    source: wgpu::ShaderSource::Wgsl(shader),
+                 }),
+                 None,
+             ),
+@@ -534,6 +556,8 @@ impl GpuContext {
+             format,
+             pipeline,
+             layout,
++            #[cfg(feature = "address-lab")]
++            address_shader,
+         })
+     }
+     pub fn device(&self) -> &wgpu::Device {
+@@ -662,6 +686,8 @@ impl RendererState {
+             grouped_records: true,
+             stats: Stats::default(),
+             packet: None,
++            #[cfg(feature = "address-lab")]
++            lab: None,
+         }
+     }
+     #[cfg(feature = "packet-trace")]
+@@ -680,6 +706,10 @@ impl RendererState {
+             observer_header_bytes: size_of::<Vec<[usize; 4]>>(),
+         }
+     }
++    #[cfg(feature = "address-lab")]
++    pub fn address_observer_bytes(&self) -> usize {
++        size_of::<Vec<[usize; 4]>>() + self.trace_groups.capacity() * size_of::<[usize; 4]>()
++    }
+     fn check_context(&self, context: &GpuContext) -> Result<(), Error> {
+         if self.layout != context.layout {
+             return Err(Error::IncompatibleContext);
+@@ -819,6 +849,10 @@ impl RendererState {
+             // Ordinary render's empty observer specializes away. Inline
+             // multi-placement diagnostic groups decline color-only patching.
+             group_ready(ordinal, group, self.records.len(), compact);
++            #[cfg(feature = "address-lab")]
++            if let Some(lab) = &mut self.lab {
++                lab.group(ordinal, group.bounds().len(), self.records.len(), compact);
++            }
+             #[cfg(feature = "packet-trace")]
+             self.trace_groups.push([
+                 ordinal,
+@@ -859,6 +893,11 @@ impl RendererState {
+                         draw.local_rect
+                     };
+                     let address = self.records.len() as u32;
++                    #[cfg(feature = "address-lab")]
++                    let address = self
++                        .lab
++                        .as_ref()
++                        .map_or(address, |lab| lab.reference(ordinal, address));
+                     self.records.extend_from_slice(&[
+                         float_word([r.x, r.y, r.width, r.height]),
+                         [0, 0, 0, common],
+@@ -881,6 +920,11 @@ impl RendererState {
+                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
+                     has_masks |= draw.source.mask().is_some();
+                     let address = INLINE_RECORD | self.records.len() as u32;
++                    #[cfg(feature = "address-lab")]
++                    let address = self
++                        .lab
++                        .as_ref()
++                        .map_or(address, |lab| lab.reference(ordinal, address));
+                     let mut packet_draw = draw;
+                     if lower_solid {
+                         packet_draw.local_rect =
+@@ -911,6 +955,10 @@ impl RendererState {
+         }
+         let draw_words_end = self.records.len();
+         clips::append(&mut self.records, scene)?;
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.append_directory(&mut self.records, draw_words_end);
++        }
+         images::prepare(
+             &context.device,
+             &context.queue,
+@@ -990,6 +1038,11 @@ impl RendererState {
+                 word -= if compact { 2 } else { 6 };
+                 reverse_ordinal -= 1;
+                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
++                #[cfg(feature = "address-lab")]
++                let address = self
++                    .lab
++                    .as_ref()
++                    .map_or(address, |lab| lab.reference(reverse_ordinal, address));
+                 visit(bounds, columns, |tile| {
+                     let range = &mut self.ranges[tile];
+                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
+@@ -1030,6 +1083,10 @@ impl RendererState {
+         let mode = u32::from(scene.color_config.profile == OutputProfile::DisplayP3)
+             | tone
+             | if hdr { 4 } else { 0 };
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.finish(&mut self.records, &mut self.ranges, &mut self.references);
++        }
+         let globals = Globals {
+             viewport: [
+                 scene.width,
+@@ -1040,24 +1097,96 @@ impl RendererState {
+             clear: scene.clear,
+             mapping: [exposure, 0.0, 0.0, 0.0],
+         };
++        #[cfg(feature = "address-lab")]
++        let globals = {
++            let mut globals = globals;
++            if let Some(lab) = &mut self.lab {
++                lab.globals(&mut globals);
++            }
++            globals
++        };
+         context
+             .queue
+             .write_buffer(&self.globals.handle, 0, bytemuck::bytes_of(&globals));
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.upload(
++                &mut self.draws,
++                context,
++                bytemuck::cast_slice(&self.records),
++                0,
++            );
++        } else {
++            self.draws.write(
++                &context.device,
++                &context.queue,
++                bytemuck::cast_slice(&self.records),
++            );
++        }
++        #[cfg(not(feature = "address-lab"))]
+         self.draws.write(
+             &context.device,
+             &context.queue,
+             bytemuck::cast_slice(&self.records),
+         );
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.upload(
++                &mut self.tiles,
++                context,
++                bytemuck::cast_slice(&self.ranges),
++                1,
++            );
++        } else {
++            self.tiles.write(
++                &context.device,
++                &context.queue,
++                bytemuck::cast_slice(&self.ranges),
++            );
++        }
++        #[cfg(not(feature = "address-lab"))]
+         self.tiles.write(
+             &context.device,
+             &context.queue,
+             bytemuck::cast_slice(&self.ranges),
+         );
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.upload(
++                &mut self.indices,
++                context,
++                bytemuck::cast_slice(&self.references),
++                2,
++            );
++        } else {
++            self.indices.write(
++                &context.device,
++                &context.queue,
++                bytemuck::cast_slice(&self.references),
++            );
++        }
++        #[cfg(not(feature = "address-lab"))]
+         self.indices.write(
+             &context.device,
+             &context.queue,
+             bytemuck::cast_slice(&self.references),
+         );
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &mut self.lab {
++            lab.upload(
++                &mut self.corrections,
++                context,
++                bytemuck::cast_slice(&self.residuals),
++                3,
++            );
++        } else {
++            self.corrections.write(
++                &context.device,
++                &context.queue,
++                bytemuck::cast_slice(&self.residuals),
++            );
++        }
++        #[cfg(not(feature = "address-lab"))]
+         self.corrections.write(
+             &context.device,
+             &context.queue,
+@@ -1147,6 +1276,10 @@ impl RendererState {
+                 + self.cursors.capacity() * 4
+                 + self.residuals.capacity() * 32,
+         };
++        #[cfg(feature = "address-lab")]
++        if let Some(lab) = &self.lab {
++            self.stats.instance_upload_bytes = lab.work.staged_bytes;
++        }
+         Ok(submitted)
+     }
+     /// Submit the last successfully prepared packet to a fresh target.
+diff --git a/reactivity/crates/gpu/src/renderer/address_lab.rs b/reactivity/crates/gpu/src/renderer/address_lab.rs
+new file mode 100644
+index 0000000000..e5083e4e85
+--- /dev/null
++++ b/reactivity/crates/gpu/src/renderer/address_lab.rs
+@@ -0,0 +1,665 @@
++//! Local experiment only. Private frame versions, not production journal authority.
++use super::*;
++
++/// Existing semantic identity plus the node's local command ordinal. The caller
++/// must supply these from the same exact scene version, not a reconstructed snapshot.
++pub type DrawKey = [u64; 2];
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum Mode {
++    RawRelocation,
++    RelativeDomains,
++    StableDraws,
++}
++#[derive(Clone, Copy, Debug, Default)]
++pub struct Work {
++    pub key_comparisons: usize,
++    pub key_insertions: usize,
++    pub key_moved_bytes: usize,
++    pub directory_entries: usize,
++    pub group_events: usize,
++    pub tile_comparisons: usize,
++    pub tile_reused: usize,
++    pub tile_appended_entries: usize,
++    pub arena_compactions: usize,
++    pub scanned_bytes: usize,
++    pub staged_bytes: usize,
++    /// Globals, record prefix, tile ranges, indices, corrections.
++    pub staged_by_domain: [usize; 5],
++    pub directory_staged_bytes: usize,
++    pub tile_rows_examined: usize,
++    pub write_calls: usize,
++    pub gpu_copy_bytes: u64,
++    pub gpu_copy_calls: usize,
++    pub cpu_copy_bytes: usize,
++    pub fallback: bool,
++    pub resource_keys_examined: usize,
++    pub format_group_visits: usize,
++    pub clip_guard_visits: usize,
++    pub resource_index_cloned_capacity: usize,
++}
++/// A bounded address allocator; it does not mint semantic identity or authorize
++/// reuse of an old draw's interpretation. Handles are not recycled in the campaign.
++pub struct Handles {
++    namespace: u64,
++    rows: Vec<(DrawKey, u32)>,
++}
++impl Handles {
++    pub fn new(namespace: u64) -> Self {
++        Self {
++            namespace,
++            rows: Vec::new(),
++        }
++    }
++    pub fn retained_bytes(&self) -> usize {
++        size_of::<Self>() + self.rows.capacity() * size_of::<(DrawKey, u32)>()
++    }
++    fn resolve(&mut self, namespace: u64, keys: &[DrawKey], work: &mut Work) -> Option<Vec<u32>> {
++        if namespace != self.namespace {
++            return None;
++        }
++        let mut out = Vec::with_capacity(keys.len());
++        let mut seen = [0_u64; 64]; // 512B bounded validation scratch.
++
++        for &key in keys {
++            let index = self.rows.binary_search_by(|(old, _)| {
++                work.key_comparisons += 1;
++                old.cmp(&key)
++            });
++            let handle = match index {
++                Ok(i) => self.rows[i].1,
++                Err(i) => {
++                    if self.rows.len() == 4096 {
++                        return None;
++                    }
++                    let handle = self.rows.len() as u32;
++                    work.key_insertions += 1;
++                    work.key_moved_bytes += (self.rows.len() - i) * size_of::<(DrawKey, u32)>();
++                    self.rows.insert(i, (key, handle));
++                    handle
++                }
++            };
++            let bit = 1_u64 << (handle % 64);
++            if seen[handle as usize / 64] & bit != 0 {
++                return None;
++            }
++            seen[handle as usize / 64] |= bit;
++            out.push(handle);
++        }
++        Some(out)
++    }
++}
++
++/// The raw shader remains unchanged. The experimental module applies checked,
++/// narrowly scoped transformations to its generated text, preserving a separately
++/// compiled original pipeline as the pixel oracle. Both sources are recorded.
++pub fn shader_source() -> String {
++    let mut source = SHADER_SOURCE.to_owned();
++    fn replace_once(source: &mut String, old: &str, new: &str) {
++        assert_eq!(
++            source.matches(old).count(),
++            1,
++            "frozen shader transformation anchor"
++        );
++        *source = source.replacen(old, new, 1);
++    }
++    replace_once(
++        &mut source,
++        "fn load_draw(address: u32) -> Draw {",
++        r#"
++fn lab_draw_address(address: u32) -> u32 {
++    if ((GLOBALS.viewport.w & 32u) != 0u) {
++        let directory = bitcast<u32>(GLOBALS.mapping.z);
++        return WORDS[directory + address / 4u][address % 4u];
++    }
++    return address;
++}
++fn lab_clip_address(index: u32) -> u32 {
++    if ((GLOBALS.viewport.w & 16u) != 0u) {
++        return bitcast<u32>(GLOBALS.mapping.y) + index * 5u;
++    }
++    return index;
++}
++fn load_draw(virtual_address: u32) -> Draw {
++    let address = lab_draw_address(virtual_address);"#,
++    );
++    // There are two common-load sites, but banked formats explicitly fall back.
++    assert_eq!(source.matches("let state_base = u32(atlas.w);").count(), 2);
++    source = source.replacen(
++        "let state_base = u32(atlas.w);",
++        r#"var state_base = u32(atlas.w);
++    if ((GLOBALS.viewport.w & 16u) != 0u) { state_base = base - state_base; }"#,
++        1,
++    );
++    replace_once(
++        &mut source,
++        "clip_chain_contains(bitcast<u32>(draw.clip.y), point)",
++        "clip_chain_contains(lab_clip_address(bitcast<u32>(draw.clip.y)), point)",
++    );
++    source
++}
++impl GpuContext {
++    pub async fn new_address_lab(
++        device: wgpu::Device,
++        queue: wgpu::Queue,
++        format: wgpu::TextureFormat,
++    ) -> Result<Self, Error> {
++        if cfg!(feature = "offline-shader") {
++            return Err(Error::InvalidScene);
++        }
++        Self::new_source(device, queue, format, Cow::Owned(shader_source())).await
++    }
++}
++
++#[derive(Clone, Copy, Debug, Default)]
++pub enum Fault {
++    #[default]
++    None,
++    OldClipDescriptor,
++    OldDirectoryDescriptor,
++}
++struct Base {
++    records: Vec<Word>,
++    ranges: Vec<[u32; 2]>,
++    references: Vec<u32>,
++    corrections: Vec<Correction>,
++    copied_handles: [wgpu::Buffer; 4],
++    mode: Mode,
++    clip_base: usize,
++    directory_base: usize,
++}
++impl Base {
++    fn bytes(&self, kind: usize) -> &[u8] {
++        match kind {
++            0 => bytemuck::cast_slice(&self.records),
++            1 => bytemuck::cast_slice(&self.ranges),
++            2 => bytemuck::cast_slice(&self.references),
++            3 => bytemuck::cast_slice(&self.corrections),
++            _ => unreachable!(),
++        }
++    }
++    fn heap(&self) -> usize {
++        self.records.capacity() * 16
++            + self.ranges.capacity() * 8
++            + self.references.capacity() * 4
++            + self.corrections.capacity() * 32
++    }
++}
++pub(super) struct Frame {
++    mode: Mode,
++    pub(super) work: Work,
++    handles: Vec<u32>,
++    directory: Vec<u32>,
++    groups: Vec<[usize; 4]>,
++    base: Option<Box<Base>>,
++    clip_base: usize,
++    directory_base: usize,
++    fault: Fault,
++}
++impl Frame {
++    pub(super) fn group(&mut self, ordinal: usize, count: usize, start: usize, compact: bool) {
++        self.work.group_events += 1;
++        self.groups
++            .push([ordinal, count, start, usize::from(compact)]);
++        if self.mode == Mode::StableDraws {
++            for i in 0..count {
++                let address = if compact {
++                    start + 5 + 2 * i
++                } else {
++                    start + 6 * i
++                };
++                self.directory[self.handles[ordinal + i] as usize] =
++                    address as u32 | if compact { 0 } else { INLINE_RECORD };
++                self.work.directory_entries += 1;
++            }
++        }
++    }
++    pub(super) fn reference(&self, ordinal: usize, raw: u32) -> u32 {
++        if self.mode == Mode::StableDraws {
++            self.handles[ordinal]
++        } else {
++            raw
++        }
++    }
++    pub(super) fn append_directory(&mut self, records: &mut Vec<Word>, clip_base: usize) {
++        self.clip_base = clip_base;
++        self.directory_base = records.len();
++        if self.mode == Mode::StableDraws {
++            for chunk in self.directory.chunks(4) {
++                let mut word = [0; 4];
++                word[..chunk.len()].copy_from_slice(chunk);
++                records.push(word);
++            }
++        }
++    }
++    pub(super) fn finish(
++        &mut self,
++        records: &mut [Word],
++        ranges: &mut [[u32; 2]],
++        references: &mut Vec<u32>,
++    ) {
++        if self.mode == Mode::RelativeDomains {
++            for &[_, n, start, compact] in &self.groups {
++                if compact != 0 {
++                    if records[start + 2][0] == 0x7fc00003 {
++                        records[start + 2][1] = (records[start + 2][1] - self.clip_base as u32) / 5;
++                    }
++                    for i in 0..n {
++                        let base = start + 5 + 2 * i;
++                        records[base + 1][3] = base as u32 - records[base + 1][3];
++                    }
++                } else {
++                    for i in 0..n {
++                        let w = start + 6 * i + 3;
++                        if records[w][0] == 0x7fc00003 {
++                            records[w][1] = (records[w][1] - self.clip_base as u32) / 5;
++                        }
++                    }
++                }
++            }
++        }
++        if self.mode != Mode::StableDraws {
++            return;
++        }
++        let Some(base) = self
++            .base
++            .as_ref()
++            .filter(|b| b.mode == Mode::StableDraws && b.ranges.len() == ranges.len())
++        else {
++            return;
++        };
++        // Actual freshly prepared CSR is the oracle. Keep a previous interval
++        // only when every ordered stable handle matches; geometry is not reused.
++        let mut reuse = Vec::with_capacity(ranges.len());
++        let mut append = 0;
++        for (now, old) in ranges.iter().zip(&base.ranges) {
++            self.work.tile_rows_examined += 1;
++            let same = if now[1] == UNIFORM_TILE || old[1] == UNIFORM_TILE {
++                self.work.tile_comparisons += 1;
++                now == old
++            } else {
++                let a = &references[now[0] as usize..now[1] as usize];
++                let b = &base.references[old[0] as usize..old[1] as usize];
++                a.len() == b.len()
++                    && a.iter().zip(b).all(|(a, b)| {
++                        self.work.tile_comparisons += 1;
++                        a == b
++                    })
++            };
++            if !same && now[1] != UNIFORM_TILE {
++                append += (now[1] - now[0]) as usize;
++            }
++            reuse.push(same);
++        }
++        let bound = references.len().saturating_mul(4).saturating_add(1024);
++        if base.references.len().saturating_add(append) > bound {
++            self.work.arena_compactions += 1;
++            return;
++        }
++        let mut next = Vec::with_capacity(base.references.len() + append);
++        next.extend_from_slice(&base.references);
++        self.work.cpu_copy_bytes += base.references.len() * 4;
++        for ((now, old), same) in ranges.iter_mut().zip(&base.ranges).zip(reuse) {
++            if same {
++                *now = *old;
++                self.work.tile_reused += 1;
++            } else if now[1] != UNIFORM_TILE {
++                let start = next.len();
++                next.extend_from_slice(&references[now[0] as usize..now[1] as usize]);
++                self.work.tile_appended_entries += next.len() - start;
++                *now = [start as u32, next.len() as u32];
++            }
++        }
++        *references = next;
++    }
++    pub(super) fn globals(&mut self, globals: &mut Globals) {
++        let bits = match self.mode {
++            Mode::RawRelocation => 0,
++            Mode::RelativeDomains => 16,
++            Mode::StableDraws => 32,
++        };
++        globals.viewport[3] |= bits;
++        let mut clip = self.clip_base;
++        let mut directory = self.directory_base;
++        if let Some(base) = &self.base {
++            match self.fault {
++                Fault::None => {}
++                Fault::OldClipDescriptor => clip = base.clip_base,
++                Fault::OldDirectoryDescriptor => directory = base.directory_base,
++            }
++        }
++        globals.mapping[1] = f32::from_bits(clip as u32);
++        globals.mapping[2] = f32::from_bits(directory as u32);
++        self.work.staged_bytes += 48;
++        self.work.staged_by_domain[0] += 48;
++        self.work.write_calls += 1;
++    }
++    pub(super) fn upload(
++        &mut self,
++        buffer: &mut Buffer,
++        context: &GpuContext,
++        bytes: &[u8],
++        kind: usize,
++    ) {
++        let base = self.base.as_ref().filter(|b| {
++            b.copied_handles[kind] == buffer.handle && bytes.len() as u64 <= buffer.size
++        });
++        let Some(base) = base else {
++            buffer.write(&context.device, &context.queue, bytes);
++            self.work.staged_bytes += bytes.len();
++            self.work.staged_by_domain[kind + 1] += bytes.len();
++            if kind == 0 && self.mode == Mode::StableDraws {
++                self.work.directory_staged_bytes +=
++                    bytes.len().saturating_sub(self.directory_base * 16);
++            }
++            self.work.write_calls += usize::from(!bytes.is_empty());
++            return;
++        };
++        let before = base.bytes(kind);
++        let mut start = None;
++        for offset in (0..bytes.len()).step_by(16) {
++            let end = (offset + 16).min(bytes.len());
++            self.work.scanned_bytes += end - offset;
++            let changed = before.get(offset..end) != Some(&bytes[offset..end]);
++            if changed {
++                if start.is_none() {
++                    start = Some(offset);
++                }
++            } else if let Some(s) = start.take() {
++                context
++                    .queue
++                    .write_buffer(&buffer.handle, s as u64, &bytes[s..offset]);
++                self.work.staged_bytes += offset - s;
++                self.work.staged_by_domain[kind + 1] += offset - s;
++                if kind == 0 && self.mode == Mode::StableDraws {
++                    self.work.directory_staged_bytes +=
++                        offset.saturating_sub(s.max(self.directory_base * 16));
++                }
++                self.work.write_calls += 1;
++            }
++        }
++        if let Some(s) = start {
++            context
++                .queue
++                .write_buffer(&buffer.handle, s as u64, &bytes[s..]);
++            self.work.staged_bytes += bytes.len() - s;
++            self.work.staged_by_domain[kind + 1] += bytes.len() - s;
++            if kind == 0 && self.mode == Mode::StableDraws {
++                self.work.directory_staged_bytes +=
++                    bytes.len().saturating_sub(s.max(self.directory_base * 16));
++            }
++            self.work.write_calls += 1;
++        }
++    }
++    fn heap(&self) -> usize {
++        self.handles.capacity() * 4
++            + self.directory.capacity() * 4
++            + self.groups.capacity() * size_of::<[usize; 4]>()
++            + self
++                .base
++                .as_ref()
++                .map_or(0, |b| size_of::<Base>() + b.heap())
++    }
++}
++
++struct Deferred<'a>(&'a wgpu::TextureView);
++impl retained::Submission for Deferred<'_> {
++    fn view(&self) -> &wgpu::TextureView {
++        self.0
++    }
++    fn submit(self, context: &GpuContext, _: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
++        // Flush only this private candidate's staged writes. Actual consumption
++        // happens later through Version::submit, in any requested version order.
++        context.queue.submit([])
++    }
++}
++/// Private mutable packet ownership. There is no API to prepare again into this
++/// version, or to change its resources after creation. `submit` only replays it.
++pub struct Version {
++    state: RendererState,
++    stamp: [u64; 2],
++    pub prepared: wgpu::SubmissionIndex,
++    prepared_stats: Stats,
++    prepared_images: Option<ImageStats>,
++}
++impl Version {
++    #[allow(clippy::too_many_arguments)]
++    pub fn prepare(
++        context: &GpuContext,
++        scene: PreparedScene<'_>,
++        target: &wgpu::TextureView,
++        stamp: [u64; 2],
++        keys: &[DrawKey],
++        allocator: &mut Handles,
++        mode: Mode,
++        predecessor: Option<&Version>,
++        fault: Fault,
++    ) -> Result<Self, Error> {
++        if !context.address_shader || keys.len() != scene.draws().len() || stamp.contains(&0) {
++            return Err(Error::InvalidScene);
++        }
++        if predecessor.is_some_and(|p| p.stamp[0] != stamp[0] || p.stamp[1] >= stamp[1]) {
++            return Err(Error::InvalidScene);
++        }
++        let mut work = Work::default();
++        let encoded_clips = scene.groups().any(|g| {
++            work.format_group_visits += 1;
++            g.clip_chain().is_some()
++        });
++        // Only encoded parent links constrain this shader. Unused clip metadata
++        // and prefixes lowered by clips::append to raster rectangles have none.
++        let supported = scene.paint_bank().len() == 0
++            && scene.gradients().next().is_none()
++            && (!encoded_clips
++                || scene.clip_nodes().all(|n| {
++                    work.clip_guard_visits += 1;
++                    n.raster_rect.is_some() || n.parent.is_none()
++                }));
++        let mut effective = mode;
++        let handles = if supported && mode == Mode::StableDraws {
++            match allocator.resolve(stamp[0], keys, &mut work) {
++                Some(v) => v,
++                None => {
++                    work.fallback = true;
++                    effective = Mode::RawRelocation;
++                    Vec::new()
++                }
++            }
++        } else {
++            Vec::new()
++        };
++        if !supported {
++            work.fallback = true;
++            effective = Mode::RawRelocation;
++        }
++        let mut state = RendererState::new(context);
++        let mut base = None;
++        if let Some(previous) = predecessor.filter(|_| !work.fallback) {
++            let old = &previous.state;
++            let mut encoder =
++                context
++                    .device
++                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
++                        label: Some("private packet predecessor copy"),
++                    });
++            fn copied(
++                context: &GpuContext,
++                encoder: &mut wgpu::CommandEncoder,
++                old: &Buffer,
++                work: &mut Work,
++            ) -> Buffer {
++                let next = Buffer::new(&context.device, "private version", old.size, false);
++                encoder.copy_buffer_to_buffer(&old.handle, 0, &next.handle, 0, old.size);
++                work.gpu_copy_bytes += old.size;
++                work.gpu_copy_calls += 1;
++                next
++            }
++            state.draws = copied(context, &mut encoder, &old.draws, &mut work);
++            state.tiles = copied(context, &mut encoder, &old.tiles, &mut work);
++            state.indices = copied(context, &mut encoder, &old.indices, &mut work);
++            state.corrections = copied(context, &mut encoder, &old.corrections, &mut work);
++            // Submission order is essential: copying AFTER patch writes would
++            // overwrite the candidate with predecessor bytes.
++            context.queue.submit([encoder.finish()]);
++            work.resource_index_cloned_capacity +=
++                old.images.as_ref().map_or(0, |i| i.stats().index_capacity);
++            state.images = old.images.clone();
++            // Share an atlas only for existing keys; insertion into a shared
++            // predecessor atlas would permit a later fork to overwrite readers.
++            if scene.masks().all(|m| {
++                work.resource_keys_examined += 1;
++                old.atlas.entries.contains_key(&m.key)
++            }) {
++                work.resource_index_cloned_capacity += old.atlas.entries.capacity();
++                state.atlas = Atlas {
++                    texture: old.atlas.texture.clone(),
++                    view: old.atlas.view.clone(),
++                    side: old.atlas.side,
++                    x: old.atlas.x,
++                    y: old.atlas.y,
++                    row_height: old.atlas.row_height,
++                    entries: old.atlas.entries.clone(),
++                };
++            }
++            let old_frame = old.lab.as_ref().unwrap();
++            let b = Base {
++                records: old.records.clone(),
++                ranges: old.ranges.clone(),
++                references: old.references.clone(),
++                corrections: old.residuals.clone(),
++                copied_handles: [
++                    state.draws.handle.clone(),
++                    state.tiles.handle.clone(),
++                    state.indices.handle.clone(),
++                    state.corrections.handle.clone(),
++                ],
++                mode: old_frame.mode,
++                clip_base: old_frame.clip_base,
++                directory_base: old_frame.directory_base,
++            };
++            work.cpu_copy_bytes +=
++                b.bytes(0).len() + b.bytes(1).len() + b.bytes(2).len() + b.bytes(3).len();
++            base = Some(Box::new(b));
++        }
++        state.lab = Some(Box::new(Frame {
++            mode: effective,
++            work,
++            handles,
++            directory: if effective == Mode::StableDraws {
++                vec![0; allocator.rows.len()]
++            } else {
++                Vec::new()
++            },
++            groups: Vec::new(),
++            base,
++            clip_base: 0,
++            directory_base: 0,
++            fault,
++        }));
++        let prepared = state.render_observed(context, scene, Deferred(target), |_, _, _, _| {})?;
++        let prepared_stats = state.stats();
++        let prepared_images = state.image_stats();
++        Ok(Self {
++            state,
++            stamp,
++            prepared,
++            prepared_stats,
++            prepared_images,
++        })
++    }
++    pub fn submit(
++        &mut self,
++        context: &GpuContext,
++        target: &wgpu::TextureView,
++    ) -> Result<wgpu::SubmissionIndex, Error> {
++        self.state
++            .redraw(context, target)?
++            .ok_or(Error::InvalidScene)
++    }
++    pub fn work(&self) -> Work {
++        self.state.lab.as_ref().unwrap().work
++    }
++    pub fn stats(&self) -> Stats {
++        self.prepared_stats
++    }
++    pub fn images(&self) -> Option<ImageStats> {
++        self.prepared_images
++    }
++    pub fn snapshot(&self) -> PacketTrace {
++        self.state.trace_packet()
++    }
++    pub fn index_entries(&self) -> usize {
++        self.state.references.len()
++    }
++    pub fn observer_retained_bytes(&self) -> usize {
++        self.state.address_observer_bytes()
++    }
++    pub fn directory_rows(&self) -> usize {
++        self.state.lab.as_ref().unwrap().directory.len()
++    }
++    pub fn adapter_retained_bytes(&self) -> usize {
++        size_of::<Frame>() + self.state.lab.as_ref().unwrap().heap()
++    }
++    pub fn orphan_copy_bytes(&self) -> u64 {
++        let Some(base) = self.state.lab.as_ref().unwrap().base.as_ref() else {
++            return 0;
++        };
++        let current = [
++            &self.state.draws.handle,
++            &self.state.tiles.handle,
++            &self.state.indices.handle,
++            &self.state.corrections.handle,
++        ];
++        base.copied_handles
++            .iter()
++            .zip(current)
++            .filter(|(old, current)| *old != *current)
++            .map(|(old, _)| old.size())
++            .sum()
++    }
++    pub fn gpu_storage_bytes(&self) -> u64 {
++        self.state.stats.gpu_buffer_bytes
++            + self.orphan_copy_bytes()
++            + u64::from(self.state.atlas.side).pow(2)
++    }
++    pub fn unique_gpu_storage_bytes(versions: &[Self]) -> u64 {
++        let mut total = 0;
++        for (i, v) in versions.iter().enumerate() {
++            total += v.state.stats.gpu_buffer_bytes + v.orphan_copy_bytes();
++            if !versions[..i]
++                .iter()
++                .any(|p| p.state.atlas.texture == v.state.atlas.texture)
++            {
++                total += u64::from(v.state.atlas.side).pow(2);
++            }
++        }
++        total
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn bounded_handles() {
++        let mut h = Handles::new(7);
++        let mut w = Work::default();
++        let keys: Vec<_> = (1..=4096).map(|i| [i, 0]).collect();
++        let admitted = h.resolve(7, &keys, &mut w).unwrap();
++        assert_eq!(admitted.len(), 4096);
++        assert_eq!(
++            admitted
++                .iter()
++                .copied()
++                .collect::<std::collections::BTreeSet<_>>()
++                .len(),
++            4096
++        );
++        let bytes = h.retained_bytes();
++        assert!(h.resolve(7, &[[4097, 0]], &mut w).is_none());
++        assert!(h.resolve(8, &[[1, 0]], &mut w).is_none());
++        assert!(h.resolve(7, &[[1, 0], [1, 0]], &mut w).is_none());
++        assert_eq!(h.retained_bytes(), bytes);
++        assert_eq!(h.resolve(7, &keys, &mut w).unwrap(), admitted);
++        assert_eq!(h.rows.len(), 4096);
++    }
++}
+diff --git a/reactivity/crates/gpu/src/renderer/images.rs b/reactivity/crates/gpu/src/renderer/images.rs
+index 6878bae32d..7e1c9bf9c2 100644
+--- a/reactivity/crates/gpu/src/renderer/images.rs
++++ b/reactivity/crates/gpu/src/renderer/images.rs
+@@ -28,11 +28,12 @@ struct Entry {
+     word: u32,
+     flags: u32,
+ }
+-#[derive(Default)]
++#[derive(Default, Clone)]
+ struct Gradients {
+     keys: Vec<gpui_canvas::GradientKey>,
+     entries: HashMap<gpui_canvas::GradientKey, u32>,
+ }
++#[derive(Clone)]
+ pub(super) struct Images {
+     keys: Vec<ImageKey>,
+     entries: HashMap<ImageKey, Entry>,
+diff --git a/reactivity/crates/gpui/Cargo.toml b/reactivity/crates/gpui/Cargo.toml
+index 9aa437d6d0..19fecd9270 100644
+--- a/reactivity/crates/gpui/Cargo.toml
++++ b/reactivity/crates/gpui/Cargo.toml
+@@ -42,7 +42,7 @@ x11-minimal = ["native-core", "gpui_reactivity_host/x11", "softbuffer/x11", "sof
+ wayland-minimal = ["native-core", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
+ 
+ [dev-dependencies]
+-gpui_gpu = { path = "../gpu", default-features = false, features = ["packet-trace"] }
++gpui_gpu = { path = "../gpu", default-features = false, features = ["address-lab"] }
+ gpui_canvas = { path = "../canvas", default-features = false, features = ["emission-trace"] }
+ allocation-counter = "=0.8.1"
+ accesskit_consumer = "=0.39.1"
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index b4bd7a68fe..1fc99812e4 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -2237,3 +2237,6 @@ mod structural_trace_tests;
+ 
+ #[cfg(test)]
+ mod packet_relocation_tests;
++
++#[cfg(test)]
++mod address_publication_tests;
+diff --git a/reactivity/crates/gpui/src/native/address_publication_tests.rs b/reactivity/crates/gpui/src/native/address_publication_tests.rs
+new file mode 100644
+index 0000000000..f0af04c351
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/address_publication_tests.rs
+@@ -0,0 +1,545 @@
++//! Independent original-GPU encoding oracle. The mixed CPU/GPU gate stays FAILED.
++use super::semantic_emission_tests::Variety;
++use super::structural_trace_tests::{Tree, texture};
++use super::*;
++use crate::prelude::{El, FieldId, Signal, Source, Sources};
++use gpui_gpu::{
++    GpuContext, RendererState,
++    address_lab::{Fault, Handles, Mode, Version},
++};
++use serde_json::{Value, json};
++
++fn read(context: &GpuContext, target: &wgpu::Texture) -> Vec<u8> {
++    let device = context.device();
++    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
++        label: Some("address publication pixels"),
++        size: 16384,
++        usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
++        mapped_at_creation: false,
++    });
++    let mut encoder = device.create_command_encoder(&Default::default());
++    encoder.copy_texture_to_buffer(
++        wgpu::TexelCopyTextureInfo {
++            texture: target,
++            mip_level: 0,
++            origin: wgpu::Origin3d::ZERO,
++            aspect: wgpu::TextureAspect::All,
++        },
++        wgpu::TexelCopyBufferInfo {
++            buffer: &buffer,
++            layout: wgpu::TexelCopyBufferLayout {
++                offset: 0,
++                bytes_per_row: Some(256),
++                rows_per_image: Some(64),
++            },
++        },
++        wgpu::Extent3d {
++            width: 64,
++            height: 64,
++            depth_or_array_layers: 1,
++        },
++    );
++    context.queue().submit([encoder.finish()]);
++    let (tx, rx) = std::sync::mpsc::channel();
++    buffer.map_async(wgpu::MapMode::Read, .., move |r| tx.send(r).unwrap());
++    device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
++    rx.recv().unwrap().unwrap();
++    let data = buffer.get_mapped_range(..).unwrap().to_vec();
++    buffer.unmap();
++    data
++}
++fn record(version: &Version) -> Value {
++    let w = version.work();
++    let s = version.stats();
++    assert_eq!(w.staged_bytes, w.staged_by_domain.iter().sum::<usize>());
++    assert!(w.directory_staged_bytes <= version.directory_rows().div_ceil(4) * 16);
++    json!({"keys_compared":w.key_comparisons,"key_insertions":w.key_insertions,"key_moved_bytes":w.key_moved_bytes,"directory_entries":w.directory_entries,"directory_rows":version.directory_rows(),"resident_index_entries":version.index_entries(),"group_events":w.group_events,"tile_comparisons":w.tile_comparisons,"tile_reused":w.tile_reused,"tile_appended_entries":w.tile_appended_entries,"arena_compactions":w.arena_compactions,"scan_bytes":w.scanned_bytes,"instance_staged_bytes":w.staged_bytes,"staged_by_domain":w.staged_by_domain,"directory_staged_bytes":w.directory_staged_bytes,"tile_rows_examined":w.tile_rows_examined,"observer_retained_bytes":version.observer_retained_bytes(),"write_calls":w.write_calls,"gpu_copy_bytes":w.gpu_copy_bytes,"gpu_copy_calls":w.gpu_copy_calls,"cpu_copy_bytes":w.cpu_copy_bytes,"fallback":w.fallback,"format_group_visits":w.format_group_visits,"clip_guard_visits":w.clip_guard_visits,"resource_keys_examined":w.resource_keys_examined,"resource_index_cloned_capacity":w.resource_index_cloned_capacity,"orphan_copy_bytes":version.orphan_copy_bytes(),"validations":s.validated_draws,"bin_visits":s.binning_tile_visits,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"adapter_retained_bytes":version.adapter_retained_bytes(),"images":version.images().map(|s|json!({"uploaded":s.uploaded_bytes,"index_capacity":s.index_capacity,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))})
++}
++#[allow(clippy::too_many_arguments)]
++fn run_case<M: View + 'static>(
++    mut owner: Win<M>,
++    raw: &GpuContext,
++    lab: &GpuContext,
++    mode: Mode,
++    case: &str,
++    operations: &[&str],
++    mut update: impl FnMut(&mut Win<M>, usize),
++    output: &std::path::Path,
++) -> Value {
++    let mut original = RendererState::new(raw);
++    let mut versions = Vec::new();
++    let mut targets = Vec::new();
++    let mut expected = Vec::new();
++    let mut tokens = Vec::new();
++    let mut reports = Vec::new();
++    let mut negatives = Vec::new();
++    let (_, stamp, _) = owner.packet_keys();
++    let mut handles = Handles::new(stamp[0]);
++    for (i, &operation) in operations.iter().enumerate() {
++        owner.structural_reset();
++        let source = allocation_counter::measure(|| {
++            if i != 0 {
++                update(&mut owner, i);
++            }
++        });
++        let observation = owner.structural_observation();
++        let (token, stamp, keys) = owner.packet_keys();
++        let target = texture(lab.device());
++        let oracle_target = texture(raw.device());
++        let mut candidate = None;
++        let mut prepare_allocation = None;
++        let mut raw_allocation = None;
++        owner
++            .with_scene(|scene, scene_token| {
++                assert_eq!(token, scene_token);
++                raw_allocation = Some(allocation_counter::measure(|| {
++                    original
++                        .render(raw, scene, &oracle_target.create_view(&Default::default()))
++                        .unwrap();
++                }));
++                prepare_allocation = Some(allocation_counter::measure(|| {
++                    candidate = Some(
++                        Version::prepare(
++                            lab,
++                            scene,
++                            &target.create_view(&Default::default()),
++                            stamp,
++                            keys,
++                            &mut handles,
++                            mode,
++                            versions.last(),
++                            Fault::None,
++                        )
++                        .unwrap(),
++                    );
++                }));
++            })
++            .unwrap();
++        let candidate = candidate.unwrap();
++        let allocation = prepare_allocation.unwrap();
++        let raw_allocation = raw_allocation.unwrap();
++        let oracle = read(raw, &oracle_target);
++        std::fs::write(
++            output.join(format!("{case}-{mode:?}-{operation}.raw.rgba")),
++            &oracle,
++        )
++        .unwrap();
++        if case == "mixed" && operation == "insert" && mode != Mode::RawRelocation {
++            let fault = if mode == Mode::RelativeDomains {
++                Fault::OldClipDescriptor
++            } else {
++                Fault::OldDirectoryDescriptor
++            };
++            let mutant_target = texture(lab.device());
++            let mut mutant = owner
++                .with_scene(|scene, _| {
++                    Version::prepare(
++                        lab,
++                        scene,
++                        &mutant_target.create_view(&Default::default()),
++                        stamp,
++                        keys,
++                        &mut handles,
++                        mode,
++                        versions.last(),
++                        fault,
++                    )
++                })
++                .unwrap()
++                .unwrap();
++            mutant
++                .submit(lab, &mutant_target.create_view(&Default::default()))
++                .unwrap();
++            let pixels = read(lab, &mutant_target);
++            let wrong = pixels.iter().zip(&oracle).filter(|(a, b)| a != b).count();
++            std::fs::write(
++                output.join(format!("{case}-{mode:?}-{operation}.mutant.rgba")),
++                pixels,
++            )
++            .unwrap();
++            negatives.push(
++                json!({"fault":format!("{fault:?}"),"wrong_bytes":wrong,"work":record(&mutant)}),
++            );
++            assert!(
++                wrong > 0,
++                "wrong descriptor must be detected in actual GPU pixels"
++            );
++            // read() waited for the mutant's completion before releasing it.
++        }
++        let s = original.stats();
++        reports.push(json!({"operation":operation,"stamp":stamp,"source_allocation":{"bytes":source.bytes_total,"count":source.count_total,"retained_delta":source.bytes_current,"peak_delta":source.bytes_max},"prepare_allocation":{"bytes":allocation.bytes_total,"count":allocation.count_total,"retained_delta":allocation.bytes_current,"peak_delta":allocation.bytes_max},"producer":observation,"raw":{"prepare_allocation":{"bytes":raw_allocation.bytes_total,"count":raw_allocation.count_total,"retained_delta":raw_allocation.bytes_current,"peak_delta":raw_allocation.bytes_max},"observer_retained_bytes":original.address_observer_bytes(),"instance_staged_bytes":s.instance_upload_bytes,"mask_upload_bytes":s.mask_upload_bytes,"gpu_buffer_bytes":s.gpu_buffer_bytes,"atlas_bytes":s.atlas_bytes,"cpu_array_capacity_bytes":s.cpu_index_capacity_bytes,"images":original.image_stats().map(|s|json!({"uploaded":s.uploaded_bytes,"packed":s.packed_bytes,"prefix":s.prefix_bytes}))},"candidate":record(&candidate),"handles_retained_bytes":handles.retained_bytes()}));
++        versions.push(candidate);
++        targets.push(target);
++        expected.push(oracle);
++        tokens.push(token);
++    }
++    assert!(versions.len() <= 4);
++    // Oldest is deliberately consumed last. No wait between these submissions;
++    // each target and every mutable packet buffer belongs to its own version.
++    let mut order: Vec<_> = (1..versions.len()).rev().collect();
++    order.push(0);
++    for &i in &order {
++        versions[i]
++            .submit(lab, &targets[i].create_view(&Default::default()))
++            .unwrap();
++    }
++    lab.device()
++        .poll(wgpu::PollType::wait_indefinitely())
++        .unwrap();
++    let retained_gpu = Version::unique_gpu_storage_bytes(&versions);
++    let retained_adapter: usize = versions.iter().map(Version::adapter_retained_bytes).sum();
++    let mut comparisons = Vec::new();
++    for &i in &order {
++        let pixels = read(lab, &targets[i]);
++        let wrong = pixels
++            .iter()
++            .zip(&expected[i])
++            .filter(|(a, b)| a != b)
++            .count();
++        std::fs::write(
++            output.join(format!("{case}-{mode:?}-{}.candidate.rgba", operations[i])),
++            pixels,
++        )
++        .unwrap();
++        let accepted = owner.presented(tokens[i]).is_ok();
++        comparisons.push(json!({"index":i,"wrong_bytes":wrong,"ack_accepted":accepted}));
++        assert_eq!(accepted, i + 1 == versions.len());
++        assert_eq!(wrong, 0, "independent original GPU renderer");
++    }
++    // All submitted readers are complete before the private versions are dropped.
++    json!({"case":case,"mode":format!("{mode:?}"),"frames":reports,"consumption_order":order,"comparisons":comparisons,"negative_controls":negatives,"retained_versions":versions.len(),"unique_gpu_payload_bytes":retained_gpu,"retained_adapter_bytes":retained_adapter,"inherited_mixed_cross_backend_gate":"FAILED; not rerun or replaced by this encoding comparison"})
++}
++struct Replacement {
++    next: Signal<bool>,
++    images: [crate::Image; 2],
++}
++impl Replacement {
++    const NEXT: Source<Self, bool> =
++        Source::new(FieldId::new(1), "next", |s| &s.next, |s| &mut s.next);
++    fn new() -> Self {
++        let image = |color: [u8; 4]| {
++            crate::Image::rgba8(
++                2,
++                2,
++                crate::ImageProfile::Srgb,
++                crate::AlphaMode::Straight,
++                color.repeat(4).into_boxed_slice(),
++            )
++            .unwrap()
++        };
++        Self {
++            next: Signal::new(false),
++            images: [image([255, 0, 0, 255]), image([0, 0, 255, 255])],
++        }
++    }
++}
++impl View for Replacement {
++    fn sources() -> Sources<Self> {
++        Sources::new().field(Self::NEXT)
++    }
++    fn view(&self) -> El<'_> {
++        use crate::prelude::*;
++        column((
++            text(if *self.next { "nn" } else { "mm" })
++                .font_size(12)
++                .w(48)
++                .h(16),
++            crate::image(&self.images[usize::from(*self.next)])
++                .w(16)
++                .h(16),
++        ))
++        .size(64)
++        .bg(Color::WHITE)
++        .rounded(4.0)
++        .clip()
++        .transform(Affine::translation(1., 0.))
++    }
++}
++struct BankFallback {
++    color: Signal<crate::Color>,
++}
++impl View for BankFallback {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Source::new(
++            FieldId::new(1),
++            "color",
++            |s| &s.color,
++            |s| &mut s.color,
++        ))
++    }
++    fn view(&self) -> El<'_> {
++        crate::div().size(64).bg(&self.color)
++    }
++}
++struct ParentFallback;
++impl View for ParentFallback {
++    fn view(&self) -> El<'_> {
++        crate::column((crate::div()
++            .size(32)
++            .bg(crate::Color::BLACK)
++            .rounded(4.0)
++            .clip(),))
++        .size(64)
++        .bg(crate::Color::WHITE)
++        .rounded(4.0)
++        .clip()
++    }
++}
++fn arena_bound(raw: &GpuContext, lab: &GpuContext, output: &std::path::Path) {
++    let mut owner = Win::recording(
++        Tree::new(true, 4, vec![1, 2, 3]),
++        WindowOptions {
++            size: [64, 64],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let (_, stamp, _) = owner.packet_keys();
++    let mut handles = Handles::new(stamp[0]);
++    let mut versions = Vec::with_capacity(2);
++    let mut original = RendererState::new(raw);
++    let raw_target = texture(raw.device());
++    let target = texture(lab.device());
++    let mut rows = Vec::new();
++    let mut compacted = 0;
++    for i in 0..=128 {
++        if i != 0 {
++            owner
++                .set(
++                    Tree::KEYS,
++                    if i % 2 == 1 {
++                        vec![1, 9, 2, 3]
++                    } else {
++                        vec![1, 2, 3]
++                    },
++                )
++                .unwrap();
++        }
++        let (token, stamp, keys) = owner.packet_keys();
++        let candidate = owner
++            .with_scene(|scene, scene_token| {
++                assert_eq!(scene_token, token);
++                original
++                    .render(raw, scene, &raw_target.create_view(&Default::default()))
++                    .unwrap();
++                Version::prepare(
++                    lab,
++                    scene,
++                    &target.create_view(&Default::default()),
++                    stamp,
++                    keys,
++                    &mut handles,
++                    Mode::StableDraws,
++                    versions.last(),
++                    Fault::None,
++                )
++                .unwrap()
++            })
++            .unwrap();
++        versions.push(candidate);
++        versions
++            .last_mut()
++            .unwrap()
++            .submit(lab, &target.create_view(&Default::default()))
++            .unwrap();
++        let expected = read(raw, &raw_target);
++        let actual = read(lab, &target);
++        assert_eq!(
++            actual, expected,
++            "arena compaction exact original GPU pixels"
++        );
++        owner.presented(token).unwrap();
++        let candidate = versions.last().unwrap();
++        let work = candidate.work();
++        compacted += work.arena_compactions;
++        let dense = original.stats().tile_references;
++        assert_eq!(candidate.stats().tile_references, dense);
++        assert!(!work.fallback);
++        assert!(candidate.index_entries() <= 4 * dense + 1024);
++        rows.push(json!({"step":i,"dense_references":dense,"retained_versions":versions.len(),"unique_gpu_payload_bytes":Version::unique_gpu_storage_bytes(&versions),"work":record(candidate)}));
++        // Every reader is complete. Release the predecessor, keeping only the
++        // current root for the following update; no unfenced range recycling.
++        if versions.len() == 2 {
++            versions.remove(0);
++        }
++    }
++    std::fs::write(output.join("arena-bound.json"),serde_json::to_vec_pretty(&json!({"updates":128,"frames":129,"compactions":compacted,"rows":rows,"pixels":"exact original GPU at every step"})).unwrap()).unwrap();
++    assert!(
++        compacted > 0,
++        "the fixed bound must actually be crossed in this gate"
++    );
++}
++#[test]
++#[ignore = "explicit bounded address publication GPU experiment"]
++fn private_versions_and_addresses() {
++    let output = std::path::PathBuf::from(std::env::var("GPUI_ADDRESS_OUTPUT").unwrap());
++    std::fs::create_dir(&output).unwrap();
++    pollster::block_on(async {
++        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
++        desc.backends = wgpu::Backends::VULKAN;
++        let instance = wgpu::Instance::new(desc);
++        let adapter = instance
++            .request_adapter(&wgpu::RequestAdapterOptions {
++                force_fallback_adapter: true,
++                ..Default::default()
++            })
++            .await
++            .unwrap();
++        let (device, queue) = adapter.request_device(&Default::default()).await.unwrap();
++        let raw = GpuContext::new(
++            device.clone(),
++            queue.clone(),
++            wgpu::TextureFormat::Rgba8UnormSrgb,
++        )
++        .await
++        .unwrap();
++        std::fs::write(
++            output.join("alternative.wgsl"),
++            gpui_gpu::address_lab::shader_source(),
++        )
++        .unwrap();
++        let lab = GpuContext::new_address_lab(device, queue, wgpu::TextureFormat::Rgba8UnormSrgb)
++            .await
++            .unwrap();
++        let mut cases = Vec::new();
++        for mode in [
++            Mode::RawRelocation,
++            Mode::RelativeDomains,
++            Mode::StableDraws,
++        ] {
++            for (keyed, fillers) in [(true, 4), (true, 256), (false, 4)] {
++                let owner = Win::recording(
++                    Tree::new(keyed, fillers, vec![1, 2, 3]),
++                    WindowOptions {
++                        size: [64, 64],
++                        ..Default::default()
++                    },
++                )
++                .unwrap();
++                cases.push(run_case(
++                    owner,
++                    &raw,
++                    &lab,
++                    mode,
++                    &format!("{}-{fillers}", if keyed { "keyed" } else { "unkeyed" }),
++                    &["initial", "insert", "remove", "move"],
++                    |o, i| {
++                        o.set(
++                            Tree::KEYS,
++                            match i {
++                                1 => vec![1, 9, 2, 3],
++                                2 => vec![1, 2, 3],
++                                _ => vec![3, 1, 2],
++                            },
++                        )
++                        .unwrap();
++                    },
++                    &output,
++                ));
++                std::fs::write(
++                    output.join("trace.json"),
++                    serde_json::to_vec_pretty(&cases).unwrap(),
++                )
++                .unwrap();
++            }
++            let owner = Win::recording(
++                Variety::new(false),
++                WindowOptions {
++                    size: [64, 64],
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++            cases.push(run_case(
++                owner,
++                &raw,
++                &lab,
++                mode,
++                "mixed",
++                &["initial", "insert", "remove"],
++                |o, i| {
++                    o.set(Variety::MORE, i == 1).unwrap();
++                },
++                &output,
++            ));
++            std::fs::write(
++                output.join("trace.json"),
++                serde_json::to_vec_pretty(&cases).unwrap(),
++            )
++            .unwrap();
++            let owner = Win::recording(
++                Replacement::new(),
++                WindowOptions {
++                    size: [64, 64],
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++            cases.push(run_case(
++                owner,
++                &raw,
++                &lab,
++                mode,
++                "resources",
++                &["initial", "replace", "return", "replace_again"],
++                |o, i| {
++                    o.set(Replacement::NEXT, i % 2 == 1).unwrap();
++                },
++                &output,
++            ));
++            std::fs::write(
++                output.join("trace.json"),
++                serde_json::to_vec_pretty(&cases).unwrap(),
++            )
++            .unwrap();
++            let owner = Win::recording(
++                BankFallback {
++                    color: Signal::new(crate::Color::rgb(10, 50, 200)),
++                },
++                WindowOptions {
++                    size: [64, 64],
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++            let bank = run_case(
++                owner,
++                &raw,
++                &lab,
++                mode,
++                "bank-fallback",
++                &["initial"],
++                |_, _| unreachable!(),
++                &output,
++            );
++            assert_eq!(bank["frames"][0]["candidate"]["fallback"], true);
++            cases.push(bank);
++            let owner = Win::recording(
++                ParentFallback,
++                WindowOptions {
++                    size: [64, 64],
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++            let parent = run_case(
++                owner,
++                &raw,
++                &lab,
++                mode,
++                "parent-fallback",
++                &["initial"],
++                |_, _| unreachable!(),
++                &output,
++            );
++            assert_eq!(parent["frames"][0]["candidate"]["fallback"], true);
++            cases.push(parent);
++            std::fs::write(
++                output.join("trace.json"),
++                serde_json::to_vec_pretty(&cases).unwrap(),
++            )
++            .unwrap();
++        }
++        arena_bound(&raw, &lab, &output);
++    });
++}
+diff --git a/reactivity/crates/gpui/src/runtime/semantic_emission.rs b/reactivity/crates/gpui/src/runtime/semantic_emission.rs
+index 08d71809f9..3dc12f06c6 100644
+--- a/reactivity/crates/gpui/src/runtime/semantic_emission.rs
++++ b/reactivity/crates/gpui/src/runtime/semantic_emission.rs
+@@ -1,6 +1,7 @@
+ //! Actual producer event mapping. Diagnostic metadata grants no rendering authority.
+ use super::*;
+ use serde_json::json;
++type PacketKeys<'a> = (PresentationToken, [u64; 2], &'a [[u64; 2]]);
+ #[derive(Clone, Copy, serde::Serialize)]
+ struct Row {
+     identity: u64,
+@@ -27,11 +28,13 @@ struct Work {
+     stack_capacity_bytes: usize,
+     row_bytes_written: usize,
+     dependency_bytes_written: usize,
++    command_key_bytes_written: usize,
+ }
+ struct Mapping {
+     token: PresentationToken,
+     source_epoch: u64,
+     rows: Vec<Row>,
++    command_keys: Vec<[u64; 2]>,
+     dependencies: Vec<Dependency>,
+     work: Work,
+ }
+@@ -46,6 +49,7 @@ impl Builder {
+                 token,
+                 source_epoch,
+                 rows: Vec::with_capacity(n),
++                command_keys: Vec::new(),
+                 dependencies: Vec::with_capacity(n),
+                 work: Work::default(),
+             },
+@@ -75,6 +79,12 @@ impl Builder {
+             self.mapping.rows.last().map_or(0, |r| r.end as usize),
+             range.start
+         );
++        // Typed keys are emitted here, at the actual command event. Consumers
++        // borrow this exact-version stream without JSON/snapshot reconstruction.
++        self.mapping
++            .command_keys
++            .extend((0..range.len()).map(|local| [identity, local as u64]));
++        self.mapping.work.command_key_bytes_written += range.len() * size_of::<[u64; 2]>();
+         self.mapping.work.rows += 1;
+         self.mapping.work.cursor_reads += 2;
+         self.mapping.work.support_draw_visits += range.len();
+@@ -107,12 +117,13 @@ impl Builder {
+ }
+ impl Mapping {
+     fn heap(&self) -> usize {
+-        self.rows.capacity() * size_of::<Row>()
++        self.command_keys.capacity() * size_of::<[u64; 2]>()
++            + self.rows.capacity() * size_of::<Row>()
+             + self.dependencies.capacity() * size_of::<Dependency>()
+     }
+     fn report(&self) -> serde_json::Value {
+         let deps:Vec<_>=self.dependencies.iter().map(|d|json!({"parent":(d.parent!=u32::MAX).then_some(d.parent),"parent_space":d.parent_space,"transform":d.transform.map(|a|[a.a,a.b,a.c,a.d,a.tx,a.ty]),"inherited_clip":format!("{:?}",d.inherited),"used_clip":format!("{:?}",d.used),"support":d.support.bounds()})).collect();
+-        json!({"token":format!("{:?}",self.token),"source_epoch":self.source_epoch,"rows":self.rows,"dependencies":deps,"work":self.work,"row_bytes":size_of::<Row>(),"dependency_bytes":size_of::<Dependency>(),"row_capacity_bytes":self.rows.capacity()*size_of::<Row>(),"dependency_capacity_bytes":self.dependencies.capacity()*size_of::<Dependency>(),"heap_bytes":self.heap()})
++        json!({"token":format!("{:?}",self.token),"source_epoch":self.source_epoch,"rows":self.rows,"dependencies":deps,"work":self.work,"row_bytes":size_of::<Row>(),"dependency_bytes":size_of::<Dependency>(),"row_capacity_bytes":self.rows.capacity()*size_of::<Row>(),"dependency_capacity_bytes":self.dependencies.capacity()*size_of::<Dependency>(),"command_key_capacity_bytes":self.command_keys.capacity()*size_of::<[u64;2]>(),"heap_bytes":self.heap()})
+     }
+ }
+ #[derive(Default)]
+@@ -121,6 +132,19 @@ pub(super) struct Store {
+     previous: Option<Mapping>,
+ }
+ impl Store {
++    fn command_keys<M>(&self, r: &Runtime<M>) -> Option<PacketKeys<'_>> {
++        let m = self.current.as_ref()?;
++        (Some(m.token) == r.latest_token
++            && m.source_epoch == r.source_epoch
++            && m.source_epoch == r.complete_epoch
++            && r.logical_valid)
++            .then_some((
++                m.token,
++                [m.token.window.get(), m.token.sequence.get()],
++                m.command_keys.as_slice(),
++            ))
++    }
++
+     pub(super) fn install(&mut self, b: Builder) {
+         self.previous = self.current.replace(b.finish());
+     }
+@@ -144,3 +168,12 @@ impl Store {
+         json!({"scope":"test producer mapping only; old metadata owns no scene/resource/GPU lease","current_lookup_matches_live_version":matches,"lookup_verification_visits":if matches{self.current.as_ref().unwrap().rows.len()}else{0},"store_header_bytes":size_of::<Self>(),"retained_heap_bytes":self.current.iter().chain(&self.previous).map(Mapping::heap).sum::<usize>(),"current":self.current.as_ref().map(Mapping::report),"previous":self.previous.as_ref().map(Mapping::report)})
+     }
+ }
++
++impl<M: View + 'static> Win<M> {
++    pub(crate) fn packet_keys(&self) -> PacketKeys<'_> {
++        let r = self.runtime().unwrap();
++        r.semantic_emission
++            .command_keys(r)
++            .expect("exact completed live emission version")
++    }
++}

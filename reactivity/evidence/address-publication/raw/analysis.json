@@ -1,0 +1,3335 @@
+{
+  "decision": "NO ADOPTION; bounded GPU encoding/lifetime comparison passed, cost timing not measured",
+  "pixel_comparisons": 63,
+  "accepted": 21,
+  "stale_rejected": 42,
+  "negative_controls": [
+    {
+      "case": "mixed",
+      "mode": "RelativeDomains",
+      "fault": "OldClipDescriptor",
+      "wrong_bytes": 3226
+    },
+    {
+      "case": "mixed",
+      "mode": "StableDraws",
+      "fault": "OldDirectoryDescriptor",
+      "wrong_bytes": 3226
+    }
+  ],
+  "arena_frames": 129,
+  "arena_compactions": 2,
+  "arena_compaction_steps": [
+    56,
+    112
+  ],
+  "rows": [
+    {
+      "case": "keyed-4",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 1184,
+      "domains": [
+        48,
+        864,
+        128,
+        112,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 26447,
+        "count": 165,
+        "peak_delta": 16294,
+        "retained_delta": 15102
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 20248,
+        "count": 156,
+        "peak_delta": 14369,
+        "retained_delta": 8152
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RawRelocation",
+      "operation": "insert",
+      "raw_instance_staged": 1312,
+      "candidate_instance_staged": 672,
+      "domains": [
+        48,
+        416,
+        64,
+        144,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1312,
+      "cpu_copied": 1136,
+      "scan": 1120,
+      "writes": 12,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16927,
+        "count": 117,
+        "peak_delta": 8701,
+        "retained_delta": 7249
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33932,
+        "count": 232,
+        "peak_delta": 14948,
+        "retained_delta": 10705
+      },
+      "producer_work": {
+        "identity_index_input": 17,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 17,
+        "minted": 2,
+        "paint_nodes": 17,
+        "reconciled": 17,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RawRelocation",
+      "operation": "remove",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 528,
+      "domains": [
+        48,
+        320,
+        64,
+        96,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1264,
+      "scan": 1136,
+      "writes": 11,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16101,
+        "count": 101,
+        "peak_delta": 9517,
+        "retained_delta": 8045
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33354,
+        "count": 220,
+        "peak_delta": 14598,
+        "retained_delta": 10225
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RawRelocation",
+      "operation": "move",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1136,
+      "scan": 1136,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15953,
+        "count": 99,
+        "peak_delta": 9489,
+        "retained_delta": 7997
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 27914,
+        "count": 186,
+        "peak_delta": 11674,
+        "retained_delta": 7147
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 6,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 7872,
+      "domains": [
+        48,
+        6720,
+        128,
+        944,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 32979,
+        "count": 139,
+        "peak_delta": 21010,
+        "retained_delta": 19498
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 39888,
+        "count": 153,
+        "peak_delta": 25305,
+        "retained_delta": 18648
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RawRelocation",
+      "operation": "insert",
+      "raw_instance_staged": 7992,
+      "candidate_instance_staged": 4440,
+      "domains": [
+        48,
+        3344,
+        96,
+        952,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7824,
+      "scan": 7944,
+      "writes": 73,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 23449,
+        "count": 100,
+        "peak_delta": 9321,
+        "retained_delta": 7809
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 113972,
+        "count": 478,
+        "peak_delta": 65225,
+        "retained_delta": 58021
+      },
+      "producer_work": {
+        "identity_index_input": 269,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 269,
+        "minted": 2,
+        "paint_nodes": 269,
+        "reconciled": 269,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RawRelocation",
+      "operation": "remove",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 4320,
+      "domains": [
+        48,
+        3248,
+        96,
+        928,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7944,
+      "scan": 7824,
+      "writes": 72,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14745,
+        "count": 98,
+        "peak_delta": 8281,
+        "retained_delta": 6769
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 123362,
+        "count": 470,
+        "peak_delta": 72718,
+        "retained_delta": 63055
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RawRelocation",
+      "operation": "move",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7824,
+      "scan": 7824,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14745,
+        "count": 98,
+        "peak_delta": 8281,
+        "retained_delta": 6769
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 55158,
+        "count": 194,
+        "peak_delta": 29746,
+        "retained_delta": 25435
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 6,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 1200,
+      "domains": [
+        48,
+        864,
+        128,
+        128,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 19139,
+        "count": 136,
+        "peak_delta": 10754,
+        "retained_delta": 9242
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 18880,
+        "count": 147,
+        "peak_delta": 11465,
+        "retained_delta": 4808
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RawRelocation",
+      "operation": "insert",
+      "raw_instance_staged": 1336,
+      "candidate_instance_staged": 680,
+      "domains": [
+        48,
+        400,
+        64,
+        168,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1312,
+      "cpu_copied": 1152,
+      "scan": 1120,
+      "writes": 13,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16519,
+        "count": 108,
+        "peak_delta": 8505,
+        "retained_delta": 6993
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33898,
+        "count": 234,
+        "peak_delta": 12738,
+        "retained_delta": 8355
+      },
+      "producer_work": {
+        "identity_index_input": 13,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 13,
+        "minted": 4,
+        "paint_nodes": 13,
+        "reconciled": 13,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RawRelocation",
+      "operation": "remove",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 512,
+      "domains": [
+        48,
+        304,
+        64,
+        96,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1288,
+      "scan": 1152,
+      "writes": 12,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14745,
+        "count": 98,
+        "peak_delta": 8281,
+        "retained_delta": 6769
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33390,
+        "count": 223,
+        "peak_delta": 12486,
+        "retained_delta": 7959
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 12,
+        "minted": 3,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RawRelocation",
+      "operation": "move",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1152,
+      "scan": 1152,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14745,
+        "count": 98,
+        "peak_delta": 8281,
+        "retained_delta": 6769
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 27790,
+        "count": 185,
+        "peak_delta": 9474,
+        "retained_delta": 4923
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 0,
+        "survived": 12
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 1208,
+      "domains": [
+        48,
+        848,
+        128,
+        152,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 22786,
+        "count": 165,
+        "peak_delta": 12171,
+        "retained_delta": 10659
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 22011,
+        "count": 175,
+        "peak_delta": 12626,
+        "retained_delta": 5585
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RawRelocation",
+      "operation": "insert",
+      "raw_instance_staged": 1320,
+      "candidate_instance_staged": 1112,
+      "domains": [
+        48,
+        768,
+        128,
+        168,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1696,
+      "cpu_copied": 1160,
+      "scan": 1272,
+      "writes": 10,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15049,
+        "count": 99,
+        "peak_delta": 8305,
+        "retained_delta": 6793
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33582,
+        "count": 216,
+        "peak_delta": 12622,
+        "retained_delta": 8299
+      },
+      "producer_work": {
+        "identity_index_input": 8,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 8,
+        "minted": 7,
+        "paint_nodes": 8,
+        "reconciled": 8,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RawRelocation",
+      "operation": "remove",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 992,
+      "domains": [
+        48,
+        672,
+        128,
+        144,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1696,
+      "cpu_copied": 1272,
+      "scan": 1160,
+      "writes": 10,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14745,
+        "count": 98,
+        "peak_delta": 8281,
+        "retained_delta": 6769
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33222,
+        "count": 221,
+        "peak_delta": 12586,
+        "retained_delta": 8203
+      },
+      "producer_work": {
+        "identity_index_input": 7,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 7,
+        "minted": 6,
+        "paint_nodes": 7,
+        "reconciled": 7,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 724,
+      "domains": [
+        48,
+        416,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 21182,
+        "count": 164,
+        "peak_delta": 11127,
+        "retained_delta": 9615
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 20151,
+        "count": 173,
+        "peak_delta": 11454,
+        "retained_delta": 4413
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RawRelocation",
+      "operation": "replace",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15565,
+        "count": 111,
+        "peak_delta": 8537,
+        "retained_delta": 7025
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 30274,
+        "count": 215,
+        "peak_delta": 9438,
+        "retained_delta": 4887
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RawRelocation",
+      "operation": "return",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15171,
+        "count": 105,
+        "peak_delta": 8431,
+        "retained_delta": 6919
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29440,
+        "count": 210,
+        "peak_delta": 10254,
+        "retained_delta": 5921
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RawRelocation",
+      "operation": "replace_again",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15363,
+        "count": 107,
+        "peak_delta": 8543,
+        "retained_delta": 7011
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29372,
+        "count": 210,
+        "peak_delta": 10826,
+        "retained_delta": 6389
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 352,
+      "candidate_instance_staged": 352,
+      "domains": [
+        48,
+        144,
+        128,
+        0,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16307,
+        "count": 125,
+        "peak_delta": 9043,
+        "retained_delta": 7471
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 14842,
+        "count": 131,
+        "peak_delta": 9304,
+        "retained_delta": 3275
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "RawRelocation",
+      "operation": "initial",
+      "raw_instance_staged": 660,
+      "candidate_instance_staged": 660,
+      "domains": [
+        48,
+        352,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 18151,
+        "count": 135,
+        "peak_delta": 9958,
+        "retained_delta": 8386
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 17058,
+        "count": 144,
+        "peak_delta": 10219,
+        "retained_delta": 3496
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 1184,
+      "domains": [
+        48,
+        864,
+        128,
+        112,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 19219,
+        "count": 136,
+        "peak_delta": 10834,
+        "retained_delta": 9262
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 18894,
+        "count": 147,
+        "peak_delta": 11479,
+        "retained_delta": 4756
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RelativeDomains",
+      "operation": "insert",
+      "raw_instance_staged": 1312,
+      "candidate_instance_staged": 672,
+      "domains": [
+        48,
+        416,
+        64,
+        144,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1312,
+      "cpu_copied": 1136,
+      "scan": 1120,
+      "writes": 12,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16583,
+        "count": 108,
+        "peak_delta": 8585,
+        "retained_delta": 7013
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33994,
+        "count": 234,
+        "peak_delta": 12590,
+        "retained_delta": 8129
+      },
+      "producer_work": {
+        "identity_index_input": 17,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 17,
+        "minted": 2,
+        "paint_nodes": 17,
+        "reconciled": 17,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RelativeDomains",
+      "operation": "remove",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 528,
+      "domains": [
+        48,
+        320,
+        64,
+        96,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1264,
+      "scan": 1136,
+      "writes": 11,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33146,
+        "count": 222,
+        "peak_delta": 12194,
+        "retained_delta": 7733
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RelativeDomains",
+      "operation": "move",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1136,
+      "scan": 1136,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 27668,
+        "count": 185,
+        "peak_delta": 9316,
+        "retained_delta": 4855
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 6,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 7872,
+      "domains": [
+        48,
+        6720,
+        128,
+        944,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 33075,
+        "count": 139,
+        "peak_delta": 21106,
+        "retained_delta": 19534
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 39918,
+        "count": 153,
+        "peak_delta": 25335,
+        "retained_delta": 18612
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RelativeDomains",
+      "operation": "insert",
+      "raw_instance_staged": 7992,
+      "candidate_instance_staged": 4440,
+      "domains": [
+        48,
+        3344,
+        96,
+        952,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7824,
+      "scan": 7944,
+      "writes": 73,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 23545,
+        "count": 100,
+        "peak_delta": 9417,
+        "retained_delta": 7845
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 103642,
+        "count": 480,
+        "peak_delta": 59933,
+        "retained_delta": 52801
+      },
+      "producer_work": {
+        "identity_index_input": 269,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 269,
+        "minted": 2,
+        "paint_nodes": 269,
+        "reconciled": 269,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RelativeDomains",
+      "operation": "remove",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 4320,
+      "domains": [
+        48,
+        3248,
+        96,
+        928,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7944,
+      "scan": 7824,
+      "writes": 72,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 102808,
+        "count": 469,
+        "peak_delta": 59933,
+        "retained_delta": 52651
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RelativeDomains",
+      "operation": "move",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 9376,
+      "cpu_copied": 7824,
+      "scan": 7824,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 55116,
+        "count": 191,
+        "peak_delta": 29716,
+        "retained_delta": 25399
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 6,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 1200,
+      "domains": [
+        48,
+        864,
+        128,
+        128,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 19235,
+        "count": 136,
+        "peak_delta": 10850,
+        "retained_delta": 9278
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 18910,
+        "count": 147,
+        "peak_delta": 11495,
+        "retained_delta": 4772
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RelativeDomains",
+      "operation": "insert",
+      "raw_instance_staged": 1336,
+      "candidate_instance_staged": 680,
+      "domains": [
+        48,
+        400,
+        64,
+        168,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1312,
+      "cpu_copied": 1152,
+      "scan": 1120,
+      "writes": 13,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16615,
+        "count": 108,
+        "peak_delta": 8601,
+        "retained_delta": 7029
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 34108,
+        "count": 237,
+        "peak_delta": 12780,
+        "retained_delta": 8319
+      },
+      "producer_work": {
+        "identity_index_input": 13,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 13,
+        "minted": 4,
+        "paint_nodes": 13,
+        "reconciled": 13,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RelativeDomains",
+      "operation": "remove",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 512,
+      "domains": [
+        48,
+        304,
+        64,
+        96,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1288,
+      "scan": 1152,
+      "writes": 12,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33336,
+        "count": 223,
+        "peak_delta": 12384,
+        "retained_delta": 7923
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 12,
+        "minted": 3,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RelativeDomains",
+      "operation": "move",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1440,
+      "cpu_copied": 1152,
+      "scan": 1152,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 27532,
+        "count": 185,
+        "peak_delta": 9240,
+        "retained_delta": 4887
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 0,
+        "survived": 12
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 1208,
+      "domains": [
+        48,
+        848,
+        128,
+        152,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 22882,
+        "count": 165,
+        "peak_delta": 12267,
+        "retained_delta": 10695
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 22041,
+        "count": 175,
+        "peak_delta": 12656,
+        "retained_delta": 5549
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RelativeDomains",
+      "operation": "insert",
+      "raw_instance_staged": 1320,
+      "candidate_instance_staged": 1048,
+      "domains": [
+        48,
+        704,
+        128,
+        168,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1696,
+      "cpu_copied": 1160,
+      "scan": 1272,
+      "writes": 10,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15145,
+        "count": 99,
+        "peak_delta": 8401,
+        "retained_delta": 6829
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33936,
+        "count": 222,
+        "peak_delta": 12628,
+        "retained_delta": 8263
+      },
+      "producer_work": {
+        "identity_index_input": 8,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 8,
+        "minted": 7,
+        "paint_nodes": 8,
+        "reconciled": 8,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "RelativeDomains",
+      "operation": "remove",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 928,
+      "domains": [
+        48,
+        608,
+        128,
+        144,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1696,
+      "cpu_copied": 1272,
+      "scan": 1160,
+      "writes": 10,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 33408,
+        "count": 218,
+        "peak_delta": 12676,
+        "retained_delta": 8167
+      },
+      "producer_work": {
+        "identity_index_input": 7,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 7,
+        "minted": 6,
+        "paint_nodes": 7,
+        "reconciled": 7,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 724,
+      "domains": [
+        48,
+        416,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 21278,
+        "count": 164,
+        "peak_delta": 11223,
+        "retained_delta": 9651
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 20181,
+        "count": 173,
+        "peak_delta": 11484,
+        "retained_delta": 4377
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RelativeDomains",
+      "operation": "replace",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15661,
+        "count": 111,
+        "peak_delta": 8633,
+        "retained_delta": 7061
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 30436,
+        "count": 217,
+        "peak_delta": 9408,
+        "retained_delta": 4755
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RelativeDomains",
+      "operation": "return",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15267,
+        "count": 105,
+        "peak_delta": 8527,
+        "retained_delta": 6955
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29548,
+        "count": 213,
+        "peak_delta": 9474,
+        "retained_delta": 4989
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "RelativeDomains",
+      "operation": "replace_again",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 676,
+      "scan": 676,
+      "writes": 3,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 15267,
+        "count": 105,
+        "peak_delta": 8527,
+        "retained_delta": 6955
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29464,
+        "count": 210,
+        "peak_delta": 9474,
+        "retained_delta": 4989
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 352,
+      "candidate_instance_staged": 352,
+      "domains": [
+        48,
+        144,
+        128,
+        0,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16307,
+        "count": 125,
+        "peak_delta": 9043,
+        "retained_delta": 7471
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 14842,
+        "count": 131,
+        "peak_delta": 9304,
+        "retained_delta": 3275
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "RelativeDomains",
+      "operation": "initial",
+      "raw_instance_staged": 660,
+      "candidate_instance_staged": 660,
+      "domains": [
+        48,
+        352,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 18151,
+        "count": 135,
+        "peak_delta": 9958,
+        "retained_delta": 8386
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 17058,
+        "count": 144,
+        "peak_delta": 10219,
+        "retained_delta": 3496
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    },
+    {
+      "case": "keyed-4",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 1232,
+      "domains": [
+        48,
+        912,
+        128,
+        112,
+        32
+      ],
+      "directory_staged": 48,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 19219,
+        "count": 136,
+        "peak_delta": 10834,
+        "retained_delta": 9262
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 21366,
+        "count": 153,
+        "peak_delta": 12799,
+        "retained_delta": 6076
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "StableDraws",
+      "operation": "insert",
+      "raw_instance_staged": 1312,
+      "candidate_instance_staged": 784,
+      "domains": [
+        48,
+        464,
+        64,
+        208,
+        0
+      ],
+      "directory_staged": 48,
+      "gpu_copied": 1312,
+      "cpu_copied": 1296,
+      "scan": 1168,
+      "writes": 14,
+      "tile_rows": 16,
+      "tile_comparisons": 27,
+      "reused_tiles": 9,
+      "appended_indices": 24,
+      "directory_written_entries": 10,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 16583,
+        "count": 108,
+        "peak_delta": 8585,
+        "retained_delta": 7013
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 36830,
+        "count": 247,
+        "peak_delta": 14138,
+        "retained_delta": 9581
+      },
+      "producer_work": {
+        "identity_index_input": 17,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 17,
+        "minted": 2,
+        "paint_nodes": 17,
+        "reconciled": 17,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "StableDraws",
+      "operation": "remove",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 752,
+      "domains": [
+        48,
+        368,
+        64,
+        272,
+        0
+      ],
+      "directory_staged": 48,
+      "gpu_copied": 1440,
+      "cpu_copied": 1584,
+      "scan": 1072,
+      "writes": 14,
+      "tile_rows": 16,
+      "tile_comparisons": 27,
+      "reused_tiles": 9,
+      "appended_indices": 16,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 36734,
+        "count": 246,
+        "peak_delta": 14246,
+        "retained_delta": 9641
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 10,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-4",
+      "mode": "StableDraws",
+      "operation": "move",
+      "raw_instance_staged": 1184,
+      "candidate_instance_staged": 208,
+      "domains": [
+        48,
+        64,
+        32,
+        64,
+        0
+      ],
+      "directory_staged": 16,
+      "gpu_copied": 1696,
+      "cpu_copied": 1616,
+      "scan": 1408,
+      "writes": 8,
+      "tile_rows": 16,
+      "tile_comparisons": 29,
+      "reused_tiles": 12,
+      "appended_indices": 16,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 14841,
+        "count": 98,
+        "peak_delta": 8377,
+        "retained_delta": 6805
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 32780,
+        "count": 211,
+        "peak_delta": 12324,
+        "retained_delta": 7719
+      },
+      "producer_work": {
+        "identity_index_input": 15,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 15,
+        "minted": 0,
+        "paint_nodes": 15,
+        "reconciled": 15,
+        "relocated": 6,
+        "survived": 15
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 8160,
+      "domains": [
+        48,
+        7008,
+        128,
+        944,
+        32
+      ],
+      "directory_staged": 288,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 70,
+      "handles_retained": 3104,
+      "raw_prepare_allocation": {
+        "bytes": 33087,
+        "count": 139,
+        "peak_delta": 21118,
+        "retained_delta": 19546
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 59966,
+        "count": 162,
+        "peak_delta": 35687,
+        "retained_delta": 28952
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "StableDraws",
+      "operation": "insert",
+      "raw_instance_staged": 7992,
+      "candidate_instance_staged": 5052,
+      "domains": [
+        48,
+        3632,
+        64,
+        1308,
+        0
+      ],
+      "directory_staged": 288,
+      "gpu_copied": 9376,
+      "cpu_copied": 9056,
+      "scan": 7264,
+      "writes": 75,
+      "tile_rows": 16,
+      "tile_comparisons": 159,
+      "reused_tiles": 9,
+      "appended_indices": 91,
+      "directory_written_entries": 71,
+      "handles_retained": 3104,
+      "raw_prepare_allocation": {
+        "bytes": 23557,
+        "count": 100,
+        "peak_delta": 9429,
+        "retained_delta": 7857
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 120412,
+        "count": 497,
+        "peak_delta": 68005,
+        "retained_delta": 61347
+      },
+      "producer_work": {
+        "identity_index_input": 269,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 269,
+        "minted": 2,
+        "paint_nodes": 269,
+        "reconciled": 269,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "StableDraws",
+      "operation": "remove",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 4000,
+      "domains": [
+        48,
+        3536,
+        64,
+        352,
+        0
+      ],
+      "directory_staged": 288,
+      "gpu_copied": 10400,
+      "cpu_copied": 9880,
+      "scan": 8816,
+      "writes": 75,
+      "tile_rows": 16,
+      "tile_comparisons": 159,
+      "reused_tiles": 9,
+      "appended_indices": 85,
+      "directory_written_entries": 70,
+      "handles_retained": 3104,
+      "raw_prepare_allocation": {
+        "bytes": 14853,
+        "count": 98,
+        "peak_delta": 8389,
+        "retained_delta": 6817
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 120054,
+        "count": 489,
+        "peak_delta": 68441,
+        "retained_delta": 61705
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 262,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "keyed-256",
+      "mode": "StableDraws",
+      "operation": "move",
+      "raw_instance_staged": 7872,
+      "candidate_instance_staged": 332,
+      "domains": [
+        48,
+        64,
+        32,
+        188,
+        0
+      ],
+      "directory_staged": 16,
+      "gpu_copied": 10400,
+      "cpu_copied": 10464,
+      "scan": 9004,
+      "writes": 8,
+      "tile_rows": 16,
+      "tile_comparisons": 199,
+      "reused_tiles": 12,
+      "appended_indices": 47,
+      "directory_written_entries": 70,
+      "handles_retained": 3104,
+      "raw_prepare_allocation": {
+        "bytes": 14853,
+        "count": 98,
+        "peak_delta": 8389,
+        "retained_delta": 6817
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 73996,
+        "count": 214,
+        "peak_delta": 40072,
+        "retained_delta": 35767
+      },
+      "producer_work": {
+        "identity_index_input": 267,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 267,
+        "minted": 0,
+        "paint_nodes": 267,
+        "reconciled": 267,
+        "relocated": 6,
+        "survived": 267
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 1248,
+      "domains": [
+        48,
+        912,
+        128,
+        128,
+        32
+      ],
+      "directory_staged": 48,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 19247,
+        "count": 136,
+        "peak_delta": 10862,
+        "retained_delta": 9290
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 21382,
+        "count": 153,
+        "peak_delta": 12815,
+        "retained_delta": 6080
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "StableDraws",
+      "operation": "insert",
+      "raw_instance_staged": 1336,
+      "candidate_instance_staged": 824,
+      "domains": [
+        48,
+        464,
+        64,
+        248,
+        0
+      ],
+      "directory_staged": 64,
+      "gpu_copied": 1312,
+      "cpu_copied": 1328,
+      "scan": 1184,
+      "writes": 15,
+      "tile_rows": 16,
+      "tile_comparisons": 25,
+      "reused_tiles": 9,
+      "appended_indices": 30,
+      "directory_written_entries": 10,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 16627,
+        "count": 108,
+        "peak_delta": 8613,
+        "retained_delta": 7041
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 36516,
+        "count": 247,
+        "peak_delta": 14104,
+        "retained_delta": 9787
+      },
+      "producer_work": {
+        "identity_index_input": 13,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 13,
+        "minted": 4,
+        "paint_nodes": 13,
+        "reconciled": 13,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "StableDraws",
+      "operation": "remove",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 808,
+      "domains": [
+        48,
+        368,
+        64,
+        328,
+        0
+      ],
+      "directory_staged": 64,
+      "gpu_copied": 1440,
+      "cpu_copied": 1680,
+      "scan": 1088,
+      "writes": 15,
+      "tile_rows": 16,
+      "tile_comparisons": 25,
+      "reused_tiles": 9,
+      "appended_indices": 20,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 14853,
+        "count": 98,
+        "peak_delta": 8389,
+        "retained_delta": 6817
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 36988,
+        "count": 247,
+        "peak_delta": 14520,
+        "retained_delta": 9915
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 12,
+        "minted": 3,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 6,
+        "survived": 9
+      },
+      "fallback": false
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "StableDraws",
+      "operation": "move",
+      "raw_instance_staged": 1200,
+      "candidate_instance_staged": 96,
+      "domains": [
+        48,
+        48,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1696,
+      "cpu_copied": 1744,
+      "scan": 1416,
+      "writes": 4,
+      "tile_rows": 16,
+      "tile_comparisons": 41,
+      "reused_tiles": 16,
+      "appended_indices": 0,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 14853,
+        "count": 98,
+        "peak_delta": 8389,
+        "retained_delta": 6817
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 30744,
+        "count": 193,
+        "peak_delta": 10836,
+        "retained_delta": 6303
+      },
+      "producer_work": {
+        "identity_index_input": 12,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 12,
+        "reconciled": 12,
+        "relocated": 0,
+        "survived": 12
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 1256,
+      "domains": [
+        48,
+        896,
+        128,
+        152,
+        32
+      ],
+      "directory_staged": 48,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 9,
+      "handles_retained": 416,
+      "raw_prepare_allocation": {
+        "bytes": 22894,
+        "count": 165,
+        "peak_delta": 12279,
+        "retained_delta": 10707
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 22785,
+        "count": 180,
+        "peak_delta": 13112,
+        "retained_delta": 5993
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "StableDraws",
+      "operation": "insert",
+      "raw_instance_staged": 1320,
+      "candidate_instance_staged": 1272,
+      "domains": [
+        48,
+        848,
+        80,
+        296,
+        0
+      ],
+      "directory_staged": 80,
+      "gpu_copied": 1696,
+      "cpu_copied": 1360,
+      "scan": 1184,
+      "writes": 10,
+      "tile_rows": 16,
+      "tile_comparisons": 16,
+      "reused_tiles": 6,
+      "appended_indices": 36,
+      "directory_written_entries": 10,
+      "handles_retained": 800,
+      "raw_prepare_allocation": {
+        "bytes": 15157,
+        "count": 99,
+        "peak_delta": 8413,
+        "retained_delta": 6841
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 35450,
+        "count": 228,
+        "peak_delta": 13534,
+        "retained_delta": 9169
+      },
+      "producer_work": {
+        "identity_index_input": 8,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 8,
+        "minted": 7,
+        "paint_nodes": 8,
+        "reconciled": 8,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "mixed",
+      "mode": "StableDraws",
+      "operation": "remove",
+      "raw_instance_staged": 1208,
+      "candidate_instance_staged": 1048,
+      "domains": [
+        48,
+        784,
+        80,
+        136,
+        0
+      ],
+      "directory_staged": 112,
+      "gpu_copied": 1952,
+      "cpu_copied": 1776,
+      "scan": 1544,
+      "writes": 10,
+      "tile_rows": 16,
+      "tile_comparisons": 16,
+      "reused_tiles": 6,
+      "appended_indices": 32,
+      "directory_written_entries": 9,
+      "handles_retained": 800,
+      "raw_prepare_allocation": {
+        "bytes": 14853,
+        "count": 98,
+        "peak_delta": 8389,
+        "retained_delta": 6817
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 34492,
+        "count": 222,
+        "peak_delta": 13212,
+        "retained_delta": 8775
+      },
+      "producer_work": {
+        "identity_index_input": 7,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 7,
+        "minted": 6,
+        "paint_nodes": 7,
+        "reconciled": 7,
+        "relocated": 0,
+        "survived": 1
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 740,
+      "domains": [
+        48,
+        432,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 16,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 4,
+      "handles_retained": 128,
+      "raw_prepare_allocation": {
+        "bytes": 21290,
+        "count": 164,
+        "peak_delta": 11235,
+        "retained_delta": 9663
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 20309,
+        "count": 176,
+        "peak_delta": 11612,
+        "retained_delta": 4493
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "StableDraws",
+      "operation": "replace",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 792,
+      "scan": 692,
+      "writes": 3,
+      "tile_rows": 16,
+      "tile_comparisons": 25,
+      "reused_tiles": 16,
+      "appended_indices": 0,
+      "directory_written_entries": 4,
+      "handles_retained": 128,
+      "raw_prepare_allocation": {
+        "bytes": 15673,
+        "count": 111,
+        "peak_delta": 8645,
+        "retained_delta": 7073
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 30264,
+        "count": 218,
+        "peak_delta": 9324,
+        "retained_delta": 4791
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "StableDraws",
+      "operation": "return",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 792,
+      "scan": 692,
+      "writes": 3,
+      "tile_rows": 16,
+      "tile_comparisons": 25,
+      "reused_tiles": 16,
+      "appended_indices": 0,
+      "directory_written_entries": 4,
+      "handles_retained": 128,
+      "raw_prepare_allocation": {
+        "bytes": 15279,
+        "count": 105,
+        "peak_delta": 8539,
+        "retained_delta": 6967
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29460,
+        "count": 217,
+        "peak_delta": 9390,
+        "retained_delta": 5025
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "resources",
+      "mode": "StableDraws",
+      "operation": "replace_again",
+      "raw_instance_staged": 724,
+      "candidate_instance_staged": 128,
+      "domains": [
+        48,
+        80,
+        0,
+        0,
+        0
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 1056,
+      "cpu_copied": 792,
+      "scan": 692,
+      "writes": 3,
+      "tile_rows": 16,
+      "tile_comparisons": 25,
+      "reused_tiles": 16,
+      "appended_indices": 0,
+      "directory_written_entries": 4,
+      "handles_retained": 128,
+      "raw_prepare_allocation": {
+        "bytes": 15279,
+        "count": 105,
+        "peak_delta": 8539,
+        "retained_delta": 6967
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 29424,
+        "count": 217,
+        "peak_delta": 9390,
+        "retained_delta": 5025
+      },
+      "producer_work": {
+        "identity_index_input": 3,
+        "image_reconcile_entries": 1,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 3,
+        "reconciled": 3,
+        "relocated": 0,
+        "survived": 3
+      },
+      "fallback": false
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 352,
+      "candidate_instance_staged": 352,
+      "domains": [
+        48,
+        144,
+        128,
+        0,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 4,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 16319,
+        "count": 125,
+        "peak_delta": 9055,
+        "retained_delta": 7483
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 14842,
+        "count": 131,
+        "peak_delta": 9304,
+        "retained_delta": 3263
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "StableDraws",
+      "operation": "initial",
+      "raw_instance_staged": 660,
+      "candidate_instance_staged": 660,
+      "domains": [
+        48,
+        352,
+        128,
+        100,
+        32
+      ],
+      "directory_staged": 0,
+      "gpu_copied": 0,
+      "cpu_copied": 0,
+      "scan": 0,
+      "writes": 5,
+      "tile_rows": 0,
+      "tile_comparisons": 0,
+      "reused_tiles": 0,
+      "appended_indices": 0,
+      "directory_written_entries": 0,
+      "handles_retained": 32,
+      "raw_prepare_allocation": {
+        "bytes": 18163,
+        "count": 135,
+        "peak_delta": 9970,
+        "retained_delta": 8398
+      },
+      "candidate_prepare_allocation": {
+        "bytes": 17058,
+        "count": 144,
+        "peak_delta": 10219,
+        "retained_delta": 3484
+      },
+      "producer_work": {
+        "identity_index_input": 0,
+        "image_reconcile_entries": 0,
+        "layout_insertions": 0,
+        "minted": 0,
+        "paint_nodes": 0,
+        "reconciled": 0,
+        "relocated": 0,
+        "survived": 0
+      },
+      "fallback": true
+    }
+  ],
+  "storage": [
+    {
+      "case": "keyed-4",
+      "mode": "RawRelocation",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 5953,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 7608,
+      "cpu_array_capacity_bytes": 5312,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RawRelocation",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 37697,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 42000,
+      "cpu_array_capacity_bytes": 32056,
+      "packet_observer_bytes": 16480,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 9425
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RawRelocation",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 5953,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 7664,
+      "cpu_array_capacity_bytes": 5384,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "mixed",
+      "mode": "RawRelocation",
+      "versions": 3,
+      "renderer_gpu_payload_bytes": 70768,
+      "private_target_texture_bytes": 49152,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 4656,
+      "cpu_array_capacity_bytes": 6232,
+      "packet_observer_bytes": 840,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 67280
+    },
+    {
+      "case": "resources",
+      "mode": "RawRelocation",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 266560,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 4564,
+      "cpu_array_capacity_bytes": 4368,
+      "packet_observer_bytes": 608,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 66640
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "RawRelocation",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 469,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 464,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 469
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "RawRelocation",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 849,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 804,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 849
+    },
+    {
+      "case": "keyed-4",
+      "mode": "RelativeDomains",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 5953,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 7608,
+      "cpu_array_capacity_bytes": 5312,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "keyed-256",
+      "mode": "RelativeDomains",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 37697,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 42000,
+      "cpu_array_capacity_bytes": 32056,
+      "packet_observer_bytes": 16480,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 9425
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "RelativeDomains",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 5953,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 7664,
+      "cpu_array_capacity_bytes": 5384,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "mixed",
+      "mode": "RelativeDomains",
+      "versions": 3,
+      "renderer_gpu_payload_bytes": 70768,
+      "private_target_texture_bytes": 49152,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 4656,
+      "cpu_array_capacity_bytes": 6232,
+      "packet_observer_bytes": 840,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 67280
+    },
+    {
+      "case": "resources",
+      "mode": "RelativeDomains",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 266560,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 4564,
+      "cpu_array_capacity_bytes": 4368,
+      "packet_observer_bytes": 608,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 66640
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "RelativeDomains",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 469,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 464,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 469
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "RelativeDomains",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 849,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 804,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 849
+    },
+    {
+      "case": "keyed-4",
+      "mode": "StableDraws",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 6721,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 8280,
+      "cpu_array_capacity_bytes": 9312,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 416,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "keyed-256",
+      "mode": "StableDraws",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 41793,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 46164,
+      "cpu_array_capacity_bytes": 60968,
+      "packet_observer_bytes": 16480,
+      "handles_retained_bytes": 3104,
+      "raw_current_gpu_payload_bytes": 9425
+    },
+    {
+      "case": "unkeyed-4",
+      "mode": "StableDraws",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 6721,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 8484,
+      "cpu_array_capacity_bytes": 9416,
+      "packet_observer_bytes": 2144,
+      "handles_retained_bytes": 416,
+      "raw_current_gpu_payload_bytes": 1489
+    },
+    {
+      "case": "mixed",
+      "mode": "StableDraws",
+      "versions": 3,
+      "renderer_gpu_payload_bytes": 71536,
+      "private_target_texture_bytes": 49152,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 5236,
+      "cpu_array_capacity_bytes": 6632,
+      "packet_observer_bytes": 840,
+      "handles_retained_bytes": 800,
+      "raw_current_gpu_payload_bytes": 67280
+    },
+    {
+      "case": "resources",
+      "mode": "StableDraws",
+      "versions": 4,
+      "renderer_gpu_payload_bytes": 266560,
+      "private_target_texture_bytes": 65536,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 4740,
+      "cpu_array_capacity_bytes": 4368,
+      "packet_observer_bytes": 608,
+      "handles_retained_bytes": 128,
+      "raw_current_gpu_payload_bytes": 66640
+    },
+    {
+      "case": "bank-fallback",
+      "mode": "StableDraws",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 469,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 464,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 469
+    },
+    {
+      "case": "parent-fallback",
+      "mode": "StableDraws",
+      "versions": 1,
+      "renderer_gpu_payload_bytes": 849,
+      "private_target_texture_bytes": 16384,
+      "one_readback_transient_bytes": 16384,
+      "adapter_retained_bytes": 448,
+      "cpu_array_capacity_bytes": 804,
+      "packet_observer_bytes": 152,
+      "handles_retained_bytes": 32,
+      "raw_current_gpu_payload_bytes": 849
+    }
+  ],
+  "exclusions": [
+    "Driver/allocator private state is not a retained-memory ledger",
+    "Source diagnostic cold and emission mirrors remain in producer; not a generic production journal",
+    "Original raw control serially reuses one renderer; candidates hold private versions",
+    "Allocation scopes differ: raw render includes draw submission, candidate prepare includes copy/flush but final draw submission separate",
+    "GPU payload excludes test oracle, expected CPU pixels, JSON and shader pipelines",
+    "Inherited mixed 48-byte CPU/GPU gate remains FAILED; encoding equality does not replace it"
+  ]
+}

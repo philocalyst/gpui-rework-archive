@@ -1,0 +1,11 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/3e86622057e37a3c032bf3b6abbcd2caedabc36eeb348373a79d3b321cd70b5b",
+    "renderer::address_lab::tests::bounded_handles",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.0026264190673828125
+}

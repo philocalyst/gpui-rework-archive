@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "clean",
+    "--release",
+    "-p",
+    "gpui",
+    "-p",
+    "gpui_gpu",
+    "--target-dir",
+    "/home/user/gpui-address-publication-target"
+  ],
+  "stdout": "",
+  "stderr": "     Removed 17 files, 7.8MiB total\n"
+}
