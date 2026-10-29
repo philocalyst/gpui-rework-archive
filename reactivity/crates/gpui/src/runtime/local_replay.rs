@@ -270,6 +270,18 @@ impl<M: View + 'static> Runtime<M> {
             self.local.revoke();
             return Ok(false);
         }
+        let old_len = self.nodes.len();
+        let count = description.nodes.len();
+        let new_len = old_len - (end - start) + count;
+        // Preserve the full producer's limit-error kind and ordering. In
+        // particular whole-tree flattening may reject on an outside suffix.
+        // Let that independent path diagnose limits before depth or identity
+        // mutation, rather than inventing a local error precedence.
+        if new_len > MAX_NODES || self.next_identity.checked_add(new_len as u64).is_none() {
+            self.local.report.fallback = "whole-owner-limit-admission";
+            self.local.revoke();
+            return Ok(false);
+        }
         // Match the full producer's depth admission before minting identities
         // or consuming retained nodes. A failed newer edit must not perturb the
         // identity interval used by the subsequent full recovery.
@@ -296,15 +308,6 @@ impl<M: View + 'static> Runtime<M> {
                 });
             }
         }
-        let old_len = self.nodes.len();
-        let count = description.nodes.len();
-        let new_len = old_len - (end - start) + count;
-        if new_len > MAX_NODES {
-            return Err(Error::ResourceLimit);
-        }
-        self.next_identity
-            .checked_add(new_len as u64)
-            .ok_or(Error::EpochExhausted)?;
         let siblings = siblings::Siblings::new(&self.nodes);
         self.local.report.sibling_count_visits = old_len;
         self.local.report.sibling_prefix_visits = old_len + 1;
